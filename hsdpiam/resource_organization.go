@@ -44,7 +44,7 @@ func resourceOrgCreate(d *schema.ResourceData, m interface{}) error {
 func resourceOrgRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*iamclient.Client)
 
-	id := d.Get("org_id").(string)
+	id := d.Id()
 	org, _, err := client.Organizations.GetOrganization(&iamclient.GetOrganizationOptions{ID: &id})
 	if err != nil {
 		return err
