@@ -84,16 +84,17 @@ func init() {
 }
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	config := Config{
-		IAMURL:               d.Get("iam_url").(string),
-		IDMURL:               d.Get("idm_url").(string),
-		OAuth2ClientID:       d.Get("oauth2_client_id").(string),
-		OAuth2ClientPassword: d.Get("oauth2_password").(string),
-		OrgID:                d.Get("org_id").(string),
-		OrgAdminUsername:     d.Get("org_admin_username").(string),
-		OrgAdminPassword:     d.Get("org_admin_password").(string),
-		SharedKey:            d.Get("shared_key").(string),
-		SecretKey:            d.Get("secret_key").(string),
-	}
+	config := &Config{}
+
+	config.IAMURL = d.Get("iam_url").(string)
+	config.IDMURL = d.Get("idm_url").(string)
+	config.OAuth2ClientID = d.Get("oauth2_client_id").(string)
+	config.OAuth2Secret = d.Get("oauth2_password").(string)
+	config.RootOrgID = d.Get("org_id").(string)
+	config.OrgAdminUsername = d.Get("org_admin_username").(string)
+	config.OrgAdminPassword = d.Get("org_admin_password").(string)
+	config.SharedKey = d.Get("shared_key").(string)
+	config.SecretKey = d.Get("secret_key").(string)
+
 	return config.Client()
 }
