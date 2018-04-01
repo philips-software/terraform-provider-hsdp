@@ -1,4 +1,4 @@
-package hsdpiam
+package hsdp
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
@@ -61,7 +61,7 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"hsdpiam_org": resourceOrg(),
+			"hsdp_iam_org": resourceIAMOrg(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"aemian.com/terraform-provider-hsdpiam/hsdpiam"
+	"aemian.com/terraform-provider-hsdp/hsdp"
 	"github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/terraform"
 )
@@ -9,7 +9,7 @@ import (
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
 		ProviderFunc: func() terraform.ResourceProvider {
-			return hsdpiam.Provider()
+			return hsdp.Provider()
 		},
 	})
 }
