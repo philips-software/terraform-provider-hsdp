@@ -1,4 +1,4 @@
-package hsdpiam
+package hsdp
 
 import (
 	"github.com/loafoe/go-hsdpiam"

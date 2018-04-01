@@ -1,20 +1,20 @@
-package hsdpiam
+package hsdp
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
 	iamclient "github.com/loafoe/go-hsdpiam"
 )
 
-func resourceOrg() *schema.Resource {
+func resourceIAMOrg() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
 			State: schema.ImportStatePassthrough,
 		},
 
-		Create: resourceOrgCreate,
-		Read:   resourceOrgRead,
-		Update: resourceOrgUpdate,
-		Delete: resourceOrgDelete,
+		Create: resourceIAMOrgCreate,
+		Read:   resourceIAMOrgRead,
+		Update: resourceIAMOrgUpdate,
+		Delete: resourceIAMOrgDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -37,11 +37,11 @@ func resourceOrg() *schema.Resource {
 	}
 }
 
-func resourceOrgCreate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMOrgCreate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceOrgRead(d *schema.ResourceData, m interface{}) error {
+func resourceIAMOrgRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*iamclient.Client)
 
 	id := d.Id()
@@ -55,14 +55,14 @@ func resourceOrgRead(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceOrgUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMOrgUpdate(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceOrgDelete(d *schema.ResourceData, m interface{}) error {
+func resourceIAMOrgDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 
-func resourceOrgImport(d *schema.ResourceData, m interface{}) error {
+func resourceIAMOrgImport(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
