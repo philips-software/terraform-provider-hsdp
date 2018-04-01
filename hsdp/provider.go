@@ -61,7 +61,8 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"hsdp_iam_org": resourceIAMOrg(),
+			"hsdp_iam_org":   resourceIAMOrg(),
+			"hsdp_iam_group": resourceIAMGroup(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
