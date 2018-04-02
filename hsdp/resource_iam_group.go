@@ -81,9 +81,13 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMGroupDelete(d *schema.ResourceData, m interface{}) error {
-	return nil
-}
-
-func resourceIAMGroupImport(d *schema.ResourceData, m interface{}) error {
+	client := m.(*iamclient.Client)
+	var group iamclient.Group
+	group.ID = d.Id()
+	_, _, err := client.Groups.DeleteGroup(group)
+	if err != nil {
+		return err
+	}
+	d.SetId("")
 	return nil
 }
