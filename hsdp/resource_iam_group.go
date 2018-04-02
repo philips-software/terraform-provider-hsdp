@@ -25,16 +25,29 @@ func resourceIAMGroup() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"org_id": &schema.Schema{
+			"managing_organization": &schema.Schema{
 				Type:     schema.TypeString,
-				Computed: true,
-				Optional: true,
+				Required: true,
 			},
 		},
 	}
 }
 
 func resourceIAMGroupCreate(d *schema.ResourceData, m interface{}) error {
+	client := m.(*iamclient.Client)
+	var group iamclient.Group
+	group.Description = d.Get("description").(string)
+	group.Name = d.Get("name").(string)
+	group.ManagingOrganization = d.Get("managing_organization").(string)
+
+	createdGroup, _, err := client.Groups.CreateGroup(group)
+	if err != nil {
+		return err
+	}
+	d.SetId(createdGroup.ID)
+	d.Set("name", createdGroup.Name)
+	d.Set("description", createdGroup.Description)
+	d.Set("managing_organization", createdGroup.ManagingOrganization)
 	return nil
 }
 
@@ -46,13 +59,24 @@ func resourceIAMGroupRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	d.Set("org_id", group.OrganizationID)
+	d.Set("managing_organization", group.ManagingOrganization)
 	d.Set("description", group.Description)
 	d.Set("name", group.Name)
 	return nil
 }
 
 func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
+	if !d.HasChange("description") {
+		return nil
+	}
+	client := m.(*iamclient.Client)
+	var group iamclient.Group
+	group.ID = d.Id()
+	group.Description = d.Get("description").(string)
+	_, _, err := client.Groups.UpdateGroup(group)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
