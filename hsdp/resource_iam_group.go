@@ -2,7 +2,8 @@ package hsdp
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	iamclient "github.com/loafoe/go-hsdpiam"
+	"github.com/loafoe/go-hsdp/api"
+	"github.com/loafoe/go-hsdp/iam"
 )
 
 func resourceIAMGroup() *schema.Resource {
@@ -34,8 +35,8 @@ func resourceIAMGroup() *schema.Resource {
 }
 
 func resourceIAMGroupCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iamclient.Client)
-	var group iamclient.Group
+	client := m.(*api.Client)
+	var group iam.Group
 	group.Description = d.Get("description").(string)
 	group.Name = d.Get("name").(string)
 	group.ManagingOrganization = d.Get("managing_organization").(string)
@@ -52,10 +53,10 @@ func resourceIAMGroupCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMGroupRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iamclient.Client)
+	client := m.(*api.Client)
 
 	id := d.Id()
-	group, _, err := client.Groups.GetGroup(&iamclient.GetGroupOptions{ID: &id})
+	group, _, err := client.Groups.GetGroupByID(id)
 	if err != nil {
 		return err
 	}
@@ -69,8 +70,8 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	if !d.HasChange("description") {
 		return nil
 	}
-	client := m.(*iamclient.Client)
-	var group iamclient.Group
+	client := m.(*api.Client)
+	var group iam.Group
 	group.ID = d.Id()
 	group.Description = d.Get("description").(string)
 	_, _, err := client.Groups.UpdateGroup(group)
@@ -81,8 +82,8 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMGroupDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iamclient.Client)
-	var group iamclient.Group
+	client := m.(*api.Client)
+	var group iam.Group
 	group.ID = d.Id()
 	_, _, err := client.Groups.DeleteGroup(group)
 	if err != nil {
