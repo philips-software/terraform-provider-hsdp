@@ -101,7 +101,6 @@ func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
 		new := expandStringList(n.(*schema.Set).List())
 
 		// Remove every permission. Simpler to remove and add new ones,
-		// since there are no replacings.
 		for _, v := range old {
 			_, _, err := client.Roles.RemoveRolePermission(*role, v)
 			if err != nil {

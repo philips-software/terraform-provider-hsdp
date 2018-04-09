@@ -66,6 +66,9 @@ func Provider() *schema.Provider {
 			"hsdp_iam_permission": resourceIAMPermission(),
 			"hsdp_iam_role":       resourceIAMRole(),
 		},
+		DataSourcesMap: map[string]*schema.Resource{
+			"hsdp_iam_introspect": dataSourceIAMIntrospect(),
+		},
 		ConfigureFunc: providerConfigure,
 	}
 }
