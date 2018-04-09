@@ -2,7 +2,7 @@ package hsdp
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	iamclient "github.com/loafoe/go-hsdpiam"
+	"github.com/loafoe/go-hsdp/api"
 )
 
 func resourceIAMOrg() *schema.Resource {
@@ -42,10 +42,10 @@ func resourceIAMOrgCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMOrgRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iamclient.Client)
+	client := m.(*api.Client)
 
 	id := d.Id()
-	org, _, err := client.Organizations.GetOrganization(&iamclient.GetOrganizationOptions{ID: &id})
+	org, _, err := client.Organizations.GetOrganizationByID(id)
 	if err != nil {
 		return err
 	}
