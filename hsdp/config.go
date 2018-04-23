@@ -1,7 +1,7 @@
 package hsdp
 
 import (
-	"github.com/loafoe/go-hsdp/api"
+	"github.com/hsdp/go-hsdp-iam/api"
 )
 
 type Config struct {

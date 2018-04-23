@@ -1,9 +1,9 @@
 package main
 
 import (
-	"aemian.com/terraform-provider-hsdp/hsdp"
 	"github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/hsdp/terraform-provider-hsdp/hsdp"
 )
 
 func main() {
