@@ -2,7 +2,7 @@ package hsdp
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/loafoe/go-hsdp/api"
+	"github.com/hsdp/go-hsdp-iam/api"
 )
 
 func resourceIAMOrg() *schema.Resource {

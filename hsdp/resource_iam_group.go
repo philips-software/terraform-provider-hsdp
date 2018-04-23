@@ -2,8 +2,8 @@ package hsdp
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/loafoe/go-hsdp/api"
-	"github.com/loafoe/go-hsdp/iam"
+	"github.com/hsdp/go-hsdp-iam/api"
+	"github.com/hsdp/go-hsdp-iam/iam"
 )
 
 func resourceIAMGroup() *schema.Resource {
