@@ -2,8 +2,7 @@ package hsdp
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hsdp/go-hsdp-iam/api"
-	"github.com/hsdp/go-hsdp-iam/iam"
+	"github.com/hsdp/go-hsdp-api/iam"
 )
 
 func resourceIAMGroup() *schema.Resource {
@@ -35,7 +34,7 @@ func resourceIAMGroup() *schema.Resource {
 }
 
 func resourceIAMGroupCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*api.Client)
+	client := m.(*iam.Client)
 	var group iam.Group
 	group.Description = d.Get("description").(string)
 	group.Name = d.Get("name").(string)
@@ -53,7 +52,7 @@ func resourceIAMGroupCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMGroupRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*api.Client)
+	client := m.(*iam.Client)
 
 	id := d.Id()
 	group, _, err := client.Groups.GetGroupByID(id)
@@ -70,7 +69,7 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	if !d.HasChange("description") {
 		return nil
 	}
-	client := m.(*api.Client)
+	client := m.(*iam.Client)
 	var group iam.Group
 	group.ID = d.Id()
 	group.Description = d.Get("description").(string)
@@ -82,7 +81,7 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMGroupDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*api.Client)
+	client := m.(*iam.Client)
 	var group iam.Group
 	group.ID = d.Id()
 	_, _, err := client.Groups.DeleteGroup(group)

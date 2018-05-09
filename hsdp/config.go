@@ -1,15 +1,15 @@
 package hsdp
 
 import (
-	"github.com/hsdp/go-hsdp-iam/api"
+	"github.com/hsdp/go-hsdp-api/iam"
 )
 
 type Config struct {
-	api.Config
+	iam.Config
 }
 
 func (c *Config) Client() (interface{}, error) {
-	client, err := api.NewClient(nil, &c.Config)
+	client, err := iam.NewClient(nil, &c.Config)
 	if err != nil {
 		return nil, err
 	}

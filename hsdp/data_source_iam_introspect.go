@@ -2,7 +2,7 @@ package hsdp
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hsdp/go-hsdp-iam/api"
+	"github.com/hsdp/go-hsdp-api/iam"
 )
 
 func dataSourceIAMIntrospect() *schema.Resource {
@@ -27,7 +27,7 @@ func dataSourceIAMIntrospect() *schema.Resource {
 }
 
 func dataSourceIAMIntrospectRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*api.Client)
+	client := meta.(*iam.Client)
 
 	resp, _, err := client.Introspect()
 
