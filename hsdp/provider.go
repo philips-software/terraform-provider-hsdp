@@ -61,10 +61,11 @@ func Provider() *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"hsdp_iam_org":        resourceIAMOrg(),
-			"hsdp_iam_group":      resourceIAMGroup(),
-			"hsdp_iam_permission": resourceIAMPermission(),
-			"hsdp_iam_role":       resourceIAMRole(),
+			"hsdp_iam_org":         resourceIAMOrg(),
+			"hsdp_iam_group":       resourceIAMGroup(),
+			"hsdp_iam_permission":  resourceIAMPermission(),
+			"hsdp_iam_role":        resourceIAMRole(),
+			"hsdp_iam_proposition": resourceIAMProposition(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect": dataSourceIAMIntrospect(),
