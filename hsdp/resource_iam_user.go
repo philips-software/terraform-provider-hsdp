@@ -35,6 +35,10 @@ func resourceIAMUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"organization_id": &schema.Schema{
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -45,8 +49,27 @@ func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
 	first := d.Get("first_name").(string)
 	email := d.Get("username").(string)
 	mobile := d.Get("mobile").(string)
+	organization := d.Get("organization_id").(string)
 
-	ok, _, err := client.Users.CreateUser(first, last, email, mobile, "")
+	// First check if this user already exists
+	uuid, _, err := client.Users.GetUserIDByLoginID(email)
+	if err == nil && uuid != "" {
+		user, _, _ := client.Users.GetUserByID(uuid)
+		if user != nil {
+			if user.Disabled {
+				// Retrigger activation email
+				client.Users.ResendActivation(email)
+				return nil
+			}
+			err = resourceIAMUserRead(d, m)
+			if err == nil {
+				d.SetId(user.ID)
+			}
+			return nil
+		}
+	}
+
+	ok, _, err := client.Users.CreateUser(first, last, email, mobile, organization)
 	if err != nil {
 		return err
 	}
@@ -54,7 +77,7 @@ func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("Error creating user")
 	}
 	// Fetch UUID
-	uuid, _, err := client.Users.GetUserIDByLoginID(email)
+	uuid, _, err = client.Users.GetUserIDByLoginID(email)
 	if err != nil {
 		return fmt.Errorf("Cannot find newly minted user")
 	}
