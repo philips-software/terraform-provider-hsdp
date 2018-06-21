@@ -89,11 +89,14 @@ func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
+	d.Partial(true)
 
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		role.Description = description
-		client.Roles.UpdateRole(role)
+		if _, _, err := client.Roles.UpdateRole(role); err == nil {
+			d.SetPartial("description")
+		}
 	}
 	if d.HasChange("permissions") {
 		o, n := d.GetChange("permissions")
@@ -118,6 +121,7 @@ func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 		}
 	}
+	d.Partial(false)
 	return nil
 }
 
