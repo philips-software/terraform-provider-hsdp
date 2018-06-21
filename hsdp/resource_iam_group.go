@@ -84,8 +84,8 @@ func resourceIAMGroupDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*iam.Client)
 	var group iam.Group
 	group.ID = d.Id()
-	_, _, err := client.Groups.DeleteGroup(group)
-	if err != nil {
+	ok, _, err := client.Groups.DeleteGroup(group)
+	if !ok {
 		return err
 	}
 	d.SetId("")
