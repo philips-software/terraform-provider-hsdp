@@ -1,13 +1,15 @@
 package hsdp
 
 import (
-	"github.com/hsdp/go-hsdp-api/iam"
+	"github.com/philips-software/go-hsdp-api/iam"
 )
 
+// Config contains configuration for the client
 type Config struct {
 	iam.Config
 }
 
+// Client returns a HSDP IAM client
 func (c *Config) Client() (interface{}, error) {
 	client, err := iam.NewClient(nil, &c.Config)
 	if err != nil {

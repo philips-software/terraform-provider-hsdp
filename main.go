@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/hsdp/terraform-provider-hsdp/hsdp"
+	"github.com/philips-software/terraform-provider-hsdp/hsdp"
 )
 
 func main() {

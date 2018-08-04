@@ -2,7 +2,7 @@ package hsdp
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hsdp/go-hsdp-api/iam"
+	"github.com/philips-software/go-hsdp-api/iam"
 )
 
 func resourceIAMApplication() *schema.Resource {
@@ -40,7 +40,7 @@ func resourceIAMApplication() *schema.Resource {
 func resourceIAMApplicationCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*iam.Client)
 	var app iam.Application
-	app.Name = d.Get("name").(string)
+	app.Name = d.Get("name").(string) // TODO: this must be all caps
 	app.Description = d.Get("description").(string)
 	app.PropositionID = d.Get("proposition_id").(string)
 	app.GlobalReferenceID = d.Get("global_reference_id").(string)
