@@ -33,4 +33,4 @@ Copy the binary to the appropiate plugin directory e.g. `terraform.d/plugins/dar
 
 ## LICENSE
 
-License is Apache
+License is MIT
