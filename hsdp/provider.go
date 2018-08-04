@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+// Provider returns an instance of the HSDP provider
 func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
@@ -59,6 +60,16 @@ func Provider() *schema.Provider {
 				Sensitive:   true,
 				Description: descriptions["secret_key"],
 			},
+			"debug": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: descriptions["debug"],
+			},
+			"debug_log": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: descriptions["debug_log"],
+			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_org":         resourceIAMOrg(),
@@ -68,6 +79,7 @@ func Provider() *schema.Provider {
 			"hsdp_iam_proposition": resourceIAMProposition(),
 			"hsdp_iam_application": resourceIAMApplication(),
 			"hsdp_iam_user":        resourceIAMUser(),
+			"hsdp_iam_client":      resourceIAMClient(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect": dataSourceIAMIntrospect(),
@@ -89,6 +101,8 @@ func init() {
 		"org_admin_password": "The password of the Organization Admin",
 		"shared_key":         "The shared key",
 		"secret_key":         "The secret key",
+		"debug":              "Enable debugging output",
+		"debug_log":          "The log file to write debugging output to",
 	}
 }
 
@@ -104,6 +118,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.OrgAdminPassword = d.Get("org_admin_password").(string)
 	config.SharedKey = d.Get("shared_key").(string)
 	config.SecretKey = d.Get("secret_key").(string)
+	config.Debug = d.Get("debug").(bool)
+	config.DebugLog = d.Get("debug_log").(string)
 
 	return config.Client()
 }
