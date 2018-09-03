@@ -35,6 +35,12 @@ func resourceIAMGroup() *schema.Resource {
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"users": &schema.Schema{
+				Type:     schema.TypeSet,
+				MaxItems: 2000,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -57,11 +63,18 @@ func resourceIAMGroupCreate(d *schema.ResourceData, m interface{}) error {
 	d.Set("description", createdGroup.Description)
 	d.Set("managing_organization", createdGroup.ManagingOrganization)
 
+	// Add roles
 	for _, r := range roles {
 		role, _, _ := client.Roles.GetRoleByID(r)
 		if role != nil {
 			client.Groups.AssignRole(*createdGroup, *role)
 		}
+	}
+
+	// Add users
+	users := expandStringList(d.Get("users").(*schema.Set).List())
+	if len(users) > 0 {
+		client.Groups.AddMembers(*createdGroup, users...)
 	}
 	return nil
 }
@@ -102,6 +115,15 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
+	if d.HasChange("users") {
+		o, n := d.GetChange("users")
+		old := expandStringList(o.(*schema.Set).List())
+		new := expandStringList(n.(*schema.Set).List())
+
+		client.Groups.RemoveMembers(group, old...)
+		client.Groups.AddMembers(group, new...)
+	}
+
 	if d.HasChange("roles") {
 		o, n := d.GetChange("roles")
 		old := expandStringList(o.(*schema.Set).List())
