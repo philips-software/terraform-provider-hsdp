@@ -1,8 +1,14 @@
 # HSDP Terraform provider
 
+- Website: https://www.terraform.io
+- [![Slack](https://philips-software-slackin.now.sh/badge.svg)](https://philips-software-slackin.now.sh)
+
+<img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
+
 ## Overview
 
-This is a terraform provider to build/verify HSDP IAM state and other resources
+This is a terraform provider to build/verify HSDP IAM state and other resources.
+To find out more about HSDP please visit https://www.hsdp.io/discover
 
 ## Requirements
 
@@ -26,6 +32,16 @@ $ go build .
 ```
 
 Copy the binary to the appropiate plugin directory e.g. `terraform.d/plugins/darwin_amd64/terraform-provider-hsdp`
+
+
+## Dockerfile
+
+A Dockerfile is provided. Example usage of the image:
+
+```sh
+$ docker build -t terraform-provider-hsdp .
+$ docker run --rm -v /Location/With/Terraform/Files:/terraform -w /terraform -it terraform-provider-hsdp check
+```
 
 ## Issues
 
