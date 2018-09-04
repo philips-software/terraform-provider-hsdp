@@ -9,7 +9,7 @@
 ## Overview
 
 This is a terraform provider to build/verify HSDP IAM state and other resources.
-To find out more about HSDP please visit https://www.hsdp.io/discover
+To find out more about HSDP please visit https://www.hsdp.io/
 
 ## Requirements
 
