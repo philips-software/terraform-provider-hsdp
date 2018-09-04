@@ -20,15 +20,13 @@ func Provider() *schema.Provider {
 			},
 			"oauth2_client_id": {
 				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "",
+				Required:    true,
 				Description: descriptions["oauth2_client_id"],
 			},
 			"oauth2_password": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				Sensitive:   true,
-				Default:     "",
 				Description: descriptions["oauth2_password"],
 			},
 			"org_id": {
