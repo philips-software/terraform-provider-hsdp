@@ -31,6 +31,9 @@ func dataSourceIAMIntrospectRead(d *schema.ResourceData, meta interface{}) error
 
 	resp, _, err := client.Introspect()
 
+	if err != nil {
+		return err
+	}
 	d.Set("managing_organization", resp.Organizations.ManagingOrganization)
 	d.SetId(resp.Username)
 	d.Set("username", resp.Username)
