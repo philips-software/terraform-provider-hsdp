@@ -1,6 +1,7 @@
 # HSDP Terraform provider
 
 - Website: https://www.terraform.io
+- Documentation: https://github.com/philips-software/terraform-provider-hsdp/wiki
 - [![Slack](https://philips-software-slackin.now.sh/badge.svg)](https://philips-software-slackin.now.sh)
 
 <img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
