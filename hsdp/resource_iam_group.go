@@ -156,6 +156,13 @@ func resourceIAMGroupDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*iam.Client)
 	var group iam.Group
 	group.ID = d.Id()
+
+	// Remove all (known) users first before attempting delete
+	users := expandStringList(d.Get("users").(*schema.Set).List())
+	if len(users) > 0 {
+		client.Groups.RemoveMembers(group, users...)
+	}
+
 	ok, _, err := client.Groups.DeleteGroup(group)
 	if !ok {
 		return err
