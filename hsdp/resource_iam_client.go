@@ -1,6 +1,8 @@
 package hsdp
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
 )
@@ -64,6 +66,18 @@ func resourceIAMClient() *schema.Resource {
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"scopes": &schema.Schema{
+				Type:     schema.TypeSet,
+				MaxItems: 100,
+				Required: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"default_scopes": &schema.Schema{
+				Type:     schema.TypeSet,
+				MaxItems: 100,
+				Required: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -81,6 +95,8 @@ func resourceIAMClientCreate(d *schema.ResourceData, m interface{}) error {
 	cl.RedirectionURIs = expandStringList(d.Get("redirection_uris").(*schema.Set).List())
 	cl.ResponseTypes = expandStringList(d.Get("response_types").(*schema.Set).List())
 	cl.ApplicationID = d.Get("application_id").(string)
+	cl.Scopes = expandStringList(d.Get("scopes").(*schema.Set).List())
+	cl.DefaultScopes = expandStringList(d.Get("default_scopes").(*schema.Set).List())
 
 	createdClient, _, err := client.Clients.CreateClient(cl)
 	if err != nil {
@@ -107,15 +123,34 @@ func resourceIAMClientRead(d *schema.ResourceData, m interface{}) error {
 	d.Set("global_reference_id", cl.GlobalReferenceID)
 	d.Set("redirection_uris", cl.RedirectionURIs)
 	d.Set("response_types", cl.ResponseTypes)
+	d.Set("scopes", cl.Scopes)
+	d.Set("default_scopes", cl.DefaultScopes)
 	return nil
 }
 
 func resourceIAMClientUpdate(d *schema.ResourceData, m interface{}) error {
-	//client := m.(*iam.Client)
+	client := m.(*iam.Client)
 	var cl iam.ApplicationClient
 	cl.ID = d.Id()
-	// TODO
-	return nil
+
+	d.Partial(true)
+	if d.HasChange("scopes") || d.HasChange("default_scopes") {
+		newScopes := expandStringList(d.Get("scopes").(*schema.Set).List())
+		newDefaultScopes := expandStringList(d.Get("default_scopes").(*schema.Set).List())
+		if d.HasChange("scopes") {
+			_, ns := d.GetChange("scopes")
+			newScopes = expandStringList(ns.(*schema.Set).List())
+			d.SetPartial("scopes")
+		}
+		if d.HasChange("default_scopes") {
+			_, nd := d.GetChange("default_scopes")
+			newDefaultScopes = expandStringList(nd.(*schema.Set).List())
+			d.SetPartial("default_scopes")
+		}
+		_, _, err := client.Clients.UpdateScopes(cl, newScopes, newDefaultScopes)
+		return err
+	}
+	return fmt.Errorf("only scopes and default_scopes changes are supported currenty")
 }
 
 func resourceIAMClientDelete(d *schema.ResourceData, m interface{}) error {
