@@ -58,6 +58,7 @@ func resourceIAMClient() *schema.Resource {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				Required: true,
+				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"response_types": &schema.Schema{
