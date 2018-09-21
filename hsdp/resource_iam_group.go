@@ -119,27 +119,23 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 		o, n := d.GetChange("users")
 		old := expandStringList(o.(*schema.Set).List())
 		new := expandStringList(n.(*schema.Set).List())
+		toAdd := difference(new, old)
+		toRemove := difference(old, new)
 
-		client.Groups.RemoveMembers(group, old...)
-		client.Groups.AddMembers(group, new...)
+		client.Groups.RemoveMembers(group, toRemove...)
+		client.Groups.AddMembers(group, toAdd...)
 	}
 
 	if d.HasChange("roles") {
 		o, n := d.GetChange("roles")
 		old := expandStringList(o.(*schema.Set).List())
 		new := expandStringList(n.(*schema.Set).List())
+		toAdd := difference(new, old)
+		toRemove := difference(old, new)
 
-		// Remove every role. Simpler to remove and add new ones,
-		for _, v := range old {
-			var role = iam.Role{ID: v}
-			_, _, err := client.Groups.RemoveRole(group, role)
-			if err != nil {
-				return err
-			}
-		}
 		// Handle additions
-		if len(new) > 0 {
-			for _, v := range new {
+		if len(toAdd) > 0 {
+			for _, v := range toAdd {
 				var role = iam.Role{ID: v}
 				_, _, err := client.Groups.AssignRole(group, role)
 				if err != nil {
@@ -147,6 +143,16 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 				}
 			}
 		}
+
+		// Remove every role. Simpler to remove and add new ones,
+		for _, v := range toRemove {
+			var role = iam.Role{ID: v}
+			_, _, err := client.Groups.RemoveRole(group, role)
+			if err != nil {
+				return err
+			}
+		}
+
 	}
 	d.Partial(false)
 	return nil
