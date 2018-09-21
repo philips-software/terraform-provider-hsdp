@@ -14,25 +14,19 @@ To find out more about HSDP please visit https://www.hsdp.io/
 ## Requirements
 
 -	[Terraform](https://www.terraform.io/downloads.html) 0.11.x
--	[Go](https://golang.org/doc/install) 1.10 (to build the provider plugin)
+-	[Go](https://golang.org/doc/install) 1.11 or newer (to build the provider plugin)
 
 ## Building The Provider
 
-Clone repository to: `$GOPATH/src/github.com/philips-software/terraform-provider-hsdp`
+Clone repository somehere *outside* your $GOPATH:
 
 ```sh
-$ mkdir -p $GOPATH/src/github.com/philips-software; cd $GOPATH/src/github.com/philips-software
 $ git clone git@github.com:philips-software/terraform-provider-hsdp
-```
-
-Enter the provider directory and build the provider
-
-```sh
-$ cd $GOPATH/src/github.com/philips-software/terraform-provider-hsdp
+$ cd terraform-provider-hsdp
 $ go build .
 ```
 
-Copy the binary to the appropiate plugin directory e.g. `terraform.d/plugins/darwin_amd64/terraform-provider-hsdp`
+Copy the resulting binary to the appropiate plugin directory e.g. `terraform.d/plugins/darwin_amd64/terraform-provider-hsdp`
 
 
 ## Dockerfile
