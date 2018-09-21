@@ -1,6 +1,8 @@
 package hsdp
 
 import (
+	"fmt"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
 )
@@ -34,6 +36,11 @@ func resourceIAMRole() *schema.Resource {
 				MaxItems: 100,
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"ticket_protection": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
 			},
 			"_id": {
 				Type:     schema.TypeString,
@@ -105,14 +112,6 @@ func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
 		toAdd := difference(new, old)
 		toRemove := difference(old, new)
 
-		// Removals
-		for _, v := range toRemove {
-			_, _, err := client.Roles.RemoveRolePermission(*role, v)
-			if err != nil {
-				return err
-			}
-		}
-
 		// Additions
 		if len(toAdd) > 0 {
 			for _, v := range toAdd {
@@ -122,6 +121,19 @@ func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
 				}
 			}
 		}
+
+		// Removals
+		for _, v := range toRemove {
+			ticketProtection := d.Get("ticket_protection").(bool)
+			if ticketProtection && v == "CLIENT.SCOPES" {
+				return fmt.Errorf("Refusing to remove CLIENT.SCOPES permissions, set ticket_protection to `false` to override")
+			}
+			_, _, err := client.Roles.RemoveRolePermission(*role, v)
+			if err != nil {
+				return err
+			}
+		}
+
 	}
 	d.Partial(false)
 	return nil
