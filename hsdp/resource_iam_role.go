@@ -126,7 +126,7 @@ func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
 		for _, v := range toRemove {
 			ticketProtection := d.Get("ticket_protection").(bool)
 			if ticketProtection && v == "CLIENT.SCOPES" {
-				return fmt.Errorf("Refusing to remove CLIENT.SCOPES permissions, set ticket_protection to `false` to override")
+				return fmt.Errorf("Refusing to remove CLIENT.SCOPES permission, set ticket_protection to `false` to override")
 			}
 			_, _, err := client.Roles.RemoveRolePermission(*role, v)
 			if err != nil {
