@@ -73,8 +73,13 @@ func resourceIAMServiceCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	d.SetId(createdService.ServiceID)
+	d.SetId(createdService.ID)
+	d.Set("expires_on", createdService.ExpiresOn)
+	d.Set("scopes", createdService.Scopes)
+	d.Set("default_scopes", createdService.DefaultScopes)
 	d.Set("private_key", createdService.PrivateKey)
+	d.Set("service_id", createdService.ServiceID)
+	d.Set("organization_id", createdService.OrganizationID)
 	return nil
 }
 
