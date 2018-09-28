@@ -104,6 +104,7 @@ func resourceIAMClientCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	d.SetId(createdClient.ID)
+	d.Set("password", cl.Password)
 	return nil
 }
 

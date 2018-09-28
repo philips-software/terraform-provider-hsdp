@@ -80,6 +80,7 @@ func resourceIAMServiceCreate(d *schema.ResourceData, m interface{}) error {
 	d.Set("private_key", createdService.PrivateKey)
 	d.Set("service_id", createdService.ServiceID)
 	d.Set("organization_id", createdService.OrganizationID)
+	d.Set("description", s.Description) // RITM0021326
 	return nil
 }
 
@@ -91,7 +92,9 @@ func resourceIAMServiceRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	d.Set("description", s.Description)
+	// Until RITM0021326 is implemented, this will always clear the field
+	// d.Set("description", s.Description)
+
 	d.Set("name", s.Name)
 	d.Set("application_id", s.ApplicationID)
 	d.Set("expires_on", s.ExpiresOn)
