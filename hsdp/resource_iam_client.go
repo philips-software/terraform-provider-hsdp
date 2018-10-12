@@ -21,6 +21,7 @@ func resourceIAMClient() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"type": &schema.Schema{
@@ -44,10 +45,12 @@ func resourceIAMClient() *schema.Resource {
 			},
 			"description": &schema.Schema{
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"application_id": &schema.Schema{
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"global_reference_id": &schema.Schema{
@@ -65,6 +68,7 @@ func resourceIAMClient() *schema.Resource {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				Required: true,
+				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"scopes": &schema.Schema{
