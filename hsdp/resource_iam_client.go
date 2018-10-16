@@ -26,6 +26,7 @@ func resourceIAMClient() *schema.Resource {
 			},
 			"type": &schema.Schema{
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"client_id": &schema.Schema{
