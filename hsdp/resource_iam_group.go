@@ -122,8 +122,12 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 		toAdd := difference(new, old)
 		toRemove := difference(old, new)
 
-		client.Groups.RemoveMembers(group, toRemove...)
-		client.Groups.AddMembers(group, toAdd...)
+		if len(toRemove) > 0 {
+			client.Groups.RemoveMembers(group, toRemove...)
+		}
+		if len(toAdd) > 0 {
+			client.Groups.AddMembers(group, toAdd...)
+		}
 	}
 
 	if d.HasChange("roles") {
