@@ -78,6 +78,7 @@ func resourceIAMServiceCreate(d *schema.ResourceData, m interface{}) error {
 	s.Description = d.Get("description").(string)
 	s.Name = d.Get("name").(string)
 	s.ApplicationID = d.Get("application_id").(string)
+	s.Validity = d.Get("validity").(int)
 	scopes := expandStringList(d.Get("scopes").(*schema.Set).List())
 	defaultScopes := expandStringList(d.Get("default_scopes").(*schema.Set).List())
 
