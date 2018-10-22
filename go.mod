@@ -20,6 +20,7 @@ require (
 	github.com/hashicorp/logutils v1.0.0 // indirect
 	github.com/hashicorp/terraform v0.11.8
 	github.com/hashicorp/yamux v0.0.0-20180917205041-7221087c3d28 // indirect
+	github.com/jeffail/gabs v1.1.1 // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
 	github.com/mitchellh/cli v1.0.0 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
@@ -28,7 +29,7 @@ require (
 	github.com/mitchellh/hashstructure v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.0.0 // indirect
 	github.com/oklog/run v1.0.0 // indirect
-	github.com/philips-software/go-hsdp-api v0.0.0-20180928132754-a96b44f85188
+	github.com/philips-software/go-hsdp-api v0.0.0-20181022151348-4eb372b4772a
 	github.com/smartystreets/assertions v0.0.0-20180820201707-7c9eb446e3cf // indirect
 	github.com/smartystreets/goconvey v0.0.0-20180222194500-ef6db91d284a // indirect
 	github.com/ulikunitz/xz v0.5.4 // indirect
