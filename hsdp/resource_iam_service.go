@@ -57,13 +57,15 @@ func resourceIAMService() *schema.Resource {
 			"scopes": &schema.Schema{
 				Type:     schema.TypeSet,
 				MaxItems: 100,
-				Optional: true,
+				MinItems: 1, // openid
+				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"default_scopes": &schema.Schema{
 				Type:     schema.TypeSet,
 				MaxItems: 100,
-				Optional: true,
+				MinItems: 1, // openid
+				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
@@ -134,7 +136,10 @@ func resourceIAMServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		toAdd := difference(new, old)
 		toRemove := difference(old, new)
 		if len(toRemove) > 0 {
-			client.Services.RemoveScopes(s, toRemove, []string{})
+			_, _, err := client.Services.RemoveScopes(s, toRemove, []string{})
+			if err != nil {
+				return err
+			}
 		}
 		if len(toAdd) > 0 {
 			client.Services.AddScopes(s, toAdd, []string{})
@@ -148,7 +153,10 @@ func resourceIAMServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		toAdd := difference(new, old)
 		toRemove := difference(old, new)
 		if len(toRemove) > 0 {
-			client.Services.RemoveScopes(s, []string{}, toRemove)
+			_, _, err := client.Services.RemoveScopes(s, []string{}, toRemove)
+			if err != nil {
+				return err
+			}
 		}
 		if len(toAdd) > 0 {
 			client.Services.AddScopes(s, []string{}, toAdd)
