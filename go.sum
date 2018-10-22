@@ -78,6 +78,8 @@ github.com/hashicorp/yamux v0.0.0-20180917205041-7221087c3d28 h1:gACvD6C1jev87Lp
 github.com/hashicorp/yamux v0.0.0-20180917205041-7221087c3d28/go.mod h1:+NfK9FKeTrX5uv1uIXGdwYDTeHna2qgaIlx54MXqjAM=
 github.com/jeffail/gabs v1.1.0 h1:q3o/obhmWPAUxEXwMlJFvwaw2/zRz+BCsUx1TcxrBJA=
 github.com/jeffail/gabs v1.1.0/go.mod h1:4qEQtV3py87F/jKMCb//ZQXJDjJBK5FU2kxdcgxb4iU=
+github.com/jeffail/gabs v1.1.1 h1:CeIG5b81N2dWPtuK7IVVLxwYFxB0alTtfZ4rJZy1PS8=
+github.com/jeffail/gabs v1.1.1/go.mod h1:4qEQtV3py87F/jKMCb//ZQXJDjJBK5FU2kxdcgxb4iU=
 github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8 h1:12VvqtR6Aowv3l/EQUlocDHW2Cp4G9WJVH7uyH8QFJE=
 github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/jtolds/gls v4.2.1+incompatible h1:fSuqC+Gmlu6l/ZYAoZzx2pyucC8Xza35fpRVWLVmUEE=
@@ -122,6 +124,8 @@ github.com/philips-software/go-hsdp-api v0.0.0-20180926083441-d5571c436bb4 h1:cS
 github.com/philips-software/go-hsdp-api v0.0.0-20180926083441-d5571c436bb4/go.mod h1:IXoGl6W+aa0BpQvkRadzHu9qc9ialJVCk9ZBxodOAM8=
 github.com/philips-software/go-hsdp-api v0.0.0-20180928132754-a96b44f85188 h1:OLKt8Nj0MVcheHh429BtAlxSVWmWB1vBp6MZwokFdK0=
 github.com/philips-software/go-hsdp-api v0.0.0-20180928132754-a96b44f85188/go.mod h1:I5mXoC3xpQ4IB+OXaVvGN0AS87oWQNNsjCGAFnrFUuE=
+github.com/philips-software/go-hsdp-api v0.0.0-20181022151348-4eb372b4772a h1:gpBwtuHQQt/gVK5ME3mQOie8sgmC1MwfMuAQ6b5aZYs=
+github.com/philips-software/go-hsdp-api v0.0.0-20181022151348-4eb372b4772a/go.mod h1:I5mXoC3xpQ4IB+OXaVvGN0AS87oWQNNsjCGAFnrFUuE=
 github.com/philips-software/go-hsdp-signer v1.0.0 h1:nhP9nDJvX7Obd4SAZ24Kut3qGn7K4X1Wd9Gq5E3dO6o=
 github.com/philips-software/go-hsdp-signer v1.0.0/go.mod h1:mtq3D20YNxHQ8e318ci9hVb3DW5Hlo30D3abN7VeqLM=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/philips-software/go-hsdp-api/iam"
 )
 
@@ -28,6 +29,13 @@ func resourceIAMService() *schema.Resource {
 			"application_id": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"validity": &schema.Schema{
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      12,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(1, 600),
 			},
 			"private_key": &schema.Schema{
 				Type:      schema.TypeString,
