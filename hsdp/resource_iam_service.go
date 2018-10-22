@@ -76,6 +76,8 @@ func resourceIAMServiceCreate(d *schema.ResourceData, m interface{}) error {
 	s.Description = d.Get("description").(string)
 	s.Name = d.Get("name").(string)
 	s.ApplicationID = d.Get("application_id").(string)
+	scopes := expandStringList(d.Get("scopes").(*schema.Set).List())
+	defaultScopes := expandStringList(d.Get("default_scopes").(*schema.Set).List())
 
 	createdService, _, err := client.Services.CreateService(s)
 	if err != nil {
@@ -89,6 +91,10 @@ func resourceIAMServiceCreate(d *schema.ResourceData, m interface{}) error {
 	d.Set("service_id", createdService.ServiceID)
 	d.Set("organization_id", createdService.OrganizationID)
 	d.Set("description", s.Description) // RITM0021326
+
+	// Set scopes and default_scopes
+	client.Services.AddScopes(*createdService, scopes, defaultScopes)
+
 	return nil
 }
 
@@ -121,21 +127,33 @@ func resourceIAMServiceUpdate(d *schema.ResourceData, m interface{}) error {
 	s.ID = d.Id()
 
 	d.Partial(true)
-	if d.HasChange("scopes") || d.HasChange("default_scopes") {
-		newScopes := expandStringList(d.Get("scopes").(*schema.Set).List())
-		newDefaultScopes := expandStringList(d.Get("default_scopes").(*schema.Set).List())
-		if d.HasChange("scopes") {
-			_, ns := d.GetChange("scopes")
-			newScopes = expandStringList(ns.(*schema.Set).List())
-			d.SetPartial("scopes")
+	if d.HasChange("scopes") {
+		o, n := d.GetChange("scopes")
+		old := expandStringList(o.(*schema.Set).List())
+		new := expandStringList(n.(*schema.Set).List())
+		toAdd := difference(new, old)
+		toRemove := difference(old, new)
+		if len(toRemove) > 0 {
+			client.Services.RemoveScopes(s, toRemove, []string{})
 		}
-		if d.HasChange("default_scopes") {
-			_, nd := d.GetChange("default_scopes")
-			newDefaultScopes = expandStringList(nd.(*schema.Set).List())
-			d.SetPartial("default_scopes")
+		if len(toAdd) > 0 {
+			client.Services.AddScopes(s, toAdd, []string{})
 		}
-		_, _, err := client.Services.UpdateScopes(s, newScopes, newDefaultScopes)
-		return err
+		d.SetPartial("scopes")
+	}
+	if d.HasChange("default_scopes") {
+		o, n := d.GetChange("default_scopes")
+		old := expandStringList(o.(*schema.Set).List())
+		new := expandStringList(n.(*schema.Set).List())
+		toAdd := difference(new, old)
+		toRemove := difference(old, new)
+		if len(toRemove) > 0 {
+			client.Services.RemoveScopes(s, []string{}, toRemove)
+		}
+		if len(toAdd) > 0 {
+			client.Services.AddScopes(s, []string{}, toAdd)
+		}
+		d.SetPartial("default_scopes")
 	}
 	return nil
 }
