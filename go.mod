@@ -29,7 +29,7 @@ require (
 	github.com/mitchellh/hashstructure v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.0.0 // indirect
 	github.com/oklog/run v1.0.0 // indirect
-	github.com/philips-software/go-hsdp-api v0.0.0-20181022155529-ac2e507829f6
+	github.com/philips-software/go-hsdp-api v0.0.0-20181102082127-34bd96b67b57
 	github.com/smartystreets/assertions v0.0.0-20180820201707-7c9eb446e3cf // indirect
 	github.com/smartystreets/goconvey v0.0.0-20180222194500-ef6db91d284a // indirect
 	github.com/ulikunitz/xz v0.5.4 // indirect
