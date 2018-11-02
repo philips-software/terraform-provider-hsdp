@@ -1,6 +1,8 @@
 package hsdp
 
 import (
+	"errors"
+
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
 )
@@ -76,15 +78,7 @@ func resourceIAMPropositionUpdate(d *schema.ResourceData, m interface{}) error {
 	if !d.HasChange("description") {
 		return nil
 	}
-	client := m.(*iam.Client)
-	var prop iam.Proposition
-	prop.ID = d.Id()
-	prop.Description = d.Get("description").(string)
-	_, _, err := client.Propositions.UpdateProposition(prop)
-	if err != nil {
-		return err
-	}
-	return nil
+	return errors.New("not implemented by HSDP")
 }
 
 func resourceIAMPropositionDelete(d *schema.ResourceData, m interface{}) error {
