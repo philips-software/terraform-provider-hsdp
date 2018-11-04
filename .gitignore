@@ -1,6 +1,7 @@
 /.terraform*
 *.tfstate
 *.backup
+*.out
 *.tf
 .DS_Store
 terraform-provider-hsdp
