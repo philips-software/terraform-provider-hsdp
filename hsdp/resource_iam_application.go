@@ -76,14 +76,7 @@ func resourceIAMApplicationUpdate(d *schema.ResourceData, m interface{}) error {
 	if !d.HasChange("description") {
 		return nil
 	}
-	client := m.(*iam.Client)
-	var app iam.Application
-	app.ID = d.Id()
-	app.Description = d.Get("description").(string)
-	_, _, err := client.Applications.UpdateApplication(app)
-	if err != nil {
-		return err
-	}
+	// Not implemented by HSDP
 	return nil
 }
 
