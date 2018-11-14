@@ -38,6 +38,8 @@ $ docker build -t terraform-provider-hsdp .
 $ docker run --rm -v /Location/With/Terraform/Files:/terraform -w /terraform -it terraform-provider-hsdp check
 ```
 
+Automatic builds can be found on [Docker hub](https://hub.docker.com/r/philipssoftware/terraform-provider-hsdp/).
+
 ## Issues
 
 - If you have an issue: report it on the [issue tracker](https://github.com/philips-software/terraform-provider-hsdp/issues)
