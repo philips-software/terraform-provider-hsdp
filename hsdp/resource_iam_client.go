@@ -56,6 +56,7 @@ func resourceIAMClient() *schema.Resource {
 			},
 			"global_reference_id": &schema.Schema{
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"redirection_uris": &schema.Schema{
