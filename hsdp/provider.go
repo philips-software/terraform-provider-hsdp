@@ -82,8 +82,9 @@ func Provider() terraform.ResourceProvider {
 			"hsdp_iam_service":     resourceIAMService(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"hsdp_iam_introspect": dataSourceIAMIntrospect(),
-			"hsdp_iam_user":       dataSourceUser(),
+			"hsdp_iam_introspect":  dataSourceIAMIntrospect(),
+			"hsdp_iam_user":        dataSourceUser(),
+			"hsdp_iam_permissions": dataSourceIAMPermissions(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
