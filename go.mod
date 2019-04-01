@@ -24,10 +24,11 @@ require (
 	github.com/hashicorp/logutils v1.0.0 // indirect
 	github.com/hashicorp/terraform v0.11.10
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
-	github.com/jeffail/gabs v1.1.1 // indirect
+	github.com/jeffail/gabs v1.2.0 // indirect
 	github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
 	github.com/kr/pty v1.1.3 // indirect
+	github.com/leodido/go-urn v1.1.0 // indirect
 	github.com/mattn/go-isatty v0.0.4 // indirect
 	github.com/mitchellh/cli v1.0.0 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
@@ -36,11 +37,13 @@ require (
 	github.com/mitchellh/go-wordwrap v1.0.0 // indirect
 	github.com/mitchellh/hashstructure v1.0.0 // indirect
 	github.com/mitchellh/mapstructure v1.1.2 // indirect
-	github.com/philips-software/go-hsdp-api v0.0.0-20181103193950-be84c9c984a5
+	github.com/philips-software/go-hsdp-api v0.0.0-20190401141214-b029dacc11f7
 	github.com/posener/complete v1.2.1 // indirect
 	github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d // indirect
 	github.com/smartystreets/goconvey v0.0.0-20180222194500-ef6db91d284a // indirect
 	github.com/spf13/pflag v1.0.3 // indirect
+	github.com/stretchr/objx v0.1.1 // indirect
+	github.com/stretchr/testify v1.3.0 // indirect
 	github.com/ulikunitz/xz v0.5.5 // indirect
 	github.com/vmihailenco/msgpack v4.0.1+incompatible // indirect
 	github.com/zclconf/go-cty v0.0.0-20181017232614-01c5aba823a6 // indirect
@@ -53,5 +56,6 @@ require (
 	google.golang.org/appengine v1.3.0 // indirect
 	google.golang.org/genproto v0.0.0-20181101192439-c830210a61df // indirect
 	google.golang.org/grpc v1.16.0 // indirect
+	gopkg.in/go-playground/validator.v9 v9.28.0 // indirect
 	honnef.co/go/tools v0.0.0-20180920025451-e3ad64cb4ed3 // indirect
 )
