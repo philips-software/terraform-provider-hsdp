@@ -35,7 +35,7 @@ A Dockerfile is provided. Example usage of the image:
 
 ```sh
 $ docker build -t terraform-provider-hsdp .
-$ docker run --rm -v /Location/With/Terraform/Files:/terraform -w /terraform -it terraform-provider-hsdp check
+$ docker run --rm -v /Location/With/Terraform/Files:/terraform -w /terraform -it terraform-provider-hsdp init
 ```
 
 Automatic builds can be found on [Docker hub](https://hub.docker.com/r/philipssoftware/terraform-provider-hsdp/).
