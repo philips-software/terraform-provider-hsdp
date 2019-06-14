@@ -16,7 +16,7 @@ To find out more about HSDP please visit https://www.hsdp.io/
 -	[Terraform](https://www.terraform.io/downloads.html) 0.12.x
 -	[Go](https://golang.org/doc/install) 1.12 or newer (to build the provider plugin)
 
-# Older version
+### Older version
 
 Use `v0.1.0` of this provider for Terraform 0.11 or older
 
