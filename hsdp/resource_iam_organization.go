@@ -99,9 +99,9 @@ func resourceIAMOrgUpdate(d *schema.ResourceData, m interface{}) error {
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		org.Description = description
-		client.Organizations.UpdateOrganization(*org)
+		_, _, err = client.Organizations.UpdateOrganization(*org)
 	}
-	return nil
+	return err
 }
 
 func resourceIAMOrgDelete(d *schema.ResourceData, m interface{}) error {

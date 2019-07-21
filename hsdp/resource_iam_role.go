@@ -62,7 +62,7 @@ func resourceIAMRoleCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	for _, p := range permissions {
-		client.Roles.AddRolePermission(*role, p)
+		_, _, _ = client.Roles.AddRolePermission(*role, p)
 	}
 	d.SetId(role.ID)
 	return nil
@@ -140,10 +140,6 @@ func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMRoleDelete(d *schema.ResourceData, m interface{}) error {
-	return nil
-}
-
-func resourceIAMRoleImport(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
 

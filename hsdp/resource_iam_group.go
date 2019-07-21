@@ -74,9 +74,9 @@ func resourceIAMGroupCreate(d *schema.ResourceData, m interface{}) error {
 	// Add users
 	users := expandStringList(d.Get("users").(*schema.Set).List())
 	if len(users) > 0 {
-		client.Groups.AddMembers(*createdGroup, users...)
+		_, _, err = client.Groups.AddMembers(*createdGroup, users...)
 	}
-	return nil
+	return err
 }
 
 func resourceIAMGroupRead(d *schema.ResourceData, m interface{}) error {
@@ -170,7 +170,10 @@ func resourceIAMGroupDelete(d *schema.ResourceData, m interface{}) error {
 	// Remove all (known) users first before attempting delete
 	users := expandStringList(d.Get("users").(*schema.Set).List())
 	if len(users) > 0 {
-		client.Groups.RemoveMembers(group, users...)
+		_, _, err := client.Groups.RemoveMembers(group, users...)
+		if err != nil {
+			return err
+		}
 	}
 
 	ok, _, err := client.Groups.DeleteGroup(group)

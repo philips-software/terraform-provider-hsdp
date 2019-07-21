@@ -58,8 +58,8 @@ func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
 		if user != nil {
 			if user.Disabled {
 				// Retrigger activation email
-				client.Users.ResendActivation(email)
-				return nil
+				_, _, err = client.Users.ResendActivation(email)
+				return err
 			}
 			err = resourceIAMUserRead(d, m)
 			if err == nil {
