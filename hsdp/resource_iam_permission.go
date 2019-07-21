@@ -69,7 +69,3 @@ func resourceIAMPermissionUpdate(d *schema.ResourceData, m interface{}) error {
 func resourceIAMPermissionDelete(d *schema.ResourceData, m interface{}) error {
 	return nil
 }
-
-func resourceIAMPermissionImport(d *schema.ResourceData, m interface{}) error {
-	return nil
-}
