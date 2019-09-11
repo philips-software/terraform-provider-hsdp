@@ -127,6 +127,8 @@ github.com/google/go-querystring v1.0.0/go.mod h1:odCYkC5MyYFN7vkCjXpyrEuKhc/BUO
 github.com/google/martian v2.1.0+incompatible h1:/CP5g8u/VJHijgedC/Legn3BAbAaWPgecwXBIDzw5no=
 github.com/google/martian v2.1.0+incompatible/go.mod h1:9I4somxYTbIHy5NJKHRl3wXiIaQGbYVAs8BPL6v8lEs=
 github.com/google/pprof v0.0.0-20181206194817-3ea8567a2e57/go.mod h1:zfwlbNMJ+OItoe0UupaVj+oy1omPYYDuagoSzA8v9mc=
+github.com/google/uuid v1.1.1 h1:Gkbcsh/GbpXz7lPftLA3P6TYMwjCLYm83jiFQZF/3gY=
+github.com/google/uuid v1.1.1/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/googleapis/gax-go v2.0.0+incompatible h1:j0GKcs05QVmm7yesiZq2+9cxHkNK9YM6zKx4D2qucQU=
 github.com/googleapis/gax-go v2.0.0+incompatible/go.mod h1:SFVmujtThgffbyetf+mdk2eWhX2bMyUtNHzFKcPA9HY=
 github.com/googleapis/gax-go/v2 v2.0.3 h1:siORttZ36U2R/WjiJuDz8znElWBiAlO9rVt+mqJt0Cc=
@@ -298,6 +300,8 @@ github.com/packer-community/winrmcp v0.0.0-20180102160824-81144009af58/go.mod h1
 github.com/pascaldekloe/goe v0.0.0-20180627143212-57f6aae5913c/go.mod h1:lzWF7FIEvWOWxwDKqyGYQf6ZUaNfKdP144TG7ZOy1lc=
 github.com/philips-software/go-hsdp-api v0.2.0 h1:cJGtRozHBse948Ns+nYA2nEXvuSQdpEe7TXAHhq52yo=
 github.com/philips-software/go-hsdp-api v0.2.0/go.mod h1:a7uZCPrJBOaLMKoTK/ICLtaySQSstrNKZ5tAk31w1Ow=
+github.com/philips-software/go-hsdp-api v0.3.0 h1:cwHbxhKG3JVttEIc15iKZLmqwSQo2w8FWpFcLoCAOvc=
+github.com/philips-software/go-hsdp-api v0.3.0/go.mod h1:iBHzGEdlXFl353rWvCnwfFD2rMhayrTpSSIwxYzFN6Q=
 github.com/philips-software/go-hsdp-signer v1.1.0 h1:7fYij8q7uCr2AOzO9g3X45FNB9tddFPnvR5WNLo3pD4=
 github.com/philips-software/go-hsdp-signer v1.1.0/go.mod h1:mtq3D20YNxHQ8e318ci9hVb3DW5Hlo30D3abN7VeqLM=
 github.com/pkg/errors v0.0.0-20170505043639-c605e284fe17 h1:chPfVn+gpAM5CTpTyVU9j8J+xgRGwmoDlNDLjKnJiYo=

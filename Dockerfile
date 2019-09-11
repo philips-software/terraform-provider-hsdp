@@ -12,6 +12,6 @@ RUN go mod download
 COPY . .
 RUN go build .
 
-FROM hashicorp/terraform:0.12.4
+FROM hashicorp/terraform:0.12.8
 ENV HOME /root
 COPY --from=builder /terraform-provider-hsdp/terraform-provider-hsdp $HOME/.terraform.d/plugins/linux_amd64/terraform-provider-hsdp
