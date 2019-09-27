@@ -1,4 +1,4 @@
-FROM golang:1.12.7-alpine3.9 as builder
+FROM golang:1.13-alpine3.10 as builder
 LABEL maintainer="andy.lo-a-foe@philips.com"
 RUN apk add --no-cache git openssh gcc musl-dev
 WORKDIR /terraform-provider-hsdp
