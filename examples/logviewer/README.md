@@ -4,7 +4,7 @@ This directory contains TF files to setup a role and a group with permissions fo
 
 ## Files
 
-* [hsdp.tf](hsdp.tf) - Provider configuration
+* [provider.tf](provider.tf) - Provider configuration
 * [roles.tf](roles.tf) - Role definition
 * [groups.tf](groups.tf) - Group definition
 * [users.tf](users.tf) - User definition
