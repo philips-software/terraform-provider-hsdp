@@ -6,3 +6,5 @@ require (
 	github.com/philips-software/go-hsdp-api v0.3.0
 	gopkg.in/go-playground/validator.v9 v9.28.0 // indirect
 )
+
+go 1.13
