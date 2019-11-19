@@ -5,7 +5,11 @@ resource "hsdp_iam_role" "tdr_data_items" {
         "DATAITEM.CREATE", 
         "DATAITEM.READ",
         "DATAITEM.DELETE",
-        "DATAITEM.PATCH"
+        "DATAITEM.PATCH",
+        "DATAITEM.CREATEONBEHALF", 
+        "DATAITEM.READONBEHALF",
+        "DATAITEM.DELETEONBEHALF",
+        "DATAITEM.PATCHONBEHALF"
     ]
 }
 
