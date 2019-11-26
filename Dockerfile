@@ -1,4 +1,4 @@
-FROM golang:1.13-alpine3.10 as builder
+FROM golang:1.13-alpine3.10 as build_base
 LABEL maintainer="andy.lo-a-foe@philips.com"
 RUN apk add --no-cache git openssh gcc musl-dev
 WORKDIR /terraform-provider-hsdp
@@ -9,6 +9,7 @@ COPY go.sum .
 RUN go mod download
 
 # Build
+FROM build_base AS builder
 COPY . .
 RUN go build .
 
