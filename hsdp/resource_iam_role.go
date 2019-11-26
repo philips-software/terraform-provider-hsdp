@@ -2,9 +2,9 @@ package hsdp
 
 import (
 	"fmt"
-
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
+	"strings"
 )
 
 func resourceIAMRole() *schema.Resource {
@@ -22,6 +22,14 @@ func resourceIAMRole() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
+					v := val.(string)
+					u := strings.ToUpper(v)
+					if v != u {
+						errs = append(errs, fmt.Errorf("%q must be in uppercase: %s -> %s", key, v, u))
+					}
+					return
+				},
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -50,8 +58,8 @@ func resourceIAMRole() *schema.Resource {
 	}
 }
 
-func resourceIAMRoleCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+func resourceIAMRoleCreate(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*iam.Client)
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
 	managingOrganization := d.Get("managing_organization").(string)
@@ -65,11 +73,11 @@ func resourceIAMRoleCreate(d *schema.ResourceData, m interface{}) error {
 		_, _, _ = client.Roles.AddRolePermission(*role, p)
 	}
 	d.SetId(role.ID)
-	return nil
+	return resourceIAMRoleRead(d, meta)
 }
 
-func resourceIAMRoleRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+func resourceIAMRoleRead(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*iam.Client)
 
 	id := d.Id()
 	role, _, err := client.Roles.GetRoleByID(id)
