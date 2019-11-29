@@ -2,7 +2,6 @@ package hsdp
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/philips-software/go-hsdp-api/iam"
 )
 
 func dataSourceIAMPermissions() *schema.Resource {
@@ -21,7 +20,8 @@ func dataSourceIAMPermissions() *schema.Resource {
 }
 
 func dataSourceIAMPermissionsRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*iam.Client)
+	config := meta.(*Config)
+	client := config.IAMClient()
 
 	resp, _, err := client.Permissions.GetPermissions(nil) // Get all permissions
 

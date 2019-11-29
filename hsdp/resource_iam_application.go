@@ -39,7 +39,9 @@ func resourceIAMApplication() *schema.Resource {
 }
 
 func resourceIAMApplicationCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
+
 	var app iam.Application
 	app.Name = d.Get("name").(string) // TODO: this must be all caps
 	app.Description = d.Get("description").(string)
@@ -59,7 +61,8 @@ func resourceIAMApplicationCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMApplicationRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
 
 	id := d.Id()
 	app, _, err := client.Applications.GetApplicationByID(id)

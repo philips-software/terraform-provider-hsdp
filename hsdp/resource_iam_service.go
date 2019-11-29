@@ -73,7 +73,9 @@ func resourceIAMService() *schema.Resource {
 }
 
 func resourceIAMServiceCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
+
 	var s iam.Service
 	s.Description = d.Get("description").(string)
 	s.Name = d.Get("name").(string)
@@ -102,7 +104,8 @@ func resourceIAMServiceCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMServiceRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
 
 	id := d.Id()
 	s, _, err := client.Services.GetServiceByID(id)
@@ -125,7 +128,9 @@ func resourceIAMServiceRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMServiceUpdate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
+
 	var s iam.Service
 	s.ID = d.Id()
 
@@ -168,7 +173,9 @@ func resourceIAMServiceUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMServiceDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
+
 	var s iam.Service
 	s.ID = d.Id()
 	ok, _, err := client.Services.DeleteService(s)

@@ -46,7 +46,9 @@ func resourceIAMGroup() *schema.Resource {
 }
 
 func resourceIAMGroupCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
+
 	var group iam.Group
 	group.Description = d.Get("description").(string)
 	group.Name = d.Get("name").(string)
@@ -80,7 +82,8 @@ func resourceIAMGroupCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMGroupRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
 
 	id := d.Id()
 	group, _, err := client.Groups.GetGroupByID(id)
@@ -103,8 +106,9 @@ func resourceIAMGroupRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
+	config := m.(*Config)
+	client := config.IAMClient()
 
-	client := m.(*iam.Client)
 	var group iam.Group
 	group.ID = d.Id()
 	d.Partial(true)
@@ -163,7 +167,9 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMGroupDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
+
 	var group iam.Group
 	group.ID = d.Id()
 

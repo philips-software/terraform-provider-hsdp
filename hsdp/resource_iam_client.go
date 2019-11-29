@@ -90,7 +90,9 @@ func resourceIAMClient() *schema.Resource {
 }
 
 func resourceIAMClientCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
+
 	var cl iam.ApplicationClient
 	cl.Description = d.Get("description").(string)
 	cl.Name = d.Get("name").(string)
@@ -115,7 +117,8 @@ func resourceIAMClientCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMClientRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
 
 	id := d.Id()
 	cl, _, err := client.Clients.GetClientByID(id)
@@ -137,7 +140,9 @@ func resourceIAMClientRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMClientUpdate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
+
 	var cl iam.ApplicationClient
 	cl.ID = d.Id()
 
@@ -162,7 +167,9 @@ func resourceIAMClientUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMClientDelete(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
+
 	var cl iam.ApplicationClient
 	cl.ID = d.Id()
 	ok, _, err := client.Clients.DeleteClient(cl)

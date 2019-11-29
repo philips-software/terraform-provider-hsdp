@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/philips-software/go-hsdp-api/iam"
 )
 
 func resourceIAMOrg() *schema.Resource {
@@ -51,7 +50,8 @@ func resourceIAMOrg() *schema.Resource {
 }
 
 func resourceIAMOrgCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
 
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
@@ -75,7 +75,8 @@ func resourceIAMOrgCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMOrgRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
 
 	id := d.Id()
 	org, _, err := client.Organizations.GetOrganizationByID(id)
@@ -89,7 +90,9 @@ func resourceIAMOrgRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMOrgUpdate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
+
 	id := d.Id()
 	org, _, err := client.Organizations.GetOrganizationByID(id)
 	if err != nil {

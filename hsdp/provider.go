@@ -19,6 +19,11 @@ func Provider() terraform.ResourceProvider {
 				Required:    true,
 				Description: descriptions["idm_url"],
 			},
+			"credentials_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: descriptions["credentials_url"],
+			},
 			"oauth2_client_id": {
 				Type:        schema.TypeString,
 				Required:    true,
@@ -71,15 +76,16 @@ func Provider() terraform.ResourceProvider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"hsdp_iam_org":         resourceIAMOrg(),
-			"hsdp_iam_group":       resourceIAMGroup(),
-			"hsdp_iam_permission":  resourceIAMPermission(),
-			"hsdp_iam_role":        resourceIAMRole(),
-			"hsdp_iam_proposition": resourceIAMProposition(),
-			"hsdp_iam_application": resourceIAMApplication(),
-			"hsdp_iam_user":        resourceIAMUser(),
-			"hsdp_iam_client":      resourceIAMClient(),
-			"hsdp_iam_service":     resourceIAMService(),
+			"hsdp_iam_org":            resourceIAMOrg(),
+			"hsdp_iam_group":          resourceIAMGroup(),
+			"hsdp_iam_permission":     resourceIAMPermission(),
+			"hsdp_iam_role":           resourceIAMRole(),
+			"hsdp_iam_proposition":    resourceIAMProposition(),
+			"hsdp_iam_application":    resourceIAMApplication(),
+			"hsdp_iam_user":           resourceIAMUser(),
+			"hsdp_iam_client":         resourceIAMClient(),
+			"hsdp_iam_service":        resourceIAMService(),
+			"hsdp_credentials_policy": resourceCredentialsPolicy(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":  dataSourceIAMIntrospect(),
@@ -96,6 +102,7 @@ func init() {
 	descriptions = map[string]string{
 		"iam_url":            "The HSDP IAM instance URL",
 		"idm_url":            "The HSDP IDM instance URL",
+		"credentials_url":    "The HSDP S3 Credentials instance URL",
 		"oauth2_client_id":   "The OAuth2 client id",
 		"oauth2_password":    "The OAuth2 password",
 		"org_id":             "The (top level) Organization ID - UUID",
@@ -122,6 +129,13 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.SecretKey = d.Get("secret_key").(string)
 	config.Debug = d.Get("debug").(bool)
 	config.DebugLog = d.Get("debug_log").(string)
+	config.S3CredsURL = d.Get("credentials_url").(string)
 
-	return config.Client()
+	err := config.setupIAMClient()
+	if err != nil {
+		return nil, err
+	}
+	err = config.setupS3CredsClient()
+
+	return config, err
 }

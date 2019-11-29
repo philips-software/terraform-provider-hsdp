@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/philips-software/go-hsdp-api/iam"
 )
 
 func resourceIAMUser() *schema.Resource {
@@ -44,7 +43,9 @@ func resourceIAMUser() *schema.Resource {
 }
 
 func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
+
 	last := d.Get("last_name").(string)
 	first := d.Get("first_name").(string)
 	email := d.Get("username").(string)
@@ -86,7 +87,8 @@ func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMUserRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
 
 	id := d.Id()
 
