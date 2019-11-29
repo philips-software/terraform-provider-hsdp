@@ -2,7 +2,6 @@ package hsdp
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/philips-software/go-hsdp-api/iam"
 )
 
 func dataSourceUser() *schema.Resource {
@@ -23,7 +22,8 @@ func dataSourceUser() *schema.Resource {
 }
 
 func dataSourceUserRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*iam.Client)
+	config := meta.(*Config)
+	client := config.IAMClient()
 
 	username := d.Get("username").(string)
 

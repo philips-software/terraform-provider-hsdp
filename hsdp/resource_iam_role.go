@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/philips-software/go-hsdp-api/iam"
 )
 
 func resourceIAMRole() *schema.Resource {
@@ -52,7 +51,9 @@ func resourceIAMRole() *schema.Resource {
 }
 
 func resourceIAMRoleCreate(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*iam.Client)
+	config := meta.(*Config)
+	client := config.IAMClient()
+
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
 	managingOrganization := d.Get("managing_organization").(string)
@@ -70,7 +71,8 @@ func resourceIAMRoleCreate(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIAMRoleRead(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*iam.Client)
+	config := meta.(*Config)
+	client := config.IAMClient()
 
 	id := d.Id()
 	role, _, err := client.Roles.GetRoleByID(id)
@@ -91,7 +93,9 @@ func resourceIAMRoleRead(d *schema.ResourceData, meta interface{}) error {
 }
 
 func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
+
 	id := d.Id()
 	role, _, err := client.Roles.GetRoleByID(id)
 	if err != nil {

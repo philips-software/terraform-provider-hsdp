@@ -41,7 +41,9 @@ func resourceIAMProposition() *schema.Resource {
 }
 
 func resourceIAMPropositionCreate(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
+
 	var prop iam.Proposition
 	prop.Name = d.Get("name").(string) // TODO: this must be all caps
 	prop.Description = d.Get("description").(string)
@@ -61,7 +63,8 @@ func resourceIAMPropositionCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMPropositionRead(d *schema.ResourceData, m interface{}) error {
-	client := m.(*iam.Client)
+	config := m.(*Config)
+	client := config.IAMClient()
 
 	id := d.Id()
 	prop, _, err := client.Propositions.GetPropositionByID(id)
