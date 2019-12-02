@@ -19,8 +19,20 @@ func (c *Config) IAMClient() *iam.Client {
 	return c.iamClient
 }
 
-func (c *Config) CredsClient() (*credentials.Client, error) {
+func (c *Config) CredentialsClient() (*credentials.Client, error) {
 	return c.credsClient, c.credsClientErr
+}
+
+func (c *Config) CredentialsClientWithLogin(username, password string) (*credentials.Client, error) {
+	newIAMClient, err := c.iamClient.WithLogin(username, password)
+	if err != nil {
+		return nil, err
+	}
+	return credentials.NewClient(newIAMClient, &credentials.Config{
+		BaseURL:  c.S3CredsURL,
+		Debug:    c.Debug,
+		DebugLog: c.DebugLog,
+	})
 }
 
 // setupIAMClient sets up an HSDP IAM client

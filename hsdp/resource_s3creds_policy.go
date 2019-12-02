@@ -28,9 +28,10 @@ func resourceCredentialsPolicy() *schema.Resource {
 				DiffSuppressFunc: suppressEquivalentPolicyDiffs,
 			},
 			"product_key": &schema.Schema{
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Required: true,
+				Type:      schema.TypeString,
+				Sensitive: true,
+				ForceNew:  true,
+				Required:  true,
 			},
 		},
 	}
@@ -38,7 +39,7 @@ func resourceCredentialsPolicy() *schema.Resource {
 
 func resourceCredentialsPolicyCreate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client, err := config.CredsClient()
+	client, err := config.CredentialsClient()
 	if err != nil {
 		return err
 	}
@@ -63,7 +64,7 @@ func resourceCredentialsPolicyCreate(d *schema.ResourceData, m interface{}) erro
 
 func resourceCredentialsPolicyRead(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client, err := config.CredsClient()
+	client, err := config.CredentialsClient()
 	if err != nil {
 		return err
 	}
@@ -100,7 +101,7 @@ func resourceCredentialsPolicyRead(d *schema.ResourceData, m interface{}) error 
 
 func resourceCredentialsPolicyDelete(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client, err := config.CredsClient()
+	client, err := config.CredentialsClient()
 	if err != nil {
 		return err
 	}

@@ -88,9 +88,10 @@ func Provider() terraform.ResourceProvider {
 			"hsdp_credentials_policy": resourceCredentialsPolicy(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
-			"hsdp_iam_introspect":  dataSourceIAMIntrospect(),
-			"hsdp_iam_user":        dataSourceUser(),
-			"hsdp_iam_permissions": dataSourceIAMPermissions(),
+			"hsdp_iam_introspect":     dataSourceIAMIntrospect(),
+			"hsdp_iam_user":           dataSourceUser(),
+			"hsdp_iam_permissions":    dataSourceIAMPermissions(),
+			"hsdp_credentials_access": dataSourceS3CredentialsAccess(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
