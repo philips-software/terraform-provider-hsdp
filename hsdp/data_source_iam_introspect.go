@@ -1,6 +1,8 @@
 package hsdp
 
 import (
+	"encoding/json"
+
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -20,6 +22,10 @@ func dataSourceIAMIntrospect() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"introspect": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 
@@ -34,10 +40,16 @@ func dataSourceIAMIntrospectRead(d *schema.ResourceData, meta interface{}) error
 	if err != nil {
 		return err
 	}
+	introspectJSON, err := json.Marshal(&resp)
+	if err != nil {
+		return err
+	}
+
 	d.Set("managing_organization", resp.Organizations.ManagingOrganization)
 	d.SetId(resp.Username)
 	d.Set("username", resp.Username)
 	d.Set("token", client.Token())
+	d.Set("introspect", string(introspectJSON))
 
 	return err
 }
