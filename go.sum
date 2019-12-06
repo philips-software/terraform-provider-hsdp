@@ -333,6 +333,8 @@ github.com/philips-software/go-hsdp-api v0.9.1-0.20191202085357-67463681c0a8 h1:
 github.com/philips-software/go-hsdp-api v0.9.1-0.20191202085357-67463681c0a8/go.mod h1:Rd8fIy69PYd8bMlgGxzqzIrvJwBV884fGFNYE2dOG3E=
 github.com/philips-software/go-hsdp-api v0.9.1-0.20191202215020-127508cf75dd h1:d8LoFhtDRBMC2h7YxJZtd9zvLWIfkdzKmnhzsMwvzTs=
 github.com/philips-software/go-hsdp-api v0.9.1-0.20191202215020-127508cf75dd/go.mod h1:Rd8fIy69PYd8bMlgGxzqzIrvJwBV884fGFNYE2dOG3E=
+github.com/philips-software/go-hsdp-api v0.9.1-0.20191206220734-858ecfb9a09e h1:X/dPcHur2GtGknZD25nRUsp0jqC8Y7IA3xq7ocTvBXc=
+github.com/philips-software/go-hsdp-api v0.9.1-0.20191206220734-858ecfb9a09e/go.mod h1:Rd8fIy69PYd8bMlgGxzqzIrvJwBV884fGFNYE2dOG3E=
 github.com/philips-software/go-hsdp-signer v1.1.0 h1:7fYij8q7uCr2AOzO9g3X45FNB9tddFPnvR5WNLo3pD4=
 github.com/philips-software/go-hsdp-signer v1.1.0/go.mod h1:mtq3D20YNxHQ8e318ci9hVb3DW5Hlo30D3abN7VeqLM=
 github.com/pkg/browser v0.0.0-20180916011732-0a3d74bf9ce4/go.mod h1:4OwLy04Bl9Ef3GJJCoec+30X3LQs/0/m4HFRt/2LUSA=
@@ -370,6 +372,7 @@ github.com/stretchr/objx v0.1.1/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+
 github.com/stretchr/testify v1.2.2/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.3.0 h1:TivCn/peBQ7UY8ooIcPgZFpTNSz0Q2U6UrFlUfqbe0Q=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
+github.com/stretchr/testify v1.4.0 h1:2E4SXV/wtOkTonXsotYi4li6zVWxYlZuYNCXe9XRJyk=
 github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81PSLYec5m4=
 github.com/svanharmelen/jsonapi v0.0.0-20180618144545-0c0828c3f16d h1:Z4EH+5EffvBEhh37F0C0DnpklTMh00JOkjW5zK3ofBI=
 github.com/svanharmelen/jsonapi v0.0.0-20180618144545-0c0828c3f16d/go.mod h1:BSTlc8jOjh0niykqEGVXOLXdi9o0r0kR8tCYiMvjFgw=

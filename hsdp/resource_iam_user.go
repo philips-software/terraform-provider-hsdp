@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/philips-software/go-hsdp-api/iam"
 )
 
 func resourceIAMUser() *schema.Resource {
@@ -32,7 +33,7 @@ func resourceIAMUser() *schema.Resource {
 			},
 			"mobile": &schema.Schema{
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"organization_id": &schema.Schema{
 				Type:     schema.TypeString,
@@ -69,8 +70,29 @@ func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
 			return nil
 		}
 	}
-
-	ok, _, err := client.Users.CreateUser(first, last, email, mobile, organization)
+	person := iam.Person{
+		ResourceType: "Person",
+		Name: iam.Name{
+			Family: last,
+			Given:  first,
+		},
+		Telecom: []iam.TelecomEntry{
+			{
+				System: "email",
+				Value:  email,
+			},
+		},
+		ManagingOrganization: organization,
+		IsAgeValidated:       "true",
+	}
+	if mobile != "" {
+		person.Telecom = append(person.Telecom,
+			iam.TelecomEntry{
+				System: "mobile",
+				Value:  mobile,
+			})
+	}
+	ok, _, err := client.Users.CreateUser(person)
 	if err != nil {
 		return err
 	}
