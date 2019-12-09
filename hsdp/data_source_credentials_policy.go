@@ -12,19 +12,13 @@ func dataSourceCredentialsPolicy() *schema.Resource {
 	return &schema.Resource{
 		Read: dataSourceCredentialsPolicyRead,
 		Schema: map[string]*schema.Schema{
-
-			"product_key": {
-				Type:      schema.TypeString,
-				Sensitive: true,
-				Required:  true,
-			},
 			"username": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"password": {
 				Type:      schema.TypeString,
-				Required:  true,
+				Optional:  true,
 				Sensitive: true,
 			},
 			"filter": &schema.Schema{
@@ -33,6 +27,11 @@ func dataSourceCredentialsPolicy() *schema.Resource {
 				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"product_key": {
+							Type:      schema.TypeString,
+							Sensitive: true,
+							Required:  true,
+						},
 						"id": {
 							Type:          schema.TypeString,
 							Optional:      true,
@@ -62,8 +61,7 @@ func dataSourceCredentialsPolicy() *schema.Resource {
 
 func dataSourceCredentialsPolicyRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	productKey := d.Get("product_key").(string)
-
+	productKey := ""
 	managingOrg := ""
 	groupName := ""
 	id := 0
@@ -74,6 +72,7 @@ func dataSourceCredentialsPolicyRead(d *schema.ResourceData, meta interface{}) e
 			mVi := vi.(map[string]interface{})
 			groupName = mVi["group_name"].(string)
 			managingOrg = mVi["managing_org"].(string)
+			productKey = mVi["product_key"].(string)
 			id, _ = strconv.Atoi(mVi["id"].(string))
 		}
 		//managingOrg := d.Get("managing_org").(string)
@@ -96,9 +95,15 @@ func dataSourceCredentialsPolicyRead(d *schema.ResourceData, meta interface{}) e
 	if id == 0 {
 		idPtr = nil
 	}
-	client, err := config.CredentialsClientWithLogin(username, password)
+	client, err := config.CredentialsClient()
 	if err != nil {
 		return err
+	}
+	if username != "" {
+		client, err = config.CredentialsClientWithLogin(username, password)
+		if err != nil {
+			return err
+		}
 	}
 
 	creds, _, err := client.Policy.GetPolicy(&creds.GetPolicyOptions{
