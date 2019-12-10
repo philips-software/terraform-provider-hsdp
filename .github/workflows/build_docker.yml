@@ -1,0 +1,15 @@
+on: [push]
+
+name: build
+
+jobs:
+  build_and_push:
+    name: Build docker image
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Build
+      run: |
+        docker build -t terraform-provider-hsdp .
