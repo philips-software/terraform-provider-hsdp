@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/philips-software/go-hsdp-api/iam"
 )
 
 func resourceIAMRole() *schema.Resource {
@@ -104,12 +105,9 @@ func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
 	d.Partial(true)
 
 	if d.HasChange("description") {
-		description := d.Get("description").(string)
-		role.Description = description
-		if _, _, err := client.Roles.UpdateRole(role); err == nil {
-			d.SetPartial("description")
-		}
+		return fmt.Errorf("description changes are not supported")
 	}
+
 	if d.HasChange("permissions") {
 		o, n := d.GetChange("permissions")
 		old := expandStringList(o.(*schema.Set).List())
@@ -145,6 +143,17 @@ func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMRoleDelete(d *schema.ResourceData, m interface{}) error {
+	config := m.(*Config)
+	client := config.IAMClient()
+
+	var role iam.Role
+	role.ID = d.Id()
+
+	ok, _, err := client.Roles.DeleteRole(role)
+	if !ok {
+		return err
+	}
+	d.SetId("")
 	return nil
 }
 
