@@ -85,6 +85,7 @@ func Provider() terraform.ResourceProvider {
 			"hsdp_iam_user":           resourceIAMUser(),
 			"hsdp_iam_client":         resourceIAMClient(),
 			"hsdp_iam_service":        resourceIAMService(),
+			"hsdp_iam_mfa_policy":     resourceIAMMFAPolicy(),
 			"hsdp_credentials_policy": resourceCredentialsPolicy(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
