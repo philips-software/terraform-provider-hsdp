@@ -5,3 +5,4 @@
 *.tf
 .DS_Store
 terraform-provider-hsdp
+build/

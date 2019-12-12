@@ -6,7 +6,7 @@ import (
 )
 
 // Provider returns an instance of the HSDP provider
-func Provider() terraform.ResourceProvider {
+func Provider(build string) terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"iam_url": {
