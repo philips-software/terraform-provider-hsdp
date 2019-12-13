@@ -1,15 +1,28 @@
 on: [push]
 
-name: build
+name: build and push
 
 jobs:
   build_and_push:
-    name: Build docker image
+    name: Build and push docker image
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v1
+      with:
+        submodules: true
 
     - name: Build
       run: |
-        docker build -t terraform-provider-hsdp .
+        ./ci/bin/docker_build.sh ./ terraform-provider-hsdp terraform-provider-hsdp:0.3.0
+      env:
+        DOCKER_ORGANIZATION: ${{ secrets.DOCKER_ORGANIZATION }}
+        GITHUB_ORGANIZATION: ${{ secrets.GITHUB_ORGANIZATION }}
+    - name: Push
+      run: |
+        ./ci/bin/docker_push.sh ./ terraform-provider-hsdp terraform-provider-hsdp:0.3.0
+      env:
+        DOCKER_ORGANIZATION: ${{ secrets.DOCKER_ORGANIZATION }}
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: '${{ secrets.DOCKER_PASSWORD }}'
+      if: github.ref == 'refs/heads/master'
