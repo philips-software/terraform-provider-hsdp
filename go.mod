@@ -3,7 +3,7 @@ module github.com/philips-software/terraform-provider-hsdp
 require (
 	github.com/hashicorp/go-hclog v0.9.2 // indirect
 	github.com/hashicorp/go-plugin v1.0.1 // indirect
-	github.com/hashicorp/terraform v0.12.17
+	github.com/hashicorp/terraform v0.12.18
 	github.com/hashicorp/terraform-config-inspect v0.0.0-20191115094559-17f92b0546e8 // indirect
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
 	github.com/mitchellh/reflectwalk v1.0.1 // indirect
