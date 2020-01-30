@@ -57,6 +57,7 @@ func (c *Config) setupS3CredsClient() error {
 		DebugLog: c.DebugLog,
 	})
 	if err != nil {
+		c.credsClient = nil
 		c.credsClientErr = err
 		return err
 	}
