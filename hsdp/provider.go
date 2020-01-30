@@ -138,7 +138,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = config.setupS3CredsClient()
+	config.setupS3CredsClient()
 
-	return config, err
+	return config, nil
 }
