@@ -18,6 +18,8 @@ func resourceIAMUser() *schema.Resource {
 		Update: resourceIAMUserUpdate,
 		Delete: resourceIAMUserDelete,
 
+		DeprecationMessage: "Please use the HSDP IAM self service portal for user management",
+
 		Schema: map[string]*schema.Schema{
 			"username": &schema.Schema{
 				Type:     schema.TypeString,
@@ -116,6 +118,10 @@ func resourceIAMUserRead(d *schema.ResourceData, m interface{}) error {
 
 	user, _, err := client.Users.GetUserByID(id)
 	if err != nil {
+		if _, ok := err.(*iam.UserError); ok {
+			d.SetId("")
+			return nil
+		}
 		return err
 	}
 	d.Set("last_name", user.Name.Family)
