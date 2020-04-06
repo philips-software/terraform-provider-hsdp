@@ -41,6 +41,12 @@ func resourceIAMGroup() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"services": &schema.Schema{
+				Type:     schema.TypeSet,
+				MaxItems: 2000,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 }
@@ -77,6 +83,12 @@ func resourceIAMGroupCreate(d *schema.ResourceData, m interface{}) error {
 	users := expandStringList(d.Get("users").(*schema.Set).List())
 	if len(users) > 0 {
 		_, _, err = client.Groups.AddMembers(*createdGroup, users...)
+	}
+
+	// Add services
+	services := expandStringList(d.Get("services").(*schema.Set).List())
+	if len(users) > 0 {
+		_, _, err = client.Groups.AddServices(*createdGroup, services...)
 	}
 	return err
 }
@@ -119,6 +131,7 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 			return err
 		}
 	}
+	// Users
 	if d.HasChange("users") {
 		o, n := d.GetChange("users")
 		old := expandStringList(o.(*schema.Set).List())
@@ -131,6 +144,22 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 		if len(toAdd) > 0 {
 			client.Groups.AddMembers(group, toAdd...)
+		}
+	}
+
+	// Services
+	if d.HasChange("services") {
+		o, n := d.GetChange("services")
+		old := expandStringList(o.(*schema.Set).List())
+		new := expandStringList(n.(*schema.Set).List())
+		toAdd := difference(new, old)
+		toRemove := difference(old, new)
+
+		if len(toRemove) > 0 {
+			client.Groups.RemoveServices(group, toRemove...)
+		}
+		if len(toAdd) > 0 {
+			client.Groups.AddServices(group, toAdd...)
 		}
 	}
 
@@ -177,6 +206,15 @@ func resourceIAMGroupDelete(d *schema.ResourceData, m interface{}) error {
 	users := expandStringList(d.Get("users").(*schema.Set).List())
 	if len(users) > 0 {
 		_, _, err := client.Groups.RemoveMembers(group, users...)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Remove all (known) users first before attempting delete
+	services := expandStringList(d.Get("services").(*schema.Set).List())
+	if len(services) > 0 {
+		_, _, err := client.Groups.RemoveServices(group, services...)
 		if err != nil {
 			return err
 		}
