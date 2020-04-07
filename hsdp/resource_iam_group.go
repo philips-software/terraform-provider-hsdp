@@ -87,7 +87,7 @@ func resourceIAMGroupCreate(d *schema.ResourceData, m interface{}) error {
 
 	// Add services
 	services := expandStringList(d.Get("services").(*schema.Set).List())
-	if len(users) > 0 {
+	if len(services) > 0 {
 		_, _, err = client.Groups.AddServices(*createdGroup, services...)
 	}
 	return err
