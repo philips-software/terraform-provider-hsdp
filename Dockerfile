@@ -13,7 +13,7 @@ FROM build_base AS builder
 COPY . .
 RUN ./buildscript.sh
 
-FROM hashicorp/terraform:0.12.23
+FROM hashicorp/terraform:0.12.24
 LABEL maintainer="Andy Lo-A-Foe <andy.lo-a-foe@philips.com>"
 ENV HOME /root
 COPY --from=builder /terraform-provider-hsdp/build/terraform-provider-hsdp $HOME/.terraform.d/plugins/linux_amd64/terraform-provider-hsdp
