@@ -54,13 +54,13 @@ func Provider(build string) terraform.ResourceProvider {
 			},
 			"shared_key": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   false,
 				Description: descriptions["shared_key"],
 			},
 			"secret_key": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				Description: descriptions["secret_key"],
 			},
