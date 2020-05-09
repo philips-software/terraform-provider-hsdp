@@ -18,8 +18,6 @@ func resourceIAMUser() *schema.Resource {
 		Update: resourceIAMUserUpdate,
 		Delete: resourceIAMUserDelete,
 
-		DeprecationMessage: "Please use the HSDP IAM self service portal for user management",
-
 		Schema: map[string]*schema.Schema{
 			"username": &schema.Schema{
 				Type:       schema.TypeString,
@@ -48,7 +46,7 @@ func resourceIAMUser() *schema.Resource {
 			},
 			"organization_id": &schema.Schema{
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 			},
 		},
 	}
@@ -71,7 +69,7 @@ func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
 	if err == nil && uuid != "" {
 		user, _, _ := client.Users.GetUserByID(uuid)
 		if user != nil {
-			if user.Disabled {
+			if user.AccountStatus.Disabled {
 				// Retrigger activation email
 				_, _, err = client.Users.ResendActivation(email)
 				return err
@@ -106,19 +104,14 @@ func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
 				Value:  mobile,
 			})
 	}
-	ok, _, err := client.Users.CreateUser(person)
+	user, _, err := client.Users.CreateUser(person)
 	if err != nil {
 		return err
 	}
-	if !ok {
+	if user == nil {
 		return fmt.Errorf("Error creating user")
 	}
-	// Fetch UUID
-	uuid, _, err = client.Users.GetUserIDByLoginID(email)
-	if err != nil {
-		return fmt.Errorf("Cannot find newly minted user")
-	}
-	d.SetId(uuid)
+	d.SetId(user.ID)
 	return nil
 }
 
@@ -136,27 +129,54 @@ func resourceIAMUserRead(d *schema.ResourceData, m interface{}) error {
 		}
 		return err
 	}
+	d.Set("login", user.LoginID)
 	d.Set("last_name", user.Name.Family)
 	d.Set("first_name", user.Name.Given)
-	for _, t := range user.Telecom {
-		if t.System == "email" {
-			d.Set("username", t.Value)
-			continue
-		}
-		if t.System == "mobile" {
-			d.Set("mobile", t.Value)
-			continue
+	d.Set("email", user.EmailAddress)
+	d.Set("login", user.LoginID)
+	return nil
+}
+
+func resourceIAMUserUpdate(d *schema.ResourceData, m interface{}) error {
+	config := m.(*Config)
+	client := config.IAMClient()
+
+	var p iam.Person
+	p.ID = d.Id()
+
+	d.Partial(true)
+	if d.HasChange("login") {
+		newLogin := d.Get("login").(string)
+		ok, _, _ := client.Users.ChangeLoginID(p, newLogin)
+		if ok {
+			d.SetPartial("login")
 		}
 	}
 	return nil
 }
 
-func resourceIAMUserUpdate(d *schema.ResourceData, m interface{}) error {
-	// Not supported by API at this time
-	return nil
-}
-
 func resourceIAMUserDelete(d *schema.ResourceData, m interface{}) error {
-	// Not supported by API at this time
+	config := m.(*Config)
+	client := config.IAMClient()
+
+	id := d.Id()
+
+	user, _, err := client.Users.GetUserByID(id)
+	if err != nil {
+		if _, ok := err.(*iam.UserError); ok {
+			d.SetId("")
+			return nil
+		}
+		return err
+	}
+	if user == nil {
+		return nil
+	}
+	var person iam.Person
+	person.ID = user.ID
+	ok, _, _ := client.Users.DeleteUser(person)
+	if ok {
+		d.SetId("")
+	}
 	return nil
 }
