@@ -22,6 +22,15 @@ func resourceIAMUser() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			"username": &schema.Schema{
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "use login field instead",
+			},
+			"login": &schema.Schema{
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"email": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -51,8 +60,10 @@ func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
 
 	last := d.Get("last_name").(string)
 	first := d.Get("first_name").(string)
-	email := d.Get("username").(string)
+	email := d.Get("username").(string) // Deprecated
 	mobile := d.Get("mobile").(string)
+	login := d.Get("login").(string)
+	email = d.Get("email").(string)
 	organization := d.Get("organization_id").(string)
 
 	// First check if this user already exists
@@ -78,6 +89,7 @@ func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
 			Family: last,
 			Given:  first,
 		},
+		LoginID: login,
 		Telecom: []iam.TelecomEntry{
 			{
 				System: "email",

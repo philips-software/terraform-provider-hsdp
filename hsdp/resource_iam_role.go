@@ -85,7 +85,7 @@ func resourceIAMRoleRead(d *schema.ResourceData, meta interface{}) error {
 	d.Set("managing_organization", role.ManagingOrganization)
 	d.SetId(role.ID)
 
-	permissions, err := client.Roles.GetRolePermissions(*role)
+	permissions, _, err := client.Roles.GetRolePermissions(*role)
 	if err != nil {
 		return err
 	}
