@@ -2,7 +2,6 @@ package hsdp
 
 import (
 	"encoding/json"
-	"fmt"
 	"strconv"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -82,13 +81,14 @@ func resourceCredentialsPolicyRead(d *schema.ResourceData, m interface{}) error 
 	if err != nil {
 		return err
 	}
-	if len(policies) != 1 {
-		return fmt.Errorf("policy not found")
+	if len(policies) != 1 { // Policy was deleted
+		d.SetId("")
+		return nil
 	}
 	policy := policies[0]
 
 	d.SetId(strconv.Itoa(policy.ID))
-	policy.ID = 0 // Don't marhal ID
+	policy.ID = 0 // Don't marshal ID
 	policyJSON, err := json.Marshal(policy)
 	if err != nil {
 		d.SetId("")

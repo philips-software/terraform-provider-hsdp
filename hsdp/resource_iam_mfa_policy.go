@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -103,8 +104,12 @@ func resourceIAMMFAPolicyRead(d *schema.ResourceData, m interface{}) error {
 	client := config.IAMClient()
 
 	id := d.Id()
-	policy, _, err := client.MFAPolicies.GetMFAPolicyByID(id)
+	policy, resp, err := client.MFAPolicies.GetMFAPolicyByID(id)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			d.SetId("")
+			return nil
+		}
 		return err
 	}
 	d.Set("name", policy.Name)

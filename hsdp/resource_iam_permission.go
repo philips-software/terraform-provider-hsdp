@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"github.com/hashicorp/terraform/helper/schema"
+	"net/http"
 )
 
 func resourceIAMPermission() *schema.Resource {
@@ -49,8 +50,12 @@ func resourceIAMPermissionRead(d *schema.ResourceData, m interface{}) error {
 	client := config.IAMClient()
 
 	id := d.Id()
-	permission, _, err := client.Permissions.GetPermissionByName(id) // NOTE: ID = name
+	permission, resp, err := client.Permissions.GetPermissionByName(id) // NOTE: ID = name
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			d.SetId("")
+			return nil
+		}
 		return err
 	}
 	d.Set("category", permission.Category)

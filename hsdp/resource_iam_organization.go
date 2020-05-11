@@ -3,6 +3,7 @@ package hsdp
 import (
 	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -79,8 +80,12 @@ func resourceIAMOrgRead(d *schema.ResourceData, m interface{}) error {
 	client := config.IAMClient()
 
 	id := d.Id()
-	org, _, err := client.Organizations.GetOrganizationByID(id)
+	org, resp, err := client.Organizations.GetOrganizationByID(id)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			d.SetId("")
+			return nil
+		}
 		return err
 	}
 	d.Set("org_id", org.OrganizationID)
