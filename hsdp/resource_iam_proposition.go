@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"errors"
+	"net/http"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -67,8 +68,12 @@ func resourceIAMPropositionRead(d *schema.ResourceData, m interface{}) error {
 	client := config.IAMClient()
 
 	id := d.Id()
-	prop, _, err := client.Propositions.GetPropositionByID(id)
+	prop, resp, err := client.Propositions.GetPropositionByID(id)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			d.SetId("")
+			return nil
+		}
 		return err
 	}
 	d.Set("name", prop.Name)

@@ -3,6 +3,7 @@ package hsdp
 import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
+	"net/http"
 )
 
 func resourceIAMGroup() *schema.Resource {
@@ -98,8 +99,12 @@ func resourceIAMGroupRead(d *schema.ResourceData, m interface{}) error {
 	client := config.IAMClient()
 
 	id := d.Id()
-	group, _, err := client.Groups.GetGroupByID(id)
+	group, resp, err := client.Groups.GetGroupByID(id)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			d.SetId("")
+			return nil
+		}
 		return err
 	}
 	d.Set("managing_organization", group.ManagingOrganization)

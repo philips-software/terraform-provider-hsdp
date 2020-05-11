@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/helper/validation"
 	"github.com/philips-software/go-hsdp-api/iam"
+	"net/http"
 )
 
 func resourceIAMService() *schema.Resource {
@@ -108,8 +109,12 @@ func resourceIAMServiceRead(d *schema.ResourceData, m interface{}) error {
 	client := config.IAMClient()
 
 	id := d.Id()
-	s, _, err := client.Services.GetServiceByID(id)
+	s, resp, err := client.Services.GetServiceByID(id)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			d.SetId("")
+			return nil
+		}
 		return err
 	}
 	// Until RITM0021326 is implemented, this will always clear the field

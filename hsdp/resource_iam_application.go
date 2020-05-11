@@ -3,6 +3,7 @@ package hsdp
 import (
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
+	"net/http"
 )
 
 func resourceIAMApplication() *schema.Resource {
@@ -65,8 +66,12 @@ func resourceIAMApplicationRead(d *schema.ResourceData, m interface{}) error {
 	client := config.IAMClient()
 
 	id := d.Id()
-	app, _, err := client.Applications.GetApplicationByID(id)
+	app, resp, err := client.Applications.GetApplicationByID(id)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			d.SetId("")
+			return nil
+		}
 		return err
 	}
 	d.Set("name", app.Name)

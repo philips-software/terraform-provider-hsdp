@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -76,8 +77,12 @@ func resourceIAMRoleRead(d *schema.ResourceData, meta interface{}) error {
 	client := config.IAMClient()
 
 	id := d.Id()
-	role, _, err := client.Roles.GetRoleByID(id)
+	role, resp, err := client.Roles.GetRoleByID(id)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			d.SetId("")
+			return nil
+		}
 		return err
 	}
 	d.Set("description", role.Description)

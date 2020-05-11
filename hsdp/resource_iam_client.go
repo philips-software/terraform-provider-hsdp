@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -121,8 +122,12 @@ func resourceIAMClientRead(d *schema.ResourceData, m interface{}) error {
 	client := config.IAMClient()
 
 	id := d.Id()
-	cl, _, err := client.Clients.GetClientByID(id)
+	cl, resp, err := client.Clients.GetClientByID(id)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			d.SetId("")
+			return nil
+		}
 		return err
 	}
 	d.Set("description", cl.Description)
