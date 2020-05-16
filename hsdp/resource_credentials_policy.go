@@ -2,8 +2,12 @@ package hsdp
 
 import (
 	"encoding/json"
+	"fmt"
+	"github.com/philips-software/go-hsdp-api/cartel"
+	"log"
 	"strconv"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	creds "github.com/philips-software/go-hsdp-api/credentials"
 )
@@ -33,6 +37,24 @@ func resourceCredentialsPolicy() *schema.Resource {
 				Required:  true,
 			},
 		},
+	}
+}
+
+func InstanceStateRefreshFunc(client *cartel.Client, nameTag string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		state, _, err := client.GetDeploymentState(nameTag)
+		if err != nil {
+			log.Printf("Error on InstanceStateRefresh: %s", err)
+			return nil, "", err
+		}
+
+		for _, failState := range failStates {
+			if state == failState {
+				return nil, state, fmt.Errorf("Failed to reach target state. Reason: %s",
+					state)
+			}
+		}
+		return nil, state, nil
 	}
 }
 

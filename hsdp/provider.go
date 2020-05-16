@@ -64,6 +64,35 @@ func Provider(build string) terraform.ResourceProvider {
 				Sensitive:   true,
 				Description: descriptions["secret_key"],
 			},
+			"cartel_host": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: descriptions["cartel_host"],
+			},
+			"cartel_token": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: descriptions["cartel_token"],
+			},
+			"cartel_secret": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Sensitive:   true,
+				Description: descriptions["cartel_secret"],
+			},
+			"cartel_no_tls": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: descriptions["cartel_no_tls"],
+			},
+			"cartel_skip_verify": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: descriptions["cartel_skip_verify"],
+			},
 			"debug": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -87,6 +116,7 @@ func Provider(build string) terraform.ResourceProvider {
 			"hsdp_iam_service":        resourceIAMService(),
 			"hsdp_iam_mfa_policy":     resourceIAMMFAPolicy(),
 			"hsdp_credentials_policy": resourceCredentialsPolicy(),
+			"hsdp_container_host":     resourceContainerHost(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":     dataSourceIAMIntrospect(),
@@ -115,6 +145,11 @@ func init() {
 		"secret_key":         "The secret key",
 		"debug":              "Enable debugging output",
 		"debug_log":          "The log file to write debugging output to",
+		"cartel_host":        "The Cartel host",
+		"cartel_token":       "The Cartel token key",
+		"cartel_secret":      "The Cartel secret key",
+		"cartel_no_tls":      "Disable TLS for Cartel",
+		"cartel_skip_verify": "Skip certificate verificsation",
 	}
 }
 
@@ -133,12 +168,19 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.Debug = d.Get("debug").(bool)
 	config.DebugLog = d.Get("debug_log").(string)
 	config.S3CredsURL = d.Get("credentials_url").(string)
+	config.CartelHost = d.Get("cartel_host").(string)
+	config.CartelToken = d.Get("cartel_token").(string)
+	config.CartelSecret = d.Get("cartel_secret").(string)
+	config.CartelNoTLS = d.Get("cartel_no_tls").(bool)
+	config.CartelSkipVerify = d.Get("cartel_skip_verify").(bool)
 
 	err := config.setupIAMClient()
 	if err != nil {
 		return nil, err
 	}
+
 	config.setupS3CredsClient()
+	config.setupCartelClient()
 
 	return config, nil
 }

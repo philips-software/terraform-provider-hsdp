@@ -1,7 +1,6 @@
 package hsdp
 
 import (
-	"errors"
 	"fmt"
 	"github.com/philips-software/go-hsdp-api/iam"
 	"net/http"
@@ -59,11 +58,11 @@ func resourceIAMOrgCreate(d *schema.ResourceData, m interface{}) error {
 	description := d.Get("description").(string)
 	isRootOrg := d.Get("is_root_org").(bool)
 	if isRootOrg {
-		return errors.New("cannot create root orgs")
+		return ErrCannotCreateRootOrg
 	}
 	parentOrgID, ok := d.Get("parent_org_id").(string)
 	if !ok {
-		return errors.New("non root orgs must specify a `parent_org_id`")
+		return ErrMissingParentOrgID
 	}
 	var newOrg iam.Organization
 	newOrg.Name = name
