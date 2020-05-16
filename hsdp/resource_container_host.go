@@ -5,6 +5,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/philips-software/go-hsdp-api/cartel"
+	"log"
 	"time"
 )
 
@@ -115,6 +116,24 @@ func resourceContainerHost() *schema.Resource {
 	}
 }
 
+func InstanceStateRefreshFunc(client *cartel.Client, nameTag string, failStates []string) resource.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		state, resp, err := client.GetDeploymentState(nameTag)
+		if err != nil {
+			log.Printf("Error on InstanceStateRefresh: %s", err)
+			return resp, "", err
+		}
+
+		for _, failState := range failStates {
+			if state == failState {
+				return resp, state, fmt.Errorf("Failed to reach target state. Reason: %s",
+					state)
+			}
+		}
+		return resp, state, nil
+	}
+}
+
 func resourceContainerHostCreate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
 	client, err := config.CartelClient()
@@ -149,8 +168,8 @@ func resourceContainerHostCreate(d *schema.ResourceData, m interface{}) error {
 	d.SetId(ch.InstanceID())
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"pending"},
-		Target:     []string{"running"},
+		Pending:    []string{"provisioning"},
+		Target:     []string{"succeeded"},
 		Refresh:    InstanceStateRefreshFunc(client, tagName, []string{"terminated", "shutting-down"}),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,

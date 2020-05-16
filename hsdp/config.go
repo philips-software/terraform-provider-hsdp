@@ -85,6 +85,7 @@ func (c *Config) setupCartelClient() {
 		Secret:     []byte(c.CartelSecret),
 		NoTLS:      c.CartelNoTLS,
 		SkipVerify: c.CartelSkipVerify,
+		Debug:      c.Debug,
 	})
 
 	if err != nil {
