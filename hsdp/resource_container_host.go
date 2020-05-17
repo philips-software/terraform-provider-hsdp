@@ -168,15 +168,17 @@ func resourceContainerHostCreate(d *schema.ResourceData, m interface{}) error {
 	d.SetId(ch.InstanceID())
 
 	stateConf := &resource.StateChangeConf{
-		Pending:    []string{"provisioning"},
+		Pending:    []string{"provisioning", "indeterminate"},
 		Target:     []string{"succeeded"},
-		Refresh:    InstanceStateRefreshFunc(client, tagName, []string{"terminated", "shutting-down"}),
+		Refresh:    InstanceStateRefreshFunc(client, tagName, []string{"failed", "terminated", "shutting-down"}),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
 	_, err = stateConf.WaitForState()
 	if err != nil {
+		// Trigger a delete to prevent failed instances from lingering
+		_, _, _ = client.Destroy(tagName)
 		return fmt.Errorf(
 			"Error waiting for instance (%s) to become ready: %s",
 			ch.InstanceID(), err)
@@ -185,31 +187,7 @@ func resourceContainerHostCreate(d *schema.ResourceData, m interface{}) error {
 		"type": "ssh",
 		"host": ch.IPAddress(),
 	})
-	return nil
-}
-
-func resourceContainerHostDelete(d *schema.ResourceData, m interface{}) error {
-	config := m.(*Config)
-	client, err := config.CartelClient()
-	if err != nil {
-		return err
-	}
-
-	tagName := d.Get("name").(string)
-	ch, _, err := client.GetDetails(tagName)
-	if err != nil {
-		return err
-	}
-	if ch.InstanceID != d.Id() {
-		return ErrInstanceIDMismatch
-	}
-	_, _, err = client.Destroy(tagName)
-	if err != nil {
-		return err
-	}
-	d.SetId("")
-	return nil
-
+	return resourceContainerHostRead(d, m)
 }
 
 func resourceContainerHostUpdate(d *schema.ResourceData, m interface{}) error {
@@ -227,8 +205,6 @@ func resourceContainerHostUpdate(d *schema.ResourceData, m interface{}) error {
 	if ch.InstanceID != d.Id() {
 		return ErrInstanceIDMismatch
 	}
-
-	d.Partial(true)
 
 	if d.HasChange("user_groups") {
 		o, n := d.GetChange("user_groups")
@@ -277,7 +253,6 @@ func resourceContainerHostUpdate(d *schema.ResourceData, m interface{}) error {
 				return err
 			}
 		}
-		d.SetPartial("security_groups")
 	}
 	if d.HasChange("protect") {
 		protect := d.Get("protect").(bool)
@@ -285,14 +260,48 @@ func resourceContainerHostUpdate(d *schema.ResourceData, m interface{}) error {
 		if err != nil {
 			return err
 		}
-		d.SetPartial(("protect"))
 	}
-	d.Partial(false)
 	return nil
 
 }
 
 func resourceContainerHostRead(d *schema.ResourceData, m interface{}) error {
+	config := m.(*Config)
+	client, err := config.CartelClient()
+	if err != nil {
+		return err
+	}
+
+	tagName := d.Get("name").(string)
+	state, _, err := client.GetDeploymentState(tagName)
+	if state != "succeeded" {
+		// Unless we have a succeeded deploy, taint the resource
+		d.SetId("")
+		return nil
+	}
+	ch, _, err := client.GetDetails(tagName)
+	if err != nil {
+		return err
+	}
+	if ch.InstanceID != d.Id() {
+		return ErrInstanceIDMismatch
+	}
+	_ = d.Set("protect", ch.Protection)
+	_ = d.Set("volumes", len(ch.BlockDevices)-1) // -1 for the root volume
+	_ = d.Set("role", ch.Role)
+	_ = d.Set("launch_time", ch.LaunchTime)
+	_ = d.Set("block_devices", ch.BlockDevices)
+	_ = d.Set("security_groups", difference(ch.SecurityGroups, []string{"base"})) // Remove "base"
+	_ = d.Set("user_groups", ch.LdapGroups)
+	_ = d.Set("instance_type", ch.InstanceType)
+	_ = d.Set("vpc", ch.Vpc)
+	_ = d.Set("zone", ch.Zone)
+	_ = d.Set("launch_time", ch.LaunchTime)
+
+	return nil
+}
+
+func resourceContainerHostDelete(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
 	client, err := config.CartelClient()
 	if err != nil {
@@ -307,17 +316,11 @@ func resourceContainerHostRead(d *schema.ResourceData, m interface{}) error {
 	if ch.InstanceID != d.Id() {
 		return ErrInstanceIDMismatch
 	}
-	_ = d.Set("protect", ch.Protection)
-	_ = d.Set("volumes", len(ch.BlockDevices))
-	_ = d.Set("role", ch.Role)
-	_ = d.Set("launch_time", ch.LaunchTime)
-	_ = d.Set("block_devices", ch.BlockDevices)
-	_ = d.Set("security_groups", ch.SecurityGroups)
-	_ = d.Set("user_groups", ch.LdapGroups)
-	_ = d.Set("instance_type", ch.InstanceType)
-	_ = d.Set("vpc", ch.Vpc)
-	_ = d.Set("zone", ch.Zone)
-	_ = d.Set("launch_time", ch.LaunchTime)
-
+	_, _, err = client.Destroy(tagName)
+	if err != nil {
+		return err
+	}
+	d.SetId("")
 	return nil
+
 }

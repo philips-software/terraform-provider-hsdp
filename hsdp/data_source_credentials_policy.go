@@ -27,7 +27,7 @@ func dataSourceCredentialsPolicy() *schema.Resource {
 				Required:  true,
 			},
 			"filter": &schema.Schema{
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Optional: true,
 				MaxItems: 1,
 				ForceNew: true,
@@ -64,13 +64,14 @@ func dataSourceCredentialsPolicyRead(d *schema.ResourceData, meta interface{}) e
 	groupName := ""
 	id := 0
 
+	productKey = d.Get("product_key").(string)
+
 	if v, ok := d.GetOk("filter"); ok {
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})
 			groupName = mVi["group_name"].(string)
 			managingOrg = mVi["managing_org"].(string)
-			productKey = mVi["product_key"].(string)
 			id, _ = strconv.Atoi(mVi["id"].(string))
 		}
 		//managingOrg := d.Get("managing_org").(string)
