@@ -128,7 +128,6 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 
 	var group iam.Group
 	group.ID = d.Id()
-	d.Partial(true)
 	if d.HasChange("description") {
 		group.Description = d.Get("description").(string)
 		_, _, err := client.Groups.UpdateGroup(group)
@@ -196,7 +195,6 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 
 	}
-	d.Partial(false)
 	return nil
 }
 

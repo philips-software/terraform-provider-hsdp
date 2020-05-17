@@ -228,7 +228,6 @@ func resourceContainerHostUpdate(d *schema.ResourceData, m interface{}) error {
 				return err
 			}
 		}
-		d.SetPartial("user_groups")
 	}
 
 	if d.HasChange("security_groups") {
@@ -297,6 +296,8 @@ func resourceContainerHostRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("vpc", ch.Vpc)
 	_ = d.Set("zone", ch.Zone)
 	_ = d.Set("launch_time", ch.LaunchTime)
+	_ = d.Set("private_ip", ch.PrivateAddress)
+	_ = d.Set("subnet", ch.Subnet)
 
 	return nil
 }
