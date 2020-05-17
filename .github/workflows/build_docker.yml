@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      uses: philips-software/docker-ci-scripts@v2.0.1
+      uses: philips-software/docker-ci-scripts@v2.2.0
       with:
         dockerfile: ./
         image-name: terraform-provider-hsdp
