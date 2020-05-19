@@ -1,7 +1,6 @@
 package hsdp
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -87,7 +86,7 @@ func resourceIAMPropositionUpdate(d *schema.ResourceData, m interface{}) error {
 	if !d.HasChange("description") {
 		return nil
 	}
-	return errors.New("not implemented by HSDP")
+	return ErrNotImplementedByHSDP
 }
 
 func resourceIAMPropositionDelete(d *schema.ResourceData, m interface{}) error {

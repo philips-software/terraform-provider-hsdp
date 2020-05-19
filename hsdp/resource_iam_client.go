@@ -151,19 +151,16 @@ func resourceIAMClientUpdate(d *schema.ResourceData, m interface{}) error {
 	var cl iam.ApplicationClient
 	cl.ID = d.Id()
 
-	d.Partial(true)
 	if d.HasChange("scopes") || d.HasChange("default_scopes") {
 		newScopes := expandStringList(d.Get("scopes").(*schema.Set).List())
 		newDefaultScopes := expandStringList(d.Get("default_scopes").(*schema.Set).List())
 		if d.HasChange("scopes") {
 			_, ns := d.GetChange("scopes")
 			newScopes = expandStringList(ns.(*schema.Set).List())
-			d.SetPartial("scopes")
 		}
 		if d.HasChange("default_scopes") {
 			_, nd := d.GetChange("default_scopes")
 			newDefaultScopes = expandStringList(nd.(*schema.Set).List())
-			d.SetPartial("default_scopes")
 		}
 		_, _, err := client.Clients.UpdateScopes(cl, newScopes, newDefaultScopes)
 		return err

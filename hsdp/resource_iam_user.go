@@ -144,12 +144,11 @@ func resourceIAMUserUpdate(d *schema.ResourceData, m interface{}) error {
 	var p iam.Person
 	p.ID = d.Id()
 
-	d.Partial(true)
 	if d.HasChange("login") {
 		newLogin := d.Get("login").(string)
-		ok, _, _ := client.Users.ChangeLoginID(p, newLogin)
-		if ok {
-			d.SetPartial("login")
+		_, _, err := client.Users.ChangeLoginID(p, newLogin)
+		if err != nil {
+			return err
 		}
 	}
 	return nil

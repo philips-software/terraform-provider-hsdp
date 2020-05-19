@@ -1,8 +1,8 @@
 package hsdp
 
 import (
-	"errors"
 	"fmt"
+	"github.com/philips-software/go-hsdp-api/iam"
 	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -58,20 +58,24 @@ func resourceIAMOrgCreate(d *schema.ResourceData, m interface{}) error {
 	description := d.Get("description").(string)
 	isRootOrg := d.Get("is_root_org").(bool)
 	if isRootOrg {
-		return errors.New("cannot create root orgs")
+		return ErrCannotCreateRootOrg
 	}
 	parentOrgID, ok := d.Get("parent_org_id").(string)
 	if !ok {
-		return errors.New("non root orgs must specify a `parent_org_id`")
+		return ErrMissingParentOrgID
 	}
-	org, resp, err := client.Organizations.CreateOrganization(parentOrgID, name, description)
+	var newOrg iam.Organization
+	newOrg.Name = name
+	newOrg.Description = description
+	newOrg.Parent.Value = parentOrgID
+	org, resp, err := client.Organizations.CreateOrganization(newOrg)
 	if err != nil {
 		return err
 	}
 	if org == nil {
 		return fmt.Errorf("failed to create organization: %d", resp.StatusCode)
 	}
-	d.SetId(org.OrganizationID)
+	d.SetId(org.ID)
 	return nil
 }
 
@@ -88,7 +92,7 @@ func resourceIAMOrgRead(d *schema.ResourceData, m interface{}) error {
 		}
 		return err
 	}
-	d.Set("org_id", org.OrganizationID)
+	d.Set("org_id", org.ID)
 	d.Set("description", org.Description)
 	d.Set("name", org.Name)
 	return nil

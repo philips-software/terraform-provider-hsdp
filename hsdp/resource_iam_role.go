@@ -107,7 +107,6 @@ func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		return err
 	}
-	d.Partial(true)
 
 	if d.HasChange("description") {
 		return fmt.Errorf("description changes are not supported")
@@ -115,10 +114,10 @@ func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
 
 	if d.HasChange("permissions") {
 		o, n := d.GetChange("permissions")
-		old := expandStringList(o.(*schema.Set).List())
-		new := expandStringList(n.(*schema.Set).List())
-		toAdd := difference(new, old)
-		toRemove := difference(old, new)
+		oldList := expandStringList(o.(*schema.Set).List())
+		newList := expandStringList(n.(*schema.Set).List())
+		toAdd := difference(newList, oldList)
+		toRemove := difference(oldList, newList)
 
 		// Additions
 		if len(toAdd) > 0 {
@@ -143,7 +142,6 @@ func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
 		}
 
 	}
-	d.Partial(false)
 	return nil
 }
 

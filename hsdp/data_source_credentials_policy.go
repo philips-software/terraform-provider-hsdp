@@ -21,31 +21,29 @@ func dataSourceCredentialsPolicy() *schema.Resource {
 				Optional:  true,
 				Sensitive: true,
 			},
+			"product_key": {
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Required:  true,
+			},
 			"filter": &schema.Schema{
 				Type:     schema.TypeSet,
 				Optional: true,
+				MaxItems: 1,
 				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"product_key": {
-							Type:      schema.TypeString,
-							Sensitive: true,
-							Required:  true,
-						},
 						"id": {
-							Type:          schema.TypeString,
-							Optional:      true,
-							ConflictsWith: []string{"filter.managing_org", "filter.group_name"},
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 						"managing_org": {
-							Type:          schema.TypeString,
-							Optional:      true,
-							ConflictsWith: []string{"filter.id"},
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 						"group_name": {
-							Type:          schema.TypeString,
-							Optional:      true,
-							ConflictsWith: []string{"filter.id"},
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 					},
 				},
@@ -66,13 +64,14 @@ func dataSourceCredentialsPolicyRead(d *schema.ResourceData, meta interface{}) e
 	groupName := ""
 	id := 0
 
+	productKey = d.Get("product_key").(string)
+
 	if v, ok := d.GetOk("filter"); ok {
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})
 			groupName = mVi["group_name"].(string)
 			managingOrg = mVi["managing_org"].(string)
-			productKey = mVi["product_key"].(string)
 			id, _ = strconv.Atoi(mVi["id"].(string))
 		}
 		//managingOrg := d.Get("managing_org").(string)
@@ -106,7 +105,7 @@ func dataSourceCredentialsPolicyRead(d *schema.ResourceData, meta interface{}) e
 		}
 	}
 
-	creds, _, err := client.Policy.GetPolicy(&creds.GetPolicyOptions{
+	credentials, _, err := client.Policy.GetPolicy(&creds.GetPolicyOptions{
 		ProductKey:  &productKey,
 		ManagingOrg: managingOrgPtr,
 		GroupName:   groupNamePtr,
@@ -115,7 +114,7 @@ func dataSourceCredentialsPolicyRead(d *schema.ResourceData, meta interface{}) e
 	if err != nil {
 		return err
 	}
-	jsonBytes, err := json.Marshal(&creds)
+	jsonBytes, err := json.Marshal(&credentials)
 	if err != nil {
 		return err
 	}

@@ -139,7 +139,6 @@ func resourceIAMServiceUpdate(d *schema.ResourceData, m interface{}) error {
 	var s iam.Service
 	s.ID = d.Id()
 
-	d.Partial(true)
 	if d.HasChange("scopes") {
 		o, n := d.GetChange("scopes")
 		old := expandStringList(o.(*schema.Set).List())
@@ -155,7 +154,6 @@ func resourceIAMServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		if len(toAdd) > 0 {
 			client.Services.AddScopes(s, toAdd, []string{})
 		}
-		d.SetPartial("scopes")
 	}
 	if d.HasChange("default_scopes") {
 		o, n := d.GetChange("default_scopes")
@@ -172,7 +170,6 @@ func resourceIAMServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		if len(toAdd) > 0 {
 			client.Services.AddScopes(s, []string{}, toAdd)
 		}
-		d.SetPartial("default_scopes")
 	}
 	return nil
 }
