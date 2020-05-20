@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.5.0
+- NEW: hsdp_container_host
+- Migrate to Terraform Plugin SDK
+- Handle externally deleted resources
+- Upgrade to Terraform 0.12.25
+
 ## v0.4.0
 - Switch user API to v2 (breaking change!)
 - New user login field
