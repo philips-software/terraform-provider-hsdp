@@ -54,7 +54,10 @@ func resourceIAMGroup() *schema.Resource {
 
 func resourceIAMGroupCreate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	var group iam.Group
 	group.Description = d.Get("description").(string)
@@ -96,7 +99,10 @@ func resourceIAMGroupCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceIAMGroupRead(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	id := d.Id()
 	group, resp, err := client.Groups.GetGroupByID(id)
@@ -107,9 +113,9 @@ func resourceIAMGroupRead(d *schema.ResourceData, m interface{}) error {
 		}
 		return err
 	}
-	d.Set("managing_organization", group.ManagingOrganization)
-	d.Set("description", group.Description)
-	d.Set("name", group.Name)
+	_ = d.Set("managing_organization", group.ManagingOrganization)
+	_ = d.Set("description", group.Description)
+	_ = d.Set("name", group.Name)
 	roles, _, err := client.Groups.GetRoles(*group)
 	if err != nil {
 		return err
@@ -118,13 +124,16 @@ func resourceIAMGroupRead(d *schema.ResourceData, m interface{}) error {
 	for i, r := range *roles {
 		roleIDs[i] = r.ID
 	}
-	d.Set("roles", &roleIDs)
+	_ = d.Set("roles", &roleIDs)
 	return nil
 }
 
 func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	var group iam.Group
 	group.ID = d.Id()
@@ -139,15 +148,15 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	if d.HasChange("users") {
 		o, n := d.GetChange("users")
 		old := expandStringList(o.(*schema.Set).List())
-		new := expandStringList(n.(*schema.Set).List())
-		toAdd := difference(new, old)
-		toRemove := difference(old, new)
+		newList := expandStringList(n.(*schema.Set).List())
+		toAdd := difference(newList, old)
+		toRemove := difference(old, newList)
 
 		if len(toRemove) > 0 {
-			client.Groups.RemoveMembers(group, toRemove...)
+			_, _, _ = client.Groups.RemoveMembers(group, toRemove...)
 		}
 		if len(toAdd) > 0 {
-			client.Groups.AddMembers(group, toAdd...)
+			_, _, _ = client.Groups.AddMembers(group, toAdd...)
 		}
 	}
 
@@ -155,15 +164,15 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 	if d.HasChange("services") {
 		o, n := d.GetChange("services")
 		old := expandStringList(o.(*schema.Set).List())
-		new := expandStringList(n.(*schema.Set).List())
-		toAdd := difference(new, old)
-		toRemove := difference(old, new)
+		newList := expandStringList(n.(*schema.Set).List())
+		toAdd := difference(newList, old)
+		toRemove := difference(old, newList)
 
 		if len(toRemove) > 0 {
-			client.Groups.RemoveServices(group, toRemove...)
+			_, _, _ = client.Groups.RemoveServices(group, toRemove...)
 		}
 		if len(toAdd) > 0 {
-			client.Groups.AddServices(group, toAdd...)
+			_, _, _ = client.Groups.AddServices(group, toAdd...)
 		}
 	}
 
@@ -200,7 +209,10 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourceIAMGroupDelete(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	var group iam.Group
 	group.ID = d.Id()

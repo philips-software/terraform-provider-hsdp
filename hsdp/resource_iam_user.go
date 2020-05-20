@@ -54,7 +54,10 @@ func resourceIAMUser() *schema.Resource {
 
 func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	last := d.Get("last_name").(string)
 	first := d.Get("first_name").(string)
@@ -117,7 +120,10 @@ func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceIAMUserRead(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	id := d.Id()
 
@@ -129,17 +135,20 @@ func resourceIAMUserRead(d *schema.ResourceData, m interface{}) error {
 		}
 		return err
 	}
-	d.Set("login", user.LoginID)
-	d.Set("last_name", user.Name.Family)
-	d.Set("first_name", user.Name.Given)
-	d.Set("email", user.EmailAddress)
-	d.Set("login", user.LoginID)
+	_ = d.Set("login", user.LoginID)
+	_ = d.Set("last_name", user.Name.Family)
+	_ = d.Set("first_name", user.Name.Given)
+	_ = d.Set("email", user.EmailAddress)
+	_ = d.Set("login", user.LoginID)
 	return nil
 }
 
 func resourceIAMUserUpdate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	var p iam.Person
 	p.ID = d.Id()
@@ -156,7 +165,10 @@ func resourceIAMUserUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourceIAMUserDelete(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	id := d.Id()
 

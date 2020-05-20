@@ -23,7 +23,10 @@ func dataSourceUser() *schema.Resource {
 
 func dataSourceUserRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	username := d.Get("username").(string)
 
@@ -33,7 +36,7 @@ func dataSourceUserRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 	d.SetId(uuid)
-	d.Set("uuid", uuid)
+	_ = d.Set("uuid", uuid)
 
 	return nil
 }

@@ -75,7 +75,10 @@ func resourceIAMService() *schema.Resource {
 
 func resourceIAMServiceCreate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	var s iam.Service
 	s.Description = d.Get("description").(string)
@@ -90,23 +93,26 @@ func resourceIAMServiceCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	d.SetId(createdService.ID)
-	d.Set("expires_on", createdService.ExpiresOn)
-	d.Set("scopes", createdService.Scopes)
-	d.Set("default_scopes", createdService.DefaultScopes)
-	d.Set("private_key", createdService.PrivateKey)
-	d.Set("service_id", createdService.ServiceID)
-	d.Set("organization_id", createdService.OrganizationID)
-	d.Set("description", s.Description) // RITM0021326
+	_ = d.Set("expires_on", createdService.ExpiresOn)
+	_ = d.Set("scopes", createdService.Scopes)
+	_ = d.Set("default_scopes", createdService.DefaultScopes)
+	_ = d.Set("private_key", createdService.PrivateKey)
+	_ = d.Set("service_id", createdService.ServiceID)
+	_ = d.Set("organization_id", createdService.OrganizationID)
+	_ = d.Set("description", s.Description) // RITM0021326
 
 	// Set scopes and default_scopes
-	client.Services.AddScopes(*createdService, scopes, defaultScopes)
+	_, _, _ = client.Services.AddScopes(*createdService, scopes, defaultScopes)
 
 	return nil
 }
 
 func resourceIAMServiceRead(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	id := d.Id()
 	s, resp, err := client.Services.GetServiceByID(id)
@@ -120,21 +126,24 @@ func resourceIAMServiceRead(d *schema.ResourceData, m interface{}) error {
 	// Until RITM0021326 is implemented, this will always clear the field
 	// d.Set("description", s.Description)
 
-	d.Set("name", s.Name)
-	d.Set("application_id", s.ApplicationID)
-	d.Set("expires_on", s.ExpiresOn)
-	d.Set("organization_id", s.OrganizationID)
-	d.Set("service_id", s.ServiceID)
-	d.Set("scopes", s.Scopes)
-	d.Set("expires_on", s.ExpiresOn)
-	d.Set("default_scopes", s.DefaultScopes)
+	_ = d.Set("name", s.Name)
+	_ = d.Set("application_id", s.ApplicationID)
+	_ = d.Set("expires_on", s.ExpiresOn)
+	_ = d.Set("organization_id", s.OrganizationID)
+	_ = d.Set("service_id", s.ServiceID)
+	_ = d.Set("scopes", s.Scopes)
+	_ = d.Set("expires_on", s.ExpiresOn)
+	_ = d.Set("default_scopes", s.DefaultScopes)
 	// The private key is only returned on create
 	return nil
 }
 
 func resourceIAMServiceUpdate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	var s iam.Service
 	s.ID = d.Id()
@@ -142,9 +151,9 @@ func resourceIAMServiceUpdate(d *schema.ResourceData, m interface{}) error {
 	if d.HasChange("scopes") {
 		o, n := d.GetChange("scopes")
 		old := expandStringList(o.(*schema.Set).List())
-		new := expandStringList(n.(*schema.Set).List())
-		toAdd := difference(new, old)
-		toRemove := difference(old, new)
+		newList := expandStringList(n.(*schema.Set).List())
+		toAdd := difference(newList, old)
+		toRemove := difference(old, newList)
 		if len(toRemove) > 0 {
 			_, _, err := client.Services.RemoveScopes(s, toRemove, []string{})
 			if err != nil {
@@ -152,15 +161,15 @@ func resourceIAMServiceUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 		}
 		if len(toAdd) > 0 {
-			client.Services.AddScopes(s, toAdd, []string{})
+			_, _, _ = client.Services.AddScopes(s, toAdd, []string{})
 		}
 	}
 	if d.HasChange("default_scopes") {
 		o, n := d.GetChange("default_scopes")
 		old := expandStringList(o.(*schema.Set).List())
-		new := expandStringList(n.(*schema.Set).List())
-		toAdd := difference(new, old)
-		toRemove := difference(old, new)
+		newList := expandStringList(n.(*schema.Set).List())
+		toAdd := difference(newList, old)
+		toRemove := difference(old, newList)
 		if len(toRemove) > 0 {
 			_, _, err := client.Services.RemoveScopes(s, []string{}, toRemove)
 			if err != nil {
@@ -168,7 +177,7 @@ func resourceIAMServiceUpdate(d *schema.ResourceData, m interface{}) error {
 			}
 		}
 		if len(toAdd) > 0 {
-			client.Services.AddScopes(s, []string{}, toAdd)
+			_, _, _ = client.Services.AddScopes(s, []string{}, toAdd)
 		}
 	}
 	return nil
@@ -176,7 +185,10 @@ func resourceIAMServiceUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourceIAMServiceDelete(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	var s iam.Service
 	s.ID = d.Id()

@@ -54,7 +54,10 @@ func resourceIAMRole() *schema.Resource {
 
 func resourceIAMRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
@@ -74,7 +77,10 @@ func resourceIAMRoleCreate(d *schema.ResourceData, meta interface{}) error {
 
 func resourceIAMRoleRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	id := d.Id()
 	role, resp, err := client.Roles.GetRoleByID(id)
@@ -85,22 +91,25 @@ func resourceIAMRoleRead(d *schema.ResourceData, meta interface{}) error {
 		}
 		return err
 	}
-	d.Set("description", role.Description)
-	d.Set("name", role.Name)
-	d.Set("managing_organization", role.ManagingOrganization)
 	d.SetId(role.ID)
+	_ = d.Set("description", role.Description)
+	_ = d.Set("name", role.Name)
+	_ = d.Set("managing_organization", role.ManagingOrganization)
 
 	permissions, _, err := client.Roles.GetRolePermissions(*role)
 	if err != nil {
 		return err
 	}
-	d.Set("permissions", permissions)
+	_ = d.Set("permissions", permissions)
 	return nil
 }
 
 func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	id := d.Id()
 	role, _, err := client.Roles.GetRoleByID(id)
@@ -147,7 +156,10 @@ func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourceIAMRoleDelete(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	var role iam.Role
 	role.ID = d.Id()

@@ -47,7 +47,10 @@ func resourceIAMPermissionCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceIAMPermissionRead(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	id := d.Id()
 	permission, resp, err := client.Permissions.GetPermissionByName(id) // NOTE: ID = name
@@ -58,12 +61,12 @@ func resourceIAMPermissionRead(d *schema.ResourceData, m interface{}) error {
 		}
 		return err
 	}
-	d.Set("category", permission.Category)
-	d.Set("description", permission.Description)
-	d.Set("name", permission.Name)
-	d.Set("type", permission.Type)
+	_ = d.Set("category", permission.Category)
+	_ = d.Set("description", permission.Description)
+	_ = d.Set("name", permission.Name)
+	_ = d.Set("type", permission.Type)
+	_ = d.Set("_id", permission.ID)
 	d.SetId(permission.Name)
-	d.Set("_id", permission.ID)
 	return nil
 }
 

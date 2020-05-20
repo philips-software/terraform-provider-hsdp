@@ -11,12 +11,12 @@ func Provider(build string) terraform.ResourceProvider {
 		Schema: map[string]*schema.Schema{
 			"iam_url": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: descriptions["iam_url"],
 			},
 			"idm_url": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: descriptions["idm_url"],
 			},
 			"credentials_url": {
@@ -26,12 +26,12 @@ func Provider(build string) terraform.ResourceProvider {
 			},
 			"oauth2_client_id": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: descriptions["oauth2_client_id"],
 			},
 			"oauth2_password": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				Description: descriptions["oauth2_password"],
 			},
@@ -43,12 +43,12 @@ func Provider(build string) terraform.ResourceProvider {
 			},
 			"org_admin_username": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: descriptions["org_admin_username"],
 			},
 			"org_admin_password": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				Description: descriptions["org_admin_password"],
 			},
@@ -174,11 +174,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.CartelNoTLS = d.Get("cartel_no_tls").(bool)
 	config.CartelSkipVerify = d.Get("cartel_skip_verify").(bool)
 
-	err := config.setupIAMClient()
-	if err != nil {
-		return nil, err
-	}
-
+	config.setupIAMClient()
 	config.setupS3CredsClient()
 	config.setupCartelClient()
 

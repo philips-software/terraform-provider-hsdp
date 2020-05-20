@@ -52,7 +52,10 @@ func resourceIAMOrg() *schema.Resource {
 
 func resourceIAMOrgCreate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
@@ -81,7 +84,10 @@ func resourceIAMOrgCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceIAMOrgRead(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	id := d.Id()
 	org, resp, err := client.Organizations.GetOrganizationByID(id)
@@ -92,15 +98,18 @@ func resourceIAMOrgRead(d *schema.ResourceData, m interface{}) error {
 		}
 		return err
 	}
-	d.Set("org_id", org.ID)
-	d.Set("description", org.Description)
-	d.Set("name", org.Name)
+	_ = d.Set("org_id", org.ID)
+	_ = d.Set("description", org.Description)
+	_ = d.Set("name", org.Name)
 	return nil
 }
 
 func resourceIAMOrgUpdate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	id := d.Id()
 	org, _, err := client.Organizations.GetOrganizationByID(id)

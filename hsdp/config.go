@@ -21,10 +21,11 @@ type Config struct {
 	credsClient     *credentials.Client
 	credsClientErr  error
 	cartelClientErr error
+	iamClientErr    error
 }
 
-func (c *Config) IAMClient() *iam.Client {
-	return c.iamClient
+func (c *Config) IAMClient() (*iam.Client, error) {
+	return c.iamClient, c.iamClientErr
 }
 
 func (c *Config) CartelClient() (*cartel.Client, error) {
@@ -36,6 +37,9 @@ func (c *Config) CredentialsClient() (*credentials.Client, error) {
 }
 
 func (c *Config) CredentialsClientWithLogin(username, password string) (*credentials.Client, error) {
+	if c.iamClientErr != nil {
+		return nil, c.iamClientErr
+	}
 	newIAMClient, err := c.iamClient.WithLogin(username, password)
 	if err != nil {
 		return nil, err
@@ -48,21 +52,37 @@ func (c *Config) CredentialsClientWithLogin(username, password string) (*credent
 }
 
 // setupIAMClient sets up an HSDP IAM client
-func (c *Config) setupIAMClient() error {
+func (c *Config) setupIAMClient() {
+	c.iamClient = nil
 	client, err := iam.NewClient(nil, &c.Config)
 	if err != nil {
-		return err
+		c.iamClientErr = err
+		return
+	}
+	if c.OrgAdminUsername == "" {
+		c.iamClientErr = ErrMissingUsername
+		return
+	}
+	if c.OrgAdminPassword == "" {
+		c.iamClientErr = ErrMissingPassword
+		return
 	}
 	err = client.Login(c.OrgAdminUsername, c.OrgAdminPassword)
 	if err != nil {
-		return err
+		c.iamClientErr = err
+		return
 	}
 	c.iamClient = client
-	return nil
+	return
 }
 
 // setupS3CredsClient sets up an HSDP S3 Credentials client
 func (c *Config) setupS3CredsClient() {
+	if c.iamClientErr != nil {
+		c.credsClient = nil
+		c.credsClientErr = c.iamClientErr
+		return
+	}
 	client, err := credentials.NewClient(c.iamClient, &credentials.Config{
 		BaseURL:  c.S3CredsURL,
 		Debug:    c.Debug,

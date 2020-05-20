@@ -33,7 +33,10 @@ func dataSourceIAMIntrospect() *schema.Resource {
 
 func dataSourceIAMIntrospectRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	resp, _, err := client.Introspect()
 
@@ -45,11 +48,11 @@ func dataSourceIAMIntrospectRead(d *schema.ResourceData, meta interface{}) error
 		return err
 	}
 
-	d.Set("managing_organization", resp.Organizations.ManagingOrganization)
 	d.SetId(resp.Username)
-	d.Set("username", resp.Username)
-	d.Set("token", client.Token())
-	d.Set("introspect", string(introspectJSON))
+	_ = d.Set("managing_organization", resp.Organizations.ManagingOrganization)
+	_ = d.Set("username", resp.Username)
+	_ = d.Set("token", client.Token())
+	_ = d.Set("introspect", string(introspectJSON))
 
 	return err
 }
