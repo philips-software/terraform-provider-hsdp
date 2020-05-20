@@ -59,7 +59,10 @@ func resourceIAMMFAPolicy() *schema.Resource {
 
 func resourceIAMMFAPolicyCreate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
@@ -92,16 +95,19 @@ func resourceIAMMFAPolicyCreate(d *schema.ResourceData, m interface{}) error {
 		return fmt.Errorf("failed to create MFA policy: %d", resp.StatusCode)
 	}
 	d.SetId(newPolicy.ID)
-	d.Set("name", newPolicy.Name)
-	d.Set("description", newPolicy.Description)
-	d.Set("active", *newPolicy.Active)
-	d.Set("version", newPolicy.Meta.Version)
+	_ = d.Set("name", newPolicy.Name)
+	_ = d.Set("description", newPolicy.Description)
+	_ = d.Set("active", *newPolicy.Active)
+	_ = d.Set("version", newPolicy.Meta.Version)
 	return nil
 }
 
 func resourceIAMMFAPolicyRead(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	id := d.Id()
 	policy, resp, err := client.MFAPolicies.GetMFAPolicyByID(id)
@@ -112,24 +118,27 @@ func resourceIAMMFAPolicyRead(d *schema.ResourceData, m interface{}) error {
 		}
 		return err
 	}
-	d.Set("name", policy.Name)
-	d.Set("description", policy.Description)
-	d.Set("active", *policy.Active)
-	d.Set("type", policy.Types[0])
+	_ = d.Set("name", policy.Name)
+	_ = d.Set("description", policy.Description)
+	_ = d.Set("active", *policy.Active)
+	_ = d.Set("type", policy.Types[0])
 	switch policy.Resource.Type {
 	case "User":
-		d.Set("user", policy.Resource.Value)
+		_ = d.Set("user", policy.Resource.Value)
 	case "Organization":
-		d.Set("organization", policy.Resource.Value)
+		_ = d.Set("organization", policy.Resource.Value)
 	}
-	d.Set("version", policy.Meta.Version)
+	_ = d.Set("version", policy.Meta.Version)
 
 	return nil
 }
 
 func resourceIAMMFAPolicyUpdate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	id := d.Id()
 	policy, _, err := client.MFAPolicies.GetMFAPolicyByID(id)
@@ -151,14 +160,17 @@ func resourceIAMMFAPolicyUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 	updatedPolicy, _, err := client.MFAPolicies.UpdateMFAPolicy(policy)
 	if updatedPolicy != nil {
-		d.Set("version", updatedPolicy.Meta.Version)
+		_ = d.Set("version", updatedPolicy.Meta.Version)
 	}
 	return err
 }
 
 func resourceIAMMFAPolicyDelete(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	var policy iam.MFAPolicy
 	policy.ID = d.Id()

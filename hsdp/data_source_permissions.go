@@ -21,7 +21,10 @@ func dataSourceIAMPermissions() *schema.Resource {
 
 func dataSourceIAMPermissionsRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	resp, _, err := client.Permissions.GetPermissions(nil) // Get all permissions
 
@@ -34,7 +37,7 @@ func dataSourceIAMPermissionsRead(d *schema.ResourceData, meta interface{}) erro
 		permissions = append(permissions, p.Name)
 	}
 	d.SetId("permissions")
-	d.Set("permissions", permissions)
+	_ = d.Set("permissions", permissions)
 
 	return err
 }

@@ -42,7 +42,10 @@ func resourceIAMProposition() *schema.Resource {
 
 func resourceIAMPropositionCreate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	var prop iam.Proposition
 	prop.Name = d.Get("name").(string) // TODO: this must be all caps
@@ -55,16 +58,19 @@ func resourceIAMPropositionCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	d.SetId(createdProp.ID)
-	d.Set("name", createdProp.Name)
-	d.Set("description", createdProp.Description)
-	d.Set("organization_id", createdProp.OrganizationID)
-	d.Set("global_reference_id", createdProp.GlobalReferenceID)
+	_ = d.Set("name", createdProp.Name)
+	_ = d.Set("description", createdProp.Description)
+	_ = d.Set("organization_id", createdProp.OrganizationID)
+	_ = d.Set("global_reference_id", createdProp.GlobalReferenceID)
 	return nil
 }
 
 func resourceIAMPropositionRead(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	id := d.Id()
 	prop, resp, err := client.Propositions.GetPropositionByID(id)
@@ -75,10 +81,10 @@ func resourceIAMPropositionRead(d *schema.ResourceData, m interface{}) error {
 		}
 		return err
 	}
-	d.Set("name", prop.Name)
-	d.Set("description", prop.Description)
-	d.Set("organization_id", prop.OrganizationID)
-	d.Set("global_reference_id", prop.GlobalReferenceID)
+	_ = d.Set("name", prop.Name)
+	_ = d.Set("description", prop.Description)
+	_ = d.Set("organization_id", prop.OrganizationID)
+	_ = d.Set("global_reference_id", prop.GlobalReferenceID)
 	return nil
 }
 

@@ -92,7 +92,10 @@ func resourceIAMClient() *schema.Resource {
 
 func resourceIAMClientCreate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	var cl iam.ApplicationClient
 	cl.Description = d.Get("description").(string)
@@ -113,13 +116,16 @@ func resourceIAMClientCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	d.SetId(createdClient.ID)
-	d.Set("password", cl.Password)
+	_ = d.Set("password", cl.Password)
 	return nil
 }
 
 func resourceIAMClientRead(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	id := d.Id()
 	cl, resp, err := client.Clients.GetClientByID(id)
@@ -130,23 +136,26 @@ func resourceIAMClientRead(d *schema.ResourceData, m interface{}) error {
 		}
 		return err
 	}
-	d.Set("description", cl.Description)
-	d.Set("name", cl.Name)
-	d.Set("client_id", cl.ClientID)
-	d.Set("password", cl.Password)
-	d.Set("type", cl.Type)
-	d.Set("application_id", cl.ApplicationID)
-	d.Set("global_reference_id", cl.GlobalReferenceID)
-	d.Set("redirection_uris", cl.RedirectionURIs)
-	d.Set("response_types", cl.ResponseTypes)
-	d.Set("scopes", cl.Scopes)
-	d.Set("default_scopes", cl.DefaultScopes)
+	_ = d.Set("description", cl.Description)
+	_ = d.Set("name", cl.Name)
+	_ = d.Set("client_id", cl.ClientID)
+	_ = d.Set("password", cl.Password)
+	_ = d.Set("type", cl.Type)
+	_ = d.Set("application_id", cl.ApplicationID)
+	_ = d.Set("global_reference_id", cl.GlobalReferenceID)
+	_ = d.Set("redirection_uris", cl.RedirectionURIs)
+	_ = d.Set("response_types", cl.ResponseTypes)
+	_ = d.Set("scopes", cl.Scopes)
+	_ = d.Set("default_scopes", cl.DefaultScopes)
 	return nil
 }
 
 func resourceIAMClientUpdate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	var cl iam.ApplicationClient
 	cl.ID = d.Id()
@@ -170,7 +179,10 @@ func resourceIAMClientUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourceIAMClientDelete(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	var cl iam.ApplicationClient
 	cl.ID = d.Id()

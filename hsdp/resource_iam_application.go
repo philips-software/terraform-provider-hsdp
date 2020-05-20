@@ -41,7 +41,10 @@ func resourceIAMApplication() *schema.Resource {
 
 func resourceIAMApplicationCreate(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	var app iam.Application
 	app.Name = d.Get("name").(string) // TODO: this must be all caps
@@ -54,16 +57,19 @@ func resourceIAMApplicationCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 	d.SetId(createdApp.ID)
-	d.Set("name", createdApp.Name)
-	d.Set("description", createdApp.Description)
-	d.Set("proposition_id", createdApp.PropositionID)
-	d.Set("global_reference_id", createdApp.GlobalReferenceID)
+	_ = d.Set("name", createdApp.Name)
+	_ = d.Set("description", createdApp.Description)
+	_ = d.Set("proposition_id", createdApp.PropositionID)
+	_ = d.Set("global_reference_id", createdApp.GlobalReferenceID)
 	return nil
 }
 
 func resourceIAMApplicationRead(d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
-	client := config.IAMClient()
+	client, err := config.IAMClient()
+	if err != nil {
+		return err
+	}
 
 	id := d.Id()
 	app, resp, err := client.Applications.GetApplicationByID(id)
@@ -74,10 +80,10 @@ func resourceIAMApplicationRead(d *schema.ResourceData, m interface{}) error {
 		}
 		return err
 	}
-	d.Set("name", app.Name)
-	d.Set("description", app.Description)
-	d.Set("proposition_id", app.PropositionID)
-	d.Set("global_reference_id", app.GlobalReferenceID)
+	_ = d.Set("name", app.Name)
+	_ = d.Set("description", app.Description)
+	_ = d.Set("proposition_id", app.PropositionID)
+	_ = d.Set("global_reference_id", app.GlobalReferenceID)
 	return nil
 }
 
