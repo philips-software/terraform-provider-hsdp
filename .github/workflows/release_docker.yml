@@ -1,9 +1,8 @@
-on:
-  push:
-    tags:
-    - '*'
-
 name: build and push tag
+
+on:
+  release:
+    types: [published]
 
 jobs:
   build_and_push:
