@@ -231,7 +231,7 @@ func resourceContainerHostUpdate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	if d.HasChange("security_groups") {
-		o, n := d.GetChange("securit_groups")
+		o, n := d.GetChange("security_groups")
 		old := expandStringList(o.(*schema.Set).List())
 		newEntries := expandStringList(n.(*schema.Set).List())
 		toAdd := difference(newEntries, old)
