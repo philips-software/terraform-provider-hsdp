@@ -16,7 +16,7 @@ RUN CHECKSUM=$(cat checksums.txt |grep linux_amd64|grep -v zip|cut -f 1 -d ' ') 
     echo ${CHECKSUM}"  "terraform-provider-cloudfoundry_linux_amd64 |sha1sum -c
 RUN chmod +x terraform-provider-cloudfoundry_linux_amd64
 
-FROM golang:1.14.3-alpine3.11 as build_base
+FROM golang:1.14.4-alpine3.11 as build_base
 RUN apk add --no-cache git openssh gcc musl-dev
 WORKDIR /terraform-provider-hsdp
 COPY go.mod .

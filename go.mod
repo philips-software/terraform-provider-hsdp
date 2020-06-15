@@ -7,7 +7,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.3.0 // indirect
 	github.com/hashicorp/terraform-config-inspect v0.0.0-20191212124732-c6ae6269b9d7 // indirect
 	github.com/hashicorp/terraform-plugin-sdk v1.12.0
-	github.com/philips-software/go-hsdp-api v0.16.0
+	github.com/philips-software/go-hsdp-api v0.17.1-0.20200615225806-aebc294ac3cf
 	github.com/pkg/errors v0.9.1
 	golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37 // indirect
 )
