@@ -1,7 +1,6 @@
 package hsdp
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -32,12 +31,14 @@ func resourceIAMClient() *schema.Resource {
 			},
 			"client_id": &schema.Schema{
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"password": &schema.Schema{
 				Type:      schema.TypeString,
 				Required:  true,
 				Sensitive: true,
+				ForceNew:  true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 					if d.Id() != "" {
 						return true
@@ -57,21 +58,18 @@ func resourceIAMClient() *schema.Resource {
 			},
 			"global_reference_id": &schema.Schema{
 				Type:     schema.TypeString,
-				ForceNew: true,
 				Required: true,
 			},
 			"redirection_uris": &schema.Schema{
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				Required: true,
-				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"response_types": &schema.Schema{
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				Required: true,
-				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"scopes": &schema.Schema{
@@ -85,6 +83,30 @@ func resourceIAMClient() *schema.Resource {
 				MaxItems: 100,
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"consent_implied": &schema.Schema{
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"access_token_lifetime": &schema.Schema{
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  3600,
+			},
+			"refresh_token_lifetime": &schema.Schema{
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  2592000,
+			},
+			"id_token_lifetime": &schema.Schema{
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  31536000,
+			},
+			"disabled": &schema.Schema{
+				Type:     schema.TypeBool,
+				Computed: true,
 			},
 		},
 	}
@@ -147,6 +169,12 @@ func resourceIAMClientRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("response_types", cl.ResponseTypes)
 	_ = d.Set("scopes", cl.Scopes)
 	_ = d.Set("default_scopes", cl.DefaultScopes)
+	_ = d.Set("access_token_lifetime", cl.AccessTokenLifetime)
+	_ = d.Set("refresh_token_lifetime", cl.RefreshTokenLifetime)
+	_ = d.Set("id_token_lifetime", cl.IDTokenLifetime)
+	_ = d.Set("disabled", cl.Disabled)
+	_ = d.Set("consent_implied", cl.ConsentImplied)
+
 	return nil
 }
 
@@ -174,7 +202,31 @@ func resourceIAMClientUpdate(d *schema.ResourceData, m interface{}) error {
 		_, _, err := client.Clients.UpdateScopes(cl, newScopes, newDefaultScopes)
 		return err
 	}
-	return fmt.Errorf("only scopes and default_scopes changes are supported currenty")
+	if d.HasChange("access_token_lifetime") ||
+		d.HasChange("refresh_token_lifetime") ||
+		d.HasChange("id_token_lifetime") ||
+		d.HasChange("consent_implied") ||
+		d.HasChange("global_reference_id") ||
+		d.HasChange("response_types") ||
+		d.HasChange("redirection_uris") {
+		cl, _, err := client.Clients.GetClientByID(d.Id())
+		if err != nil {
+			return err
+		}
+		cl.RedirectionURIs = expandStringList(d.Get("redirection_uris").(*schema.Set).List())
+		cl.ResponseTypes = expandStringList(d.Get("response_types").(*schema.Set).List())
+		cl.ConsentImplied = d.Get("consent_implied").(bool)
+		cl.AccessTokenLifetime = d.Get("access_token_lifetime").(int)
+		cl.RefreshTokenLifetime = d.Get("refresh_token_lifetime").(int)
+		cl.IDTokenLifetime = d.Get("id_token_lifetime").(int)
+		cl.GlobalReferenceID = d.Get("global_reference_id").(string)
+		_, _, err = client.Clients.UpdateClient(*cl)
+		if err != nil {
+			return err
+		}
+		return resourceIAMClientRead(d, m)
+	}
+	return nil
 }
 
 func resourceIAMClientDelete(d *schema.ResourceData, m interface{}) error {
