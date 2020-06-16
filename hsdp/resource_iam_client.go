@@ -30,9 +30,10 @@ func resourceIAMClient() *schema.Resource {
 				Required: true,
 			},
 			"client_id": &schema.Schema{
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Required: true,
+				Type:             schema.TypeString,
+				ForceNew:         true,
+				Required:         true,
+				DiffSuppressFunc: suppressCaseDiffs,
 			},
 			"password": &schema.Schema{
 				Type:      schema.TypeString,
@@ -132,6 +133,9 @@ func resourceIAMClientCreate(d *schema.ResourceData, m interface{}) error {
 	cl.ApplicationID = d.Get("application_id").(string)
 	cl.Scopes = expandStringList(d.Get("scopes").(*schema.Set).List())
 	cl.DefaultScopes = expandStringList(d.Get("default_scopes").(*schema.Set).List())
+	cl.IDTokenLifetime = d.Get("id_token_lifetime").(int)
+	cl.RefreshTokenLifetime = d.Get("refresh_token_timeline").(int)
+	cl.AccessTokenLifetime = d.Get("access_token_lifetime").(int)
 
 	createdClient, _, err := client.Clients.CreateClient(cl)
 	if err != nil {

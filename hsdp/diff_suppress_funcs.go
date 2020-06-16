@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	creds "github.com/philips-software/go-hsdp-api/credentials"
@@ -17,4 +18,11 @@ func suppressEquivalentPolicyDiffs(k, old, new string, d *schema.ResourceData) b
 		return false
 	}
 	return oldPolicy.Equals(newPolicy)
+}
+
+func suppressCaseDiffs(k, old, new string, d *schema.ResourceData) bool {
+	if strings.ToLower(old) == strings.ToLower(new) {
+		return true
+	}
+	return false
 }
