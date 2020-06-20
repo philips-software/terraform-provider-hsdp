@@ -93,6 +93,12 @@ func Provider(build string) terraform.ResourceProvider {
 				Default:     false,
 				Description: descriptions["cartel_skip_verify"],
 			},
+			"retry_max": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Default:     0,
+				Description: descriptions["retry_max"],
+			},
 			"debug": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -150,6 +156,7 @@ func init() {
 		"cartel_secret":      "The Cartel secret key",
 		"cartel_no_tls":      "Disable TLS for Cartel",
 		"cartel_skip_verify": "Skip certificate verificsation",
+		"retry_max":          "Maximum number of retries for API requests",
 	}
 }
 
@@ -173,6 +180,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.CartelSecret = d.Get("cartel_secret").(string)
 	config.CartelNoTLS = d.Get("cartel_no_tls").(bool)
 	config.CartelSkipVerify = d.Get("cartel_skip_verify").(bool)
+	config.RetryMax = d.Get("retry_max").(int)
 
 	config.setupIAMClient()
 	config.setupS3CredsClient()

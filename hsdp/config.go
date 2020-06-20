@@ -1,9 +1,11 @@
 package hsdp
 
 import (
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/philips-software/go-hsdp-api/cartel"
 	"github.com/philips-software/go-hsdp-api/credentials"
 	"github.com/philips-software/go-hsdp-api/iam"
+	"net/http"
 )
 
 // Config contains configuration for the client
@@ -15,6 +17,7 @@ type Config struct {
 	CartelSecret     string
 	CartelNoTLS      bool
 	CartelSkipVerify bool
+	RetryMax         int
 
 	iamClient       *iam.Client
 	cartelClient    *cartel.Client
@@ -53,8 +56,14 @@ func (c *Config) CredentialsClientWithLogin(username, password string) (*credent
 
 // setupIAMClient sets up an HSDP IAM client
 func (c *Config) setupIAMClient() {
+	standardClient := http.DefaultClient
+	if c.RetryMax > 0 {
+		retryClient := retryablehttp.NewClient()
+		retryClient.RetryMax = 5
+		standardClient = retryClient.StandardClient()
+	}
 	c.iamClient = nil
-	client, err := iam.NewClient(nil, &c.Config)
+	client, err := iam.NewClient(standardClient, &c.Config)
 	if err != nil {
 		c.iamClientErr = err
 		return
