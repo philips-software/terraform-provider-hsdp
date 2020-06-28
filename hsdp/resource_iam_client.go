@@ -134,7 +134,7 @@ func resourceIAMClientCreate(d *schema.ResourceData, m interface{}) error {
 	cl.Scopes = expandStringList(d.Get("scopes").(*schema.Set).List())
 	cl.DefaultScopes = expandStringList(d.Get("default_scopes").(*schema.Set).List())
 	cl.IDTokenLifetime = d.Get("id_token_lifetime").(int)
-	cl.RefreshTokenLifetime = d.Get("refresh_token_timeline").(int)
+	cl.RefreshTokenLifetime = d.Get("refresh_token_lifetime").(int)
 	cl.AccessTokenLifetime = d.Get("access_token_lifetime").(int)
 
 	createdClient, _, err := client.Clients.CreateClient(cl)
