@@ -40,12 +40,6 @@ func resourceIAMClient() *schema.Resource {
 				Required:  true,
 				Sensitive: true,
 				ForceNew:  true,
-				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					if d.Id() != "" {
-						return true
-					}
-					return false
-				},
 			},
 			"description": &schema.Schema{
 				Type:     schema.TypeString,
