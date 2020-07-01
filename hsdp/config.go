@@ -71,10 +71,10 @@ func (c *Config) setupIAMClient() {
 		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(c.Environment))
 		if err == nil {
 			iamService := ac.Service("iam")
-			if url, err := iamService.String("iam_url"); err != nil && c.IAMURL == "" {
+			if url, err := iamService.String("iam_url"); err == nil && c.IAMURL == "" {
 				c.IAMURL = url
 			}
-			if url, err := iamService.String("idm_url"); err != nil && c.IDMURL == "" {
+			if url, err := iamService.String("idm_url"); err == nil && c.IDMURL == "" {
 				c.IDMURL = url
 			}
 		}
@@ -112,7 +112,7 @@ func (c *Config) setupS3CredsClient() {
 	if c.Environment != "" && c.Region != "" {
 		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(c.Environment))
 		if err == nil {
-			if url, err := ac.Service("s3creds").String("url"); err != nil && c.S3CredsURL == "" {
+			if url, err := ac.Service("s3creds").String("url"); err == nil && c.S3CredsURL == "" {
 				c.S3CredsURL = url
 			}
 		}
@@ -146,7 +146,7 @@ func (c *Config) setupCartelClient() {
 	if c.Environment != "" && c.Region != "" {
 		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(c.Environment))
 		if err == nil {
-			if host, err := ac.Service("cartel").String("host"); err != nil && c.CartelHost == "" {
+			if host, err := ac.Service("cartel").String("host"); err == nil && c.CartelHost == "" {
 				c.CartelHost = host
 			}
 		}
