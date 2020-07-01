@@ -26,3 +26,10 @@ func suppressCaseDiffs(k, old, new string, d *schema.ResourceData) bool {
 	}
 	return false
 }
+
+func suppressOnID(k, old, new string, d *schema.ResourceData) bool {
+	if d.Id() != "" {
+		return true
+	}
+	return false
+}

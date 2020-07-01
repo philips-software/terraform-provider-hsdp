@@ -159,7 +159,6 @@ func resourceIAMClientRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("description", cl.Description)
 	_ = d.Set("name", cl.Name)
 	_ = d.Set("client_id", cl.ClientID)
-	_ = d.Set("password", cl.Password)
 	_ = d.Set("type", cl.Type)
 	_ = d.Set("application_id", cl.ApplicationID)
 	_ = d.Set("global_reference_id", cl.GlobalReferenceID)
