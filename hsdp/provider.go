@@ -9,6 +9,18 @@ import (
 func Provider(build string) terraform.ResourceProvider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
+			"region": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				RequiredWith: []string{"environment"},
+				Description:  descriptions["region"],
+			},
+			"environment": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				RequiredWith: []string{"region"},
+				Description:  descriptions["environment"],
+			},
 			"iam_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -90,7 +102,7 @@ func Provider(build string) terraform.ResourceProvider {
 			"cartel_skip_verify": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
+				Default:     true,
 				Description: descriptions["cartel_skip_verify"],
 			},
 			"retry_max": {
@@ -139,6 +151,8 @@ var descriptions map[string]string
 
 func init() {
 	descriptions = map[string]string{
+		"region":             "The HSDP region to configure for",
+		"environment":        "The HSDP environment to configure for",
 		"iam_url":            "The HSDP IAM instance URL",
 		"idm_url":            "The HSDP IDM instance URL",
 		"credentials_url":    "The HSDP S3 Credentials instance URL",
@@ -163,6 +177,8 @@ func init() {
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := &Config{}
 
+	config.Region = d.Get("region").(string)
+	config.Environment = d.Get("environment").(string)
 	config.IAMURL = d.Get("iam_url").(string)
 	config.IDMURL = d.Get("idm_url").(string)
 	config.OAuth2ClientID = d.Get("oauth2_client_id").(string)

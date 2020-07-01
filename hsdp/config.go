@@ -3,6 +3,7 @@ package hsdp
 import (
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/philips-software/go-hsdp-api/cartel"
+	"github.com/philips-software/go-hsdp-api/config"
 	"github.com/philips-software/go-hsdp-api/credentials"
 	"github.com/philips-software/go-hsdp-api/iam"
 	"net/http"
@@ -18,6 +19,8 @@ type Config struct {
 	CartelNoTLS      bool
 	CartelSkipVerify bool
 	RetryMax         int
+	Region           string
+	Environment      string
 
 	iamClient       *iam.Client
 	cartelClient    *cartel.Client
@@ -63,6 +66,20 @@ func (c *Config) setupIAMClient() {
 		standardClient = retryClient.StandardClient()
 	}
 	c.iamClient = nil
+	// Auto config
+	if c.Environment != "" && c.Region != "" {
+		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(c.Environment))
+		if err == nil {
+			iamService := ac.Service("iam")
+			if url, err := iamService.String("iam_url"); err == nil && c.IAMURL == "" {
+				c.IAMURL = url
+			}
+			if url, err := iamService.String("idm_url"); err == nil && c.IDMURL == "" {
+				c.IDMURL = url
+			}
+		}
+	}
+
 	client, err := iam.NewClient(standardClient, &c.Config)
 	if err != nil {
 		c.iamClientErr = err
@@ -92,6 +109,14 @@ func (c *Config) setupS3CredsClient() {
 		c.credsClientErr = c.iamClientErr
 		return
 	}
+	if c.Environment != "" && c.Region != "" {
+		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(c.Environment))
+		if err == nil {
+			if url, err := ac.Service("s3creds").String("url"); err == nil && c.S3CredsURL == "" {
+				c.S3CredsURL = url
+			}
+		}
+	}
 	client, err := credentials.NewClient(c.iamClient, &credentials.Config{
 		BaseURL:  c.S3CredsURL,
 		Debug:    c.Debug,
@@ -111,13 +136,21 @@ func (c *Config) setupCartelClient() {
 	client, err := cartel.NewClient(nil, cartel.Config{
 		Host:       c.CartelHost,
 		Token:      c.CartelToken,
-		Secret:     []byte(c.CartelSecret),
+		Secret:     c.CartelSecret,
 		NoTLS:      c.CartelNoTLS,
 		SkipVerify: c.CartelSkipVerify,
 		Debug:      c.Debug,
 		DebugLog:   c.DebugLog,
 	})
-
+	// Auto config
+	if c.Environment != "" && c.Region != "" {
+		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(c.Environment))
+		if err == nil {
+			if host, err := ac.Service("cartel").String("host"); err == nil && c.CartelHost == "" {
+				c.CartelHost = host
+			}
+		}
+	}
 	if err != nil {
 		c.cartelClient = nil
 		c.cartelClientErr = err
