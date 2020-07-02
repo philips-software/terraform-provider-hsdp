@@ -45,6 +45,7 @@ github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.m
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
 github.com/fatih/color v1.7.0 h1:DkWD4oS2D8LGGgTQ6IvwJJXSL5Vp2ffcQg58nFV38Ys=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
+github.com/go-bindata/go-bindata v3.1.2+incompatible/go.mod h1:xK8Dsgwmeed+BBsSy2XTopBn/8uK2HWuGSnA11C3Joo=
 github.com/go-playground/assert/v2 v2.0.1 h1:MsBgLAaY856+nPRTKrp3/OZK38U/wa0CcBYNjji3q3A=
 github.com/go-playground/assert/v2 v2.0.1/go.mod h1:VDjEfimB/XKnb+ZQfWdccd7VUvScMdVu0Titje2rxJ4=
 github.com/go-playground/locales v0.13.0 h1:HyWk6mgj5qFqCT5fjGBuRArbVDfE4hi8+e8ceBS/t7Q=
@@ -190,6 +191,8 @@ github.com/philips-software/go-hsdp-api v0.19.0 h1:ygdMrGSUokYQ1QaImxK8DPFipgXWN
 github.com/philips-software/go-hsdp-api v0.19.0/go.mod h1:9+2MQAUHTHJtQmTCiHwLalgrMRVin019Zo0/3Qf5Zc4=
 github.com/philips-software/go-hsdp-api v0.19.1-0.20200701073942-567142717405 h1:4yKlYeT9iGOgZWS39wm57IllAz0zIQ24tTG6ucj9K+0=
 github.com/philips-software/go-hsdp-api v0.19.1-0.20200701073942-567142717405/go.mod h1:9+2MQAUHTHJtQmTCiHwLalgrMRVin019Zo0/3Qf5Zc4=
+github.com/philips-software/go-hsdp-api v0.20.0 h1:jLhoS4Yx4ohHwjI6bcVESX0tLgsdZc//8UuETgyIx/c=
+github.com/philips-software/go-hsdp-api v0.20.0/go.mod h1:agJtsgjb1W4xq5cVUdk06uUVETKO1nKZAZJ4Y1Dumg4=
 github.com/philips-software/go-hsdp-signer v1.3.0 h1:Si1voDE/GHzthmxpasPdntbu8aUW6EYJfI6gHVf7BCc=
 github.com/philips-software/go-hsdp-signer v1.3.0/go.mod h1:/QehZ/+Aks2t1TFpjhF/7ZSB8PJIIJHzLc03rOqwLw0=
 github.com/pierrec/lz4 v2.0.5+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi+IEE17M5jbnwPHcY=
