@@ -3,7 +3,9 @@
 *.backup
 *.out
 *.tf
+*.exe
 .DS_Store
 terraform-provider-hsdp
 build/
+dist/
 .idea/
