@@ -25,6 +25,7 @@ builds:
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.buildSource=binaryRelease
 
 archives:
+- format: binary
 - replacements:
     darwin: Darwin
     linux: Linux
