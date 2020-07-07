@@ -25,12 +25,13 @@ builds:
       - -s -w -X main.version={{.Version}} -X main.commit={{.Commit}} -X main.date={{.Date}} -X main.buildSource=binaryRelease
 
 archives:
-- format: binary
-- replacements:
+ - 
+  replacements:
     darwin: Darwin
     linux: Linux
     windows: Windows
     amd64: x86_64
+  format: binary
 
 checksum:
   name_template: 'checksums.txt'
