@@ -8,7 +8,9 @@ import (
 
 var commit = "deadbeef"
 var release = "v0.0.0"
-var buildVersion = release + "-" + commit
+var date = "0000-00-00"
+var buildSource = "unknown"
+var buildVersion = release + "-" + commit + "." + date + "." + buildSource
 
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
