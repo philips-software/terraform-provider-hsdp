@@ -30,7 +30,7 @@ $ cd terraform-provider-hsdp
 $ go build .
 ```
 
-Copy the resulting binary to the appropiate plugin directory e.g. `terraform.d/plugins/darwin_amd64/terraform-provider-hsdp`
+Copy the resulting binary to the appropiate [plugin directory](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) e.g. `.terraform.d/plugins/darwin_amd64/terraform-provider-hsdp` 
 
 
 ## Dockerfile
