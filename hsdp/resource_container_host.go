@@ -32,6 +32,12 @@ func resourceContainerHost() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"instance_role": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "container-host",
+			},
 			"instance_type": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -151,6 +157,7 @@ func resourceContainerHostCreate(d *schema.ResourceData, m interface{}) error {
 	instanceType := d.Get("instance_type").(string)
 	securityGroups := expandStringList(d.Get("security_groups").(*schema.Set).List())
 	userGroups := expandStringList(d.Get("user_groups").(*schema.Set).List())
+	instanceRole := d.Get("instance_role").(string)
 
 	ch, _, err := client.Create(tagName,
 		cartel.SecurityGroups(securityGroups...),
@@ -161,6 +168,7 @@ func resourceContainerHostCreate(d *schema.ResourceData, m interface{}) error {
 		cartel.VolumesAndSize(numberOfVolumes, volumeSize),
 		cartel.VolumeEncryption(encryptVolumes),
 		cartel.Protect(protect),
+		cartel.InstanceRole(instanceRole),
 	)
 	if err != nil {
 		return err
