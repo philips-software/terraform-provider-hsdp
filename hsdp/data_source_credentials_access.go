@@ -2,7 +2,6 @@ package hsdp
 
 import (
 	"encoding/json"
-
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	creds "github.com/philips-software/go-hsdp-api/credentials"
 )
@@ -22,11 +21,11 @@ func dataSourceS3CredentialsAccess() *schema.Resource {
 			},
 			"username": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"password": {
 				Type:      schema.TypeString,
-				Required:  true,
+				Optional:  true,
 				Sensitive: true,
 			},
 		},
@@ -40,18 +39,30 @@ func dataSourceS3CredsAccessRead(d *schema.ResourceData, meta interface{}) error
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 
-	client, err := config.CredentialsClientWithLogin(username, password)
-	if err != nil {
-		return err
-	}
+	var client *creds.Client
+	var err error
 
-	creds, _, err := client.Access.GetAccess(&creds.GetAccessOptions{
+	if username != "" && password != "" {
+		client, err = config.CredentialsClientWithLogin(username, password)
+		if err != nil {
+			return err
+		}
+	} else {
+		client, err = config.CredentialsClient()
+		if err != nil {
+			return err
+		}
+	}
+	if client == nil {
+		return ErrMissingClientPassword
+	}
+	credentials, _, err := client.Access.GetAccess(&creds.GetAccessOptions{
 		ProductKey: &productKey,
 	})
 	if err != nil {
 		return err
 	}
-	jsonBytes, err := json.Marshal(&creds)
+	jsonBytes, err := json.Marshal(&credentials)
 	if err != nil {
 		return err
 	}

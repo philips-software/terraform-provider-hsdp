@@ -36,6 +36,21 @@ func Provider(build string) terraform.ResourceProvider {
 				Optional:    true,
 				Description: descriptions["credentials_url"],
 			},
+			"service_id": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"org_admin_username"},
+				RequiredWith:  []string{"service_private_key"},
+				Description:   descriptions["service_id"],
+			},
+			"service_private_key": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				ConflictsWith: []string{"org_admin_password"},
+				RequiredWith:  []string{"service_id"},
+				Description:   descriptions["service_private_key"],
+			},
 			"oauth2_client_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -54,15 +69,19 @@ func Provider(build string) terraform.ResourceProvider {
 				Description: descriptions["org_id"],
 			},
 			"org_admin_username": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: descriptions["org_admin_username"],
+				Type:          schema.TypeString,
+				Optional:      true,
+				Description:   descriptions["org_admin_username"],
+				RequiredWith:  []string{"org_admin_password"},
+				ConflictsWith: []string{"service_id"},
 			},
 			"org_admin_password": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Sensitive:   true,
-				Description: descriptions["org_admin_password"],
+				Type:          schema.TypeString,
+				Optional:      true,
+				Sensitive:     true,
+				Description:   descriptions["org_admin_password"],
+				RequiredWith:  []string{"org_admin_username"},
+				ConflictsWith: []string{"service_private_key"},
 			},
 			"shared_key": {
 				Type:        schema.TypeString,
@@ -151,26 +170,28 @@ var descriptions map[string]string
 
 func init() {
 	descriptions = map[string]string{
-		"region":             "The HSDP region to configure for",
-		"environment":        "The HSDP environment to configure for",
-		"iam_url":            "The HSDP IAM instance URL",
-		"idm_url":            "The HSDP IDM instance URL",
-		"credentials_url":    "The HSDP S3 Credentials instance URL",
-		"oauth2_client_id":   "The OAuth2 client id",
-		"oauth2_password":    "The OAuth2 password",
-		"org_id":             "The (top level) Organization ID - UUID",
-		"org_admin_username": "The username of the Organization Admin",
-		"org_admin_password": "The password of the Organization Admin",
-		"shared_key":         "The shared key",
-		"secret_key":         "The secret key",
-		"debug":              "Enable debugging output",
-		"debug_log":          "The log file to write debugging output to",
-		"cartel_host":        "The Cartel host",
-		"cartel_token":       "The Cartel token key",
-		"cartel_secret":      "The Cartel secret key",
-		"cartel_no_tls":      "Disable TLS for Cartel",
-		"cartel_skip_verify": "Skip certificate verificsation",
-		"retry_max":          "Maximum number of retries for API requests",
+		"region":              "The HSDP region to configure for",
+		"environment":         "The HSDP environment to configure for",
+		"iam_url":             "The HSDP IAM instance URL",
+		"idm_url":             "The HSDP IDM instance URL",
+		"credentials_url":     "The HSDP S3 Credentials instance URL",
+		"oauth2_client_id":    "The OAuth2 client id",
+		"oauth2_password":     "The OAuth2 password",
+		"service_id":          "The service ID to use as Organization Admin",
+		"service_private_key": "The private key of the service ID",
+		"org_id":              "The (top level) Organization ID - UUID",
+		"org_admin_username":  "The username of the Organization Admin",
+		"org_admin_password":  "The password of the Organization Admin",
+		"shared_key":          "The shared key",
+		"secret_key":          "The secret key",
+		"debug":               "Enable debugging output",
+		"debug_log":           "The log file to write debugging output to",
+		"cartel_host":         "The Cartel host",
+		"cartel_token":        "The Cartel token key",
+		"cartel_secret":       "The Cartel secret key",
+		"cartel_no_tls":       "Disable TLS for Cartel",
+		"cartel_skip_verify":  "Skip certificate verificsation",
+		"retry_max":           "Maximum number of retries for API requests",
 	}
 }
 
@@ -184,6 +205,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.OAuth2ClientID = d.Get("oauth2_client_id").(string)
 	config.OAuth2Secret = d.Get("oauth2_password").(string)
 	config.RootOrgID = d.Get("org_id").(string)
+	config.ServiceID = d.Get("service_id").(string)
+	config.ServicePrivateKey = d.Get("service_private_key").(string)
 	config.OrgAdminUsername = d.Get("org_admin_username").(string)
 	config.OrgAdminPassword = d.Get("org_admin_password").(string)
 	config.SharedKey = d.Get("shared_key").(string)
