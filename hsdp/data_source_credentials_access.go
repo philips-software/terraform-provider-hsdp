@@ -49,6 +49,9 @@ func dataSourceS3CredsAccessRead(d *schema.ResourceData, meta interface{}) error
 		}
 	} else {
 		client, err = config.CredentialsClient()
+		if err != nil {
+			return err
+		}
 	}
 	if client == nil {
 		return ErrMissingClientPassword
