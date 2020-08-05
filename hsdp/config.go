@@ -12,13 +12,15 @@ import (
 // Config contains configuration for the client
 type Config struct {
 	iam.Config
-	S3CredsURL       string
-	CartelHost       string
-	CartelToken      string
-	CartelSecret     string
-	CartelNoTLS      bool
-	CartelSkipVerify bool
-	RetryMax         int
+	ServiceID         string
+	ServicePrivateKey string
+	S3CredsURL        string
+	CartelHost        string
+	CartelToken       string
+	CartelSecret      string
+	CartelNoTLS       bool
+	CartelSkipVerify  bool
+	RetryMax          int
 
 	iamClient       *iam.Client
 	cartelClient    *cartel.Client
@@ -69,18 +71,22 @@ func (c *Config) setupIAMClient() {
 		c.iamClientErr = err
 		return
 	}
-	if c.OrgAdminUsername == "" {
-		c.iamClientErr = ErrMissingUsername
-		return
+	if c.ServiceID != "" && c.ServicePrivateKey != "" {
+		err = client.ServiceLogin(iam.Service{
+			ServiceID:  c.ServiceID,
+			PrivateKey: c.ServicePrivateKey,
+		})
+		if err != nil {
+			c.iamClientErr = err
+			return
+		}
 	}
-	if c.OrgAdminPassword == "" {
-		c.iamClientErr = ErrMissingPassword
-		return
-	}
-	err = client.Login(c.OrgAdminUsername, c.OrgAdminPassword)
-	if err != nil {
-		c.iamClientErr = err
-		return
+	if c.OrgAdminUsername != "" && c.OrgAdminPassword != "" {
+		err = client.Login(c.OrgAdminUsername, c.OrgAdminPassword)
+		if err != nil {
+			c.iamClientErr = err
+			return
+		}
 	}
 	c.iamClient = client
 	return
