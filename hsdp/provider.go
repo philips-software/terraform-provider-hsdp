@@ -41,6 +41,7 @@ func Provider(build string) terraform.ResourceProvider {
 				Optional:      true,
 				ConflictsWith: []string{"org_admin_username"},
 				RequiredWith:  []string{"service_private_key"},
+				Description:   descriptions["service_id"],
 			},
 			"service_private_key": {
 				Type:          schema.TypeString,
@@ -48,6 +49,7 @@ func Provider(build string) terraform.ResourceProvider {
 				Sensitive:     true,
 				ConflictsWith: []string{"org_admin_password"},
 				RequiredWith:  []string{"service_id"},
+				Description:   descriptions["service_private_key"],
 			},
 			"oauth2_client_id": {
 				Type:        schema.TypeString,
