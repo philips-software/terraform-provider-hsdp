@@ -1,8 +1,7 @@
 # HSDP Terraform provider
 
 - Website: https://www.terraform.io
-- Documentation: https://github.com/philips-software/terraform-provider-hsdp/wiki
-- [![Slack](https://philips-software-slackin.now.sh/badge.svg)](https://philips-software-slackin.now.sh)
+- Documentation: https://registry.terraform.io/providers/philips-software/hsdp/latest/docs
 
 <img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
 
@@ -11,16 +10,31 @@
 This is a terraform provider to build/verify HSDP IAM state and other resources.
 To find out more about HSDP please visit https://www.hsdp.io/
 
-## Requirements
+# Using the provider
+
+**Terraform 0.13**: To install this provider, copy and paste this code into your Terraform configuration. Then, run terraform init.
+
+```
+terraform {
+  required_providers {
+    hsdp = {
+      source = "philips-software/hsdp"
+      version = "0.5.4"
+    }
+  }
+}
+```
+
+## Development requirements
 
 -	[Terraform](https://www.terraform.io/downloads.html) 0.12.x
--	[Go](https://golang.org/doc/install) 1.13 or newer (to build the provider plugin)
+-	[Go](https://golang.org/doc/install) 1.14 or newer (to build the provider plugin)
 
 ### Older version
 
 Use `v0.1.0` of this provider for Terraform 0.11 or older
 
-## Building The Provider
+## Building the provider
 
 Clone repository somehere *outside* your $GOPATH:
 
