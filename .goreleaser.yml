@@ -32,6 +32,8 @@ archives:
 checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_SHA256SUMS'
   algorithm: sha256
+snapshot:
+  name_template: "{{ .Tag }}-next"
 signs:
   - artifacts: checksum
     args:
