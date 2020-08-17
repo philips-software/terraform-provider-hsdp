@@ -1,6 +1,6 @@
 # hsdp_config
 
-Retrieve configuration details from services based on regio and environment
+Retrieve configuration details from services based on region and environment
 
 ## Example Usage
 
