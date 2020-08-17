@@ -162,6 +162,7 @@ func Provider(build string) terraform.ResourceProvider {
 			"hsdp_iam_org":            dataSourceIAMOrg(),
 			"hsdp_credentials_access": dataSourceS3CredentialsAccess(),
 			"hsdp_credentials_policy": dataSourceCredentialsPolicy(),
+			"hsdp_config":             dataSourceConfig(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
