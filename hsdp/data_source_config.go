@@ -7,7 +7,7 @@ import (
 
 func dataSourceConfig() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceUserRead,
+		Read: dataSourceConfigRead,
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -51,6 +51,7 @@ func dataSourceConfigRead(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		return err
 	}
+	d.SetId("data" + region + environment + service)
 	if url, err := c.Service(service).GetString("url"); err == nil {
 		_ = d.Set("url", url)
 	}
