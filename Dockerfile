@@ -1,5 +1,5 @@
 ARG cf_provider_version=0.12.2
-ARG hsdp_provider_version=0.5.0
+ARG hsdp_provider_version=0.5.5
 
 FROM alpine:latest AS cf
 ARG cf_provider_version
@@ -16,7 +16,7 @@ RUN CHECKSUM=$(cat checksums.txt |grep linux_amd64|grep -v zip|cut -f 1 -d ' ') 
     echo ${CHECKSUM}"  "terraform-provider-cloudfoundry_linux_amd64 |sha1sum -c
 RUN chmod +x terraform-provider-cloudfoundry_linux_amd64
 
-FROM golang:1.14.4-alpine3.11 as build_base
+FROM golang:1.15-alpine3.12 as build_base
 RUN apk add --no-cache git openssh gcc musl-dev
 WORKDIR /terraform-provider-hsdp
 COPY go.mod .
@@ -31,7 +31,7 @@ FROM build_base AS builder
 COPY . .
 RUN ./buildscript.sh
 
-FROM hashicorp/terraform:0.12.25
+FROM hashicorp/terraform:0.13.0
 ARG cf_provider_version
 ARG hsdp_provider_version
 ENV CF_PROVIDER_VERSION ${cf_provider_version}
