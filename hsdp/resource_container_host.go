@@ -132,7 +132,7 @@ func InstanceStateRefreshFunc(client *cartel.Client, nameTag string, failStates 
 
 		for _, failState := range failStates {
 			if state == failState {
-				return resp, state, fmt.Errorf("Failed to reach target state. Reason: %s",
+				return resp, state, fmt.Errorf("failed to reach target state, reason: %s",
 					state)
 			}
 		}
@@ -188,7 +188,7 @@ func resourceContainerHostCreate(d *schema.ResourceData, m interface{}) error {
 		// Trigger a delete to prevent failed instances from lingering
 		_, _, _ = client.Destroy(tagName)
 		return fmt.Errorf(
-			"Error waiting for instance (%s) to become ready: %s",
+			"error waiting for instance (%s) to become ready: %s",
 			ch.InstanceID(), err)
 	}
 	d.SetConnInfo(map[string]string{
@@ -281,6 +281,9 @@ func resourceContainerHostRead(d *schema.ResourceData, m interface{}) error {
 
 	tagName := d.Get("name").(string)
 	state, _, err := client.GetDeploymentState(tagName)
+	if err != nil {
+		return err
+	}
 	if state != "succeeded" {
 		// Unless we have a succeeded deploy, taint the resource
 		d.SetId("")
