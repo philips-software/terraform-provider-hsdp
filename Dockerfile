@@ -38,5 +38,5 @@ ENV CF_PROVIDER_VERSION ${cf_provider_version}
 ENV HSDP_PROVIDER_VERSION ${hsdp_provider_version}
 LABEL maintainer="Andy Lo-A-Foe <andy.lo-a-foe@philips.com>"
 ENV HOME /root
-COPY --from=cf /build/terraform-provider-cloudfoundry_linux_amd64 $HOME/.terraform.d/plugins/linux_amd64/terraform-provider-cloudfoundry_v${CF_PROVIDER_VERSION}
-COPY --from=builder /terraform-provider-hsdp/build/terraform-provider-hsdp $HOME/.terraform.d/plugins/linux_amd64/terraform-provider-hsdp_v${HSDP_PROVIDER_VERSION}
+COPY --from=cf /build/terraform-provider-cloudfoundry_linux_amd64 $HOME/.terraform.d/plugins/philips.com/hsdp/cloudfoundry/${CF_PROVIDER_VERSION}/linux_amd64/terraform-provider-cloudfoundry_v${CF_PROVIDER_VERSION}
+COPY --from=builder /terraform-provider-hsdp/build/terraform-provider-hsdp $HOME/.terraform.d/plugins/philips.com/hsdp/hsdp/${HSDP_PROVIDER_VERSION}/linux_amd64/terraform-provider-hsdp_v${HSDP_PROVIDER_VERSION}
