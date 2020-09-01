@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.6.0
+- NEW: hsdp_metrics_autoscaler resource
+- Migrate Terraform PLugin SDK
+- Upgrade to Terraform 0.13.1
+
 ## v0.5.0
 - NEW: hsdp_container_host
 - Migrate to Terraform Plugin SDK
