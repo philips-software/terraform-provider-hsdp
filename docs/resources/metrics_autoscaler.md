@@ -6,9 +6,8 @@ Manages HSDP Metrics Autoscaler settings for Cloudfoundry applications hosted in
 [Metrics Service Broker](https://www.hsdp.io/documentation/metrics-service-broker)
 
 ## Example Usage
-The following resource enables autoscaling of the HSDP CF hosted `myapp`. A maximum of
-10 instances can be provisioned. The app upscales at 90% CPU utilization.
-An instance is downscaled when only 5% CPU is utilized.
+The following resource enables autoscaling of the HSDP CF hosted `myapp`, scaling up to 10 instances maximum.
+The app upscales at 90% CPU utilization and downscales again when CPU usage falls below 5%.
 
 ```hcl
 resource "hsdp_metrics_autoscaler" "myapp_autoscaler" {
