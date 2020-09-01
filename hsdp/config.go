@@ -4,6 +4,7 @@ import (
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/philips-software/go-hsdp-api/cartel"
 	"github.com/philips-software/go-hsdp-api/config"
+	"github.com/philips-software/go-hsdp-api/console"
 	"github.com/philips-software/go-hsdp-api/credentials"
 	"github.com/philips-software/go-hsdp-api/iam"
 	"net/http"
@@ -21,13 +22,17 @@ type Config struct {
 	CartelNoTLS       bool
 	CartelSkipVerify  bool
 	RetryMax          int
+	UAAUsername       string
+	UAAPassword       string
 
-	iamClient       *iam.Client
-	cartelClient    *cartel.Client
-	credsClient     *credentials.Client
-	credsClientErr  error
-	cartelClientErr error
-	iamClientErr    error
+	iamClient        *iam.Client
+	cartelClient     *cartel.Client
+	credsClient      *credentials.Client
+	consoleClient    *console.Client
+	credsClientErr   error
+	cartelClientErr  error
+	iamClientErr     error
+	consoleClientErr error
 }
 
 func (c *Config) IAMClient() (*iam.Client, error) {
@@ -40,6 +45,10 @@ func (c *Config) CartelClient() (*cartel.Client, error) {
 
 func (c *Config) CredentialsClient() (*credentials.Client, error) {
 	return c.credsClient, c.credsClientErr
+}
+
+func (c *Config) ConsoleClient() (*console.Client, error) {
+	return c.consoleClient, c.consoleClientErr
 }
 
 func (c *Config) CredentialsClientWithLogin(username, password string) (*credentials.Client, error) {
@@ -140,5 +149,28 @@ func (c *Config) setupCartelClient() {
 		return
 	}
 	c.cartelClient = client
+	return
+}
+
+// setupConsoleClient sets up an Console client
+func (c *Config) setupConsoleClient() {
+	client, err := console.NewClient(nil, &console.Config{
+		Region:   c.Region,
+		Debug:    c.Debug,
+		DebugLog: c.DebugLog,
+	})
+	if err != nil {
+		c.consoleClient = nil
+		c.consoleClientErr = err
+		return
+	}
+	if c.UAAUsername != "" && c.UAAPassword != "" {
+		err = client.Login(c.UAAUsername, c.UAAPassword)
+		if err != nil {
+			c.consoleClientErr = err
+			return
+		}
+	}
+	c.consoleClient = client
 	return
 }

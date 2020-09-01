@@ -13,8 +13,11 @@ func TestConfig(t *testing.T) {
 	c.Environment = "client-test"
 	c.OrgAdminUsername = "foo"
 	c.OrgAdminPassword = "bar"
+	c.UAAPassword = "foo"
+	c.UAAUsername = "bar"
 
 	c.setupIAMClient()
+	c.setupConsoleClient()
 
 	assert.Equal(t, iam.ErrNotAuthorized, c.iamClientErr)
 }

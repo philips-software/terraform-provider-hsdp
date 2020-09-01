@@ -31,7 +31,7 @@ FROM build_base AS builder
 COPY . .
 RUN ./buildscript.sh
 
-FROM hashicorp/terraform:0.13.0
+FROM hashicorp/terraform:0.13.1
 ARG cf_provider_version
 ARG hsdp_provider_version
 ENV CF_PROVIDER_VERSION ${cf_provider_version}

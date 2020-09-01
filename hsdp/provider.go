@@ -16,10 +16,9 @@ func Provider(build string) terraform.ResourceProvider {
 				Description:  descriptions["region"],
 			},
 			"environment": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				RequiredWith: []string{"region"},
-				Description:  descriptions["environment"],
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: descriptions["environment"],
 			},
 			"iam_url": {
 				Type:        schema.TypeString,
@@ -82,6 +81,19 @@ func Provider(build string) terraform.ResourceProvider {
 				Description:   descriptions["org_admin_password"],
 				RequiredWith:  []string{"org_admin_username"},
 				ConflictsWith: []string{"service_private_key"},
+			},
+			"uaa_username": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  descriptions["uaa_username"],
+				RequiredWith: []string{"uaa_password"},
+			},
+			"uaa_password": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Sensitive:    true,
+				Description:  descriptions["uaa_password"],
+				RequiredWith: []string{"uaa_username"},
 			},
 			"shared_key": {
 				Type:        schema.TypeString,
@@ -154,6 +166,7 @@ func Provider(build string) terraform.ResourceProvider {
 			"hsdp_iam_mfa_policy":     resourceIAMMFAPolicy(),
 			"hsdp_credentials_policy": resourceCredentialsPolicy(),
 			"hsdp_container_host":     resourceContainerHost(),
+			"hsdp_metrics_autoscaler": resourceMetricsAutoscaler(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":     dataSourceIAMIntrospect(),
@@ -192,8 +205,10 @@ func init() {
 		"cartel_token":        "The Cartel token key",
 		"cartel_secret":       "The Cartel secret key",
 		"cartel_no_tls":       "Disable TLS for Cartel",
-		"cartel_skip_verify":  "Skip certificate verificsation",
+		"cartel_skip_verify":  "Skip certificate verification",
 		"retry_max":           "Maximum number of retries for API requests",
+		"uaa_username":        "The username of the Cloudfoundry account to use",
+		"uaa_password":        "The password of the Cloudfoundry account to use",
 	}
 }
 
@@ -222,10 +237,13 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.CartelNoTLS = d.Get("cartel_no_tls").(bool)
 	config.CartelSkipVerify = d.Get("cartel_skip_verify").(bool)
 	config.RetryMax = d.Get("retry_max").(int)
+	config.UAAUsername = d.Get("uaa_username").(string)
+	config.UAAPassword = d.Get("uaa_password").(string)
 
 	config.setupIAMClient()
 	config.setupS3CredsClient()
 	config.setupCartelClient()
+	config.setupConsoleClient()
 
 	return config, nil
 }
