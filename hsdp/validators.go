@@ -27,3 +27,10 @@ func validatePolicyJSON(val interface{}, key string) (warns []string, errs []err
 	}
 	return
 }
+
+var thresholdMapping = map[string]string{
+	"cpu":          "threshold_cpu",
+	"memory":       "threshold_memory",
+	"http-rate":    "threshold_http_rate",
+	"http-latency": "threshold_http_latency",
+}

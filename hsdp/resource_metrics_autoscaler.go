@@ -25,12 +25,12 @@ func resourceMetricsAutoscaler() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"instance_id": {
+			"metrics_instance_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"name": {
+			"app_name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -50,10 +50,79 @@ func resourceMetricsAutoscaler() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"thresholds": &schema.Schema{
+			"threshold_http_latency": &schema.Schema{
 				Type:     schema.TypeSet,
 				Required: true,
-				MaxItems: 10,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:     schema.TypeBool,
+							Required: true,
+						},
+						"max": {
+							Type:     schema.TypeFloat,
+							Optional: true,
+							Default:  10000,
+						},
+						"min": {
+							Type:     schema.TypeFloat,
+							Optional: true,
+							Default:  10,
+						},
+					},
+				},
+			},
+			"threshold_http_rate": &schema.Schema{
+				Type:     schema.TypeSet,
+				Required: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:     schema.TypeBool,
+							Required: true,
+						},
+						"max": {
+							Type:     schema.TypeFloat,
+							Optional: true,
+							Default:  6000000,
+						},
+						"min": {
+							Type:     schema.TypeFloat,
+							Optional: true,
+							Default:  300,
+						},
+					},
+				},
+			},
+			"threshold_memory": &schema.Schema{
+				Type:     schema.TypeSet,
+				Required: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:     schema.TypeBool,
+							Required: true,
+						},
+						"max": {
+							Type:     schema.TypeFloat,
+							Optional: true,
+							Default:  100,
+						},
+						"min": {
+							Type:     schema.TypeFloat,
+							Optional: true,
+							Default:  20,
+						},
+					},
+				},
+			},
+			"threshold_cpu": &schema.Schema{
+				Type:     schema.TypeSet,
+				Required: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"enabled": {
@@ -64,16 +133,12 @@ func resourceMetricsAutoscaler() *schema.Resource {
 						"max": {
 							Type:     schema.TypeFloat,
 							Optional: true,
-							Default:  0,
+							Default:  100,
 						},
 						"min": {
 							Type:     schema.TypeFloat,
 							Optional: true,
-							Default:  0,
-						},
-						"name": {
-							Type:     schema.TypeString,
-							Required: true,
+							Default:  5,
 						},
 					},
 				},
@@ -89,8 +154,8 @@ func resourceMetricsAutoscalerDelete(d *schema.ResourceData, m interface{}) erro
 		return err
 	}
 	var app console.Application
-	instanceID := d.Get("instance_id").(string)
-	app.Name = d.Get("name").(string)
+	instanceID := d.Get("metrics_instance_id").(string)
+	app.Name = d.Get("app_name").(string)
 	app.Enabled = false
 	result, _, err := client.Metrics.UpdateApplicationAutoscaler(instanceID, app)
 	if err != nil {
@@ -113,15 +178,34 @@ func resourceMetricsAutoscalerRead(d *schema.ResourceData, m interface{}) error 
 	if err != nil {
 		return err
 	}
-	instanceID := d.Get("instance_id").(string)
-	name := d.Get("name").(string)
+	instanceID := d.Get("metrics_instance_id").(string)
+	name := d.Get("app_name").(string)
 
 	app, _, err := client.Metrics.GetApplicationAutoscaler(instanceID, name)
+	if err != nil {
+		return err
+	}
 	_ = d.Set("min_instances", app.MinInstances)
 	_ = d.Set("max_instances", app.MaxInstances)
 	_ = d.Set("enabled", app.Enabled)
-
+	for _, th := range app.Thresholds {
+		mapping, ok := thresholdMapping[th.Name]
+		if !ok {
+			return fmt.Errorf("unknown threshold: %s", th.Name)
+		}
+		fields := make(map[string]interface{})
+		fields["enabled"] = th.Enabled
+		fields["min"] = th.Min
+		fields["max"] = th.Max
+		s := &schema.Set{F: resourceMetricsThresholdHash}
+		s.Add(fields)
+		_ = d.Set(mapping, s)
+	}
 	return nil
+}
+
+func resourceMetricsThresholdHash(v interface{}) int {
+	return 0
 }
 
 func resourceMetricsAutoscalerCreate(d *schema.ResourceData, m interface{}) error {
@@ -132,13 +216,27 @@ func resourceMetricsAutoscalerCreate(d *schema.ResourceData, m interface{}) erro
 	}
 	var app console.Application
 
-	instanceID := d.Get("instance_id").(string)
+	instanceID := d.Get("metrics_instance_id").(string)
 
-	app.Name = d.Get("name").(string)
+	app.Name = d.Get("app_name").(string)
 	app.MaxInstances = d.Get("max_instances").(int)
 	app.MinInstances = d.Get("min_instances").(int)
 	app.Enabled = d.Get("enabled").(bool)
 
+	for key, mapping := range thresholdMapping {
+		if v, ok := d.GetOk(mapping); ok {
+			vL := v.(*schema.Set).List()
+			for _, vi := range vL {
+				mVi := vi.(map[string]interface{})
+				var threshold console.Threshold
+				threshold.Name = key
+				threshold.Min = mVi["min"].(float64)
+				threshold.Max = mVi["max"].(float64)
+				threshold.Enabled = mVi["enabled"].(bool)
+				app.Thresholds = append(app.Thresholds, threshold)
+			}
+		}
+	}
 	created, _, err := client.Metrics.UpdateApplicationAutoscaler(instanceID, app)
 	if err != nil {
 		return err
@@ -148,4 +246,24 @@ func resourceMetricsAutoscalerCreate(d *schema.ResourceData, m interface{}) erro
 	}
 	d.SetId(instanceID + created.Name)
 	return nil
+}
+
+func expandMapList(configured []interface{}) []map[string]interface{} {
+	vs := make([]map[string]interface{}, 0, len(configured))
+	for _, v := range configured {
+		val, ok := v.(map[string]interface{})
+		if ok {
+			vs = append(vs, val)
+		}
+	}
+	return vs
+}
+
+func stringInSlice(slice []string, val string) bool {
+	for _, item := range slice {
+		if item == val {
+			return true
+		}
+	}
+	return false
 }

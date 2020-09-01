@@ -16,10 +16,9 @@ func Provider(build string) terraform.ResourceProvider {
 				Description:  descriptions["region"],
 			},
 			"environment": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				RequiredWith: []string{"region"},
-				Description:  descriptions["environment"],
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: descriptions["environment"],
 			},
 			"iam_url": {
 				Type:        schema.TypeString,
