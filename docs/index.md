@@ -70,7 +70,11 @@ The following arguments are supported:
 
 * `org_admin_username` - (Optional) Your IAM admin username.
 
-* `org_admin_password` - (Optional) Your IAM admin passowrd.
+* `org_admin_password` - (Optional) Your IAM admin password.
+
+* `uaa_username` - (Optional) The HSDP CF UAA username.
+
+* `uaa_password` - (Optional) The HSDP CF UAA password.
 
 * `org_id` - (Optional) Your IAM root ORG id as provided by HSDP
 
