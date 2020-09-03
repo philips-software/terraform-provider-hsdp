@@ -76,6 +76,8 @@ The following arguments are supported:
 
 * `uaa_password` - (Optional) The HSDP CF UAA password.
 
+* `uaa_url` - (Optional) The URL of the UAA authentication service
+
 * `org_id` - (Optional) Your IAM root ORG id as provided by HSDP
 
 * `shared_key` - (Optional) The shared key as provided by HSDP. Actions which require API signing will not work if this value is missing.

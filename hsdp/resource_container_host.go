@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/philips-software/go-hsdp-api/cartel"
 	"log"
+	"net/http"
 	"time"
 )
 
@@ -280,8 +281,13 @@ func resourceContainerHostRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	tagName := d.Get("name").(string)
-	state, _, err := client.GetDeploymentState(tagName)
+	state, resp, err := client.GetDeploymentState(tagName)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusBadRequest {
+			// State not found, probably a botched provision :(
+			d.SetId("")
+			return nil
+		}
 		return err
 	}
 	if state != "succeeded" {

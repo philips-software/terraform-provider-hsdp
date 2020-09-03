@@ -95,6 +95,11 @@ func Provider(build string) terraform.ResourceProvider {
 				Description:  descriptions["uaa_password"],
 				RequiredWith: []string{"uaa_username"},
 			},
+			"uaa_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: descriptions["uaa_url"],
+			},
 			"shared_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -209,6 +214,7 @@ func init() {
 		"retry_max":           "Maximum number of retries for API requests",
 		"uaa_username":        "The username of the Cloudfoundry account to use",
 		"uaa_password":        "The password of the Cloudfoundry account to use",
+		"uaa_url":             "The URL of the UAA server",
 	}
 }
 
@@ -239,6 +245,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.RetryMax = d.Get("retry_max").(int)
 	config.UAAUsername = d.Get("uaa_username").(string)
 	config.UAAPassword = d.Get("uaa_password").(string)
+	config.UAAURL = d.Get("uaa_url").(string)
 
 	config.setupIAMClient()
 	config.setupS3CredsClient()

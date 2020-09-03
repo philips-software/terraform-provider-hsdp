@@ -1,7 +1,7 @@
 # hsdp_metrics_autoscaler
 Manages HSDP Metrics Autoscaler settings for Cloudfoundry applications hosted in an HSDP CF space.
 
-> This resource is only available when the `region` and `uaa_*` keys are set in the provider config
+~> **NOTE:** This resource is only available when the `region` and `uaa_*` keys are set in the provider config
 
 [Metrics Service Broker](https://www.hsdp.io/documentation/metrics-service-broker)
 

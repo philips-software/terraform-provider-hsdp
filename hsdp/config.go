@@ -24,6 +24,7 @@ type Config struct {
 	RetryMax          int
 	UAAUsername       string
 	UAAPassword       string
+	UAAURL            string
 
 	iamClient        *iam.Client
 	cartelClient     *cartel.Client
