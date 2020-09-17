@@ -178,6 +178,7 @@ func Provider(build string) terraform.ResourceProvider {
 			"hsdp_iam_user":           dataSourceUser(),
 			"hsdp_iam_permissions":    dataSourceIAMPermissions(),
 			"hsdp_iam_org":            dataSourceIAMOrg(),
+			"hsdp_iam_proposition":    dataSourceIAMProposition(),
 			"hsdp_credentials_access": dataSourceS3CredentialsAccess(),
 			"hsdp_credentials_policy": dataSourceCredentialsPolicy(),
 			"hsdp_config":             dataSourceConfig(),

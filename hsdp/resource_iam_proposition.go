@@ -96,5 +96,8 @@ func resourceIAMPropositionUpdate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceIAMPropositionDelete(d *schema.ResourceData, m interface{}) error {
+	// As HSDP IAM does not support IAM proposition deletion we simply
+	// clear the proposition from state. This will be properly implemented
+	// once the IAM API balances out
 	return nil
 }
