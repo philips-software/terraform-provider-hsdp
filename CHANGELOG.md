@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.6.2
+- NEW: hsdp_iam_proposition data source
+- Updated hsdp_iam_org resource to include additional fields
+- Implement hsdp_iam_org deletion
+
+## v0.6.1
+- Bugfix release
+
 ## v0.6.0
 - NEW: hsdp_metrics_autoscaler resource
 - Migrate Terraform PLugin SDK
