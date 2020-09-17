@@ -12,7 +12,19 @@ func dataSourceIAMOrg() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"parent_org_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"external_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"display_name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -52,6 +64,9 @@ func dataSourceIAMOrgRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set("description", org.Description)
 	_ = d.Set("active", org.Active)
 	_ = d.Set("type", org.Type)
+	_ = d.Set("external_id", org.ExternalID)
+	_ = d.Set("display_name", org.DisplayName)
+	_ = d.Set("parent_org_id", org.Parent.Value)
 
 	return err
 }
