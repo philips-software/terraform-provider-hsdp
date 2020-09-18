@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.6.3
+- NEW: hsdp_iam_application data source
+- Fix data ID for hsdp_iam_proposition
+
 ## v0.6.2
 - NEW: hsdp_iam_proposition data source
 - Updated hsdp_iam_org resource to include additional fields

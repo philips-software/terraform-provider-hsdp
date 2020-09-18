@@ -12,4 +12,5 @@ var (
 	ErrMissingClientID       = errors.New("missing client id")
 	ErrMissingClientPassword = errors.New("missing client password")
 	ErrInvalidResponse       = errors.New("invalid response received")
+	ErrResourceNotFound      = errors.New("resource not found")
 )

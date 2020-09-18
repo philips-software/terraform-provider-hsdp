@@ -5,15 +5,15 @@ import (
 	"github.com/philips-software/go-hsdp-api/iam"
 )
 
-func dataSourceIAMProposition() *schema.Resource {
+func dataSourceIAMApplication() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIAMPropositionRead,
+		Read: dataSourceIAMApplicationRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"organization_id": {
+			"proposition_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -30,25 +30,28 @@ func dataSourceIAMProposition() *schema.Resource {
 
 }
 
-func dataSourceIAMPropositionRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIAMApplicationRead(d *schema.ResourceData, meta interface{}) error {
 	config := meta.(*Config)
 	client, err := config.IAMClient()
 	if err != nil {
 		return err
 	}
-	orgId := d.Get("organization_id").(string)
+	propID := d.Get("proposition_id").(string)
 	name := d.Get("name").(string)
 
-	prop, _, err := client.Propositions.GetProposition(&iam.GetPropositionsOptions{
-		OrganizationID: &orgId,
-		Name:           &name,
+	prop, _, err := client.Applications.GetApplication(&iam.GetApplicationsOptions{
+		PropositionID: &propID,
+		Name:          &name,
 	})
 	if err != nil {
 		return err
 	}
+	if len(prop) == 0 {
+		return ErrResourceNotFound
+	}
 
-	d.SetId(prop.ID)
-	_ = d.Set("description", prop.Description)
-	_ = d.Set("global_reference_id", prop.GlobalReferenceID)
+	d.SetId(prop[0].ID)
+	_ = d.Set("description", prop[0].Description)
+	_ = d.Set("global_reference_id", prop[0].GlobalReferenceID)
 	return nil
 }
