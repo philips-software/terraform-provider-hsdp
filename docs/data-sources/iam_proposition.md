@@ -13,7 +13,7 @@ data "hsdp_iam_proposition" "my_prop" {
 
 ```hcl
 output "my_prop_display_name" {
-   value = data.hsdp_iam_org.display_name
+   value = data.hsdp_iam_proposition.my_prop.display_name
 }
 ```
 
@@ -28,5 +28,5 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `description` - The description of the organization
+* `description` - The description of the proposition
 * `global_reference_id` - The global reference ID of the proposition
