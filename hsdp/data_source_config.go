@@ -29,6 +29,10 @@ func dataSourceConfig() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"domain": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 
@@ -57,6 +61,9 @@ func dataSourceConfigRead(d *schema.ResourceData, meta interface{}) error {
 	}
 	if host, err := c.Service(service).GetString("host"); err == nil {
 		_ = d.Set("host", host)
+	}
+	if domain, err := c.Service(service).GetString("domain"); err == nil {
+		_ = d.Set("domain", domain)
 	}
 	return nil
 }

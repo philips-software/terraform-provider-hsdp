@@ -14,7 +14,7 @@ resource "hsdp_credentials_policy" "policy1" {
   policy = <<POLICY
 {
   "conditions": {
-    "managingOrganizations": [ var.org_id ],
+    "managingOrganizations": [ "${var.org_id}" ],
     "groups": [ "PublishGroup" ]
   },
   "allowed": {

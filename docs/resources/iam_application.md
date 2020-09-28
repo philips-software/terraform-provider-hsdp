@@ -10,7 +10,7 @@ The following example creates an application
 resource "hsdp_iam_application" "testapp" {
   name                = "TESTAPP"
   description         = "Test application"
-  proposition_id      = hsdp_iam_application.testprop.id
+  proposition_id      = hsdp_iam_proposition.testprop.id
   global_reference_id = "some-app-ref-here"
 }
 ```
