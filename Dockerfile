@@ -1,5 +1,4 @@
-ARG cf_provider_version=0.12.2
-ARG hsdp_provider_version=0.5.5
+ARG hsdp_provider_version=0.6.3
 
 FROM alpine:latest AS cf
 ARG cf_provider_version
@@ -31,12 +30,9 @@ FROM build_base AS builder
 COPY . .
 RUN ./buildscript.sh
 
-FROM hashicorp/terraform:0.13.0
-ARG cf_provider_version
-ARG hsdp_provider_version
+FROM hashicorp/terraform:0.13.2
 ENV CF_PROVIDER_VERSION ${cf_provider_version}
 ENV HSDP_PROVIDER_VERSION ${hsdp_provider_version}
 LABEL maintainer="Andy Lo-A-Foe <andy.lo-a-foe@philips.com>"
 ENV HOME /root
-COPY --from=cf /build/terraform-provider-cloudfoundry_linux_amd64 $HOME/.terraform.d/plugins/philips.com/hsdp/cloudfoundry/${CF_PROVIDER_VERSION}/linux_amd64/terraform-provider-cloudfoundry_v${CF_PROVIDER_VERSION}
 COPY --from=builder /terraform-provider-hsdp/build/terraform-provider-hsdp $HOME/.terraform.d/plugins/philips.com/hsdp/hsdp/${HSDP_PROVIDER_VERSION}/linux_amd64/terraform-provider-hsdp_v${HSDP_PROVIDER_VERSION}
