@@ -4,8 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## v0.6.4
+## v0.6.5
 - NEW: hsdp_iam_password_policy
+
+## v0.6.4
+- Add domain to hsdp config data source
+- Documentation fixes
 
 ## v0.6.3
 - NEW: hsdp_iam_application data source
