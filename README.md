@@ -1,6 +1,6 @@
 # HSDP Terraform provider
 
-- Website: https://www.terraform.io
+- Website: https://www.hsdp.io
 - Documentation: https://registry.terraform.io/providers/philips-software/hsdp/latest/docs
 
 <img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
@@ -19,7 +19,7 @@ terraform {
   required_providers {
     hsdp = {
       source = "philips-software/hsdp"
-      version = ">= 0.6.3"
+      version = ">= 0.6.5"
     }
   }
 }
@@ -28,7 +28,7 @@ terraform {
 ## Development requirements
 
 -	[Terraform](https://www.terraform.io/downloads.html) 0.13.x
--	[Go](https://golang.org/doc/install) 1.14 or newer (to build the provider plugin)
+-	[Go](https://golang.org/doc/install) 1.15 or newer (to build the provider plugin)
 
 ### Older version
 
