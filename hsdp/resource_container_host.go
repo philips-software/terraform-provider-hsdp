@@ -172,7 +172,7 @@ func resourceContainerHostCreate(d *schema.ResourceData, m interface{}) error {
 		cartel.InstanceRole(instanceRole),
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("create error: %d: %s", ch.Code, ch.Description)
 	}
 	d.SetId(ch.InstanceID())
 
