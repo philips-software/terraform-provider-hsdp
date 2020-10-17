@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.6.6
+- NEW: Support for tagging Container Host instances
+- Improve error handling for Container Host provisioning
+- Fix Dockerfile for local development
+
 ## v0.6.5
 - NEW: hsdp_iam_password_policy
 
