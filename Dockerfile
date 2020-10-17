@@ -1,4 +1,4 @@
-ARG hsdp_provider_version=0.6.2
+ARG hsdp_provider_version=0.6.6
 
 FROM golang:1.15.2-alpine3.12 as build_base
 RUN apk add --no-cache git openssh gcc musl-dev
@@ -16,9 +16,8 @@ COPY . .
 RUN ./buildscript.sh
 
 FROM hashicorp/terraform:0.13.4
-ARG cf_provider_version
 ARG hsdp_provider_version
 ENV HSDP_PROVIDER_VERSION ${hsdp_provider_version}
 LABEL maintainer="Andy Lo-A-Foe <andy.lo-a-foe@philips.com>"
 ENV HOME /root
-COPY --from=builder /terraform-provider-hsdp/build/terraform-provider-hsdp $HOME/.terraform.d/plugins/philips.com/hsdp/hsdp/${HSDP_PROVIDER_VERSION}/linux_amd64/terraform-provider-hsdp_v${HSDP_PROVIDER_VERSION}
+COPY --from=builder /terraform-provider-hsdp/build/terraform-provider-hsdp $HOME/.terraform.d/plugins/registry.terraform.io/philips-software/hsdp/${HSDP_PROVIDER_VERSION}/linux_amd64/terraform-provider-hsdp_v${HSDP_PROVIDER_VERSION}
