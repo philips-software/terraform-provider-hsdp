@@ -10,6 +10,24 @@ import (
 	"time"
 )
 
+func tagsSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeMap,
+		Required: true,
+		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+			// TODO: handle empty tags
+			if k == "tags.billing" {
+				return true
+			}
+			return false
+		},
+		DefaultFunc: func() (interface{}, error) {
+			return map[string]interface{}{"billing": ""}, nil
+		},
+		Elem: &schema.Schema{Type: schema.TypeString},
+	}
+}
+
 func resourceContainerHost() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
@@ -119,7 +137,9 @@ func resourceContainerHost() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"tags": tagsSchema(),
 		},
+		SchemaVersion: 1,
 	}
 }
 
@@ -159,6 +179,13 @@ func resourceContainerHostCreate(d *schema.ResourceData, m interface{}) error {
 	securityGroups := expandStringList(d.Get("security_groups").(*schema.Set).List())
 	userGroups := expandStringList(d.Get("user_groups").(*schema.Set).List())
 	instanceRole := d.Get("instance_role").(string)
+	tagList := d.Get("tags").(map[string]interface{})
+	tags := make(map[string]string)
+	for t, v := range tagList {
+		if val, ok := v.(string); ok {
+			tags[t] = val
+		}
+	}
 
 	ch, _, err := client.Create(tagName,
 		cartel.SecurityGroups(securityGroups...),
@@ -170,6 +197,7 @@ func resourceContainerHostCreate(d *schema.ResourceData, m interface{}) error {
 		cartel.VolumeEncryption(encryptVolumes),
 		cartel.Protect(protect),
 		cartel.InstanceRole(instanceRole),
+		cartel.Tags(tags),
 	)
 	if err != nil {
 		return fmt.Errorf("create error: %d: %s", ch.Code, ch.Description)
@@ -215,6 +243,15 @@ func resourceContainerHostUpdate(d *schema.ResourceData, m interface{}) error {
 		return ErrInstanceIDMismatch
 	}
 
+	if d.HasChange("tags") {
+		o, n := d.GetChange("tags")
+		change := generateTagChange(o, n)
+		log.Printf("[o:%v] [n:%v] [c:%v]\n", o, n, change)
+		_, _, err := client.AddTags([]string{tagName}, change)
+		if err != nil {
+			return err
+		}
+	}
 	if d.HasChange("user_groups") {
 		o, n := d.GetChange("user_groups")
 		old := expandStringList(o.(*schema.Set).List())
@@ -315,6 +352,7 @@ func resourceContainerHostRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("launch_time", ch.LaunchTime)
 	_ = d.Set("private_ip", ch.PrivateAddress)
 	_ = d.Set("subnet", ch.Subnet)
+	_ = d.Set("tags", normalizeTags(ch.Tags))
 
 	return nil
 }
@@ -341,4 +379,35 @@ func resourceContainerHostDelete(d *schema.ResourceData, m interface{}) error {
 	d.SetId("")
 	return nil
 
+}
+
+func normalizeTags(tags map[string]string) map[string]string {
+	normalized := make(map[string]string)
+	for k, v := range tags {
+		if k == "billing" || v == "" {
+			continue
+		}
+		normalized[k] = v
+	}
+	return normalized
+}
+
+func generateTagChange(old, new interface{}) map[string]string {
+	change := make(map[string]string)
+	o := old.(map[string]interface{})
+	n := new.(map[string]interface{})
+	for k := range o {
+		if newVal, ok := n[k]; !ok || newVal == "" {
+			change[k] = ""
+		}
+	}
+	for k, v := range n {
+		if k == "billing" {
+			continue
+		}
+		if s, ok := v.(string); ok {
+			change[k] = s
+		}
+	}
+	return change
 }
