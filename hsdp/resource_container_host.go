@@ -40,9 +40,9 @@ func resourceContainerHost() *schema.Resource {
 		Delete: resourceContainerHostDelete,
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(12 * time.Minute),
-			Update: schema.DefaultTimeout(12 * time.Minute),
-			Delete: schema.DefaultTimeout(22 * time.Minute),
+			Create: schema.DefaultTimeout(30 * time.Minute),
+			Update: schema.DefaultTimeout(15 * time.Minute),
+			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{

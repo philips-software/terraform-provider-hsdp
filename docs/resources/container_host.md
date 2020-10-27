@@ -26,6 +26,10 @@ resource "hsdp_container_host" "zahadoom" {
     script_path  = "/home/${var.user}/bootstrap.bash"
   }
 
+  tags {
+    "created_by" = "terraform"
+  }
+
   provisioner "remote-exec" {
     inline = [
       "ifconfig",
@@ -51,7 +55,7 @@ The following arguments are supported:
 * `volume_size` - (Optional) Volume size in GB.
 * `security_groups` - (Optional) list(string) of Security groups to attach. Default `[]`
 * `user_groups` - (Optional) list(string) of User groups to attach. Default `[]`
-
+* `tags` - (Optional) Map of tags to assign to the instances
 
 ## Attributes Reference
 
