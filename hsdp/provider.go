@@ -66,6 +66,7 @@ func Provider(build string) terraform.ResourceProvider {
 				Optional:    true,
 				Default:     "",
 				Description: descriptions["org_id"],
+				Deprecated:  "this value is not used anywhere",
 			},
 			"org_admin_username": {
 				Type:          schema.TypeString,

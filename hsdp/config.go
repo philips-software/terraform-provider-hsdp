@@ -135,7 +135,6 @@ func (c *Config) setupS3CredsClient() {
 func (c *Config) setupCartelClient() {
 	client, err := cartel.NewClient(nil, &cartel.Config{
 		Region:      c.Region,
-		Environment: c.Environment,
 		Host:        c.CartelHost,
 		Token:       c.CartelToken,
 		Secret:      c.CartelSecret,
