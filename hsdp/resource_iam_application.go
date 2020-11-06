@@ -1,7 +1,9 @@
 package hsdp
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
 	"net/http"
 )
@@ -9,13 +11,13 @@ import (
 func resourceIAMApplication() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		Create: resourceIAMApplicationCreate,
-		Read:   resourceIAMApplicationRead,
-		Update: resourceIAMApplicationUpdate,
-		Delete: resourceIAMApplicationDelete,
+		CreateContext: resourceIAMApplicationCreate,
+		ReadContext:   resourceIAMApplicationRead,
+		UpdateContext: resourceIAMApplicationUpdate,
+		DeleteContext: resourceIAMApplicationDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -39,11 +41,14 @@ func resourceIAMApplication() *schema.Resource {
 	}
 }
 
-func resourceIAMApplicationCreate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMApplicationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var app iam.Application
@@ -54,21 +59,24 @@ func resourceIAMApplicationCreate(d *schema.ResourceData, m interface{}) error {
 
 	createdApp, _, err := client.Applications.CreateApplication(app)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId(createdApp.ID)
 	_ = d.Set("name", createdApp.Name)
 	_ = d.Set("description", createdApp.Description)
 	_ = d.Set("proposition_id", createdApp.PropositionID)
 	_ = d.Set("global_reference_id", createdApp.GlobalReferenceID)
-	return nil
+	return diags
 }
 
-func resourceIAMApplicationRead(d *schema.ResourceData, m interface{}) error {
+func resourceIAMApplicationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id := d.Id()
@@ -76,25 +84,28 @@ func resourceIAMApplicationRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			d.SetId("")
-			return nil
+			return diags
 		}
-		return err
+		return diag.FromErr(err)
 	}
 	_ = d.Set("name", app.Name)
 	_ = d.Set("description", app.Description)
 	_ = d.Set("proposition_id", app.PropositionID)
 	_ = d.Set("global_reference_id", app.GlobalReferenceID)
-	return nil
+	return diags
 }
 
-func resourceIAMApplicationUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMApplicationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	if !d.HasChange("description") {
-		return nil
+		return diags
 	}
 	// Not implemented by HSDP
-	return nil
+	return diags
 }
 
-func resourceIAMApplicationDelete(d *schema.ResourceData, m interface{}) error {
-	return nil
+func resourceIAMApplicationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+	return diags
 }

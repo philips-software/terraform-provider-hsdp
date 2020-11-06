@@ -1,23 +1,25 @@
 package hsdp
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
 )
 
 func resourceIAMMFAPolicy() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		Create: resourceIAMMFAPolicyCreate,
-		Read:   resourceIAMMFAPolicyRead,
-		Update: resourceIAMMFAPolicyUpdate,
-		Delete: resourceIAMMFAPolicyDelete,
+		CreateContext: resourceIAMMFAPolicyCreate,
+		ReadContext:   resourceIAMMFAPolicyRead,
+		UpdateContext: resourceIAMMFAPolicyUpdate,
+		DeleteContext: resourceIAMMFAPolicyDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -57,11 +59,14 @@ func resourceIAMMFAPolicy() *schema.Resource {
 	}
 }
 
-func resourceIAMMFAPolicyCreate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMMFAPolicyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	name := d.Get("name").(string)
@@ -72,7 +77,7 @@ func resourceIAMMFAPolicyCreate(d *schema.ResourceData, m interface{}) error {
 	organization := d.Get("organization").(string)
 
 	if user != "" && organization != "" {
-		return fmt.Errorf("user and organization are mutually exclusive")
+		return diag.FromErr(fmt.Errorf("user and organization are mutually exclusive"))
 	}
 
 	var policy iam.MFAPolicy
@@ -89,24 +94,27 @@ func resourceIAMMFAPolicyCreate(d *schema.ResourceData, m interface{}) error {
 
 	newPolicy, resp, err := client.MFAPolicies.CreateMFAPolicy(policy)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if newPolicy == nil {
-		return fmt.Errorf("failed to create MFA policy: %d", resp.StatusCode)
+		return diag.FromErr(fmt.Errorf("failed to create MFA policy: %d", resp.StatusCode))
 	}
 	d.SetId(newPolicy.ID)
 	_ = d.Set("name", newPolicy.Name)
 	_ = d.Set("description", newPolicy.Description)
 	_ = d.Set("active", *newPolicy.Active)
 	_ = d.Set("version", newPolicy.Meta.Version)
-	return nil
+	return diags
 }
 
-func resourceIAMMFAPolicyRead(d *schema.ResourceData, m interface{}) error {
+func resourceIAMMFAPolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id := d.Id()
@@ -114,9 +122,9 @@ func resourceIAMMFAPolicyRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			d.SetId("")
-			return nil
+			return diags
 		}
-		return err
+		return diag.FromErr(err)
 	}
 	_ = d.Set("name", policy.Name)
 	_ = d.Set("description", policy.Description)
@@ -130,20 +138,23 @@ func resourceIAMMFAPolicyRead(d *schema.ResourceData, m interface{}) error {
 	}
 	_ = d.Set("version", policy.Meta.Version)
 
-	return nil
+	return diags
 }
 
-func resourceIAMMFAPolicyUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMMFAPolicyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id := d.Id()
 	policy, _, err := client.MFAPolicies.GetMFAPolicyByID(id)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if d.HasChange("description") {
@@ -162,14 +173,17 @@ func resourceIAMMFAPolicyUpdate(d *schema.ResourceData, m interface{}) error {
 	if updatedPolicy != nil {
 		_ = d.Set("version", updatedPolicy.Meta.Version)
 	}
-	return err
+	return diags
 }
 
-func resourceIAMMFAPolicyDelete(d *schema.ResourceData, m interface{}) error {
+func resourceIAMMFAPolicyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var policy iam.MFAPolicy
@@ -177,8 +191,8 @@ func resourceIAMMFAPolicyDelete(d *schema.ResourceData, m interface{}) error {
 
 	ok, _, err := client.MFAPolicies.DeleteMFAPolicy(policy)
 	if !ok {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId("")
-	return nil
+	return diags
 }

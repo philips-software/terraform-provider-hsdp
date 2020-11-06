@@ -1,13 +1,15 @@
 package hsdp
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
 )
 
 func dataSourceIAMApplication() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIAMApplicationRead,
+		ReadContext: dataSourceIAMApplicationRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -30,11 +32,14 @@ func dataSourceIAMApplication() *schema.Resource {
 
 }
 
-func dataSourceIAMApplicationRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIAMApplicationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	propID := d.Get("proposition_id").(string)
 	name := d.Get("name").(string)
@@ -44,14 +49,14 @@ func dataSourceIAMApplicationRead(d *schema.ResourceData, meta interface{}) erro
 		Name:          &name,
 	})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if len(prop) == 0 {
-		return ErrResourceNotFound
+		return diag.FromErr(ErrResourceNotFound)
 	}
 
 	d.SetId(prop[0].ID)
 	_ = d.Set("description", prop[0].Description)
 	_ = d.Set("global_reference_id", prop[0].GlobalReferenceID)
-	return nil
+	return diags
 }

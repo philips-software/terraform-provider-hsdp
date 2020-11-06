@@ -1,14 +1,16 @@
 package hsdp
 
 import (
+	"context"
 	"encoding/json"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceIAMIntrospect() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIAMIntrospectRead,
+		ReadContext: dataSourceIAMIntrospectRead,
 		Schema: map[string]*schema.Schema{
 			"token": {
 				Type:     schema.TypeString,
@@ -31,21 +33,24 @@ func dataSourceIAMIntrospect() *schema.Resource {
 
 }
 
-func dataSourceIAMIntrospectRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIAMIntrospectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resp, _, err := client.Introspect()
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	introspectJSON, err := json.Marshal(&resp)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resp.Username)
@@ -54,5 +59,5 @@ func dataSourceIAMIntrospectRead(d *schema.ResourceData, meta interface{}) error
 	_ = d.Set("token", client.Token())
 	_ = d.Set("introspect", string(introspectJSON))
 
-	return err
+	return diags
 }

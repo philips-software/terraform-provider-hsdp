@@ -1,12 +1,14 @@
 package hsdp
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceIAMPermissions() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIAMPermissionsRead,
+		ReadContext: dataSourceIAMPermissionsRead,
 		Schema: map[string]*schema.Schema{
 			"permissions": {
 				Type:     schema.TypeSet,
@@ -19,17 +21,20 @@ func dataSourceIAMPermissions() *schema.Resource {
 
 }
 
-func dataSourceIAMPermissionsRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIAMPermissionsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resp, _, err := client.Permissions.GetPermissions(nil) // Get all permissions
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	permissions := make([]string, 0)
 
@@ -39,5 +44,5 @@ func dataSourceIAMPermissionsRead(d *schema.ResourceData, meta interface{}) erro
 	d.SetId("permissions")
 	_ = d.Set("permissions", permissions)
 
-	return err
+	return diags
 }

@@ -1,9 +1,11 @@
 package hsdp
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/cartel"
 	"log"
 	"net/http"
@@ -30,14 +32,10 @@ func tagsSchema() *schema.Schema {
 
 func resourceContainerHost() *schema.Resource {
 	return &schema.Resource{
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
-		Create: resourceContainerHostCreate,
-		Read:   resourceContainerHostRead,
-		Update: resourceContainerHostUpdate,
-		Delete: resourceContainerHostDelete,
+		CreateContext: resourceContainerHostCreate,
+		ReadContext:   resourceContainerHostRead,
+		UpdateContext: resourceContainerHostUpdate,
+		DeleteContext: resourceContainerHostDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(30 * time.Minute),
@@ -161,11 +159,11 @@ func InstanceStateRefreshFunc(client *cartel.Client, nameTag string, failStates 
 	}
 }
 
-func resourceContainerHostCreate(d *schema.ResourceData, m interface{}) error {
+func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	client, err := config.CartelClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	tagName := d.Get("name").(string)
@@ -200,7 +198,7 @@ func resourceContainerHostCreate(d *schema.ResourceData, m interface{}) error {
 		cartel.Tags(tags),
 	)
 	if err != nil {
-		return fmt.Errorf("create error: %d: %s", ch.Code, ch.Description)
+		return diag.FromErr(fmt.Errorf("create error: %d: %s", ch.Code, ch.Description))
 	}
 	d.SetId(ch.InstanceID())
 
@@ -216,31 +214,34 @@ func resourceContainerHostCreate(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		// Trigger a delete to prevent failed instances from lingering
 		_, _, _ = client.Destroy(tagName)
-		return fmt.Errorf(
+		return diag.FromErr(fmt.Errorf(
 			"error waiting for instance (%s) to become ready: %s",
-			ch.InstanceID(), err)
+			ch.InstanceID(), err))
 	}
 	d.SetConnInfo(map[string]string{
 		"type": "ssh",
 		"host": ch.IPAddress(),
 	})
-	return resourceContainerHostRead(d, m)
+	return resourceContainerHostRead(ctx, d, m)
 }
 
-func resourceContainerHostUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceContainerHostUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.CartelClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	tagName := d.Get("name").(string)
 	ch, _, err := client.GetDetails(tagName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if ch.InstanceID != d.Id() {
-		return ErrInstanceIDMismatch
+		return diag.FromErr(ErrInstanceIDMismatch)
 	}
 
 	if d.HasChange("tags") {
@@ -249,7 +250,7 @@ func resourceContainerHostUpdate(d *schema.ResourceData, m interface{}) error {
 		log.Printf("[o:%v] [n:%v] [c:%v]\n", o, n, change)
 		_, _, err := client.AddTags([]string{tagName}, change)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	if d.HasChange("user_groups") {
@@ -263,7 +264,7 @@ func resourceContainerHostUpdate(d *schema.ResourceData, m interface{}) error {
 		if len(toAdd) > 0 {
 			_, _, err := client.AddUserGroups([]string{tagName}, toAdd)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 
@@ -271,7 +272,7 @@ func resourceContainerHostUpdate(d *schema.ResourceData, m interface{}) error {
 		if len(toRemove) > 0 {
 			_, _, err := client.RemoveUserGroups([]string{tagName}, toRemove)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 	}
@@ -287,7 +288,7 @@ func resourceContainerHostUpdate(d *schema.ResourceData, m interface{}) error {
 		if len(toAdd) > 0 {
 			_, _, err := client.AddSecurityGroups([]string{tagName}, toAdd)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 
@@ -295,7 +296,7 @@ func resourceContainerHostUpdate(d *schema.ResourceData, m interface{}) error {
 		if len(toRemove) > 0 {
 			_, _, err := client.RemoveSecurityGroups([]string{tagName}, toRemove)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 	}
@@ -303,18 +304,21 @@ func resourceContainerHostUpdate(d *schema.ResourceData, m interface{}) error {
 		protect := d.Get("protect").(bool)
 		_, _, err := client.SetProtection(tagName, protect)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
-	return nil
+	return diags
 
 }
 
-func resourceContainerHostRead(d *schema.ResourceData, m interface{}) error {
+func resourceContainerHostRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.CartelClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	tagName := d.Get("name").(string)
@@ -323,21 +327,21 @@ func resourceContainerHostRead(d *schema.ResourceData, m interface{}) error {
 		if resp != nil && resp.StatusCode == http.StatusBadRequest {
 			// State not found, probably a botched provision :(
 			d.SetId("")
-			return nil
+			return diags
 		}
-		return err
+		return diag.FromErr(err)
 	}
 	if state != "succeeded" {
 		// Unless we have a succeeded deploy, taint the resource
 		d.SetId("")
-		return nil
+		return diags
 	}
 	ch, _, err := client.GetDetails(tagName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if ch.InstanceID != d.Id() {
-		return ErrInstanceIDMismatch
+		return diag.FromErr(ErrInstanceIDMismatch)
 	}
 	_ = d.Set("protect", ch.Protection)
 	_ = d.Set("volumes", len(ch.BlockDevices)-1) // -1 for the root volume
@@ -354,30 +358,33 @@ func resourceContainerHostRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("subnet", ch.Subnet)
 	_ = d.Set("tags", normalizeTags(ch.Tags))
 
-	return nil
+	return diags
 }
 
-func resourceContainerHostDelete(d *schema.ResourceData, m interface{}) error {
+func resourceContainerHostDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.CartelClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	tagName := d.Get("name").(string)
 	ch, _, err := client.GetDetails(tagName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if ch.InstanceID != d.Id() {
-		return ErrInstanceIDMismatch
+		return diag.FromErr(ErrInstanceIDMismatch)
 	}
 	_, _, err = client.Destroy(tagName)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId("")
-	return nil
+	return diags
 
 }
 

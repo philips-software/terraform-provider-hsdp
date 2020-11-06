@@ -1,22 +1,20 @@
 package hsdp
 
 import (
+	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/console"
 	"time"
 )
 
 func resourceMetricsAutoscaler() *schema.Resource {
 	return &schema.Resource{
-		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
-		},
-
-		Create: resourceMetricsAutoscalerCreate,
-		Read:   resourceMetricsAutoscalerRead,
-		Update: resourceMetricsAutoscalerUpdate,
-		Delete: resourceMetricsAutoscalerDelete,
+		CreateContext: resourceMetricsAutoscalerCreate,
+		ReadContext:   resourceMetricsAutoscalerRead,
+		UpdateContext: resourceMetricsAutoscalerUpdate,
+		DeleteContext: resourceMetricsAutoscalerDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(12 * time.Minute),
@@ -147,11 +145,14 @@ func resourceMetricsAutoscaler() *schema.Resource {
 	}
 }
 
-func resourceMetricsAutoscalerDelete(d *schema.ResourceData, m interface{}) error {
+func resourceMetricsAutoscalerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.ConsoleClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	var app console.Application
 	instanceID := d.Get("metrics_instance_id").(string)
@@ -159,31 +160,34 @@ func resourceMetricsAutoscalerDelete(d *schema.ResourceData, m interface{}) erro
 	app.Enabled = false
 	result, _, err := client.Metrics.UpdateApplicationAutoscaler(instanceID, app)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if result == nil {
-		return fmt.Errorf("error creating/updating autoscaler")
+		return diag.FromErr(fmt.Errorf("error creating/updating autoscaler"))
 	}
 	d.SetId("")
-	return nil
+	return diags
 }
 
-func resourceMetricsAutoscalerUpdate(d *schema.ResourceData, m interface{}) error {
-	return resourceMetricsAutoscalerCreate(d, m)
+func resourceMetricsAutoscalerUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	return resourceMetricsAutoscalerCreate(ctx, d, m)
 }
 
-func resourceMetricsAutoscalerRead(d *schema.ResourceData, m interface{}) error {
+func resourceMetricsAutoscalerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.ConsoleClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	instanceID := d.Get("metrics_instance_id").(string)
 	name := d.Get("app_name").(string)
 
 	app, _, err := client.Metrics.GetApplicationAutoscaler(instanceID, name)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	_ = d.Set("min_instances", app.MinInstances)
 	_ = d.Set("max_instances", app.MaxInstances)
@@ -191,7 +195,7 @@ func resourceMetricsAutoscalerRead(d *schema.ResourceData, m interface{}) error 
 	for _, th := range app.Thresholds {
 		mapping, ok := thresholdMapping[th.Name]
 		if !ok {
-			return fmt.Errorf("unknown threshold: %s", th.Name)
+			return diag.FromErr(fmt.Errorf("unknown threshold: %s", th.Name))
 		}
 		fields := make(map[string]interface{})
 		fields["enabled"] = th.Enabled
@@ -201,18 +205,21 @@ func resourceMetricsAutoscalerRead(d *schema.ResourceData, m interface{}) error 
 		s.Add(fields)
 		_ = d.Set(mapping, s)
 	}
-	return nil
+	return diags
 }
 
 func resourceMetricsThresholdHash(v interface{}) int {
 	return 0
 }
 
-func resourceMetricsAutoscalerCreate(d *schema.ResourceData, m interface{}) error {
+func resourceMetricsAutoscalerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.ConsoleClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	var app console.Application
 
@@ -239,13 +246,13 @@ func resourceMetricsAutoscalerCreate(d *schema.ResourceData, m interface{}) erro
 	}
 	created, _, err := client.Metrics.UpdateApplicationAutoscaler(instanceID, app)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if created == nil {
-		return fmt.Errorf("error creating/updating autoscaler")
+		return diag.FromErr(fmt.Errorf("error creating/updating autoscaler"))
 	}
 	d.SetId(instanceID + created.Name)
-	return nil
+	return diags
 }
 
 func expandMapList(configured []interface{}) []map[string]interface{} {

@@ -1,14 +1,16 @@
 package hsdp
 
 import (
+	"context"
 	"encoding/json"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	creds "github.com/philips-software/go-hsdp-api/credentials"
 )
 
 func dataSourceS3CredentialsAccess() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceS3CredsAccessRead,
+		ReadContext: dataSourceS3CredsAccessRead,
 		Schema: map[string]*schema.Schema{
 			"access": {
 				Type:     schema.TypeString,
@@ -33,8 +35,11 @@ func dataSourceS3CredentialsAccess() *schema.Resource {
 
 }
 
-func dataSourceS3CredsAccessRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceS3CredsAccessRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
+
+	var diags diag.Diagnostics
+
 	productKey := d.Get("product_key").(string)
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
@@ -45,29 +50,30 @@ func dataSourceS3CredsAccessRead(d *schema.ResourceData, meta interface{}) error
 	if username != "" && password != "" {
 		client, err = config.CredentialsClientWithLogin(username, password)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	} else {
 		client, err = config.CredentialsClient()
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	if client == nil {
-		return ErrMissingClientPassword
+		return diag.FromErr(ErrMissingClientPassword)
 	}
 	credentials, _, err := client.Access.GetAccess(&creds.GetAccessOptions{
 		ProductKey: &productKey,
 	})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	jsonBytes, err := json.Marshal(&credentials)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId("access")
 	d.Set("access", string(jsonBytes))
 
-	return err
+	return diags
+
 }

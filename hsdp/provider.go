@@ -1,12 +1,13 @@
 package hsdp
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Provider returns an instance of the HSDP provider
-func Provider(build string) terraform.ResourceProvider {
+func Provider(build string) *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -186,7 +187,7 @@ func Provider(build string) terraform.ResourceProvider {
 			"hsdp_credentials_policy": dataSourceCredentialsPolicy(),
 			"hsdp_config":             dataSourceConfig(),
 		},
-		ConfigureFunc: providerConfigure,
+		ConfigureContextFunc: providerConfigure,
 	}
 }
 
@@ -222,7 +223,10 @@ func init() {
 	}
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
+
 	config := &Config{}
 
 	config.Region = d.Get("region").(string)
@@ -256,5 +260,5 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.setupCartelClient()
 	config.setupConsoleClient()
 
-	return config, nil
+	return config, diags
 }

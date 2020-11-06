@@ -5,7 +5,7 @@ import (
 	"github.com/philips-software/go-hsdp-api/iam"
 	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceIAMOrg() *schema.Resource {

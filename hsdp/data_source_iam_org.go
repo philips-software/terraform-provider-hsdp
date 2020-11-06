@@ -1,12 +1,14 @@
 package hsdp
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceIAMOrg() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIAMOrgRead,
+		ReadContext: dataSourceIAMOrgRead,
 		Schema: map[string]*schema.Schema{
 			"organization_id": {
 				Type:     schema.TypeString,
@@ -45,18 +47,21 @@ func dataSourceIAMOrg() *schema.Resource {
 
 }
 
-func dataSourceIAMOrgRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIAMOrgRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	orgId := d.Get("organization_id").(string)
 
 	org, _, err := client.Organizations.GetOrganizationByID(orgId) // Get all permissions
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(orgId)
@@ -68,5 +73,5 @@ func dataSourceIAMOrgRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set("display_name", org.DisplayName)
 	_ = d.Set("parent_org_id", org.Parent.Value)
 
-	return err
+	return diags
 }
