@@ -1,46 +1,17 @@
 # HSDP Provider
 
-The HSDP provider is used to interact with HSDP REST APIs to perform adminstrative configuration of platform 
-resources.
+The HSDP provider is capable of managing a select set of HSDP resources. This includes many IAM resources, Cartel / Container Host instances
 
-## Example Usage
+## Configuring the provider
 
 ```hcl
-# Many variables are optional
-
-variable "region" {}
-variable "environment" {}
-variable "iam_url" {}
-variable "idm_url" {}
-variable "oauth2_client_id" {}
-variable "oauth2_password" {}
-variable "org_admin_username" {}
-variable "org_admin_password" {}
-variable "shared_key" {}
-variable "secret_key" {}
-variable "cartel_host" {}
-variable "cartel_token" {}
-variable "cartel_secret" {}
-variable "cartel_skip_verify" {}
-variable "cartel_no_tls" {}
-variable "retry_max"
-
-
-## Configure the HSDP Provider
-
 provider "hsdp" {
   region             = "us-east"
   environment        = "client-test"
-  iam_url            = var.iam_url
-  idm_url            = var.idm_url
   oauth2_client_id   = var.oauth2_client_id
   oauth2_password    = var.oauth2_password
   org_admin_username = var.org_admin_username
   org_admin_password = var.org_admin_password
-  shared_key         = var.shared_key
-  secret_key         = var.secret_key
-  debug              = true
-  debug_log          = "/tmp/provider.log"
 }
 ```
 
