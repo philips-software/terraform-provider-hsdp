@@ -67,7 +67,7 @@ func Provider(build string) *schema.Provider {
 				Optional:    true,
 				Default:     "",
 				Description: descriptions["org_id"],
-				Deprecated:  "this value is not used anywhere",
+				Deprecated:  "org_id is not used anywhere and should be removed",
 			},
 			"org_admin_username": {
 				Type:          schema.TypeString,
@@ -163,7 +163,6 @@ func Provider(build string) *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_org":             resourceIAMOrg(),
 			"hsdp_iam_group":           resourceIAMGroup(),
-			"hsdp_iam_permission":      resourceIAMPermission(),
 			"hsdp_iam_role":            resourceIAMRole(),
 			"hsdp_iam_proposition":     resourceIAMProposition(),
 			"hsdp_iam_application":     resourceIAMApplication(),
