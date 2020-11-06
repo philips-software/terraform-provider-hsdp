@@ -145,6 +145,9 @@ func resourceIAMOrgUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		description := d.Get("description").(string)
 		org.Description = description
 		_, _, err = client.Organizations.UpdateOrganization(*org)
+		if err != nil {
+			diags = append(diags, diag.FromErr(err)...)
+		}
 	}
 	return diags
 }

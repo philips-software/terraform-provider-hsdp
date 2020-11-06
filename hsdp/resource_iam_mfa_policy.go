@@ -170,6 +170,9 @@ func resourceIAMMFAPolicyUpdate(ctx context.Context, d *schema.ResourceData, m i
 		policy.Active = &active
 	}
 	updatedPolicy, _, err := client.MFAPolicies.UpdateMFAPolicy(policy)
+	if err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
 	if updatedPolicy != nil {
 		_ = d.Set("version", updatedPolicy.Meta.Version)
 	}
