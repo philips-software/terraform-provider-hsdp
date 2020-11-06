@@ -1,7 +1,9 @@
 package hsdp
 
 import (
+	"context"
 	"encoding/json"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
 )
@@ -9,13 +11,13 @@ import (
 func resourceIAMPasswordPolicy() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		Create: resourceIAMPasswordPolicyCreate,
-		Update: resourceIAMPasswordPolicyUpdate,
-		Read:   resourceIAMPasswordPolicyRead,
-		Delete: resourceIAMPasswordPolicyDelete,
+		CreateContext: resourceIAMPasswordPolicyCreate,
+		UpdateContext: resourceIAMPasswordPolicyUpdate,
+		ReadContext:   resourceIAMPasswordPolicyRead,
+		DeleteContext: resourceIAMPasswordPolicyDelete,
 
 		Schema: map[string]*schema.Schema{
 			"managing_organization": {
@@ -147,11 +149,14 @@ func resourceDataToToPasswordPolicy(d *schema.ResourceData, policy *iam.Password
 	}
 }
 
-func resourceIAMPasswordPolicyCreate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMPasswordPolicyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	var policy iam.PasswordPolicy
 	resourceDataToToPasswordPolicy(d, &policy)
@@ -161,7 +166,7 @@ func resourceIAMPasswordPolicyCreate(d *schema.ResourceData, m interface{}) erro
 		OrganizationID: &policy.ManagingOrganization,
 	})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	policyFunc := client.PasswordPolicies.CreatePasswordPolicy
 	if policies != nil && len(*policies) > 0 {
@@ -173,28 +178,31 @@ func resourceIAMPasswordPolicyCreate(d *schema.ResourceData, m interface{}) erro
 
 	createdPolicy, _, err := policyFunc(policy)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	data, err := json.Marshal(policy)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	_ = d.Set("_policy", string(data))
 	d.SetId(createdPolicy.ID)
-	return nil
+	return diags
 }
 
-func resourceIAMPasswordPolicyUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMPasswordPolicyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	var updatePolicy iam.PasswordPolicy
 
 	policy, _, err := client.PasswordPolicies.GetPasswordPolicyByID(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resourceDataToToPasswordPolicy(d, &updatePolicy)
@@ -203,50 +211,60 @@ func resourceIAMPasswordPolicyUpdate(d *schema.ResourceData, m interface{}) erro
 
 	updatedPolicy, _, err := client.PasswordPolicies.UpdatePasswordPolicy(updatePolicy)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	data, err := json.Marshal(updatedPolicy)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
-	return d.Set("_policy", string(data))
+	err = d.Set("_policy", string(data))
+	if err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
+	return diags
 }
 
-func resourceIAMPasswordPolicyRead(d *schema.ResourceData, m interface{}) error {
+func resourceIAMPasswordPolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	policy, _, err := client.PasswordPolicies.GetPasswordPolicyByID(d.Id())
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	data, err := json.Marshal(policy)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	_ = d.Set("_policy", data)
 	d.SetId(policy.ID)
-	return nil
+	return diags
 }
 
-func resourceIAMPasswordPolicyDelete(d *schema.ResourceData, m interface{}) error {
+func resourceIAMPasswordPolicyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var policy iam.PasswordPolicy
 	policy.ID = d.Id()
 	ok, _, err := client.PasswordPolicies.DeletePasswordPolicy(policy)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if ok {
 		d.SetId("")
 	}
-	return nil
+	return diags
 }

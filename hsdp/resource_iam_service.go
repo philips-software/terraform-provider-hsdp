@@ -1,6 +1,8 @@
 package hsdp
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -10,13 +12,13 @@ import (
 func resourceIAMService() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		Create: resourceIAMServiceCreate,
-		Read:   resourceIAMServiceRead,
-		Update: resourceIAMServiceUpdate,
-		Delete: resourceIAMServiceDelete,
+		CreateContext: resourceIAMServiceCreate,
+		ReadContext:   resourceIAMServiceRead,
+		UpdateContext: resourceIAMServiceUpdate,
+		DeleteContext: resourceIAMServiceDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -32,10 +34,11 @@ func resourceIAMService() *schema.Resource {
 				Required: true,
 			},
 			"validity": &schema.Schema{
-				Type:         schema.TypeInt,
-				Optional:     true,
-				Default:      12,
-				ForceNew:     true,
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  12,
+				ForceNew: true,
+				// TODO
 				ValidateFunc: validation.IntBetween(1, 600),
 			},
 			"private_key": &schema.Schema{
@@ -73,11 +76,14 @@ func resourceIAMService() *schema.Resource {
 	}
 }
 
-func resourceIAMServiceCreate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMServiceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var s iam.Service
@@ -90,7 +96,7 @@ func resourceIAMServiceCreate(d *schema.ResourceData, m interface{}) error {
 
 	createdService, _, err := client.Services.CreateService(s)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId(createdService.ID)
 	_ = d.Set("expires_on", createdService.ExpiresOn)
@@ -102,16 +108,21 @@ func resourceIAMServiceCreate(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("description", s.Description) // RITM0021326
 
 	// Set scopes and default_scopes
-	_, _, _ = client.Services.AddScopes(*createdService, scopes, defaultScopes)
-
-	return nil
+	_, _, err = client.Services.AddScopes(*createdService, scopes, defaultScopes)
+	if err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
+	return diags
 }
 
-func resourceIAMServiceRead(d *schema.ResourceData, m interface{}) error {
+func resourceIAMServiceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id := d.Id()
@@ -119,9 +130,9 @@ func resourceIAMServiceRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			d.SetId("")
-			return nil
+			return diags
 		}
-		return err
+		return diag.FromErr(err)
 	}
 	// Until RITM0021326 is implemented, this will always clear the field
 	// d.Set("description", s.Description)
@@ -135,14 +146,17 @@ func resourceIAMServiceRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("expires_on", s.ExpiresOn)
 	_ = d.Set("default_scopes", s.DefaultScopes)
 	// The private key is only returned on create
-	return nil
+	return diags
 }
 
-func resourceIAMServiceUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMServiceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var s iam.Service
@@ -157,7 +171,7 @@ func resourceIAMServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		if len(toRemove) > 0 {
 			_, _, err := client.Services.RemoveScopes(s, toRemove, []string{})
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 		if len(toAdd) > 0 {
@@ -173,29 +187,32 @@ func resourceIAMServiceUpdate(d *schema.ResourceData, m interface{}) error {
 		if len(toRemove) > 0 {
 			_, _, err := client.Services.RemoveScopes(s, []string{}, toRemove)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 		if len(toAdd) > 0 {
 			_, _, _ = client.Services.AddScopes(s, []string{}, toAdd)
 		}
 	}
-	return nil
+	return diags
 }
 
-func resourceIAMServiceDelete(d *schema.ResourceData, m interface{}) error {
+func resourceIAMServiceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var s iam.Service
 	s.ID = d.Id()
 	ok, _, err := client.Services.DeleteService(s)
 	if !ok {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId("")
-	return nil
+	return diags
 }

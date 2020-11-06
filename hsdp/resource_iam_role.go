@@ -1,7 +1,9 @@
 package hsdp
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -11,13 +13,13 @@ import (
 func resourceIAMRole() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		Create: resourceIAMRoleCreate,
-		Read:   resourceIAMRoleRead,
-		Update: resourceIAMRoleUpdate,
-		Delete: resourceIAMRoleDelete,
+		CreateContext: resourceIAMRoleCreate,
+		ReadContext:   resourceIAMRoleRead,
+		UpdateContext: resourceIAMRoleUpdate,
+		DeleteContext: resourceIAMRoleDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -52,11 +54,14 @@ func resourceIAMRole() *schema.Resource {
 	}
 }
 
-func resourceIAMRoleCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	name := d.Get("name").(string)
@@ -66,20 +71,27 @@ func resourceIAMRoleCreate(d *schema.ResourceData, meta interface{}) error {
 
 	role, _, err := client.Roles.CreateRole(name, description, managingOrganization)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	for _, p := range permissions {
 		_, _, _ = client.Roles.AddRolePermission(*role, p)
 	}
 	d.SetId(role.ID)
-	return resourceIAMRoleRead(d, meta)
+	readDiags := resourceIAMRoleRead(ctx, d, meta)
+	if readDiags != nil {
+		diags = append(diags, readDiags...)
+	}
+	return diags
 }
 
-func resourceIAMRoleRead(d *schema.ResourceData, meta interface{}) error {
+func resourceIAMRoleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id := d.Id()
@@ -87,38 +99,41 @@ func resourceIAMRoleRead(d *schema.ResourceData, meta interface{}) error {
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			d.SetId("")
-			return nil
+			return diags
 		}
-		return err
+		return diag.FromErr(err)
 	}
-	d.SetId(role.ID)
 	_ = d.Set("description", role.Description)
 	_ = d.Set("name", role.Name)
 	_ = d.Set("managing_organization", role.ManagingOrganization)
 
 	permissions, _, err := client.Roles.GetRolePermissions(*role)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	_ = d.Set("permissions", permissions)
-	return nil
+	d.SetId(role.ID)
+	return diags
 }
 
-func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMRoleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id := d.Id()
 	role, _, err := client.Roles.GetRoleByID(id)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if d.HasChange("description") {
-		return fmt.Errorf("description changes are not supported")
+		return diag.FromErr(fmt.Errorf("description changes are not supported"))
 	}
 
 	if d.HasChange("permissions") {
@@ -133,7 +148,7 @@ func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
 			for _, v := range toAdd {
 				_, _, err := client.Roles.AddRolePermission(*role, v)
 				if err != nil {
-					return err
+					return diag.FromErr(err)
 				}
 			}
 		}
@@ -142,23 +157,26 @@ func resourceIAMRoleUpdate(d *schema.ResourceData, m interface{}) error {
 		for _, v := range toRemove {
 			ticketProtection := d.Get("ticket_protection").(bool)
 			if ticketProtection && v == "CLIENT.SCOPES" {
-				return fmt.Errorf("Refusing to remove CLIENT.SCOPES permission, set ticket_protection to `false` to override")
+				return diag.FromErr(fmt.Errorf("Refusing to remove CLIENT.SCOPES permission, set ticket_protection to `false` to override"))
 			}
 			_, _, err := client.Roles.RemoveRolePermission(*role, v)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 
 	}
-	return nil
+	return diags
 }
 
-func resourceIAMRoleDelete(d *schema.ResourceData, m interface{}) error {
+func resourceIAMRoleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var role iam.Role
@@ -166,10 +184,10 @@ func resourceIAMRoleDelete(d *schema.ResourceData, m interface{}) error {
 
 	ok, _, err := client.Roles.DeleteRole(role)
 	if !ok {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId("")
-	return nil
+	return diags
 }
 
 // Takes the result of flatmap.Expand for an array of strings
