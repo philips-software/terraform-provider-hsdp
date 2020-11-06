@@ -1,22 +1,24 @@
 package hsdp
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
 )
 
 func resourceIAMProposition() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		Create: resourceIAMPropositionCreate,
-		Read:   resourceIAMPropositionRead,
-		Update: resourceIAMPropositionUpdate,
-		Delete: resourceIAMPropositionDelete,
+		CreateContext: resourceIAMPropositionCreate,
+		ReadContext:   resourceIAMPropositionRead,
+		UpdateContext: resourceIAMPropositionUpdate,
+		DeleteContext: resourceIAMPropositionDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -40,11 +42,14 @@ func resourceIAMProposition() *schema.Resource {
 	}
 }
 
-func resourceIAMPropositionCreate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMPropositionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var prop iam.Proposition
@@ -55,21 +60,24 @@ func resourceIAMPropositionCreate(d *schema.ResourceData, m interface{}) error {
 
 	createdProp, _, err := client.Propositions.CreateProposition(prop)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId(createdProp.ID)
 	_ = d.Set("name", createdProp.Name)
 	_ = d.Set("description", createdProp.Description)
 	_ = d.Set("organization_id", createdProp.OrganizationID)
 	_ = d.Set("global_reference_id", createdProp.GlobalReferenceID)
-	return nil
+	return diags
 }
 
-func resourceIAMPropositionRead(d *schema.ResourceData, m interface{}) error {
+func resourceIAMPropositionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id := d.Id()
@@ -77,27 +85,31 @@ func resourceIAMPropositionRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			d.SetId("")
-			return nil
+			return diags
 		}
-		return err
+		return diag.FromErr(err)
 	}
 	_ = d.Set("name", prop.Name)
 	_ = d.Set("description", prop.Description)
 	_ = d.Set("organization_id", prop.OrganizationID)
 	_ = d.Set("global_reference_id", prop.GlobalReferenceID)
-	return nil
+	return diags
 }
 
-func resourceIAMPropositionUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMPropositionUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	if !d.HasChange("description") {
-		return nil
+		return diags
 	}
-	return ErrNotImplementedByHSDP
+	return diag.FromErr(ErrNotImplementedByHSDP)
 }
 
-func resourceIAMPropositionDelete(d *schema.ResourceData, m interface{}) error {
+func resourceIAMPropositionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	// As HSDP IAM does not support IAM proposition deletion we simply
 	// clear the proposition from state. This will be properly implemented
 	// once the IAM API balances out
-	return nil
+	var diags diag.Diagnostics
+
+	return diags
 }

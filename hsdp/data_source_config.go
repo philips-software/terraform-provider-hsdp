@@ -1,13 +1,15 @@
 package hsdp
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/config"
 )
 
 func dataSourceConfig() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceConfigRead,
+		ReadContext: dataSourceConfigRead,
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:     schema.TypeString,
@@ -38,8 +40,10 @@ func dataSourceConfig() *schema.Resource {
 
 }
 
-func dataSourceConfigRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceConfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	providerConfig := meta.(*Config)
+
+	var diags diag.Diagnostics
 
 	service := d.Get("service").(string)
 	region := d.Get("region").(string)
@@ -53,7 +57,7 @@ func dataSourceConfigRead(d *schema.ResourceData, meta interface{}) error {
 	c, err := config.New(config.WithEnv(environment),
 		config.WithRegion(region))
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId("data" + region + environment + service)
 	if url, err := c.Service(service).GetString("url"); err == nil {
@@ -65,5 +69,5 @@ func dataSourceConfigRead(d *schema.ResourceData, meta interface{}) error {
 	if domain, err := c.Service(service).GetString("domain"); err == nil {
 		_ = d.Set("domain", domain)
 	}
-	return nil
+	return diags
 }

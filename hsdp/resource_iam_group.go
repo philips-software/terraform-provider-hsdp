@@ -1,7 +1,9 @@
 package hsdp
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
 	"net/http"
 )
@@ -9,13 +11,13 @@ import (
 func resourceIAMGroup() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		Create: resourceIAMGroupCreate,
-		Read:   resourceIAMGroupRead,
-		Update: resourceIAMGroupUpdate,
-		Delete: resourceIAMGroupDelete,
+		CreateContext: resourceIAMGroupCreate,
+		ReadContext:   resourceIAMGroupRead,
+		UpdateContext: resourceIAMGroupUpdate,
+		DeleteContext: resourceIAMGroupDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -52,11 +54,14 @@ func resourceIAMGroup() *schema.Resource {
 	}
 }
 
-func resourceIAMGroupCreate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var group iam.Group
@@ -66,7 +71,7 @@ func resourceIAMGroupCreate(d *schema.ResourceData, m interface{}) error {
 
 	createdGroup, _, err := client.Groups.CreateGroup(group)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	roles := expandStringList(d.Get("roles").(*schema.Set).List())
 
@@ -87,21 +92,30 @@ func resourceIAMGroupCreate(d *schema.ResourceData, m interface{}) error {
 	users := expandStringList(d.Get("users").(*schema.Set).List())
 	if len(users) > 0 {
 		_, _, err = client.Groups.AddMembers(*createdGroup, users...)
+		if err != nil {
+			diags = append(diags, diag.FromErr(err)...)
+		}
 	}
 
 	// Add services
 	services := expandStringList(d.Get("services").(*schema.Set).List())
 	if len(services) > 0 {
 		_, _, err = client.Groups.AddServices(*createdGroup, services...)
+		if err != nil {
+			diags = append(diags, diag.FromErr(err)...)
+		}
 	}
-	return err
+	return diags
 }
 
-func resourceIAMGroupRead(d *schema.ResourceData, m interface{}) error {
+func resourceIAMGroupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id := d.Id()
@@ -109,30 +123,33 @@ func resourceIAMGroupRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			d.SetId("")
-			return nil
+			return diags
 		}
-		return err
+		return diag.FromErr(err)
 	}
 	_ = d.Set("managing_organization", group.ManagingOrganization)
 	_ = d.Set("description", group.Description)
 	_ = d.Set("name", group.Name)
 	roles, _, err := client.Groups.GetRoles(*group)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	roleIDs := make([]string, len(*roles))
 	for i, r := range *roles {
 		roleIDs[i] = r.ID
 	}
 	_ = d.Set("roles", &roleIDs)
-	return nil
+	return diags
 }
 
-func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var group iam.Group
@@ -141,7 +158,7 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 		group.Description = d.Get("description").(string)
 		_, _, err := client.Groups.UpdateGroup(group)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 	// Users
@@ -189,7 +206,7 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 				var role = iam.Role{ID: v}
 				_, _, err := client.Groups.AssignRole(group, role)
 				if err != nil {
-					return err
+					return diag.FromErr(err)
 				}
 			}
 		}
@@ -199,19 +216,22 @@ func resourceIAMGroupUpdate(d *schema.ResourceData, m interface{}) error {
 			var role = iam.Role{ID: v}
 			_, _, err := client.Groups.RemoveRole(group, role)
 			if err != nil {
-				return err
+				return diag.FromErr(err)
 			}
 		}
 
 	}
-	return nil
+	return diags
 }
 
-func resourceIAMGroupDelete(d *schema.ResourceData, m interface{}) error {
+func resourceIAMGroupDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var group iam.Group
@@ -222,7 +242,7 @@ func resourceIAMGroupDelete(d *schema.ResourceData, m interface{}) error {
 	if len(users) > 0 {
 		_, _, err := client.Groups.RemoveMembers(group, users...)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -231,14 +251,14 @@ func resourceIAMGroupDelete(d *schema.ResourceData, m interface{}) error {
 	if len(services) > 0 {
 		_, _, err := client.Groups.RemoveServices(group, services...)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	ok, _, err := client.Groups.DeleteGroup(group)
 	if !ok {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId("")
-	return nil
+	return diags
 }

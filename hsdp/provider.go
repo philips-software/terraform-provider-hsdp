@@ -1,12 +1,13 @@
 package hsdp
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 // Provider returns an instance of the HSDP provider
-func Provider(build string) terraform.ResourceProvider {
+func Provider(build string) *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"region": {
@@ -66,7 +67,7 @@ func Provider(build string) terraform.ResourceProvider {
 				Optional:    true,
 				Default:     "",
 				Description: descriptions["org_id"],
-				Deprecated:  "this value is not used anywhere",
+				Deprecated:  "org_id is not used anywhere and should be removed",
 			},
 			"org_admin_username": {
 				Type:          schema.TypeString,
@@ -162,7 +163,6 @@ func Provider(build string) terraform.ResourceProvider {
 		ResourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_org":             resourceIAMOrg(),
 			"hsdp_iam_group":           resourceIAMGroup(),
-			"hsdp_iam_permission":      resourceIAMPermission(),
 			"hsdp_iam_role":            resourceIAMRole(),
 			"hsdp_iam_proposition":     resourceIAMProposition(),
 			"hsdp_iam_application":     resourceIAMApplication(),
@@ -186,7 +186,7 @@ func Provider(build string) terraform.ResourceProvider {
 			"hsdp_credentials_policy": dataSourceCredentialsPolicy(),
 			"hsdp_config":             dataSourceConfig(),
 		},
-		ConfigureFunc: providerConfigure,
+		ConfigureContextFunc: providerConfigure,
 	}
 }
 
@@ -222,7 +222,10 @@ func init() {
 	}
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+	// Warning or errors can be collected in a slice type
+	var diags diag.Diagnostics
+
 	config := &Config{}
 
 	config.Region = d.Get("region").(string)
@@ -256,5 +259,5 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config.setupCartelClient()
 	config.setupConsoleClient()
 
-	return config, nil
+	return config, diags
 }

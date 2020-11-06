@@ -1,13 +1,15 @@
 package hsdp
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
 )
 
 func dataSourceIAMProposition() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceIAMPropositionRead,
+		ReadContext: dataSourceIAMPropositionRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -30,11 +32,14 @@ func dataSourceIAMProposition() *schema.Resource {
 
 }
 
-func dataSourceIAMPropositionRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceIAMPropositionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	orgId := d.Get("organization_id").(string)
 	name := d.Get("name").(string)
@@ -44,11 +49,11 @@ func dataSourceIAMPropositionRead(d *schema.ResourceData, meta interface{}) erro
 		Name:           &name,
 	})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(prop.ID)
 	_ = d.Set("description", prop.Description)
 	_ = d.Set("global_reference_id", prop.GlobalReferenceID)
-	return nil
+	return diags
 }

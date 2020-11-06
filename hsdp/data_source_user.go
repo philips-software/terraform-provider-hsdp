@@ -1,12 +1,14 @@
 package hsdp
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceUser() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceUserRead,
+		ReadContext: dataSourceUserRead,
 		Schema: map[string]*schema.Schema{
 			"username": {
 				Type:     schema.TypeString,
@@ -21,11 +23,14 @@ func dataSourceUser() *schema.Resource {
 
 }
 
-func dataSourceUserRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	username := d.Get("username").(string)
@@ -33,10 +38,10 @@ func dataSourceUserRead(d *schema.ResourceData, meta interface{}) error {
 	uuid, _, err := client.Users.GetUserIDByLoginID(username)
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId(uuid)
 	_ = d.Set("uuid", uuid)
 
-	return nil
+	return diags
 }

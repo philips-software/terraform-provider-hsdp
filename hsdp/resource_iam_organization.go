@@ -1,23 +1,25 @@
 package hsdp
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/philips-software/go-hsdp-api/iam"
 	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceIAMOrg() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		Create: resourceIAMOrgCreate,
-		Read:   resourceIAMOrgRead,
-		Update: resourceIAMOrgUpdate,
-		Delete: resourceIAMOrgDelete,
+		CreateContext: resourceIAMOrgCreate,
+		ReadContext:   resourceIAMOrgRead,
+		UpdateContext: resourceIAMOrgUpdate,
+		DeleteContext: resourceIAMOrgDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -54,11 +56,14 @@ func resourceIAMOrg() *schema.Resource {
 	}
 }
 
-func resourceIAMOrgCreate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMOrgCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	name := d.Get("name").(string)
@@ -67,11 +72,11 @@ func resourceIAMOrgCreate(d *schema.ResourceData, m interface{}) error {
 	externalID := d.Get("external_id").(string)
 	orgType := d.Get("type").(string)
 	if isRootOrg {
-		return ErrCannotCreateRootOrg
+		return diag.FromErr(ErrCannotCreateRootOrg)
 	}
 	parentOrgID, ok := d.Get("parent_org_id").(string)
 	if !ok {
-		return ErrMissingParentOrgID
+		return diag.FromErr(ErrMissingParentOrgID)
 	}
 	var newOrg iam.Organization
 	newOrg.Name = name
@@ -81,20 +86,23 @@ func resourceIAMOrgCreate(d *schema.ResourceData, m interface{}) error {
 	newOrg.Type = orgType
 	org, resp, err := client.Organizations.CreateOrganization(newOrg)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if org == nil {
-		return fmt.Errorf("failed to create organization: %d", resp.StatusCode)
+		return diag.FromErr(fmt.Errorf("failed to create organization: %d", resp.StatusCode))
 	}
 	d.SetId(org.ID)
-	return nil
+	return diags
 }
 
-func resourceIAMOrgRead(d *schema.ResourceData, m interface{}) error {
+func resourceIAMOrgRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id := d.Id()
@@ -104,7 +112,7 @@ func resourceIAMOrgRead(d *schema.ResourceData, m interface{}) error {
 			d.SetId("")
 			return nil
 		}
-		return err
+		return diag.FromErr(err)
 	}
 	_ = d.Set("org_id", org.ID)
 	_ = d.Set("description", org.Description)
@@ -114,49 +122,58 @@ func resourceIAMOrgRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("display_name", org.DisplayName)
 	_ = d.Set("active", org.Active)
 	_ = d.Set("type", org.Type)
-	return nil
+	return diags
 }
 
-func resourceIAMOrgUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMOrgUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id := d.Id()
 	org, _, err := client.Organizations.GetOrganizationByID(id)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if d.HasChange("description") {
 		description := d.Get("description").(string)
 		org.Description = description
 		_, _, err = client.Organizations.UpdateOrganization(*org)
+		if err != nil {
+			diags = append(diags, diag.FromErr(err)...)
+		}
 	}
-	return err
+	return diags
 }
 
-func resourceIAMOrgDelete(d *schema.ResourceData, m interface{}) error {
+func resourceIAMOrgDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id := d.Id()
 	org, _, err := client.Organizations.GetOrganizationByID(id)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	ok, _, err := client.Organizations.DeleteOrganization(*org)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if !ok {
-		return ErrInvalidResponse
+		return diag.FromErr(ErrInvalidResponse)
 	}
-	return nil
+	return diags
 }

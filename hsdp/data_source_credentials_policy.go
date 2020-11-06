@@ -1,16 +1,18 @@
 package hsdp
 
 import (
+	"context"
 	"encoding/json"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strconv"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	creds "github.com/philips-software/go-hsdp-api/credentials"
 )
 
 func dataSourceCredentialsPolicy() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceCredentialsPolicyRead,
+		ReadContext: dataSourceCredentialsPolicyRead,
 		Schema: map[string]*schema.Schema{
 			"username": {
 				Type:     schema.TypeString,
@@ -57,8 +59,9 @@ func dataSourceCredentialsPolicy() *schema.Resource {
 
 }
 
-func dataSourceCredentialsPolicyRead(d *schema.ResourceData, meta interface{}) error {
+func dataSourceCredentialsPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
+	var diags diag.Diagnostics
 	productKey := ""
 	managingOrg := ""
 	groupName := ""
@@ -96,12 +99,12 @@ func dataSourceCredentialsPolicyRead(d *schema.ResourceData, meta interface{}) e
 	}
 	client, err := config.CredentialsClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if username != "" {
 		client, err = config.CredentialsClientWithLogin(username, password)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
@@ -112,14 +115,14 @@ func dataSourceCredentialsPolicyRead(d *schema.ResourceData, meta interface{}) e
 		ID:          idPtr,
 	})
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	jsonBytes, err := json.Marshal(&credentials)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId("policies")
 	d.Set("policies", string(jsonBytes))
 
-	return err
+	return diags
 }

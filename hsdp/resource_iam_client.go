@@ -1,22 +1,24 @@
 package hsdp
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"net/http"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
 )
 
 func resourceIAMClient() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		Create: resourceIAMClientCreate,
-		Read:   resourceIAMClientRead,
-		Update: resourceIAMClientUpdate,
-		Delete: resourceIAMClientDelete,
+		CreateContext: resourceIAMClientCreate,
+		ReadContext:   resourceIAMClientRead,
+		UpdateContext: resourceIAMClientUpdate,
+		DeleteContext: resourceIAMClientDelete,
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -107,11 +109,14 @@ func resourceIAMClient() *schema.Resource {
 	}
 }
 
-func resourceIAMClientCreate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMClientCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var cl iam.ApplicationClient
@@ -133,18 +138,21 @@ func resourceIAMClientCreate(d *schema.ResourceData, m interface{}) error {
 
 	createdClient, _, err := client.Clients.CreateClient(cl)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId(createdClient.ID)
 	_ = d.Set("password", cl.Password)
-	return nil
+	return diags
 }
 
-func resourceIAMClientRead(d *schema.ResourceData, m interface{}) error {
+func resourceIAMClientRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id := d.Id()
@@ -152,9 +160,9 @@ func resourceIAMClientRead(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			d.SetId("")
-			return nil
+			return diags
 		}
-		return err
+		return diag.FromErr(err)
 	}
 	_ = d.Set("description", cl.Description)
 	_ = d.Set("name", cl.Name)
@@ -172,14 +180,17 @@ func resourceIAMClientRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("disabled", cl.Disabled)
 	_ = d.Set("consent_implied", cl.ConsentImplied)
 
-	return nil
+	return diags
 }
 
-func resourceIAMClientUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMClientUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var cl iam.ApplicationClient
@@ -197,7 +208,9 @@ func resourceIAMClientUpdate(d *schema.ResourceData, m interface{}) error {
 			newDefaultScopes = expandStringList(nd.(*schema.Set).List())
 		}
 		_, _, err := client.Clients.UpdateScopes(cl, newScopes, newDefaultScopes)
-		return err
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 	if d.HasChange("access_token_lifetime") ||
 		d.HasChange("refresh_token_lifetime") ||
@@ -208,7 +221,7 @@ func resourceIAMClientUpdate(d *schema.ResourceData, m interface{}) error {
 		d.HasChange("redirection_uris") {
 		cl, _, err := client.Clients.GetClientByID(d.Id())
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 		cl.RedirectionURIs = expandStringList(d.Get("redirection_uris").(*schema.Set).List())
 		cl.ResponseTypes = expandStringList(d.Get("response_types").(*schema.Set).List())
@@ -219,26 +232,29 @@ func resourceIAMClientUpdate(d *schema.ResourceData, m interface{}) error {
 		cl.GlobalReferenceID = d.Get("global_reference_id").(string)
 		_, _, err = client.Clients.UpdateClient(*cl)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
-		return resourceIAMClientRead(d, m)
+		return resourceIAMClientRead(ctx, d, m)
 	}
-	return nil
+	return diags
 }
 
-func resourceIAMClientDelete(d *schema.ResourceData, m interface{}) error {
+func resourceIAMClientDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
+
+	var diags diag.Diagnostics
+
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var cl iam.ApplicationClient
 	cl.ID = d.Id()
 	ok, _, err := client.Clients.DeleteClient(cl)
 	if !ok {
-		return err
+		return diag.FromErr(err)
 	}
 	d.SetId("")
-	return nil
+	return diags
 }
