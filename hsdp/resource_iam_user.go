@@ -64,6 +64,9 @@ func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
 	email := d.Get("username").(string) // Deprecated
 	mobile := d.Get("mobile").(string)
 	login := d.Get("login").(string)
+	if login == "" {
+		login = email
+	}
 	email = d.Get("email").(string)
 	organization := d.Get("organization_id").(string)
 

@@ -122,7 +122,7 @@ func dataSourceCredentialsPolicyRead(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 	d.SetId("policies")
-	d.Set("policies", string(jsonBytes))
+	_ = d.Set("policies", string(jsonBytes))
 
 	return diags
 }

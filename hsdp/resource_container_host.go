@@ -18,10 +18,7 @@ func tagsSchema() *schema.Schema {
 		Required: true,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			// TODO: handle empty tags
-			if k == "tags.billing" {
-				return true
-			}
-			return false
+			return k == "tags.billing"
 		},
 		DefaultFunc: func() (interface{}, error) {
 			return map[string]interface{}{"billing": ""}, nil
@@ -210,7 +207,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
 	}
-	_, err = stateConf.WaitForState()
+	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		// Trigger a delete to prevent failed instances from lingering
 		_, _, _ = client.Destroy(tagName)

@@ -99,8 +99,8 @@ func resourceCredentialsPolicyRead(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 
 	}
-	d.Set("policy", policyJSON)
-	d.Set("product_key", productKey)
+	_ = d.Set("policy", policyJSON)
+	_ = d.Set("product_key", productKey)
 	return diags
 }
 

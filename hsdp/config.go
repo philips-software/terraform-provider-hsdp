@@ -99,7 +99,6 @@ func (c *Config) setupIAMClient() {
 		}
 	}
 	c.iamClient = client
-	return
 }
 
 // setupS3CredsClient sets up an HSDP S3 Credentials client
@@ -128,7 +127,6 @@ func (c *Config) setupS3CredsClient() {
 		return
 	}
 	c.credsClient = client
-	return
 }
 
 // setupCartelClient sets up an Cartel client
@@ -149,7 +147,6 @@ func (c *Config) setupCartelClient() {
 		return
 	}
 	c.cartelClient = client
-	return
 }
 
 // setupConsoleClient sets up an Console client
@@ -172,5 +169,4 @@ func (c *Config) setupConsoleClient() {
 		}
 	}
 	c.consoleClient = client
-	return
 }

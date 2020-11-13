@@ -254,23 +254,3 @@ func resourceMetricsAutoscalerCreate(ctx context.Context, d *schema.ResourceData
 	d.SetId(instanceID + created.Name)
 	return diags
 }
-
-func expandMapList(configured []interface{}) []map[string]interface{} {
-	vs := make([]map[string]interface{}, 0, len(configured))
-	for _, v := range configured {
-		val, ok := v.(map[string]interface{})
-		if ok {
-			vs = append(vs, val)
-		}
-	}
-	return vs
-}
-
-func stringInSlice(slice []string, val string) bool {
-	for _, item := range slice {
-		if item == val {
-			return true
-		}
-	}
-	return false
-}

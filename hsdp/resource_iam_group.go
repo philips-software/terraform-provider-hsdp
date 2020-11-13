@@ -76,15 +76,18 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 	roles := expandStringList(d.Get("roles").(*schema.Set).List())
 
 	d.SetId(createdGroup.ID)
-	d.Set("name", createdGroup.Name)
-	d.Set("description", createdGroup.Description)
-	d.Set("managing_organization", createdGroup.ManagingOrganization)
+	_ = d.Set("name", createdGroup.Name)
+	_ = d.Set("description", createdGroup.Description)
+	_ = d.Set("managing_organization", createdGroup.ManagingOrganization)
 
 	// Add roles
 	for _, r := range roles {
 		role, _, _ := client.Roles.GetRoleByID(r)
 		if role != nil {
-			client.Groups.AssignRole(*createdGroup, *role)
+			_, _, err = client.Groups.AssignRole(*createdGroup, *role)
+			if err != nil {
+				diags = append(diags, diag.FromErr(err)...)
+			}
 		}
 	}
 

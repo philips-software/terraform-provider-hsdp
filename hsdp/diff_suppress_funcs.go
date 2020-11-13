@@ -21,15 +21,5 @@ func suppressEquivalentPolicyDiffs(k, old, new string, d *schema.ResourceData) b
 }
 
 func suppressCaseDiffs(k, old, new string, d *schema.ResourceData) bool {
-	if strings.ToLower(old) == strings.ToLower(new) {
-		return true
-	}
-	return false
-}
-
-func suppressOnID(k, old, new string, d *schema.ResourceData) bool {
-	if d.Id() != "" {
-		return true
-	}
-	return false
+	return strings.EqualFold(old, new)
 }

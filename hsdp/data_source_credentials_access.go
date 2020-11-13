@@ -72,7 +72,7 @@ func dataSourceS3CredsAccessRead(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(err)
 	}
 	d.SetId("access")
-	d.Set("access", string(jsonBytes))
+	_ = d.Set("access", string(jsonBytes))
 
 	return diags
 
