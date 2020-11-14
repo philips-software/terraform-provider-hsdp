@@ -1,6 +1,6 @@
 ARG hsdp_provider_version=0.7.1
 
-FROM golang:1.15.2-alpine3.12 as build_base
+FROM golang:1.15.5-alpine3.12 as build_base
 RUN apk add --no-cache git openssh gcc musl-dev
 WORKDIR /terraform-provider-hsdp
 COPY go.mod .
