@@ -178,6 +178,7 @@ func Provider(build string) *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":     dataSourceIAMIntrospect(),
 			"hsdp_iam_user":           dataSourceUser(),
+			"hsdp_iam_service":        dataSourceService(),
 			"hsdp_iam_permissions":    dataSourceIAMPermissions(),
 			"hsdp_iam_org":            dataSourceIAMOrg(),
 			"hsdp_iam_proposition":    dataSourceIAMProposition(),
