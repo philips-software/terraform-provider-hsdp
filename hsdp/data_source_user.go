@@ -38,7 +38,11 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 	uuid, _, err := client.Users.GetUserIDByLoginID(username)
 
 	if err != nil {
-		return diag.FromErr(err)
+		// Fallback to legacy user find
+		uuid, _, err = client.Users.LegacyGetUserIDByLoginID(username)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 	d.SetId(uuid)
 	_ = d.Set("uuid", uuid)

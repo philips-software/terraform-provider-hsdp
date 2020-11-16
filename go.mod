@@ -5,7 +5,7 @@ require (
 	github.com/google/go-querystring v1.0.0 // indirect
 	github.com/hashicorp/go-retryablehttp v0.6.6
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.2.0
-	github.com/philips-software/go-hsdp-api v0.24.1-0.20201102143330-6d32ee1dfaa4
+	github.com/philips-software/go-hsdp-api v0.24.1-0.20201116153039-dc27531a282b
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.5.1
 )
