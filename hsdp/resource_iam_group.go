@@ -23,6 +23,7 @@ func resourceIAMGroup() *schema.Resource {
 			"name": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"description": &schema.Schema{
 				Type:     schema.TypeString,
