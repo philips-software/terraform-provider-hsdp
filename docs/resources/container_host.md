@@ -9,25 +9,25 @@ The following example provisions three (3) new container host instances
 
 ```hcl
 resource "hsdp_container_host" "zahadoom" {
-  count         = 3
-  name          = "zahadoom-${count.index}.dev"
-  volumes       = 1
-  volume_size   = 50
+  count = 3
+  name = "zahadoom-${count.index}.dev"
+  volumes = 1
+  volume_size = 50
   instance_type = "t2.medium"
 
-  user_groups     = var.user_groups
-  security_groups = ["analytics", "tcp-8080"]
+  user_groups = var.user_groups
+  security_groups = ["analytics", var.user]
 
   connection {
     bastion_host = var.bastion_host
-    host         = self.private_ip
-    user         = var.user
-    private_key  = var.private_key
-    script_path  = "/home/${var.user}/bootstrap.bash"
+    host = self.private_ip
+    user = var.user
+    private_key = var.private_key
+    script_path = "/home/${var.user}/bootstrap.bash"
   }
 
   tags {
-    "created_by" = "terraform"
+    created_by = "terraform"
   }
 
   provisioner "remote-exec" {
@@ -55,6 +55,7 @@ The following arguments are supported:
 * `volume_size` - (Optional) Volume size in GB. Supported value range `1-1000` (1 TB max)
 * `security_groups` - (Optional) list(string) of Security groups to attach. Default `[]`
 * `user_groups` - (Optional) list(string) of User groups to attach. Default `[]`
+* `subnet_type` - (Optional) What subnet type to use. Can be `public` or `private`. Default is `private`. 
 * `tags` - (Optional) Map of tags to assign to the instances
 
 ## Attributes Reference

@@ -60,9 +60,10 @@ func resourceContainerHost() *schema.Resource {
 				Default:  "m5.large",
 			},
 			"volume_type": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"iops"},
 			},
 			"iops": {
 				Type:         schema.TypeInt,
@@ -106,6 +107,13 @@ func resourceContainerHost() *schema.Resource {
 				MaxItems: 50,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"subnet_type": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ValidateFunc: validation.StringInSlice([]string{"public", "private"}, false),
+				Default:      "private",
+				ForceNew:     true,
 			},
 			"private_ip": {
 				Type:     schema.TypeString,
@@ -178,6 +186,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	securityGroups := expandStringList(d.Get("security_groups").(*schema.Set).List())
 	userGroups := expandStringList(d.Get("user_groups").(*schema.Set).List())
 	instanceRole := d.Get("instance_role").(string)
+	subnetType := d.Get("subnet_type").(string)
 	tagList := d.Get("tags").(map[string]interface{})
 	tags := make(map[string]string)
 	for t, v := range tagList {
@@ -196,6 +205,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		cartel.VolumeEncryption(encryptVolumes),
 		cartel.Protect(protect),
 		cartel.InstanceRole(instanceRole),
+		cartel.SubnetType(subnetType),
 		cartel.Tags(tags),
 	)
 	if err != nil {

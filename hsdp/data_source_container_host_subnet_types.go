@@ -11,7 +11,7 @@ func dataSourceContainerHostSubnetTypes() *schema.Resource {
 		ReadContext: dataSourceContainerHostSubnetTypesRead,
 		Schema: map[string]*schema.Schema{
 			"names": {
-				Type:     schema.TypeList,
+				Type:     schema.TypeSet,
 				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,

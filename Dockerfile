@@ -1,23 +1,20 @@
+# syntax = docker/dockerfile:1-experimental
+
 ARG hsdp_provider_version=0.7.4
-
-FROM golang:1.15.6-alpine3.12 as build_base
-RUN apk add --no-cache git openssh gcc musl-dev
-WORKDIR /terraform-provider-hsdp
-COPY go.mod .
-COPY go.sum .
-
-# Get dependancies - will also be cached if we won't change mod/sum
+FROM --platform=${BUILDPLATFORM} golang:1.15.6-alpine AS build
+ARG TARGETOS
+ARG TARGETARCH
+WORKDIR /src
+ENV CGO_ENABLED=0
+COPY go.* .
 RUN go mod download
-LABEL builder=true
-
-# Build
-FROM build_base AS builder
 COPY . .
-RUN ./buildscript.sh
+RUN --mount=type=cache,target=/root/.cache/go-build \
+GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /out/terraform-provider-hsdp -ldflags "-X main.GitCommit=${GIT_COMMIT}" .
 
 FROM hashicorp/terraform:0.14.2
 ARG hsdp_provider_version
 ENV HSDP_PROVIDER_VERSION ${hsdp_provider_version}
 LABEL maintainer="Andy Lo-A-Foe <andy.lo-a-foe@philips.com>"
 ENV HOME /root
-COPY --from=builder /terraform-provider-hsdp/build/terraform-provider-hsdp $HOME/.terraform.d/plugins/registry.terraform.io/philips-software/hsdp/${HSDP_PROVIDER_VERSION}/linux_amd64/terraform-provider-hsdp_v${HSDP_PROVIDER_VERSION}
+COPY --from=build /out/terraform-provider-hsdp $HOME/.terraform.d/plugins/registry.terraform.io/philips-software/hsdp/${HSDP_PROVIDER_VERSION}/linux_amd64/terraform-provider-hsdp_v${HSDP_PROVIDER_VERSION}
