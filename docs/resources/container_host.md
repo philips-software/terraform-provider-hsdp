@@ -47,12 +47,12 @@ The following arguments are supported:
 * `name` - (Required) The container host name. Must be unique.
 * `instance_type` - (Optional) The EC2 instance type to use. Default `m5.large`
 * `instance_role` - (Optional) The role to use. Default `container-host` (other values: `vanilla`, `base`)
-* `volume_type` - (Optional) The EBS volume type.
-* `iops` - (Optional) Number of IOPs to provision.
+* `volume_type` - (Optional) The EBS volume type. Default is `gp2`. You can also choose `io1` which is default when you specify `iops` value
+* `iops` - (Optional) Number of guaranteed IOPs to provision. Supported value range `1-4000`
 * `protect` - (Optional) Boolean when set will enable protection for container host.
 * `encrypt_volumes` - (Optional) When set encrypts volumes. Default is `true`
-* `volumes` - (Optional) Number of additional volumes to attach. Default `0`
-* `volume_size` - (Optional) Volume size in GB.
+* `volumes` - (Optional) Number of additional volumes to attach. Default `0`, Maximum `6`
+* `volume_size` - (Optional) Volume size in GB. Supported value range `1-1000` (1 TB max)
 * `security_groups` - (Optional) list(string) of Security groups to attach. Default `[]`
 * `user_groups` - (Optional) list(string) of User groups to attach. Default `[]`
 * `tags` - (Optional) Map of tags to assign to the instances

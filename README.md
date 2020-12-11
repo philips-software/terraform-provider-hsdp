@@ -12,14 +12,14 @@ To find out more about HSDP please visit https://www.hsdp.io/
 
 # Using the provider
 
-**Terraform 0.13**: To install this provider, copy and paste this code into your Terraform configuration. Then, run terraform init.
+**Terraform 0.13+**: To install this provider, copy and paste this code into your Terraform configuration. Then, run terraform init.
 
 ```terraform
 terraform {
   required_providers {
     hsdp = {
       source = "philips-software/hsdp"
-      version = ">= 0.7.3"
+      version = ">= 0.7.4"
     }
   }
 }

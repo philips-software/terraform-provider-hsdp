@@ -6,6 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/philips-software/go-hsdp-api/cartel"
 	"log"
 	"net/http"
@@ -64,9 +65,10 @@ func resourceContainerHost() *schema.Resource {
 				ForceNew: true,
 			},
 			"iops": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(1, 4000),
 			},
 			"protect": {
 				Type:     schema.TypeBool,
@@ -80,16 +82,18 @@ func resourceContainerHost() *schema.Resource {
 				ForceNew: true,
 			},
 			"volumes": {
-				Type:     schema.TypeInt,
-				Default:  0,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeInt,
+				Default:      0,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(0, 6),
 			},
 			"volume_size": {
-				Type:     schema.TypeInt,
-				Default:  0,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeInt,
+				Default:      0,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(0, 1000),
 			},
 			"security_groups": {
 				Type:     schema.TypeSet,
