@@ -64,6 +64,7 @@ The following attributes are exported:
 
 * `id` - The instance ID
 * `private_ip` - The private IP address of the instance
+* `public_ip` - The public IP address of the instance if it has one
 * `role` - The role of the instance.
 * `subnet` - The subnet the instance was provisioned in.
 * `vpc` - The VPC the instance was provisioned in.

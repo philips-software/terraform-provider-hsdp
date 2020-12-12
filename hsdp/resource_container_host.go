@@ -119,6 +119,10 @@ func resourceContainerHost() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"public_ip": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"role": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -366,6 +370,7 @@ func resourceContainerHostRead(ctx context.Context, d *schema.ResourceData, m in
 	_ = d.Set("zone", ch.Zone)
 	_ = d.Set("launch_time", ch.LaunchTime)
 	_ = d.Set("private_ip", ch.PrivateAddress)
+	_ = d.Set("public_ip", ch.PublicAddress)
 	_ = d.Set("subnet", ch.Subnet)
 	_ = d.Set("tags", normalizeTags(ch.Tags))
 
