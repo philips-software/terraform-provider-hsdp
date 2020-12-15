@@ -60,13 +60,13 @@ func dataSourceConfigRead(ctx context.Context, d *schema.ResourceData, meta inte
 		return diag.FromErr(err)
 	}
 	d.SetId("data" + region + environment + service)
-	if url, err := c.Service(service).GetString("url"); err == nil {
+	if url := c.Service(service).URL; url != "" {
 		_ = d.Set("url", url)
 	}
-	if host, err := c.Service(service).GetString("host"); err == nil {
+	if host := c.Service(service).Host; host != "" {
 		_ = d.Set("host", host)
 	}
-	if domain, err := c.Service(service).GetString("domain"); err == nil {
+	if domain := c.Service(service).Domain; domain != "" {
 		_ = d.Set("domain", domain)
 	}
 	return diags

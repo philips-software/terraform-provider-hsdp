@@ -11,12 +11,12 @@ The app upscales at 90% CPU utilization and downscales again when CPU usage fall
 
 ```hcl
 resource "hsdp_metrics_autoscaler" "myapp_autoscaler" {
-  instance_id = cloudfoundry_service_instance.metrics.id
+  metrics_instance_id = cloudfoundry_service_instance.metrics.id
   app_name    = cloudfoundry_app.myapp.name
  
   enabled = true
-  min     = 1
-  max     = 10 
+  min_instances     = 1
+  max_instances     = 10 
 
   threshold_cpu {
     enabled = true
@@ -32,7 +32,7 @@ resource "hsdp_metrics_autoscaler" "myapp_autoscaler" {
     enabled = false
   }
 
-  threshold_http_traffic {
+  threshold_http_rate {
     enabled = false
   }
 }
@@ -42,7 +42,7 @@ resource "hsdp_metrics_autoscaler" "myapp_autoscaler" {
 
 The following arguments are supported:
 
-* `instance_id` - (Required) The Metrics service instance UUID running in the space where the app is hosted.
+* `metrics_instance_id` - (Required) The Metrics service instance UUID running in the space where the app is hosted.
 * `app_name` - (Required) The CF app name to apply this autoscaler settings for.
 * `min` - (Optional) Minimum number of app instances. Default: 1
 * `max` - (Optional) Maximum number of app instances. Default: 10

@@ -13,4 +13,5 @@ var (
 	ErrMissingClientPassword = errors.New("missing client password")
 	ErrInvalidResponse       = errors.New("invalid response received")
 	ErrResourceNotFound      = errors.New("resource not found")
+	ErrIntermittent          = errors.New("intermittent error detected")
 )

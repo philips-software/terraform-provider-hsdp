@@ -111,7 +111,7 @@ func (c *Config) setupS3CredsClient() {
 	if c.Environment != "" && c.Region != "" {
 		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(c.Environment))
 		if err == nil {
-			if url, err := ac.Service("s3creds").GetString("url"); err == nil && c.S3CredsURL == "" {
+			if url := ac.Service("s3creds").URL; c.S3CredsURL == "" {
 				c.S3CredsURL = url
 			}
 		}
