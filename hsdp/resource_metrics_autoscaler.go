@@ -54,7 +54,7 @@ func resourceMetricsAutoscaler() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
-			"threshold_http_latency": &schema.Schema{
+			"threshold_http_latency": {
 				Type:     schema.TypeSet,
 				Required: true,
 				MaxItems: 1,
@@ -79,7 +79,7 @@ func resourceMetricsAutoscaler() *schema.Resource {
 					},
 				},
 			},
-			"threshold_http_rate": &schema.Schema{
+			"threshold_http_rate": {
 				Type:     schema.TypeSet,
 				Required: true,
 				MaxItems: 1,
@@ -104,7 +104,7 @@ func resourceMetricsAutoscaler() *schema.Resource {
 					},
 				},
 			},
-			"threshold_memory": &schema.Schema{
+			"threshold_memory": {
 				Type:     schema.TypeSet,
 				Required: true,
 				MaxItems: 1,
@@ -129,7 +129,7 @@ func resourceMetricsAutoscaler() *schema.Resource {
 					},
 				},
 			},
-			"threshold_cpu": &schema.Schema{
+			"threshold_cpu": {
 				Type:     schema.TypeSet,
 				Required: true,
 				MaxItems: 1,
