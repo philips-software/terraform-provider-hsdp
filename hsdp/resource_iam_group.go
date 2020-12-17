@@ -260,8 +260,11 @@ func resourceIAMGroupDelete(ctx context.Context, d *schema.ResourceData, m inter
 	}
 
 	ok, _, err := client.Groups.DeleteGroup(group)
-	if !ok {
+	if err != nil {
 		return diag.FromErr(err)
+	}
+	if !ok {
+		return diag.FromErr(ErrDeleteGroupFailed)
 	}
 	d.SetId("")
 	return diags

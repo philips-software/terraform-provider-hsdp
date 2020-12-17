@@ -193,8 +193,11 @@ func resourceIAMMFAPolicyDelete(ctx context.Context, d *schema.ResourceData, m i
 	policy.ID = d.Id()
 
 	ok, _, err := client.MFAPolicies.DeleteMFAPolicy(policy)
-	if !ok {
+	if err != nil {
 		return diag.FromErr(err)
+	}
+	if !ok {
+		return diag.FromErr(ErrDeleteMFAPolicyFailed)
 	}
 	d.SetId("")
 	return diags

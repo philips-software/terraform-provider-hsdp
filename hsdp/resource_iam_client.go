@@ -252,8 +252,11 @@ func resourceIAMClientDelete(ctx context.Context, d *schema.ResourceData, m inte
 	var cl iam.ApplicationClient
 	cl.ID = d.Id()
 	ok, _, err := client.Clients.DeleteClient(cl)
-	if !ok {
+	if err != nil {
 		return diag.FromErr(err)
+	}
+	if !ok {
+		return diag.FromErr(ErrDeleteClientFailed)
 	}
 	d.SetId("")
 	return diags

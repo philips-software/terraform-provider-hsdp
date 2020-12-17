@@ -292,8 +292,6 @@ github.com/nsf/jsondiff v0.0.0-20200515183724-f29ed568f4ce h1:RPclfga2SEJmgMmz2k
 github.com/nsf/jsondiff v0.0.0-20200515183724-f29ed568f4ce/go.mod h1:uFMI8w+ref4v2r9jz+c9i1IfIttS/OkmLfrk1jne5hs=
 github.com/oklog/run v1.0.0 h1:Ru7dDtJNOyC66gQ5dQmaCa0qIsAUFY3sFpK1Xk8igrw=
 github.com/oklog/run v1.0.0/go.mod h1:dlhp/R75TPv97u0XWUtDeV/lRKWPKSdTuV0TZvrmrQA=
-github.com/philips-software/go-hsdp-api v0.26.1-0.20201215053631-69d660526250 h1:EVE4vtazB9ua2RrMikIgyHl4Wm7ATVGyLoKmaQchUCs=
-github.com/philips-software/go-hsdp-api v0.26.1-0.20201215053631-69d660526250/go.mod h1:HaEaF0bYLfcP2P5NKoVCevPZDnNQVr0Y9t/DzWvEGYM=
 github.com/philips-software/go-hsdp-api v0.26.1-0.20201215115602-576c945d0109 h1:VlWzmGruKlo1uT9Hxu79WNU8lwAaSoaTowl/81HTobI=
 github.com/philips-software/go-hsdp-api v0.26.1-0.20201215115602-576c945d0109/go.mod h1:HaEaF0bYLfcP2P5NKoVCevPZDnNQVr0Y9t/DzWvEGYM=
 github.com/philips-software/go-hsdp-signer v1.3.0 h1:Si1voDE/GHzthmxpasPdntbu8aUW6EYJfI6gHVf7BCc=

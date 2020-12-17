@@ -14,4 +14,8 @@ var (
 	ErrInvalidResponse       = errors.New("invalid response received")
 	ErrResourceNotFound      = errors.New("resource not found")
 	ErrIntermittent          = errors.New("intermittent error detected")
+	ErrDeleteGroupFailed     = errors.New("delete group failed")
+	ErrDeleteMFAPolicyFailed = errors.New("delete of MFA policy failed")
+	ErrDeleteClientFailed    = errors.New("delete client failed")
+	ErrDeleteServiceFailed   = errors.New("delete service failed")
 )

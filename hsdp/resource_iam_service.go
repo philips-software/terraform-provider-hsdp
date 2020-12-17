@@ -210,8 +210,11 @@ func resourceIAMServiceDelete(ctx context.Context, d *schema.ResourceData, m int
 	var s iam.Service
 	s.ID = d.Id()
 	ok, _, err := client.Services.DeleteService(s)
-	if !ok {
+	if err != nil {
 		return diag.FromErr(err)
+	}
+	if !ok {
+		return diag.FromErr(ErrDeleteServiceFailed)
 	}
 	d.SetId("")
 	return diags
