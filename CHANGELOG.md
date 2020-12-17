@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.7.8
+- Handle missing Role delete capability of IAM gracefully
+- Fix crashing bug
+
 ## v0.7.7
 - go-hsdp-api bugfix in the console API client
 
