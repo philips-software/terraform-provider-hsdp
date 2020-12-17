@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"net/http"
 
@@ -58,9 +59,24 @@ func resourceIAMPropositionCreate(ctx context.Context, d *schema.ResourceData, m
 	prop.OrganizationID = d.Get("organization_id").(string)
 	prop.GlobalReferenceID = d.Get("global_reference_id").(string)
 
-	createdProp, _, err := client.Propositions.CreateProposition(prop)
+	createdProp, resp, err := client.Propositions.CreateProposition(prop)
 	if err != nil {
-		return diag.FromErr(err)
+		if resp == nil {
+			return diag.FromErr(err)
+		}
+		if resp.StatusCode != http.StatusConflict {
+			return diag.FromErr(err)
+		}
+		createdProp, _, err = client.Propositions.GetProposition(&iam.GetPropositionsOptions{
+			Name: &prop.Name,
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if createdProp.OrganizationID != prop.OrganizationID || createdProp.GlobalReferenceID != prop.GlobalReferenceID {
+			return diag.FromErr(fmt.Errorf("conflict creating, but no proposition match found"))
+		}
+		// We found a matching existing proposition, go with it
 	}
 	d.SetId(createdProp.ID)
 	_ = d.Set("name", createdProp.Name)
