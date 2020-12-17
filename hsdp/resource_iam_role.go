@@ -69,9 +69,26 @@ func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, meta int
 	managingOrganization := d.Get("managing_organization").(string)
 	permissions := expandStringList(d.Get("permissions").(*schema.Set).List())
 
-	role, _, err := client.Roles.CreateRole(name, description, managingOrganization)
+	role, resp, err := client.Roles.CreateRole(name, description, managingOrganization)
 	if err != nil {
-		return diag.FromErr(err)
+		if resp == nil {
+			return diag.FromErr(fmt.Errorf("response is nil: %v", err))
+		}
+		if resp.StatusCode != http.StatusConflict {
+			return diag.FromErr(err)
+		}
+		// Already exists most likely, adopt it
+		var roles *[]iam.Role
+		roles, _, err = client.Roles.GetRoles(&iam.GetRolesOptions{
+			Name: &name,
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if len(*roles) == 0 || (*roles)[0].ManagingOrganization != managingOrganization {
+			return diag.FromErr(fmt.Errorf("conflict creating, but no role match found"))
+		}
+		role = &(*roles)[0]
 	}
 	for _, p := range permissions {
 		_, _, _ = client.Roles.AddRolePermission(*role, p)
@@ -182,10 +199,8 @@ func resourceIAMRoleDelete(ctx context.Context, d *schema.ResourceData, m interf
 	var role iam.Role
 	role.ID = d.Id()
 
-	ok, _, err := client.Roles.DeleteRole(role)
-	if !ok {
-		return diag.FromErr(err)
-	}
+	_, _, _ = client.Roles.DeleteRole(role)
+	// Note: 2020-12-17, the DeleteRole call will always fail. Thanks IAM.
 	d.SetId("")
 	return diags
 }
