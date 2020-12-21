@@ -3,6 +3,7 @@ package hsdp
 import (
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/philips-software/go-hsdp-api/cartel"
+	"github.com/philips-software/go-hsdp-api/cdr"
 	"github.com/philips-software/go-hsdp-api/config"
 	"github.com/philips-software/go-hsdp-api/console"
 	"github.com/philips-software/go-hsdp-api/credentials"
@@ -169,4 +170,36 @@ func (c *Config) setupConsoleClient() {
 		}
 	}
 	c.consoleClient = client
+}
+
+// getCDRClient creates a HSDP CDR client
+func (c *Config) getCDRClient(cdrInstanceURL string) (*cdr.Client, error) {
+	if c.iamClientErr != nil {
+		return nil, c.iamClientErr
+	}
+	client, err := cdr.NewClient(c.iamClient, &cdr.Config{
+		CDRURL:    cdrInstanceURL,
+		RootOrgID: "",
+		DebugLog:  c.DebugLog,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+// getFHIRClient creates a HSDP CDR client
+func (c *Config) getFHIRClient(fhirStore, rootOrgID string) (*cdr.Client, error) {
+	if c.iamClientErr != nil {
+		return nil, c.iamClientErr
+	}
+	client, err := cdr.NewClient(c.iamClient, &cdr.Config{
+		FHIRStore: fhirStore,
+		RootOrgID: rootOrgID,
+		DebugLog:  c.DebugLog,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 }

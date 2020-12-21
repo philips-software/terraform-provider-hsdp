@@ -174,6 +174,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_credentials_policy":  resourceCredentialsPolicy(),
 			"hsdp_container_host":      resourceContainerHost(),
 			"hsdp_metrics_autoscaler":  resourceMetricsAutoscaler(),
+			"hsdp_cdr_org":             resourceCDROrg(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":              dataSourceIAMIntrospect(),
@@ -187,6 +188,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_credentials_policy":          dataSourceCredentialsPolicy(),
 			"hsdp_config":                      dataSourceConfig(),
 			"hsdp_container_host_subnet_types": dataSourceContainerHostSubnetTypes(),
+			"hsdp_cdr_instance":                dataSourceCDRInstance(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
