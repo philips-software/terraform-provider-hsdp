@@ -19,6 +19,8 @@ resource "hsdp_cdr_subscription" "patient_changes" {
   headers = [
     "Authorization: Basic cm9uOnN3YW5zb24="
   ]
+  
+  end = "2030-12-31T23:59:59Z"
 }
 ```
 
@@ -37,6 +39,7 @@ The REST endpoint will be called with a JSON body as follows:
 The following arguments are supported:
 
 * `criteria` - (Required) On which resource to notify
+* `end` - (Required) RFC3339 formatted timestamp when to end notifications
 * `reason` - (Optional) Reason for the notification
 * `endpoint` - (Required) The REST endpoint to call
 * `headers` - (Optional) List of headers to add to call
@@ -47,7 +50,7 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `id` - The GUID of the subsscription
+* `id` - The GUID of the subscription
 
 ## Import
 

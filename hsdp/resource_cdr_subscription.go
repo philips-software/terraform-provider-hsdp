@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	jsonpatch "github.com/herkyl/patchwerk"
 	"github.com/philips-software/go-hsdp-api/cdr/helper/fhir/stu3"
+	"time"
 )
 
 func resourceCDRSubscription() *schema.Resource {
@@ -48,6 +49,10 @@ func resourceCDRSubscription() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Optional: true,
 			},
+			"end": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 		},
 	}
 }
@@ -62,7 +67,12 @@ func resourceCDRSubscriptionCreate(ctx context.Context, d *schema.ResourceData, 
 	endpoint := d.Get("endpoint").(string)
 	reason := d.Get("reason").(string)
 	criteria := d.Get("criteria").(string)
+	end := d.Get("end").(string)
 	headers := expandStringList(d.Get("headers").(*schema.Set).List())
+	endTime, err := time.Parse(time.RFC3339, end)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	client, err := config.getFHIRClient(fhirStore, rootOrgID)
 	if err != nil {
@@ -73,7 +83,8 @@ func resourceCDRSubscriptionCreate(ctx context.Context, d *schema.ResourceData, 
 		stu3.WithReason(reason),
 		stu3.WithCriteria(criteria),
 		stu3.WithHeaders(headers),
-		stu3.WithEndpoint(endpoint))
+		stu3.WithEndpoint(endpoint),
+		stu3.WithEndtime(endTime))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -168,6 +179,14 @@ func resourceCDRSubscriptionUpdate(ctx context.Context, d *schema.ResourceData, 
 	}
 	if d.HasChange("endpoint") {
 		sub.Channel.Endpoint.Value = d.Get("endpoint").(string)
+		madeChanges = true
+	}
+	if d.HasChange("end") {
+		endTime, err := time.Parse(time.RFC3339, d.Get("end").(string))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		sub.End.ValueUs = endTime.UnixNano() / 1000
 		madeChanges = true
 	}
 	if d.HasChange("headers") {
