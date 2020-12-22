@@ -8,7 +8,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.2.0
 	github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
-	github.com/philips-software/go-hsdp-api v0.27.0
+	github.com/philips-software/go-hsdp-api v0.27.1-0.20201222200734-c5eb460e9232
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.5.1
 )

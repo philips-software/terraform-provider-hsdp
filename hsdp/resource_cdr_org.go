@@ -23,14 +23,17 @@ func resourceCDROrg() *schema.Resource {
 			"fhir_store": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"root_org_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"org_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
