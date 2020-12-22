@@ -41,7 +41,7 @@ func dataSourceCDRInstanceRead(ctx context.Context, d *schema.ResourceData, meta
 	defer client.Close()
 
 	d.SetId(baseURL)
-	_ = d.Set("fhir_store", client.GetFHirStoreURL())
+	_ = d.Set("fhir_store", client.GetFHIRStoreURL())
 	_ = d.Set("type", "EHR")
 	return diags
 }
