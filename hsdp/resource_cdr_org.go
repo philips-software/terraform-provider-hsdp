@@ -157,6 +157,6 @@ func resourceCDROrgUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 func resourceCDROrgDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	// TODO
+	// TODO: will be supported in CDR release of Q1 2021
 	return diags
 }
