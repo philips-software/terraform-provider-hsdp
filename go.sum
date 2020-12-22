@@ -180,6 +180,7 @@ github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7
 github.com/evanphx/json-patch v4.2.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
 github.com/evanphx/json-patch v4.5.0+incompatible h1:ouOWdg56aJriqS0huScTkVXPC5IcNrDCXZ6OoTAWu7M=
 github.com/evanphx/json-patch v4.5.0+incompatible/go.mod h1:50XU6AFN0ol/bzJsmQLiYLvXMP4fmwYFNcr97nuDLSk=
+github.com/evanphx/json-patch/v5 v5.1.0 h1:B0aXl1o/1cP8NbviYiBMkcHBtUjIJ1/Ccg6b+SwCLQg=
 github.com/evanphx/json-patch/v5 v5.1.0/go.mod h1:G79N1coSVB93tBe7j6PhzjmR3/2VvlbKOFpnXhI9Bw4=
 github.com/fatih/color v1.7.0 h1:DkWD4oS2D8LGGgTQ6IvwJJXSL5Vp2ffcQg58nFV38Ys=
 github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
@@ -320,7 +321,6 @@ github.com/google/go-cmp v0.5.0/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/
 github.com/google/go-cmp v0.5.2 h1:X2ev0eStA3AbceY54o37/0PQ/UWqKEiiO2dKL5OPaFM=
 github.com/google/go-cmp v0.5.2/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
 github.com/google/go-github/v27 v27.0.4/go.mod h1:/0Gr8pJ55COkmv+S/yPKCczSkUPIM/LnFyubufRNIS0=
-github.com/google/go-querystring v0.0.0-20170111101155-53e6ce116135/go.mod h1:odCYkC5MyYFN7vkCjXpyrEuKhc/BUO6wN/zVPAxq5ck=
 github.com/google/go-querystring v1.0.0 h1:Xkwi/a1rcvNg1PPYe5vI8GbeBY/jrVuDX5ASuANWTrk=
 github.com/google/go-querystring v1.0.0/go.mod h1:odCYkC5MyYFN7vkCjXpyrEuKhc/BUO6wN/zVPAxq5ck=
 github.com/google/gofuzz v0.0.0-20161122191042-44d81051d367/go.mod h1:HP5RmnzzSNb993RKQDq4+1A4ia9nllfqcQFTQJedwGI=
@@ -586,20 +586,6 @@ github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtP
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/peterbourgon/diskv v2.0.1+incompatible/go.mod h1:uqqh8zWWbv1HBMNONnaR/tNboyR3/BZd58JJSHlUSCU=
 github.com/philhofer/fwd v1.0.0/go.mod h1:gk3iGcWd9+svBvR0sR+KPcfE+RNWozjowpeBVG3ZVNU=
-github.com/philips-software/go-hsdp-api v0.26.1-0.20201220140908-2df59921304c h1:Bopanic9kS4ibSPKVbqWcxqWZ8D9m5Ec4sjHzWgKCUU=
-github.com/philips-software/go-hsdp-api v0.26.1-0.20201220140908-2df59921304c/go.mod h1:HaEaF0bYLfcP2P5NKoVCevPZDnNQVr0Y9t/DzWvEGYM=
-github.com/philips-software/go-hsdp-api v0.26.1-0.20201221093940-253b0dbb487f h1:X//3FlEbruraz0KLqDtpA0cDwlpHX2kkhVlVzlQWi7Y=
-github.com/philips-software/go-hsdp-api v0.26.1-0.20201221093940-253b0dbb487f/go.mod h1:SmrEUSLXPOrxedUjlNFDmHV4QwIZmgAhJ3ZB/NVEcz8=
-github.com/philips-software/go-hsdp-api v0.26.1-0.20201221214618-8519652f015b h1:xob4M+vGY/XaZfMNhYZcbD8FyLJKOBdcEL3wt75COFQ=
-github.com/philips-software/go-hsdp-api v0.26.1-0.20201221214618-8519652f015b/go.mod h1:SmrEUSLXPOrxedUjlNFDmHV4QwIZmgAhJ3ZB/NVEcz8=
-github.com/philips-software/go-hsdp-api v0.26.1-0.20201221215218-7d49687293fc h1:/zhSfYjOGQV0bqLkTFKEs7uBPD1ewUQ3d0kI6yXGp+U=
-github.com/philips-software/go-hsdp-api v0.26.1-0.20201221215218-7d49687293fc/go.mod h1:SmrEUSLXPOrxedUjlNFDmHV4QwIZmgAhJ3ZB/NVEcz8=
-github.com/philips-software/go-hsdp-api v0.26.1-0.20201221220832-909694c826a7 h1:OPgVv6PPx0fesZBUEpWC7EGd5EEkaWsyJtChsYJ2y+o=
-github.com/philips-software/go-hsdp-api v0.26.1-0.20201221220832-909694c826a7/go.mod h1:SmrEUSLXPOrxedUjlNFDmHV4QwIZmgAhJ3ZB/NVEcz8=
-github.com/philips-software/go-hsdp-api v0.26.1-0.20201222071216-d4bd2966d320 h1:5errXC4C9EfntxpybXy8HNuvYRPL9acj5mnyeZjOoQc=
-github.com/philips-software/go-hsdp-api v0.26.1-0.20201222071216-d4bd2966d320/go.mod h1:SmrEUSLXPOrxedUjlNFDmHV4QwIZmgAhJ3ZB/NVEcz8=
-github.com/philips-software/go-hsdp-api v0.26.1-0.20201222103055-ac02ba6c8512 h1:0WrxgC4U26nh2MDYdxWf4R3ADqTHcajUAnjTKWiTCHw=
-github.com/philips-software/go-hsdp-api v0.26.1-0.20201222103055-ac02ba6c8512/go.mod h1:zYRZs6S8Oth4caY5cR1x1e9OO1PfzQgXVmHRwqOwVGg=
 github.com/philips-software/go-hsdp-api v0.27.0 h1:DDCkPDRUyqZXw+7ZsHMYjDdI2w7Qqo1yRVQ/XhOzZJI=
 github.com/philips-software/go-hsdp-api v0.27.0/go.mod h1:zYRZs6S8Oth4caY5cR1x1e9OO1PfzQgXVmHRwqOwVGg=
 github.com/philips-software/go-hsdp-signer v1.3.0 h1:Si1voDE/GHzthmxpasPdntbu8aUW6EYJfI6gHVf7BCc=
