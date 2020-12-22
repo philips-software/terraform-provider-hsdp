@@ -1,8 +1,10 @@
 package hsdp
 
 import (
+	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/philips-software/go-hsdp-api/cartel"
+	"github.com/philips-software/go-hsdp-api/cdr"
 	"github.com/philips-software/go-hsdp-api/config"
 	"github.com/philips-software/go-hsdp-api/console"
 	"github.com/philips-software/go-hsdp-api/credentials"
@@ -34,6 +36,9 @@ type Config struct {
 	cartelClientErr  error
 	iamClientErr     error
 	consoleClientErr error
+	TimeZone         string
+
+	ma *jsonformat.Marshaller
 }
 
 func (c *Config) IAMClient() (*iam.Client, error) {
@@ -169,4 +174,38 @@ func (c *Config) setupConsoleClient() {
 		}
 	}
 	c.consoleClient = client
+}
+
+// getCDRClient creates a HSDP CDR client
+func (c *Config) getCDRClient(cdrInstanceURL string) (*cdr.Client, error) {
+	if c.iamClientErr != nil {
+		return nil, c.iamClientErr
+	}
+	client, err := cdr.NewClient(c.iamClient, &cdr.Config{
+		CDRURL:    cdrInstanceURL,
+		RootOrgID: "",
+		TimeZone:  c.TimeZone,
+		DebugLog:  c.DebugLog,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+// getFHIRClient creates a HSDP CDR client
+func (c *Config) getFHIRClient(fhirStore, rootOrgID string) (*cdr.Client, error) {
+	if c.iamClientErr != nil {
+		return nil, c.iamClientErr
+	}
+	client, err := cdr.NewClient(c.iamClient, &cdr.Config{
+		FHIRStore: fhirStore,
+		RootOrgID: rootOrgID,
+		TimeZone:  c.TimeZone,
+		DebugLog:  c.DebugLog,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 }
