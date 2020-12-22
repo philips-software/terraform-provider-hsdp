@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.8.0
+- NEW: Clinical Data Repository (CDR) onboarding support
+
 ## v0.7.8
 - Handle missing Role delete capability of IAM gracefully
 - Fix crashing bug
