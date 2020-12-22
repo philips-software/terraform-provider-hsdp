@@ -12,7 +12,8 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /out/terraform-provider-hsdp -ldflags "-X main.GitCommit=${GIT_COMMIT}" .
 
-FROM hashicorp/terraform:0.14.2
+FROM hashicorp/terraform:0.14.3
+RUN apk add --no-cache tzdata
 ARG hsdp_provider_version
 ENV HSDP_PROVIDER_VERSION ${hsdp_provider_version}
 LABEL maintainer="Andy Lo-A-Foe <andy.lo-a-foe@philips.com>"

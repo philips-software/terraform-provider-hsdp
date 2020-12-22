@@ -180,6 +180,7 @@ func (c *Config) getCDRClient(cdrInstanceURL string) (*cdr.Client, error) {
 	client, err := cdr.NewClient(c.iamClient, &cdr.Config{
 		CDRURL:    cdrInstanceURL,
 		RootOrgID: "",
+		TimeZone:  "Europe/Amsterdam",
 		DebugLog:  c.DebugLog,
 	})
 	if err != nil {
@@ -196,6 +197,7 @@ func (c *Config) getFHIRClient(fhirStore, rootOrgID string) (*cdr.Client, error)
 	client, err := cdr.NewClient(c.iamClient, &cdr.Config{
 		FHIRStore: fhirStore,
 		RootOrgID: rootOrgID,
+		TimeZone:  "Europe/Amsterdam",
 		DebugLog:  c.DebugLog,
 	})
 	if err != nil {

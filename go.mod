@@ -7,7 +7,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.6.6
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.2.0
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
-	github.com/philips-software/go-hsdp-api v0.26.1-0.20201221220832-909694c826a7
+	github.com/philips-software/go-hsdp-api v0.26.1-0.20201222071216-d4bd2966d320
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.5.1
 )

@@ -3,10 +3,8 @@ package hsdp
 import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/philips-software/go-hsdp-api/cdr/helper/fhir/stu3"
-	"net/http"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/philips-software/go-hsdp-api/cdr/helper/fhir/stu3"
 )
 
 func resourceCDROrg() *schema.Resource {
@@ -60,20 +58,18 @@ func resourceCDROrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	defer client.Close()
 
-	onboardedOrg, resp, err := client.TenantSTU3.Onboard(org)
+	// Check if already onboarded
+	onboardedOrg, _, err := client.TenantSTU3.GetOrganizationByID(orgID)
+	if err == nil && onboardedOrg != nil {
+		d.SetId(onboardedOrg.Id.Value)
+		return resourceCDROrgUpdate(ctx, d, m)
+	}
+	// Do initial boarding
+	onboardedOrg, _, err = client.TenantSTU3.Onboard(org)
 	if err != nil {
-		if resp == nil {
-			return diag.FromErr(err)
-		}
-		if resp.StatusCode != http.StatusConflict {
-			return diag.FromErr(err)
-		}
-		onboardedOrg, _, err = client.TenantSTU3.GetOrganizationByID(orgID)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		// We found a matching existing org, go with it
+		return diag.FromErr(err)
 	}
 	d.SetId(onboardedOrg.Id.Value)
 	return diags
@@ -92,6 +88,7 @@ func resourceCDROrgRead(ctx context.Context, d *schema.ResourceData, m interface
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	defer client.Close()
 	org, resp, err := client.TenantSTU3.GetOrganizationByID(orgID)
 	if err != nil || resp == nil {
 		if resp == nil {
@@ -113,13 +110,23 @@ func resourceCDROrgRead(ctx context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceCDROrgUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	config := m.(*Config)
 	var diags diag.Diagnostics
 
-	// TODO: no meaningful lifecycle here
-	if !d.HasChange("name") {
+	fhirStore := d.Get("fhir_store").(string)
+	rootOrgID := d.Get("root_org_id").(string)
+
+	client, err := config.getFHIRClient(fhirStore, rootOrgID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	defer client.Close()
+
+	if d.HasChange("name") {
+		// TODO: update name
 		return diags
 	}
-	return diag.FromErr(ErrNotImplementedByHSDP)
+	return diags
 }
 
 func resourceCDROrgDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
