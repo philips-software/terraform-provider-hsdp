@@ -3,8 +3,6 @@
 - Website: https://www.hsdp.io
 - Documentation: https://registry.terraform.io/providers/philips-software/hsdp/latest/docs
 
-<img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
-
 ## Overview
 
 This is a terraform provider to build/verify HSDP IAM state and other resources.
@@ -27,7 +25,7 @@ terraform {
 
 ## Development requirements
 
--	[Terraform](https://www.terraform.io/downloads.html) 0.13.x
+-	[Terraform](https://www.terraform.io/downloads.html) 0.14.x
 -	[Go](https://golang.org/doc/install) 1.15 or newer (to build the provider plugin)
 
 ### Older version
@@ -49,18 +47,17 @@ Copy the resulting binary to the appropiate [plugin directory](https://www.terra
 
 ## Dockerfile
 
-A Dockerfile is provided. Example usage of the image:
+A Dockerfile is provided, useful for local testing. Example usage:
 
 ```sh
-$ docker build -t terraform-provider-hsdp .
-$ docker run --rm -v /Location/With/Terraform/Files:/terraform -w /terraform -it terraform-provider-hsdp init
+$ docker buildx build --push -t loafoe/terraform-provider-hsdp .
+$ docker pull loafoe/terraform-provider-hsdp
+$ docker run --rm -v /Location/With/Terraform/Files:/terraform -w /terraform -it loafoe/terraform-provider-hsdp init
 ```
-
-Automatic builds can be found on [Docker hub](https://hub.docker.com/r/philipssoftware/terraform-provider-hsdp/).
 
 ## Issues
 
-- If you have an issue: report it on the [issue tracker](https://github.com/philips-software/terraform-provider-hsdp/issues)
+* If you have an issue: report it on the [issue tracker](https://github.com/philips-software/terraform-provider-hsdp/issues)
 
 ## LICENSE
 
