@@ -1,6 +1,7 @@
 package hsdp
 
 import (
+	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/philips-software/go-hsdp-api/cartel"
 	"github.com/philips-software/go-hsdp-api/cdr"
@@ -35,6 +36,9 @@ type Config struct {
 	cartelClientErr  error
 	iamClientErr     error
 	consoleClientErr error
+	TimeZone         string
+
+	ma *jsonformat.Marshaller
 }
 
 func (c *Config) IAMClient() (*iam.Client, error) {
@@ -180,7 +184,7 @@ func (c *Config) getCDRClient(cdrInstanceURL string) (*cdr.Client, error) {
 	client, err := cdr.NewClient(c.iamClient, &cdr.Config{
 		CDRURL:    cdrInstanceURL,
 		RootOrgID: "",
-		TimeZone:  "Europe/Amsterdam",
+		TimeZone:  c.TimeZone,
 		DebugLog:  c.DebugLog,
 	})
 	if err != nil {
@@ -197,7 +201,7 @@ func (c *Config) getFHIRClient(fhirStore, rootOrgID string) (*cdr.Client, error)
 	client, err := cdr.NewClient(c.iamClient, &cdr.Config{
 		FHIRStore: fhirStore,
 		RootOrgID: rootOrgID,
-		TimeZone:  "Europe/Amsterdam",
+		TimeZone:  c.TimeZone,
 		DebugLog:  c.DebugLog,
 	})
 	if err != nil {

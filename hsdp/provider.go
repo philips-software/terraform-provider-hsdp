@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -257,11 +258,18 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	config.UAAUsername = d.Get("uaa_username").(string)
 	config.UAAPassword = d.Get("uaa_password").(string)
 	config.UAAURL = d.Get("uaa_url").(string)
+	config.TimeZone = "Europe/Amsterdam"
 
 	config.setupIAMClient()
 	config.setupS3CredsClient()
 	config.setupCartelClient()
 	config.setupConsoleClient()
+
+	ma, err := jsonformat.NewMarshaller(false, "", "", jsonformat.STU3)
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
+	config.ma = ma
 
 	return config, diags
 }

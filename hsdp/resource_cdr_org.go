@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	jsonpatch "github.com/herkyl/patchwerk"
 	"github.com/philips-software/go-hsdp-api/cdr/helper/fhir/stu3"
 )
 
@@ -54,7 +55,7 @@ func resourceCDROrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	name := d.Get("name").(string)
-	org, err := stu3.NewOrganization("Europe/Amsterdam", orgID, name)
+	org, err := stu3.NewOrganization(config.TimeZone, orgID, name)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -115,6 +116,7 @@ func resourceCDROrgUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	fhirStore := d.Get("fhir_store").(string)
 	rootOrgID := d.Get("root_org_id").(string)
+	id := d.Id()
 
 	client, err := config.getFHIRClient(fhirStore, rootOrgID)
 	if err != nil {
@@ -122,10 +124,34 @@ func resourceCDROrgUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 	defer client.Close()
 
+	org, _, err := client.TenantSTU3.GetOrganizationByID(id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	jsonOrg, err := config.ma.MarshalResource(org)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	madeChanges := false
+
 	if d.HasChange("name") {
-		// TODO: update name
+		org.Name.Value = d.Get("name").(string)
+		madeChanges = true
+	}
+	if !madeChanges {
 		return diags
 	}
+
+	changedOrg, _ := config.ma.MarshalResource(org)
+	patch, err := jsonpatch.DiffBytes(jsonOrg, changedOrg)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	_, _, err = client.OperationsSTU3.Patch("Organization/"+id, patch)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	return diags
 }
 
