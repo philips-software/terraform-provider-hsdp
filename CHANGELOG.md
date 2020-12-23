@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.8.1
+- NEW: Add hsdp_cdr_subscription
+
 ## v0.8.0
 - NEW: Clinical Data Repository (CDR) onboarding support
 
