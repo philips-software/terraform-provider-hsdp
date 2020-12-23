@@ -36,6 +36,10 @@ func resourceCDRSubscription() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"delete_endpoint": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"criteria": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -69,6 +73,7 @@ func resourceCDRSubscriptionCreate(ctx context.Context, d *schema.ResourceData, 
 	fhirStore := d.Get("fhir_store").(string)
 	orgID := d.Get("org_id").(string)
 	endpoint := d.Get("endpoint").(string)
+	deleteEndpoint := d.Get("delete_endpoint").(string)
 	reason := d.Get("reason").(string)
 	criteria := d.Get("criteria").(string)
 	end := d.Get("end").(string)
@@ -88,7 +93,8 @@ func resourceCDRSubscriptionCreate(ctx context.Context, d *schema.ResourceData, 
 		stu3.WithCriteria(criteria),
 		stu3.WithHeaders(headers),
 		stu3.WithEndpoint(endpoint),
-		stu3.WithEndtime(endTime))
+		stu3.WithEndtime(endTime),
+		stu3.WithDeleteEndpoint(deleteEndpoint))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -141,6 +147,7 @@ func resourceCDRSubscriptionRead(ctx context.Context, d *schema.ResourceData, m 
 	_ = d.Set("reason", sub.Reason.Value)
 	_ = d.Set("criteria", sub.Criteria.Value)
 	_ = d.Set("status", sub.Status.Value)
+	_ = d.Set("delete_endpoint", stu3.DeleteEndpointValue()(sub))
 	headers := make([]string, 0)
 	for _, h := range sub.Channel.Header {
 		headers = append(headers, h.Value)
@@ -199,6 +206,13 @@ func resourceCDRSubscriptionUpdate(ctx context.Context, d *schema.ResourceData, 
 		sub.Channel.Header = make([]*datatypes_go_proto.String, 0)
 		for _, h := range headers {
 			sub.Channel.Header = append(sub.Channel.Header, &datatypes_go_proto.String{Value: h})
+		}
+		madeChanges = true
+	}
+	if d.HasChange("delete_endpoint") {
+		modifyDeleteEndpoint := stu3.WithDeleteEndpoint(d.Get("delete_endpoint").(string))
+		if err := modifyDeleteEndpoint(sub); err != nil {
+			return diag.FromErr(err)
 		}
 		madeChanges = true
 	}

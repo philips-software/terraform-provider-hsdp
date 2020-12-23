@@ -13,14 +13,15 @@ data "hsdp_cdr_instance" "sandbox" {
 
 resource "hsdp_cdr_subscription" "patient_changes" {
   fhir_store = data.hsdp_cdr_instance.sandbox.fhir_store
-  org_id = var.iam_org_id
+  org_id     = var.iam_org_id
 
-  criteria = "Patient"
-  endpoint = "https://webhook.myapp.io/patient"
+  criteria        = "Patient"
+  endpoint        = "https://webhook.myapp.io/patient"
+  delete_endpoint = "https://webhook.myapp.io/patient_deleted"
   headers = [
     "Authorization: Basic cm9uOnN3YW5zb24="
   ]
-  
+
   end = "2030-12-31T23:59:59Z"
 }
 ```
@@ -43,6 +44,7 @@ The following arguments are supported:
 * `org_id` - (Required ) The Org ID of the tenant (GUID) to create the Subscription 
 * `criteria` - (Required) On which resource to notify
 * `endpoint` - (Required) The REST endpoint to call. Must use `https://`  schema
+* `delete_endpoint` - (Optional) The REST endpoint to call for DELETE operations. Must use `https://` schema  
 * `end` - (Required) RFC3339 formatted timestamp when to end notifications
 * `reason` - (Optional) Reason for creating the subscription
 * `headers` - (Optional) List of headers to add to the REST call
