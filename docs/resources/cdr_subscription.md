@@ -43,17 +43,17 @@ The following arguments are supported:
 * `fhir_store` - (Required) The CDR FHIR store to use
 * `org_id` - (Required ) The Org ID of the tenant (GUID) to create the Subscription 
 * `criteria` - (Required) On which resource to notify
+* `reason` - (Required) Reason for creating the subscription
 * `endpoint` - (Required) The REST endpoint to call. Must use `https://`  schema
 * `delete_endpoint` - (Optional) The REST endpoint to call for DELETE operations. Must use `https://` schema  
 * `end` - (Required) RFC3339 formatted timestamp when to end notifications
-* `reason` - (Optional) Reason for creating the subscription
 * `headers` - (Optional) List of headers to add to the REST call
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `status` - The status of the subscription (requested|active|error|off)
+* `status` - The status of the subscription (requested | active | error  | off)
 
 ## Import
 

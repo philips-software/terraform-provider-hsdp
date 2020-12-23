@@ -1,12 +1,11 @@
 # HSDP Terraform provider
 
-- Website: https://www.hsdp.io
-- Documentation: https://registry.terraform.io/providers/philips-software/hsdp/latest/docs
+- Documentation on [registry.terraform.io](https://registry.terraform.io/providers/philips-software/hsdp/latest/docs)
 
 ## Overview
 
-This is a terraform provider to build/verify HSDP IAM state and other resources.
-To find out more about HSDP please visit https://www.hsdp.io/
+A Terraform provider to provision and manage state of various HSDP specific resources.
+To find out more about HSDP please visit [hsdp.io](https://www.hsdp.io/)
 
 # Using the provider
 
@@ -17,7 +16,7 @@ terraform {
   required_providers {
     hsdp = {
       source = "philips-software/hsdp"
-      version = ">= 0.8.0"
+      version = ">= 0.8.1"
     }
   }
 }
@@ -34,7 +33,7 @@ Use `v0.1.0` of this provider for Terraform 0.11 or older
 
 ## Building the provider
 
-Clone repository somehere *outside* your $GOPATH:
+Clone repository somewhere *outside* your $GOPATH:
 
 ```sh
 $ git clone git@github.com:philips-software/terraform-provider-hsdp
@@ -42,8 +41,7 @@ $ cd terraform-provider-hsdp
 $ go build .
 ```
 
-Copy the resulting binary to the appropiate [plugin directory](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) e.g. `.terraform.d/plugins/darwin_amd64/terraform-provider-hsdp` 
-
+Copy the resulting binary to the appropriate [plugin directory](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) e.g. `.terraform.d/plugins/darwin_amd64/terraform-provider-hsdp`
 
 ## Dockerfile
 

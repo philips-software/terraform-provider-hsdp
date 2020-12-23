@@ -1,6 +1,6 @@
 # HSDP Provider
 
-The HSDP provider is capable of managing a select set of HSDP resources. This includes many IAM resources, Cartel / Container Host instances
+The HSDP provider can provision and manage a select set of HSDP resources. This includes amongst others many IAM entities, Container Host instances and even some Clinical Data Repository (CDR) resources.
 
 ## Configuring the provider
 
@@ -59,9 +59,9 @@ The following arguments are supported:
 
 * `cartel_secret` - (Optional) The cartel secret as provided by HSDP.
 
-* `retry_max` - (Optiona) Integer, when > 0 will use a retry-able HTTP client and retry requests when applicable.
+* `retry_max` - (Optional) Integer, when > 0 will use a retry-able HTTP client and retry requests when applicable.
 
-* `debug` - (Optional) If set to true, outputs details on API calls
+* `debug` - **deprecated** If set to true, outputs details on API calls. Deprecated, just setting `debug_log` is sufficient.
 
 * `debug_log` - (Optional) If set to a path, when debug is enabled outputs details to this file
 
