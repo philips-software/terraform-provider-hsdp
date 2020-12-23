@@ -183,7 +183,7 @@ func resourceCDRSubscriptionUpdate(ctx context.Context, d *schema.ResourceData, 
 	madeChanges := false
 
 	if d.HasChange("criteria") {
-		sub.Criteria.Value = d.Get("name").(string)
+		sub.Criteria.Value = d.Get("criteria").(string)
 		madeChanges = true
 	}
 	if d.HasChange("reason") {
