@@ -67,7 +67,6 @@ func (c *Config) CredentialsClientWithLogin(username, password string) (*credent
 	}
 	return credentials.NewClient(newIAMClient, &credentials.Config{
 		BaseURL:  c.S3CredsURL,
-		Debug:    c.Debug,
 		DebugLog: c.DebugLog,
 	})
 }
@@ -123,7 +122,6 @@ func (c *Config) setupS3CredsClient() {
 	}
 	client, err := credentials.NewClient(c.iamClient, &credentials.Config{
 		BaseURL:  c.S3CredsURL,
-		Debug:    c.Debug,
 		DebugLog: c.DebugLog,
 	})
 	if err != nil {
@@ -143,7 +141,6 @@ func (c *Config) setupCartelClient() {
 		Secret:     c.CartelSecret,
 		NoTLS:      c.CartelNoTLS,
 		SkipVerify: c.CartelSkipVerify,
-		Debug:      c.Debug,
 		DebugLog:   c.DebugLog,
 	})
 	if err != nil {
@@ -158,7 +155,6 @@ func (c *Config) setupCartelClient() {
 func (c *Config) setupConsoleClient() {
 	client, err := console.NewClient(nil, &console.Config{
 		Region:   c.Region,
-		Debug:    c.Debug,
 		DebugLog: c.DebugLog,
 	})
 	if err != nil {

@@ -154,6 +154,7 @@ func Provider(build string) *schema.Provider {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: descriptions["debug"],
+				Deprecated:  "no need to set debug boolean, setting debug_log is sufficient",
 			},
 			"debug_log": {
 				Type:        schema.TypeString,
