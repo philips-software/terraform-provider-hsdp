@@ -27,7 +27,7 @@ func resourceCDRSubscription() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"root_org_id": {
+			"org_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -67,7 +67,7 @@ func resourceCDRSubscriptionCreate(ctx context.Context, d *schema.ResourceData, 
 	var diags diag.Diagnostics
 
 	fhirStore := d.Get("fhir_store").(string)
-	rootOrgID := d.Get("root_org_id").(string)
+	orgID := d.Get("org_id").(string)
 	endpoint := d.Get("endpoint").(string)
 	reason := d.Get("reason").(string)
 	criteria := d.Get("criteria").(string)
@@ -78,7 +78,7 @@ func resourceCDRSubscriptionCreate(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	client, err := config.getFHIRClient(fhirStore, rootOrgID)
+	client, err := config.getFHIRClient(fhirStore, orgID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -113,9 +113,9 @@ func resourceCDRSubscriptionRead(ctx context.Context, d *schema.ResourceData, m 
 	var diags diag.Diagnostics
 
 	fhirStore := d.Get("fhir_store").(string)
-	rootOrgID := d.Get("root_org_id").(string)
+	orgID := d.Get("org_id").(string)
 
-	client, err := config.getFHIRClient(fhirStore, rootOrgID)
+	client, err := config.getFHIRClient(fhirStore, orgID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -154,10 +154,10 @@ func resourceCDRSubscriptionUpdate(ctx context.Context, d *schema.ResourceData, 
 	var diags diag.Diagnostics
 
 	fhirStore := d.Get("fhir_store").(string)
-	rootOrgID := d.Get("root_org_id").(string)
+	orgID := d.Get("org_id").(string)
 	id := d.Id()
 
-	client, err := config.getFHIRClient(fhirStore, rootOrgID)
+	client, err := config.getFHIRClient(fhirStore, orgID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -224,10 +224,10 @@ func resourceCDRSubscriptionDelete(ctx context.Context, d *schema.ResourceData, 
 	var diags diag.Diagnostics
 
 	fhirStore := d.Get("fhir_store").(string)
-	rootOrgID := d.Get("root_org_id").(string)
+	orgID := d.Get("org_id").(string)
 	id := d.Id()
 
-	client, err := config.getFHIRClient(fhirStore, rootOrgID)
+	client, err := config.getFHIRClient(fhirStore, orgID)
 	if err != nil {
 		return diag.FromErr(err)
 	}

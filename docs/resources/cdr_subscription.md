@@ -1,5 +1,6 @@
 # hsdp_cdr_subscription
-Provides a resource for subscribing to HSDP CDR [subscriptions](https://www.hsdp.io/documentation/clinical-data-repository/stu3/getting-started/ehr).
+Provides a resource for managing [FHIR Subscriptions](https://www.hl7.org/fhir/stu3/subscription.html) in a CDR. 
+The only supported channel type is `rest-webhook` therefore the `endpoint` and `headers` are top-level arguments.
 
 ## Example Usage
 
@@ -12,7 +13,7 @@ data "hsdp_cdr_instance" "sandbox" {
 
 resource "hsdp_cdr_subscription" "patient_changes" {
   fhir_store = data.hsdp_cdr_instance.sandbox.fhir_store
-  root_org_id = var.iam_org_id
+  org_id = var.iam_org_id
 
   criteria = "Patient"
   endpoint = "https://webhook.myapp.io/patient"
@@ -24,7 +25,7 @@ resource "hsdp_cdr_subscription" "patient_changes" {
 }
 ```
 
-The REST endpoint will be called with a JSON body as follows:
+CDR will send a `POST` request to the endpoint with a JSON body containing:
 
 ```json
 {
@@ -38,13 +39,13 @@ The REST endpoint will be called with a JSON body as follows:
 
 The following arguments are supported:
 
-* `criteria` - (Required) On which resource to notify
-* `end` - (Required) RFC3339 formatted timestamp when to end notifications
-* `reason` - (Optional) Reason for the notification
-* `endpoint` - (Required) The REST endpoint to call
-* `headers` - (Optional) List of headers to add to call
 * `fhir_store` - (Required) The CDR FHIR store to use
-* `root_org_id` - (Required ) The root Org ID (GUID) to onboard the organization under
+* `org_id` - (Required ) The Org ID of the tenant (GUID) to create the Subscription 
+* `criteria` - (Required) On which resource to notify
+* `endpoint` - (Required) The REST endpoint to call. Must use `https://`  schema
+* `end` - (Required) RFC3339 formatted timestamp when to end notifications
+* `reason` - (Optional) Reason for creating the subscription
+* `headers` - (Optional) List of headers to add to the REST call
 
 ## Attributes Reference
 
