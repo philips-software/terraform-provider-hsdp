@@ -53,6 +53,10 @@ func resourceCDRSubscription() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -136,6 +140,7 @@ func resourceCDRSubscriptionRead(ctx context.Context, d *schema.ResourceData, m 
 	_ = d.Set("endpoint", sub.Channel.Endpoint.Value)
 	_ = d.Set("reason", sub.Reason.Value)
 	_ = d.Set("criteria", sub.Criteria.Value)
+	_ = d.Set("status", sub.Status.Value)
 	headers := make([]string, 0)
 	for _, h := range sub.Channel.Header {
 		headers = append(headers, h.Value)
@@ -215,7 +220,25 @@ func resourceCDRSubscriptionUpdate(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceCDRSubscriptionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	config := m.(*Config)
 	var diags diag.Diagnostics
-	// TODO: will be supported in CDR release of Q1 2021
+
+	fhirStore := d.Get("fhir_store").(string)
+	rootOrgID := d.Get("root_org_id").(string)
+	id := d.Id()
+
+	client, err := config.getFHIRClient(fhirStore, rootOrgID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	defer client.Close()
+
+	ok, _, err := client.OperationsSTU3.Delete("Subscription/" + id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if !ok {
+		return diag.FromErr(ErrDeleteSubscriptionFailed)
+	}
 	return diags
 }
