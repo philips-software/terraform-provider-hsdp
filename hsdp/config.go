@@ -198,6 +198,9 @@ func (c *Config) getFHIRClient(fhirStore, rootOrgID string) (*cdr.Client, error)
 	if c.iamClientErr != nil {
 		return nil, c.iamClientErr
 	}
+	if rootOrgID == "" {
+		return nil, ErrMissingOrganizationID
+	}
 	client, err := cdr.NewClient(c.iamClient, &cdr.Config{
 		FHIRStore: fhirStore,
 		RootOrgID: rootOrgID,

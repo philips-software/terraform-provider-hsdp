@@ -19,4 +19,5 @@ var (
 	ErrDeleteClientFailed       = errors.New("delete client failed")
 	ErrDeleteServiceFailed      = errors.New("delete service failed")
 	ErrDeleteSubscriptionFailed = errors.New("delete subscription failed")
+	ErrMissingOrganizationID    = errors.New("missing organization ID")
 )

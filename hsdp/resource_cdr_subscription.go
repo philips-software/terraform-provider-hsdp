@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"fmt"
 	"github.com/google/fhir/go/proto/google/fhir/proto/stu3/datatypes_go_proto"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -123,7 +124,7 @@ func resourceCDRSubscriptionRead(ctx context.Context, d *schema.ResourceData, m 
 
 	client, err := config.getFHIRClient(fhirStore, orgID)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("subscription read: %w", err))
 	}
 	defer client.Close()
 	contained, resp, err := client.OperationsSTU3.Get("Subscription/" + d.Id())
