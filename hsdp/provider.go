@@ -176,6 +176,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_container_host":      resourceContainerHost(),
 			"hsdp_metrics_autoscaler":  resourceMetricsAutoscaler(),
 			"hsdp_cdr_org":             resourceCDROrg(),
+			"hsdp_cdr_subscription":    resourceCDRSubscription(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":              dataSourceIAMIntrospect(),
