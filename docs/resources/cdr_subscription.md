@@ -13,7 +13,6 @@ data "hsdp_cdr_fhir_store" "sandbox" {
 
 resource "hsdp_cdr_subscription" "patient_changes" {
   fhir_store = data.hsdp_cdr_fhir_store.sandbox.fhir_store
-  org_id     = var.iam_org_id
 
   criteria        = "Patient"
   endpoint        = "https://webhook.myapp.io/patient"
