@@ -28,15 +28,6 @@ func resourceCDRSubscription() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"org_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"endpoint": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
 			"delete_endpoint": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -44,6 +35,10 @@ func resourceCDRSubscription() *schema.Resource {
 			"criteria": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"endpoint": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"reason": {
 				Type:     schema.TypeString,
@@ -72,7 +67,6 @@ func resourceCDRSubscriptionCreate(ctx context.Context, d *schema.ResourceData, 
 	var diags diag.Diagnostics
 
 	fhirStore := d.Get("fhir_store").(string)
-	orgID := d.Get("org_id").(string)
 	endpoint := d.Get("endpoint").(string)
 	deleteEndpoint := d.Get("delete_endpoint").(string)
 	reason := d.Get("reason").(string)
@@ -84,7 +78,7 @@ func resourceCDRSubscriptionCreate(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	client, err := config.getFHIRClient(fhirStore, orgID)
+	client, err := config.getFHIRClientFromEndpoint(fhirStore)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -120,9 +114,8 @@ func resourceCDRSubscriptionRead(ctx context.Context, d *schema.ResourceData, m 
 	var diags diag.Diagnostics
 
 	fhirStore := d.Get("fhir_store").(string)
-	orgID := d.Get("org_id").(string)
 
-	client, err := config.getFHIRClient(fhirStore, orgID)
+	client, err := config.getFHIRClientFromEndpoint(fhirStore)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("subscription read: %w", err))
 	}
@@ -138,7 +131,7 @@ func resourceCDRSubscriptionRead(ctx context.Context, d *schema.ResourceData, m 
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
-				Summary:  err.Error(),
+				Summary:  fmt.Errorf("subscription read: %w", err).Error(),
 			})
 		}
 		return diags
@@ -162,10 +155,9 @@ func resourceCDRSubscriptionUpdate(ctx context.Context, d *schema.ResourceData, 
 	var diags diag.Diagnostics
 
 	fhirStore := d.Get("fhir_store").(string)
-	orgID := d.Get("org_id").(string)
 	id := d.Id()
 
-	client, err := config.getFHIRClient(fhirStore, orgID)
+	client, err := config.getFHIRClientFromEndpoint(fhirStore)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -173,12 +165,12 @@ func resourceCDRSubscriptionUpdate(ctx context.Context, d *schema.ResourceData, 
 
 	contained, _, err := client.OperationsSTU3.Get("Subscription/" + id)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("subscription update: %w", err))
 	}
 	sub := contained.GetSubscription()
 	jsonSub, err := config.ma.MarshalResource(sub)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("subscription update: %w", err))
 	}
 	madeChanges := false
 
@@ -224,11 +216,11 @@ func resourceCDRSubscriptionUpdate(ctx context.Context, d *schema.ResourceData, 
 	changedOrg, _ := config.ma.MarshalResource(sub)
 	patch, err := jsonpatch.DiffBytes(jsonSub, changedOrg)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("subscription update: %w", err))
 	}
 	_, _, err = client.OperationsSTU3.Patch("Subscription/"+id, patch)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("subscription update: %w", err))
 	}
 
 	return diags
@@ -239,10 +231,9 @@ func resourceCDRSubscriptionDelete(ctx context.Context, d *schema.ResourceData, 
 	var diags diag.Diagnostics
 
 	fhirStore := d.Get("fhir_store").(string)
-	orgID := d.Get("org_id").(string)
 	id := d.Id()
 
-	client, err := config.getFHIRClient(fhirStore, orgID)
+	client, err := config.getFHIRClientFromEndpoint(fhirStore)
 	if err != nil {
 		return diag.FromErr(err)
 	}

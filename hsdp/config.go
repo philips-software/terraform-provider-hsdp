@@ -172,13 +172,13 @@ func (c *Config) setupConsoleClient() {
 	c.consoleClient = client
 }
 
-// getCDRClient creates a HSDP CDR client
-func (c *Config) getCDRClient(cdrInstanceURL string) (*cdr.Client, error) {
+// getFHIRClientFromEndpoint creates a HSDP CDR client form the given endpoint
+func (c *Config) getFHIRClientFromEndpoint(endpointURL string) (*cdr.Client, error) {
 	if c.iamClientErr != nil {
 		return nil, c.iamClientErr
 	}
 	client, err := cdr.NewClient(c.iamClient, &cdr.Config{
-		CDRURL:    cdrInstanceURL,
+		CDRURL:    "https://localhost.domain",
 		RootOrgID: "",
 		TimeZone:  c.TimeZone,
 		DebugLog:  c.DebugLog,
@@ -186,11 +186,14 @@ func (c *Config) getCDRClient(cdrInstanceURL string) (*cdr.Client, error) {
 	if err != nil {
 		return nil, err
 	}
+	if err = client.SetEndpointURL(endpointURL); err != nil {
+		return nil, err
+	}
 	return client, nil
 }
 
 // getFHIRClient creates a HSDP CDR client
-func (c *Config) getFHIRClient(fhirStore, rootOrgID string) (*cdr.Client, error) {
+func (c *Config) getFHIRClient(baseURL, rootOrgID string) (*cdr.Client, error) {
 	if c.iamClientErr != nil {
 		return nil, c.iamClientErr
 	}
@@ -198,7 +201,7 @@ func (c *Config) getFHIRClient(fhirStore, rootOrgID string) (*cdr.Client, error)
 		return nil, ErrMissingOrganizationID
 	}
 	client, err := cdr.NewClient(c.iamClient, &cdr.Config{
-		FHIRStore: fhirStore,
+		CDRURL:    baseURL,
 		RootOrgID: rootOrgID,
 		TimeZone:  c.TimeZone,
 		DebugLog:  c.DebugLog,

@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"github.com/google/fhir/go/proto/google/fhir/proto/stu3/datatypes_go_proto"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	jsonpatch "github.com/herkyl/patchwerk"
@@ -25,11 +26,6 @@ func resourceCDROrg() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"root_org_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
 			"org_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -38,6 +34,10 @@ func resourceCDROrg() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"part_of": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 		},
 	}
@@ -48,11 +48,10 @@ func resourceCDROrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	var diags diag.Diagnostics
 
-	fhirStore := d.Get("fhir_store").(string)
-	rootOrgID := d.Get("root_org_id").(string)
+	endpoint := d.Get("fhir_store").(string)
 	orgID := d.Get("org_id").(string)
 
-	client, err := config.getFHIRClient(fhirStore, rootOrgID)
+	client, err := config.getFHIRClientFromEndpoint(endpoint)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -63,6 +62,17 @@ func resourceCDROrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 	defer client.Close()
+
+	partOf := d.Get("part_of").(string)
+	if partOf != "" {
+		org.PartOf = &datatypes_go_proto.Reference{
+			Reference: &datatypes_go_proto.Reference_OrganizationId{
+				OrganizationId: &datatypes_go_proto.ReferenceId{
+					Value: partOf,
+				},
+			},
+		}
+	}
 
 	// Check if already onboarded
 	onboardedOrg, _, err := client.TenantSTU3.GetOrganizationByID(orgID)
@@ -84,11 +94,10 @@ func resourceCDROrgRead(ctx context.Context, d *schema.ResourceData, m interface
 
 	var diags diag.Diagnostics
 
-	fhirStore := d.Get("fhir_store").(string)
-	rootOrgID := d.Get("root_org_id").(string)
+	endpoint := d.Get("fhir_store").(string)
 	orgID := d.Get("org_id").(string)
 
-	client, err := config.getFHIRClient(fhirStore, rootOrgID)
+	client, err := config.getFHIRClientFromEndpoint(endpoint)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -110,6 +119,9 @@ func resourceCDROrgRead(ctx context.Context, d *schema.ResourceData, m interface
 		return diags
 	}
 	_ = d.Set("name", org.Name.Value)
+	if org.PartOf != nil {
+		_ = d.Set("part_of", org.PartOf.GetOrganizationId())
+	}
 	return diags
 }
 
@@ -117,11 +129,10 @@ func resourceCDROrgUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	config := m.(*Config)
 	var diags diag.Diagnostics
 
-	fhirStore := d.Get("fhir_store").(string)
-	rootOrgID := d.Get("root_org_id").(string)
+	endpoint := d.Get("fhir_store").(string)
 	id := d.Id()
 
-	client, err := config.getFHIRClient(fhirStore, rootOrgID)
+	client, err := config.getFHIRClientFromEndpoint(endpoint)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -139,6 +150,21 @@ func resourceCDROrgUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	if d.HasChange("name") {
 		org.Name.Value = d.Get("name").(string)
+		madeChanges = true
+	}
+	if d.HasChange("part_of") {
+		partOf := d.Get("part_of").(string)
+		if partOf != "" {
+			org.PartOf = &datatypes_go_proto.Reference{
+				Reference: &datatypes_go_proto.Reference_OrganizationId{
+					OrganizationId: &datatypes_go_proto.ReferenceId{
+						Value: partOf,
+					},
+				},
+			}
+		} else {
+			org.PartOf = nil
+		}
 		madeChanges = true
 	}
 	if !madeChanges {

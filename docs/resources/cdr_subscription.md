@@ -4,15 +4,15 @@ The only supported channel type is `rest-webhook` therefore the `endpoint` and `
 
 ## Example Usage
 
-The following example creates a subscription that calls a REST endpoint whenever a Patient resources is changed in CDR
+The following example creates a subscription that calls a REST endpoint whenever a Patient resources is changed in the CDR FHIR store
 
 ```hcl
-data "hsdp_cdr_instance" "sandbox" {
+data "hsdp_cdr_fhir_store" "sandbox" {
   base_url = "https://cdr-stu3-sandbox.us-east.philips-healthsuite.com"
 }
 
 resource "hsdp_cdr_subscription" "patient_changes" {
-  fhir_store = data.hsdp_cdr_instance.sandbox.fhir_store
+  fhir_store = data.hsdp_cdr_fhir_store.sandbox.fhir_store
   org_id     = var.iam_org_id
 
   criteria        = "Patient"
@@ -41,7 +41,6 @@ CDR will send a `POST` request to the endpoint with a JSON body containing:
 The following arguments are supported:
 
 * `fhir_store` - (Required) The CDR FHIR store to use
-* `org_id` - (Required ) The Org ID of the tenant (GUID) to create the Subscription 
 * `criteria` - (Required) On which resource to notify
 * `reason` - (Required) Reason for creating the subscription
 * `endpoint` - (Required) The REST endpoint to call. Must use `https://`  schema

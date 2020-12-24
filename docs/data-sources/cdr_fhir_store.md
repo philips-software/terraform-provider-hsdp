@@ -1,12 +1,13 @@
-# hsdp_cdr_instance
+# hsdp_cdr_fhir_store
 
 Retrieve details of an existing Clinical Data Repository (CDR).
 
 ## Example Usage
 
 ```hcl
-data "hsdp_cdr_instance" "mycdr" {
+data "hsdp_cdr_fhir_store" "mycdr" {
    base_url = "https://sandbox-stu3-cdr.hsdp.io"
+   fhir_org_id = var.iam_org_id
 }
 ```
 
@@ -15,10 +16,11 @@ data "hsdp_cdr_instance" "mycdr" {
 The following arguments are supported:
 
 * `base_url` - (Required) the base URL of the CDR instances. This is provided by HSDP.
+* `fhir_org_id` - (Required) the FHIR Org ID (GUID)
 
 ## Attributes Reference
 
 The following attributes are exported:
 
-* `fhir_store` - The FHIR store base URL
+* `endpoint` - The FHIR store endpoint URL
 * `type` - The type of CDR deployment. Currently, always `EHR`

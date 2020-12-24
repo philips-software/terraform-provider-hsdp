@@ -6,15 +6,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceCDRInstance() *schema.Resource {
+func dataSourceCDRFHIRStore() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceCDRInstanceRead,
+		ReadContext: dataSourceCDRFHIRStoreRead,
 		Schema: map[string]*schema.Schema{
 			"base_url": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"fhir_store": {
+			"fhir_org_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"endpoint": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -27,21 +31,22 @@ func dataSourceCDRInstance() *schema.Resource {
 
 }
 
-func dataSourceCDRInstanceRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceCDRFHIRStoreRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 
 	var diags diag.Diagnostics
 
 	baseURL := d.Get("base_url").(string)
+	fhirOrgID := d.Get("fhir_org_id").(string)
 
-	client, err := config.getCDRClient(baseURL)
+	client, err := config.getFHIRClient(baseURL, fhirOrgID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	defer client.Close()
 
 	d.SetId(baseURL)
-	_ = d.Set("fhir_store", client.GetFHIRStoreURL())
+	_ = d.Set("endpoint", client.GetEndpointURL())
 	_ = d.Set("type", "EHR")
 	return diags
 }
