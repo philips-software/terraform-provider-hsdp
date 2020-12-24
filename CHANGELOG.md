@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.8.2
+- Refactor CDR resource naming after some trial use
+- Add `part_of` attribute to `hsdp_cdr_org`
+
 ## v0.8.1
 - NEW: Add hsdp_cdr_subscription
 
