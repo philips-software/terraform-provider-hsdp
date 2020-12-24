@@ -9,13 +9,13 @@ rediscover already onboarded organizations and import their state.
 The following example creates and onboards a CDR FHIR organization
 
 ```hcl
-data "hsdp_cdr_instance" "sandbox" {
+data "hsdp_cdr_fhir_store" "sandbox" {
   base_url = "https://cdr-stu3-sandbox.us-east.philips-healthsuite.com"
+  root_org_id = var.iam_org_id
 }
 
 resource "hsdp_cdr_org" "hospital" {
-  fhir_store = data.hsdp_cdr_instance.sandbox.fhir_store
-  root_org_id = var.iam_org_id
+  fhir_store = data.hsdp_cdr_fhir_store.sandbox.endpoint
   org_id = var.iam_org_id
 
   name = "Hospital"
@@ -26,10 +26,10 @@ resource "hsdp_cdr_org" "hospital" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the Org in IAM
 * `fhir_store` - (Required) The CDR FHIR store to use
-* `root_org_id` - (Required ) The root Org ID (GUID) to onboard the organization under
-* `org_id` - (Optional) The IAM Org ID (GUID) to onboard
+* `org_id` - (Required) The Org ID (GUID) under which to onboard. Usually same as IAM Org ID
+* `name` - (Required) The name of the FHIR Org
+* `part_of` - (Optional) The parent Organization ID (GUID) this Org is part of
 
 ## Attributes Reference
 

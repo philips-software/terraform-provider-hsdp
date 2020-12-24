@@ -191,7 +191,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_credentials_policy":          dataSourceCredentialsPolicy(),
 			"hsdp_config":                      dataSourceConfig(),
 			"hsdp_container_host_subnet_types": dataSourceContainerHostSubnetTypes(),
-			"hsdp_cdr_instance":                dataSourceCDRInstance(),
+			"hsdp_cdr_fhir_store":              dataSourceCDRFHIRStore(),
 		},
 		ConfigureContextFunc: providerConfigure,
 	}
