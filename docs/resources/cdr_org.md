@@ -10,15 +10,17 @@ The following example creates and onboards a CDR FHIR organization
 
 ```hcl
 data "hsdp_cdr_fhir_store" "sandbox" {
-  base_url = "https://cdr-stu3-sandbox.us-east.philips-healthsuite.com"
+  base_url = "https://cdr-stu3-sandbox.hsdp.io"
   root_org_id = var.iam_org_id
 }
 
 resource "hsdp_cdr_org" "hospital" {
   fhir_store = data.hsdp_cdr_fhir_store.sandbox.endpoint
-  org_id = var.iam_org_id
+  org_id = var.sub_org_id
 
   name = "Hospital"
+  
+  part_of = var.root_org_id
 }
 ```
 

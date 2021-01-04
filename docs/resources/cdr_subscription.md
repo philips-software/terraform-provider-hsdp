@@ -8,13 +8,14 @@ The following example creates a subscription that calls a REST endpoint whenever
 
 ```hcl
 data "hsdp_cdr_fhir_store" "sandbox" {
-  base_url = "https://cdr-stu3-sandbox.us-east.philips-healthsuite.com"
+  base_url = "https://cdr-stu3-sandbox.hsdp.io"
 }
 
 resource "hsdp_cdr_subscription" "patient_changes" {
-  fhir_store = data.hsdp_cdr_fhir_store.sandbox.fhir_store
+  fhir_store = data.hsdp_cdr_fhir_store.sandbox.endpoint
 
   criteria        = "Patient"
+  reason          = "Notification for patient changes"
   endpoint        = "https://webhook.myapp.io/patient"
   delete_endpoint = "https://webhook.myapp.io/patient_deleted"
   headers = [
@@ -39,12 +40,12 @@ CDR will send a `POST` request to the endpoint with a JSON body containing:
 
 The following arguments are supported:
 
-* `fhir_store` - (Required) The CDR FHIR store to use
+* `fhir_store` - (Required) The CDR FHIR store endpoint to use
 * `criteria` - (Required) On which resource to notify
 * `reason` - (Required) Reason for creating the subscription
 * `endpoint` - (Required) The REST endpoint to call. Must use `https://`  schema
-* `delete_endpoint` - (Optional) The REST endpoint to call for DELETE operations. Must use `https://` schema  
 * `end` - (Required) RFC3339 formatted timestamp when to end notifications
+* `delete_endpoint` - (Optional) The REST endpoint to call for DELETE operations. Must use `https://` schema  
 * `headers` - (Optional) List of headers to add to the REST call
 
 ## Attributes Reference
