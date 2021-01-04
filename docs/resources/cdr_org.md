@@ -11,7 +11,7 @@ The following example creates and onboards a CDR FHIR organization
 ```hcl
 data "hsdp_cdr_fhir_store" "sandbox" {
   base_url = "https://cdr-stu3-sandbox.hsdp.io"
-  root_org_id = var.iam_org_id
+  fhir_org_id = var.iam_org_id
 }
 
 resource "hsdp_cdr_org" "hospital" {
@@ -20,7 +20,7 @@ resource "hsdp_cdr_org" "hospital" {
 
   name = "Hospital"
   
-  part_of = var.root_org_id
+  part_of = var.fhir_org_id
 }
 ```
 
