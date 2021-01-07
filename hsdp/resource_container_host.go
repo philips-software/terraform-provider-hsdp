@@ -113,7 +113,7 @@ func resourceContainerHost() *schema.Resource {
 			"subnet_type": {
 				Type:          schema.TypeString,
 				Optional:      true,
-				Default:       "private",
+				Computed:      true,
 				ForceNew:      true,
 				ConflictsWith: []string{"subnet"},
 			},
@@ -195,6 +195,9 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	userGroups := expandStringList(d.Get("user_groups").(*schema.Set).List())
 	instanceRole := d.Get("instance_role").(string)
 	subnetType := d.Get("subnet_type").(string)
+	if subnetType == "" {
+		subnetType = "private"
+	}
 	subnet := d.Get("subnet").(string)
 	tagList := d.Get("tags").(map[string]interface{})
 	tags := make(map[string]string)
