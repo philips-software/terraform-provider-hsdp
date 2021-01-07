@@ -1,6 +1,7 @@
 package hsdp
 
 import (
+	"fmt"
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/philips-software/go-hsdp-api/cartel"
@@ -195,10 +196,10 @@ func (c *Config) getFHIRClientFromEndpoint(endpointURL string) (*cdr.Client, err
 // getFHIRClient creates a HSDP CDR client
 func (c *Config) getFHIRClient(baseURL, rootOrgID string) (*cdr.Client, error) {
 	if c.iamClientErr != nil {
-		return nil, c.iamClientErr
+		return nil, fmt.Errorf("IAM client error in getFHIRClient: %w", c.iamClientErr)
 	}
 	if rootOrgID == "" {
-		return nil, ErrMissingOrganizationID
+		return nil, fmt.Errorf("getFHIRClient: %w", ErrMissingOrganizationID)
 	}
 	client, err := cdr.NewClient(c.iamClient, &cdr.Config{
 		CDRURL:    baseURL,
@@ -207,7 +208,7 @@ func (c *Config) getFHIRClient(baseURL, rootOrgID string) (*cdr.Client, error) {
 		DebugLog:  c.DebugLog,
 	})
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("getFHIRClient: %w", err)
 	}
 	return client, nil
 }
