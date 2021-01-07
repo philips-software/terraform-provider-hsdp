@@ -3,6 +3,7 @@ package hsdp
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/philips-software/go-hsdp-api/cartel"
 	"strings"
 
 	creds "github.com/philips-software/go-hsdp-api/credentials"
@@ -26,6 +27,22 @@ func validatePolicyJSON(val interface{}, key string) (warns []string, errs []err
 		errs = append(errs, fmt.Errorf("%q contains invalid JSON: %s, %v", key, v, err))
 	}
 	return
+}
+
+func validateSubnet(client *cartel.Client, v string) error {
+	subnets, _, err := client.GetAllSubnets()
+
+	if err != nil {
+		return err
+	}
+	var availableSubnets []string
+	for _, subnet := range *subnets {
+		availableSubnets = append(availableSubnets, subnet.ID)
+		if v == subnet.ID {
+			return nil
+		}
+	}
+	return fmt.Errorf("unsupported subnet: %s (available: %s)", v, strings.Join(availableSubnets, ", "))
 }
 
 var thresholdMapping = map[string]string{
