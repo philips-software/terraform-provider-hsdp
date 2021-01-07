@@ -353,7 +353,7 @@ func resourceContainerHostRead(_ context.Context, d *schema.ResourceData, m inte
 
 	tagName := d.Get("name").(string)
 
-	if tagName == "" { // This an import, find and set the tagName
+	if tagName == "" { // This is an import, find and set the tagName
 		instances, _, err := client.GetAllInstances()
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("cartel.GetAllInstances: %w", err))
