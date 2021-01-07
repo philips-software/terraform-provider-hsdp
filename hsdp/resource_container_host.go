@@ -30,6 +30,9 @@ func tagsSchema() *schema.Schema {
 
 func resourceContainerHost() *schema.Resource {
 	return &schema.Resource{
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
 		CreateContext: resourceContainerHostCreate,
 		ReadContext:   resourceContainerHostRead,
 		UpdateContext: resourceContainerHostUpdate,
@@ -40,7 +43,6 @@ func resourceContainerHost() *schema.Resource {
 			Update: schema.DefaultTimeout(15 * time.Minute),
 			Delete: schema.DefaultTimeout(30 * time.Minute),
 		},
-
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -109,11 +111,17 @@ func resourceContainerHost() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"subnet_type": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ValidateFunc: validation.StringInSlice([]string{"public", "private"}, false),
-				Default:      "private",
-				ForceNew:     true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Default:       "private",
+				ForceNew:      true,
+				ConflictsWith: []string{"subnet"},
+			},
+			"subnet": {
+				Type:     schema.TypeString,
+				ForceNew: true,
+				Optional: true,
+				Computed: true,
 			},
 			"private_ip": {
 				Type:     schema.TypeString,
@@ -124,10 +132,6 @@ func resourceContainerHost() *schema.Resource {
 				Computed: true,
 			},
 			"role": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"subnet": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -150,7 +154,7 @@ func resourceContainerHost() *schema.Resource {
 			},
 			"tags": tagsSchema(),
 		},
-		SchemaVersion: 1,
+		SchemaVersion: 2,
 	}
 }
 
@@ -191,6 +195,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	userGroups := expandStringList(d.Get("user_groups").(*schema.Set).List())
 	instanceRole := d.Get("instance_role").(string)
 	subnetType := d.Get("subnet_type").(string)
+	subnet := d.Get("subnet").(string)
 	tagList := d.Get("tags").(map[string]interface{})
 	tags := make(map[string]string)
 	for t, v := range tagList {
@@ -199,7 +204,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		}
 	}
 
-	ch, _, err := client.Create(tagName,
+	ch, resp, err := client.Create(tagName,
 		cartel.SecurityGroups(securityGroups...),
 		cartel.UserGroups(userGroups...),
 		cartel.VolumeType(volumeType),
@@ -211,9 +216,16 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		cartel.InstanceRole(instanceRole),
 		cartel.SubnetType(subnetType),
 		cartel.Tags(tags),
+		cartel.InSubnet(subnet),
 	)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("create error: %d: %s", ch.Code, ch.Description))
+		if resp == nil {
+			return diag.FromErr(fmt.Errorf("create error (resp=nil): %w", err))
+		}
+		if ch == nil {
+			return diag.FromErr(fmt.Errorf("create error (instance=nil): %w", err))
+		}
+		return diag.FromErr(fmt.Errorf("create error (description=[%s]): %w", ch.Description, err))
 	}
 	d.SetId(ch.InstanceID())
 
@@ -240,7 +252,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	return resourceContainerHostRead(ctx, d, m)
 }
 
-func resourceContainerHostUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceContainerHostUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -326,7 +338,7 @@ func resourceContainerHostUpdate(ctx context.Context, d *schema.ResourceData, m 
 
 }
 
-func resourceContainerHostRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceContainerHostRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -337,6 +349,24 @@ func resourceContainerHostRead(ctx context.Context, d *schema.ResourceData, m in
 	}
 
 	tagName := d.Get("name").(string)
+
+	if tagName == "" { // This an import, find and set the tagName
+		instances, _, err := client.GetAllInstances()
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("cartel.GetAllInstances: %w", err))
+		}
+		id := d.Id()
+		_ = d.Set("encrypt_volumes", true)
+		_ = d.Set("volume_size", 0)
+		for _, i := range *instances {
+			if i.InstanceID == id {
+				_ = d.Set("name", i.NameTag)
+				tagName = i.NameTag
+				break
+			}
+		}
+	}
+
 	state, resp, err := client.GetDeploymentState(tagName)
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusBadRequest {
@@ -366,18 +396,24 @@ func resourceContainerHostRead(ctx context.Context, d *schema.ResourceData, m in
 	_ = d.Set("security_groups", difference(ch.SecurityGroups, []string{"base"})) // Remove "base"
 	_ = d.Set("user_groups", ch.LdapGroups)
 	_ = d.Set("instance_type", ch.InstanceType)
+	_ = d.Set("instance_role", ch.Role)
 	_ = d.Set("vpc", ch.Vpc)
 	_ = d.Set("zone", ch.Zone)
 	_ = d.Set("launch_time", ch.LaunchTime)
 	_ = d.Set("private_ip", ch.PrivateAddress)
 	_ = d.Set("public_ip", ch.PublicAddress)
 	_ = d.Set("subnet", ch.Subnet)
+	subnetType := "private"
+	if ch.PublicAddress != "" {
+		subnetType = "public"
+	}
+	_ = d.Set("subnet_type", subnetType)
 	_ = d.Set("tags", normalizeTags(ch.Tags))
 
 	return diags
 }
 
-func resourceContainerHostDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceContainerHostDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics

@@ -55,6 +55,7 @@ The following arguments are supported:
 * `volume_size` - (Optional) Volume size in GB. Supported value range `1-1000` (1 TB max)
 * `security_groups` - (Optional) list(string) of Security groups to attach. Default `[]`
 * `user_groups` - (Optional) list(string) of User groups to attach. Default `[]`
+* `subnet` - (Optional) This will cause a new instance to get deployed on a specific subnet. Conflicts with `subnet_type`. You should only use this option if you have very specific requirements that dictate all the instances you are creating need to reside in the same AZ. An example of this would be a cluster of systems that need to reside in the same datacenter. 
 * `subnet_type` - (Optional) What subnet type to use. Can be `public` or `private`. Default is `private`. 
 * `tags` - (Optional) Map of tags to assign to the instances
 
