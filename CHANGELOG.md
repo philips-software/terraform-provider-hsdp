@@ -4,9 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.8.7
+- Validate Container Host tags
+
 ## v0.8.6
 - Support for setting subnet for Container Hosts
-- Fix Container Host import suppot
+- Fix Container Host import support
 - Update Terraform to 0.14.4
 
 ## v0.8.5
