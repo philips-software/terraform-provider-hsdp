@@ -3,6 +3,7 @@ package hsdp
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -10,13 +11,15 @@ import (
 	"github.com/philips-software/go-hsdp-api/cartel"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 )
 
 func tagsSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeMap,
-		Required: true,
+		Type:             schema.TypeMap,
+		Required:         true,
+		ValidateDiagFunc: validateTags,
 		DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
 			// TODO: handle empty tags
 			return k == "tags.billing"
@@ -26,6 +29,34 @@ func tagsSchema() *schema.Schema {
 		},
 		Elem: &schema.Schema{Type: schema.TypeString},
 	}
+}
+
+func validateTags(v interface{}, _ cty.Path) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	tagsMap, ok := v.(map[string]interface{})
+	if !ok {
+		return diag.FromErr(fmt.Errorf("expected %q to be a map", v))
+	}
+	if len(tagsMap) > 8 {
+		return diag.FromErr(fmt.Errorf("maximum of 8 tags are supported"))
+	}
+	for k, v := range tagsMap {
+		if strings.EqualFold(k, "name") {
+			return diag.FromErr(fmt.Errorf("tag \"%s\" is reserved by the Cartel API", k))
+		}
+		val, ok := v.(string)
+		if !ok {
+			return diag.FromErr(fmt.Errorf("tag \"%s\" value is of type %q", k, v))
+		}
+		if len(val) > 255 {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Detail:   fmt.Sprintf("value of tag \"%s\" is too long (max=255)", k),
+			})
+		}
+	}
+	return diags
 }
 
 func resourceContainerHost() *schema.Resource {
