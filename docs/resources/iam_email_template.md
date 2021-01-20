@@ -108,6 +108,7 @@ The following arguments are supported:
 * `type ` - (Required) The email template. See the `Type` table above for available values
 * `format` - (Required) The template format. Must be `HTML` currently
 * `message` - (Required) A boolean value indicating if challenges are enabled at organization level. If the value is set to true, `challenge_policy` attribute is mandatory.
+* `locale` - (Optional) The locale of the template. Default vaule is `default`
 * `from` - (Optional) The From field of the email. Default value is `default`
 * `subject` - (Optional) The Subject line of the email. Default value is `default`
 * `link` - (Optional) A clickable link, depends on the template `type`

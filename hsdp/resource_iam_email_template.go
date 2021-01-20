@@ -3,7 +3,6 @@ package hsdp
 import (
 	"context"
 	"encoding/base64"
-	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -16,7 +15,6 @@ func resourceIAMEmailTemplate() *schema.Resource {
 		},
 
 		CreateContext: resourceIAMEmailTemplateCreate,
-		UpdateContext: resourceIAMEmailTemplateUpdate,
 		ReadContext:   resourceIAMEmailTemplateRead,
 		DeleteContext: resourceIAMEmailTemplateDelete,
 
@@ -39,13 +37,13 @@ func resourceIAMEmailTemplate() *schema.Resource {
 			},
 			"format": &schema.Schema{
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 				Default:  "HTML",
 			},
 			"subject": &schema.Schema{
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 				Default:  "default",
 			},
@@ -56,8 +54,9 @@ func resourceIAMEmailTemplate() *schema.Resource {
 			},
 			"locale": &schema.Schema{
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
+				Default:  "default",
 			},
 			"link": &schema.Schema{
 				Type:     schema.TypeString,
@@ -101,10 +100,6 @@ func resourceIAMEmailTemplateCreate(_ context.Context, d *schema.ResourceData, m
 	d.SetId(createdTemplate.ID)
 	d.Set("message_base64", createdTemplate.Message)
 	return diags
-}
-
-func resourceIAMEmailTemplateUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return diag.FromErr(fmt.Errorf("EmailTemplate updating is not supported"))
 }
 
 func resourceIAMEmailTemplateRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
