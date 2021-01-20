@@ -26,8 +26,9 @@ resource "hsdp_container_host" "zahadoom" {
     script_path = "/home/${var.user}/bootstrap.bash"
   }
 
-  tags {
+  tags = {
     created_by = "terraform"
+    owner = var.user
   }
 
   provisioner "remote-exec" {
