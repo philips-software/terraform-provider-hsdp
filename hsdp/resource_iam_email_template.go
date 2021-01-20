@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -63,6 +64,10 @@ func resourceIAMEmailTemplate() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"message_base64": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -81,7 +86,7 @@ func resourceIAMEmailTemplateCreate(_ context.Context, d *schema.ResourceData, m
 	template.Type = d.Get("type").(string)
 	template.Format = d.Get("format").(string)
 	template.Subject = d.Get("subject").(string)
-	template.Message = d.Get("message").(string)
+	template.Message = base64.StdEncoding.EncodeToString([]byte(d.Get("message").(string)))
 	template.Link = d.Get("link").(string)
 	template.Locale = d.Get("locale").(string)
 	template.ManagingOrganization = d.Get("managing_organization").(string)
@@ -94,6 +99,7 @@ func resourceIAMEmailTemplateCreate(_ context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 	d.SetId(createdTemplate.ID)
+	d.Set("message_base64", createdTemplate.Message)
 	return diags
 }
 
