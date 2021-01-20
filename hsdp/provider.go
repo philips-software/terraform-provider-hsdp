@@ -173,6 +173,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_service":         resourceIAMService(),
 			"hsdp_iam_mfa_policy":      resourceIAMMFAPolicy(),
 			"hsdp_iam_password_policy": resourceIAMPasswordPolicy(),
+			"hsdp_iam_email_template":  resourceIAMEmailTemplate(),
 			"hsdp_credentials_policy":  resourceCredentialsPolicy(),
 			"hsdp_container_host":      resourceContainerHost(),
 			"hsdp_metrics_autoscaler":  resourceMetricsAutoscaler(),

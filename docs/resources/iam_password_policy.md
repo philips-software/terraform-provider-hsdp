@@ -1,4 +1,4 @@
-# hsdp_password_policy
+# hsdp_iam_password_policy
 Provides a resource for managing HSDP IAM [password policies](https://www.hsdp.io/documentation/identity-and-access-management-iam/api-documents#_password_policy). 
 
 ## Example Usage
