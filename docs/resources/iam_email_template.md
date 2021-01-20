@@ -79,16 +79,15 @@ If multi-factor authentication is disabled for a user, user will get this email 
 The following example manages an email template for an org
 
 ```hcl
-resource "hsdp_iam_email_template" "password_reset" {
+resource "hsdp_iam_email_template" "password_changed" {
   type = "PASSWORD_CHANGED"
-  
+
   managing_organization = data.hsdp_iam_org.myorg.id
-  format = "HTML"
-  
+  format                = "HTML"
+
   subject = "Your IAM account password was changed"
-  from = "default"
   message = <<EOF
-Dear user,
+Dear {{user.givenName}},
 
 Your password was recently changed. If this was not initiated
 by you please contact support immediately.
@@ -96,7 +95,27 @@ by you please contact support immediately.
 Kind regards,
 IAM Team
 EOF
-  
+}
+
+resource "hsdp_iam_email_template" "password_expiry" {
+  type = "PASSWORD_EXPIRY"
+
+  managing_organization = data.hsdp_iam_org.myorg.id
+  format                = "HTML"
+
+  subject = "Your IAM account password was changed"
+  message = <<EOF
+Dear {{user.givenName}},
+
+Your password will expire in {{password.expiresAfterPeriod}} day(s). Please set a new
+password using the below link:
+
+{{link.passwordChange}}
+
+Kind regards,
+IAM Team
+EOF
+
 }
 ```
 
