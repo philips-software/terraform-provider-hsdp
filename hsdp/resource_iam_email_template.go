@@ -30,10 +30,10 @@ func resourceIAMEmailTemplate() *schema.Resource {
 				ForceNew: true,
 			},
 			"from": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "default",
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: suppressDefault,
 			},
 			"format": &schema.Schema{
 				Type:     schema.TypeString,
@@ -53,15 +53,16 @@ func resourceIAMEmailTemplate() *schema.Resource {
 				ForceNew: true,
 			},
 			"locale": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "default",
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: suppressDefault,
 			},
 			"link": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: suppressDefault,
 			},
 			"message_base64": &schema.Schema{
 				Type:     schema.TypeString,
@@ -88,6 +89,7 @@ func resourceIAMEmailTemplateCreate(_ context.Context, d *schema.ResourceData, m
 	template.Message = base64.StdEncoding.EncodeToString([]byte(d.Get("message").(string)))
 	template.Link = d.Get("link").(string)
 	template.Locale = d.Get("locale").(string)
+	template.From = d.Get("from").(string)
 	template.ManagingOrganization = d.Get("managing_organization").(string)
 
 	createdTemplate, _, err := client.EmailTemplates.CreateTemplate(template)
@@ -120,7 +122,9 @@ func resourceIAMEmailTemplateRead(_ context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 	d.Set("subject", template.Subject)
-	d.Set("locale", template.Locale)
+	if template.Locale != "default" {
+		d.Set("locale", template.Locale)
+	}
 	d.Set("from", template.From)
 	d.Set("format", template.Format)
 	d.Set("type", template.Type)

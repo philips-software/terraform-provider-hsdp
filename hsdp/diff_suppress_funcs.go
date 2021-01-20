@@ -23,3 +23,10 @@ func suppressEquivalentPolicyDiffs(k, old, new string, d *schema.ResourceData) b
 func suppressCaseDiffs(k, old, new string, d *schema.ResourceData) bool {
 	return strings.EqualFold(old, new)
 }
+
+func suppressDefault(k, old, new string, d *schema.ResourceData) bool {
+	if old == "default" && new == "" {
+		return true
+	}
+	return false
+}

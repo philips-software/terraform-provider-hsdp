@@ -571,6 +571,8 @@ github.com/philips-software/go-hsdp-api v0.31.0 h1:l+5Hw/g0ToM2yQmaOpfnTqY4W1RnQ
 github.com/philips-software/go-hsdp-api v0.31.0/go.mod h1:zYRZs6S8Oth4caY5cR1x1e9OO1PfzQgXVmHRwqOwVGg=
 github.com/philips-software/go-hsdp-api v0.31.1 h1:bsUSKwGnulbheZvspSHrQMV4ITnaW4KAcn8WtW9qjIg=
 github.com/philips-software/go-hsdp-api v0.31.1/go.mod h1:zYRZs6S8Oth4caY5cR1x1e9OO1PfzQgXVmHRwqOwVGg=
+github.com/philips-software/go-hsdp-api v0.31.2 h1:dr8spZs7axmdfVQUDcg4U71BVGqrEqtkyA1lpaMuK4s=
+github.com/philips-software/go-hsdp-api v0.31.2/go.mod h1:zYRZs6S8Oth4caY5cR1x1e9OO1PfzQgXVmHRwqOwVGg=
 github.com/philips-software/go-hsdp-signer v1.3.0 h1:Si1voDE/GHzthmxpasPdntbu8aUW6EYJfI6gHVf7BCc=
 github.com/philips-software/go-hsdp-signer v1.3.0/go.mod h1:/QehZ/+Aks2t1TFpjhF/7ZSB8PJIIJHzLc03rOqwLw0=
 github.com/pierrec/lz4 v2.0.5+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi+IEE17M5jbnwPHcY=

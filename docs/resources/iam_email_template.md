@@ -91,7 +91,7 @@ resource "hsdp_iam_email_template" "password_reset" {
 Dear user,
 
 Your password was recently changed. If this was not initiated
-by you please contact support immediatele.
+by you please contact support immediately.
 
 Kind regards,
 IAM Team
@@ -108,7 +108,7 @@ The following arguments are supported:
 * `type ` - (Required) The email template. See the `Type` table above for available values
 * `format` - (Required) The template format. Must be `HTML` currently
 * `message` - (Required) A boolean value indicating if challenges are enabled at organization level. If the value is set to true, `challenge_policy` attribute is mandatory.
-* `locale` - (Optional) The locale of the template. Default vaule is `default`
+* `locale` - (Optional) The locale of the template. When not specified the template will become the default. Only a single default template is allowed of course.
 * `from` - (Optional) The From field of the email. Default value is `default`
 * `subject` - (Optional) The Subject line of the email. Default value is `default`
 * `link` - (Optional) A clickable link, depends on the template `type`
