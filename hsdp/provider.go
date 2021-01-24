@@ -5,6 +5,7 @@ import (
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"os"
 )
 
 // Provider returns an instance of the HSDP provider
@@ -176,6 +177,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_email_template":  resourceIAMEmailTemplate(),
 			"hsdp_credentials_policy":  resourceCredentialsPolicy(),
 			"hsdp_container_host":      resourceContainerHost(),
+			"hsdp_container_host_exec": resourceContainerHostExec(),
 			"hsdp_metrics_autoscaler":  resourceMetricsAutoscaler(),
 			"hsdp_cdr_org":             resourceCDROrg(),
 			"hsdp_cdr_subscription":    resourceCDRSubscription(),
@@ -194,7 +196,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_container_host_subnet_types": dataSourceContainerHostSubnetTypes(),
 			"hsdp_cdr_fhir_store":              dataSourceCDRFHIRStore(),
 		},
-		ConfigureContextFunc: providerConfigure,
+		ConfigureContextFunc: providerConfigure(build),
 	}
 }
 
@@ -230,49 +232,59 @@ func init() {
 	}
 }
 
-func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-	// Warning or errors can be collected in a slice type
-	var diags diag.Diagnostics
+func providerConfigure(build string) schema.ConfigureContextFunc {
+	return func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+		var diags diag.Diagnostics
 
-	config := &Config{}
+		config := &Config{}
 
-	config.Region = d.Get("region").(string)
-	config.Environment = d.Get("environment").(string)
-	config.IAMURL = d.Get("iam_url").(string)
-	config.IDMURL = d.Get("idm_url").(string)
-	config.OAuth2ClientID = d.Get("oauth2_client_id").(string)
-	config.OAuth2Secret = d.Get("oauth2_password").(string)
-	config.RootOrgID = d.Get("org_id").(string)
-	config.ServiceID = d.Get("service_id").(string)
-	config.ServicePrivateKey = d.Get("service_private_key").(string)
-	config.OrgAdminUsername = d.Get("org_admin_username").(string)
-	config.OrgAdminPassword = d.Get("org_admin_password").(string)
-	config.SharedKey = d.Get("shared_key").(string)
-	config.SecretKey = d.Get("secret_key").(string)
-	config.Debug = d.Get("debug").(bool)
-	config.DebugLog = d.Get("debug_log").(string)
-	config.S3CredsURL = d.Get("credentials_url").(string)
-	config.CartelHost = d.Get("cartel_host").(string)
-	config.CartelToken = d.Get("cartel_token").(string)
-	config.CartelSecret = d.Get("cartel_secret").(string)
-	config.CartelNoTLS = d.Get("cartel_no_tls").(bool)
-	config.CartelSkipVerify = d.Get("cartel_skip_verify").(bool)
-	config.RetryMax = d.Get("retry_max").(int)
-	config.UAAUsername = d.Get("uaa_username").(string)
-	config.UAAPassword = d.Get("uaa_password").(string)
-	config.UAAURL = d.Get("uaa_url").(string)
-	config.TimeZone = "UTC"
+		config.BuildVersion = build
+		config.Region = d.Get("region").(string)
+		config.Environment = d.Get("environment").(string)
+		config.IAMURL = d.Get("iam_url").(string)
+		config.IDMURL = d.Get("idm_url").(string)
+		config.OAuth2ClientID = d.Get("oauth2_client_id").(string)
+		config.OAuth2Secret = d.Get("oauth2_password").(string)
+		config.RootOrgID = d.Get("org_id").(string)
+		config.ServiceID = d.Get("service_id").(string)
+		config.ServicePrivateKey = d.Get("service_private_key").(string)
+		config.OrgAdminUsername = d.Get("org_admin_username").(string)
+		config.OrgAdminPassword = d.Get("org_admin_password").(string)
+		config.SharedKey = d.Get("shared_key").(string)
+		config.SecretKey = d.Get("secret_key").(string)
+		config.DebugLog = d.Get("debug_log").(string)
+		config.S3CredsURL = d.Get("credentials_url").(string)
+		config.CartelHost = d.Get("cartel_host").(string)
+		config.CartelToken = d.Get("cartel_token").(string)
+		config.CartelSecret = d.Get("cartel_secret").(string)
+		config.CartelNoTLS = d.Get("cartel_no_tls").(bool)
+		config.CartelSkipVerify = d.Get("cartel_skip_verify").(bool)
+		config.RetryMax = d.Get("retry_max").(int)
+		config.UAAUsername = d.Get("uaa_username").(string)
+		config.UAAPassword = d.Get("uaa_password").(string)
+		config.UAAURL = d.Get("uaa_url").(string)
+		config.TimeZone = "UTC"
 
-	config.setupIAMClient()
-	config.setupS3CredsClient()
-	config.setupCartelClient()
-	config.setupConsoleClient()
+		config.setupIAMClient()
+		config.setupS3CredsClient()
+		config.setupCartelClient()
+		config.setupConsoleClient()
 
-	ma, err := jsonformat.NewMarshaller(false, "", "", jsonformat.STU3)
-	if err != nil {
-		return nil, diag.FromErr(err)
+		if config.DebugLog != "" {
+			debugFile, err := os.OpenFile(config.DebugLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+			if err != nil {
+				config.debugFile = nil
+			} else {
+				config.debugFile = debugFile
+			}
+		}
+
+		ma, err := jsonformat.NewMarshaller(false, "", "", jsonformat.STU3)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+		config.ma = ma
+
+		return config, diags
 	}
-	config.ma = ma
-
-	return config, diags
 }

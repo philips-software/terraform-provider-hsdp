@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1-experimental
 
-ARG hsdp_provider_version=0.8.8
+ARG hsdp_provider_version=0.9.0
 FROM --platform=${BUILDPLATFORM} golang:1.15.6-alpine AS build
 ARG TARGETOS
 ARG TARGETARCH
@@ -14,8 +14,10 @@ GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /out/terraform-provider-hsdp -
 
 FROM hashicorp/terraform:0.14.4
 RUN apk add --no-cache tzdata
+ARG TARGETOS
+ARG TARGETARCH
 ARG hsdp_provider_version
 ENV HSDP_PROVIDER_VERSION ${hsdp_provider_version}
 LABEL maintainer="Andy Lo-A-Foe <andy.lo-a-foe@philips.com>"
 ENV HOME /root
-COPY --from=build /out/terraform-provider-hsdp $HOME/.terraform.d/plugins/registry.terraform.io/philips-software/hsdp/${HSDP_PROVIDER_VERSION}/linux_amd64/terraform-provider-hsdp_v${HSDP_PROVIDER_VERSION}
+COPY --from=build /out/terraform-provider-hsdp $HOME/.terraform.d/plugins/registry.terraform.io/philips-software/hsdp/${HSDP_PROVIDER_VERSION}/${TARGETOS}_${TARGETARCH}/terraform-provider-hsdp_v${HSDP_PROVIDER_VERSION}

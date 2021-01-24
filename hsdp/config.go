@@ -11,11 +11,13 @@ import (
 	"github.com/philips-software/go-hsdp-api/credentials"
 	"github.com/philips-software/go-hsdp-api/iam"
 	"net/http"
+	"os"
 )
 
 // Config contains configuration for the client
 type Config struct {
 	iam.Config
+	BuildVersion      string
 	ServiceID         string
 	ServicePrivateKey string
 	S3CredsURL        string
@@ -33,6 +35,7 @@ type Config struct {
 	cartelClient     *cartel.Client
 	credsClient      *credentials.Client
 	consoleClient    *console.Client
+	debugFile        *os.File
 	credsClientErr   error
 	cartelClientErr  error
 	iamClientErr     error
@@ -211,4 +214,12 @@ func (c *Config) getFHIRClient(baseURL, rootOrgID string) (*cdr.Client, error) {
 		return nil, fmt.Errorf("getFHIRClient: %w", err)
 	}
 	return client, nil
+}
+
+func (c *Config) Debug(format string, a ...interface{}) (int, error) {
+	if c.debugFile != nil {
+		output := fmt.Sprintf(format, a...)
+		return c.debugFile.WriteString(output)
+	}
+	return 0, nil
 }
