@@ -14,7 +14,7 @@ resource "hsdp_container_host_exec" "init" {
   user = var.user
   private_key = var.private_key
 
-  create_file {
+  file {
     content = "echo Hello world"
     destination = "/tmp/hello.sh"
   }

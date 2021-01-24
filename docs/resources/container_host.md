@@ -59,12 +59,12 @@ resource "hsdp_container_host" "zahadoom" {
     created_by = "terraform"
   }
 
-  provision_file {
+  file {
     content = "This string will be stored remotely"
     destination = "/tmp/stored.txt"
   }
   
-  provision_commands = [
+  commands = [
     "cat /tmp/stored.txt",
     "docker volume create fluent-bit",
     "docker run -d -p 24224:24224 -v fluent-bit:/fluent-bit/etc philipssoftware/fluent-bit-out-hsdp:1.4.4"
