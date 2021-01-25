@@ -1,7 +1,6 @@
 package hsdp
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -62,13 +61,20 @@ The ` + "`triggers`" + ` argument allows specifying an arbitrary set of values t
 				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"source": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
 						"content": {
 							Type:     schema.TypeString,
 							Optional: true,
+							ForceNew: true,
 						},
 						"destination": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Required: true,
+							ForceNew: true,
 						},
 					},
 				},
@@ -129,17 +135,15 @@ func resourceContainerHostExecCreate(_ context.Context, d *schema.ResourceData, 
 	}
 
 	// Provision files
-	for _, f := range createFiles {
-		buffer := bytes.NewBufferString(f.Content)
-		// Should we fail the complete provision on error here?
-		_ = ssh.WriteFile(buffer, int64(buffer.Len()), f.Destination)
-		_, _ = config.Debug("Wrote remote %s:%s: %d bytes\n", privateIP, f.Destination, len(f.Content))
+	if err := copyFiles(ssh, config, createFiles); err != nil {
+		return diag.FromErr(fmt.Errorf("copying files to remote: %w", err))
 	}
+
 	// Run commands
 	for i := 0; i < len(commands); i++ {
 		stdout, stderr, done, err := ssh.Run(commands[i], 5*time.Minute)
 		if err != nil {
-			return diag.FromErr(err)
+			return append(diags, diag.FromErr(fmt.Errorf("command [%s]: %w", commands[i], err))...)
 		} else {
 			_, _ = config.Debug("command: %s\ndone: %t\nstdout:\n%s\nstderr:\n%s\n", commands[i], done, stdout, stderr)
 		}

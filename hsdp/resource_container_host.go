@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/loafoe/easyssh-proxy/v2"
 	"github.com/philips-software/go-hsdp-api/cartel"
+	"os"
 
 	"log"
 	"net/http"
@@ -175,13 +176,17 @@ func resourceContainerHost() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"source": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
 						"content": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
 						"destination": {
 							Type:     schema.TypeString,
-							Optional: true,
+							Required: true,
 						},
 					},
 				},
@@ -370,22 +375,52 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	// Create files
-	for _, f := range createFiles {
-		buffer := bytes.NewBufferString(f.Content)
-		// Should we fail the complete provision on errors here?
-		_ = ssh.WriteFile(buffer, int64(buffer.Len()), f.Destination)
-		_, _ = config.Debug("Created remote file %s:%s: %d bytes\n", privateIP, f.Destination, buffer.Len())
+	if err := copyFiles(ssh, config, createFiles); err != nil {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "failed to copy all files",
+			Detail:   fmt.Sprintf("One or more files failed to copy: %v", err),
+		})
 	}
+
 	// Run commands
 	for i := 0; i < len(commands); i++ {
 		stdout, stderr, done, err := ssh.Run(commands[i], 5*time.Minute)
 		if err != nil {
-			return diag.FromErr(err)
+			return append(diags, diag.FromErr(fmt.Errorf("command [%s]: %w", commands[i], err))...)
 		} else {
 			_, _ = config.Debug("command: %s\ndone: %t\nstdout:\n%s\nstderr:\n%s\n", commands[i], done, stdout, stderr)
 		}
 	}
-	return resourceContainerHostRead(ctx, d, m)
+	readDiags := resourceContainerHostRead(ctx, d, m)
+	return append(diags, readDiags...)
+}
+
+func copyFiles(ssh *easyssh.MakeConfig, config *Config, createFiles []provisionFile) error {
+	for _, f := range createFiles {
+		if f.Source != "" {
+			src, srcErr := os.Open(f.Source)
+			if srcErr != nil {
+				_, _ = config.Debug("Failed to open source file %s: %v\n", f.Source, srcErr)
+				return srcErr
+			}
+			srcStat, statErr := src.Stat()
+			if statErr != nil {
+				_, _ = config.Debug("Failed to stat source file %s: %v\n", f.Source, statErr)
+				_ = src.Close()
+				return statErr
+			}
+			_ = ssh.WriteFile(src, srcStat.Size(), f.Destination)
+			_, _ = config.Debug("Copied %s to remote file %s:%s: %d bytes\n", f.Source, ssh.Server, f.Destination, srcStat.Size())
+			_ = src.Close()
+		} else {
+			buffer := bytes.NewBufferString(f.Content)
+			// Should we fail the complete provision on errors here?
+			_ = ssh.WriteFile(buffer, int64(buffer.Len()), f.Destination)
+			_, _ = config.Debug("Created remote file %s:%s: %d bytes\n", ssh.Server, f.Destination, buffer.Len())
+		}
+	}
+	return nil
 }
 
 func collectCommands(d *schema.ResourceData) ([]string, diag.Diagnostics) {
@@ -400,6 +435,7 @@ func collectCommands(d *schema.ResourceData) ([]string, diag.Diagnostics) {
 }
 
 type provisionFile struct {
+	Source      string
 	Content     string
 	Destination string
 }
@@ -412,8 +448,47 @@ func collectFilesToCreate(d *schema.ResourceData) ([]provisionFile, diag.Diagnos
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})
 			file := provisionFile{
+				Source:      mVi["source"].(string),
 				Content:     mVi["content"].(string),
 				Destination: mVi["destination"].(string),
+			}
+			if file.Source == "" && file.Content == "" {
+				diags = append(diags, diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  "conflict in file block",
+					Detail:   fmt.Sprintf("file %s has neither 'source' or 'content', set one", file.Destination),
+				})
+				continue
+			}
+			if file.Source != "" && file.Content != "" {
+				diags = append(diags, diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  "conflict in file block",
+					Detail:   fmt.Sprintf("file %s has conflicting 'source' and 'content', choose only one", file.Destination),
+				})
+				continue
+			}
+			if file.Source != "" {
+				src, srcErr := os.Open(file.Source)
+				if srcErr != nil {
+					diags = append(diags, diag.Diagnostic{
+						Severity: diag.Error,
+						Summary:  "issue with source",
+						Detail:   fmt.Sprintf("file %s: %v", file.Source, srcErr),
+					})
+					continue
+				}
+				_, statErr := src.Stat()
+				if statErr != nil {
+					diags = append(diags, diag.Diagnostic{
+						Severity: diag.Error,
+						Summary:  "issue with source stat",
+						Detail:   fmt.Sprintf("file %s: %v", file.Source, statErr),
+					})
+					_ = src.Close()
+					continue
+				}
+				_ = src.Close()
 			}
 			files = append(files, file)
 		}

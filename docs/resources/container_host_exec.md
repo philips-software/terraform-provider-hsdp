@@ -1,5 +1,5 @@
 # hsdp_container_host_exec
-Copies content and executes command on Container Host instances
+Copies content and executes commands on Container Host instances
 
 > This resource is only available when the `cartel_*` keys are set in the provider config
 
@@ -37,9 +37,10 @@ The following arguments are supported:
 * `triggers` - (Optiona, list(string)) An list of strings which when changes will trigger recreation of the resource triggering 
 all create files and commands executions.
 
-Each `file` block should contain the following fields:
+Each `file` block can contain the following fields. Use either `content` or `source`:
 
-* `content` - (Required, string) Content of the file
+* `source` - (Optional, file path) Content of the file. Conflicts with `content`
+* `content` - (Optional, string) Content of the file. Conflicts with `source`
 * `destination` - (Required, string) Remote filename to store the content in
 
 ## Attributes Reference

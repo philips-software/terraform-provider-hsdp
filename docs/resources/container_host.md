@@ -1,11 +1,42 @@
 # hsdp_container_host
-Provides HSDP Container Host instances
+Manage HSDP Container Host instances
 
 > This resource is only available when the `cartel_*` keys are set in the provider config
 
 ## Example Usage
 
-The following example provisions three (3) new container host instances
+The following example provisions and bootstraps a container host instance:
+
+```hcl
+resource "hsdp_container_host" "zahadoom" {
+  name = "mybox.dev"
+  instance_type = "t2.medium"
+
+  user_groups = var.user_groups
+  security_groups = ["analytics", var.user]
+
+  bastion_host = var.bastion_host
+  user = var.user
+  private_key = var.private_key
+
+  tags = {
+    created_by = "terraform"
+  }
+
+  file {
+    content = "This string will be stored remotely"
+    destination = "/tmp/stored.txt"
+  }
+  
+  commands = [
+    "cat /tmp/stored.txt",
+    "docker volume create fluent-bit",
+    "docker run -d -p 24224:24224 -v fluent-bit:/fluent-bit/etc philipssoftware/fluent-bit-out-hsdp:1.4.4"
+  ]
+}
+```
+
+The following example provisions three (3) new container host instances and using Terraform's traditional provisioners
 
 ```hcl
 resource "hsdp_container_host" "zahadoom" {
@@ -41,36 +72,6 @@ resource "hsdp_container_host" "zahadoom" {
 }
 ```
 
-The following example uses the internal provisioning support for bootstrapping an instance
-
-```hcl
-resource "hsdp_container_host" "zahadoom" {
-  name = "mybox.dev"
-  instance_type = "t2.medium"
-
-  user_groups = var.user_groups
-  security_groups = ["analytics", var.user]
-
-  bastion_host = var.bastion_host
-  user = var.user
-  private_key = var.private_key
-
-  tags = {
-    created_by = "terraform"
-  }
-
-  file {
-    content = "This string will be stored remotely"
-    destination = "/tmp/stored.txt"
-  }
-  
-  commands = [
-    "cat /tmp/stored.txt",
-    "docker volume create fluent-bit",
-    "docker run -d -p 24224:24224 -v fluent-bit:/fluent-bit/etc philipssoftware/fluent-bit-out-hsdp:1.4.4"
-  ]
-}
-```
 
 ## Argument Reference
 
@@ -96,9 +97,10 @@ The following arguments are supported:
 * `commands` - (Optional, list(string)) List of commands to execute after creation of container host
 * `bastion_host` - (Optional) The bastion host to use.  When not set, this will be deduced from the container host location
 
-Each `file` block should contain the following fields:
+Each `file` block can contain the following fields. Use either `content` or `source`:
 
-* `content` - (Required, string) Content of the file
+* `source` - (Optional, file path) Content of the file. Conflicts with `content`
+* `content` - (Optional, string) Content of the file. Conflicts with `source`
 * `destination` - (Required, string) Remote filename to store the content in
 
 ## Attributes Reference
