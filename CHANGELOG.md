@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.9.1
+- Add support for file sources
+- Improve error handling
+
 ## v0.9.0
 - [NEW] Use SSH file and commands directies for Container Host
 - [NEW] Add hsdp_container_host_exec as replacement for null_resource
