@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.9.0
+- [NEW] Use SSH file and commands directies for Container Host
+- [NEW] Add hsdp_container_host_exec as replacement for null_resource
+
+## v0.8.9
+- Add proxy support for Cartel connections
+
 ## v0.8.8
 - [NEW] Added hsdp_iam_email_template to manage IAM custom email templates
 
