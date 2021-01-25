@@ -1,6 +1,7 @@
 package hsdp
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"github.com/hashicorp/go-cty/cty"
@@ -8,11 +9,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/loafoe/easyssh-proxy/v2"
 	"github.com/philips-software/go-hsdp-api/cartel"
+
 	"log"
 	"net/http"
 	"strings"
 	"time"
+)
+
+const (
+	fileField     = "file"
+	commandsField = "commands"
 )
 
 func tagsSchema() *schema.Schema {
@@ -141,6 +149,43 @@ func resourceContainerHost() *schema.Resource {
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"bastion_host": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"user": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				RequiredWith: []string{"private_key"},
+			},
+			"private_key": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Sensitive:    true,
+				RequiredWith: []string{"user"},
+			},
+			commandsField: {
+				Type:     schema.TypeList,
+				MaxItems: 10,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			fileField: {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"content": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"destination": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
 			"subnet_type": {
 				Type:          schema.TypeString,
 				Optional:      true,
@@ -185,7 +230,7 @@ func resourceContainerHost() *schema.Resource {
 			},
 			"tags": tagsSchema(),
 		},
-		SchemaVersion: 2,
+		SchemaVersion: 3,
 	}
 }
 
@@ -226,6 +271,13 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	userGroups := expandStringList(d.Get("user_groups").(*schema.Set).List())
 	instanceRole := d.Get("instance_role").(string)
 	subnetType := d.Get("subnet_type").(string)
+	bastionHost := d.Get("bastion_host").(string)
+	if bastionHost == "" {
+		bastionHost = client.BastionHost()
+	}
+	user := d.Get("user").(string)
+	privateKey := d.Get("private_key").(string)
+
 	if subnetType == "" {
 		subnetType = "private"
 	}
@@ -235,6 +287,24 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	for t, v := range tagList {
 		if val, ok := v.(string); ok {
 			tags[t] = val
+		}
+	}
+	// Fetch files first before starting provisioning
+	createFiles, diags := collectFilesToCreate(d)
+	if len(diags) > 0 {
+		return diags
+	}
+	// And commands
+	commands, diags := collectCommands(d)
+	if len(diags) > 0 {
+		return diags
+	}
+	if len(commands) > 0 {
+		if user == "" {
+			return diag.FromErr(fmt.Errorf("user must be set when '%s' is specified", commandsField))
+		}
+		if privateKey == "" {
+			return diag.FromErr(fmt.Errorf("privateKey must be set when '%s' is specified", commandsField))
 		}
 	}
 
@@ -283,7 +353,72 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		"type": "ssh",
 		"host": ch.IPAddress(),
 	})
+	// Collect SSH details
+	privateIP := ch.IPAddress()
+	ssh := &easyssh.MakeConfig{
+		User:   user,
+		Server: privateIP,
+		Port:   "22",
+		Key:    privateKey,
+		Proxy:  http.ProxyFromEnvironment,
+		Bastion: easyssh.DefaultConfig{
+			User:   user,
+			Server: bastionHost,
+			Port:   "22",
+			Key:    privateKey,
+		},
+	}
+
+	// Create files
+	for _, f := range createFiles {
+		buffer := bytes.NewBufferString(f.Content)
+		// Should we fail the complete provision on errors here?
+		_ = ssh.WriteFile(buffer, int64(buffer.Len()), f.Destination)
+		_, _ = config.Debug("Created remote file %s:%s: %d bytes\n", privateIP, f.Destination, buffer.Len())
+	}
+	// Run commands
+	for i := 0; i < len(commands); i++ {
+		stdout, stderr, done, err := ssh.Run(commands[i], 5*time.Minute)
+		if err != nil {
+			return diag.FromErr(err)
+		} else {
+			_, _ = config.Debug("command: %s\ndone: %t\nstdout:\n%s\nstderr:\n%s\n", commands[i], done, stdout, stderr)
+		}
+	}
 	return resourceContainerHostRead(ctx, d, m)
+}
+
+func collectCommands(d *schema.ResourceData) ([]string, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	list := d.Get(commandsField).([]interface{})
+	commands := make([]string, 0)
+	for i := 0; i < len(list); i++ {
+		commands = append(commands, list[i].(string))
+	}
+	return commands, diags
+
+}
+
+type provisionFile struct {
+	Content     string
+	Destination string
+}
+
+func collectFilesToCreate(d *schema.ResourceData) ([]provisionFile, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	files := make([]provisionFile, 0)
+	if v, ok := d.GetOk(fileField); ok {
+		vL := v.(*schema.Set).List()
+		for _, vi := range vL {
+			mVi := vi.(map[string]interface{})
+			file := provisionFile{
+				Content:     mVi["content"].(string),
+				Destination: mVi["destination"].(string),
+			}
+			files = append(files, file)
+		}
+	}
+	return files, diags
 }
 
 func resourceContainerHostUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
