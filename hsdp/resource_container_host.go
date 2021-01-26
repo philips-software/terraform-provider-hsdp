@@ -417,7 +417,7 @@ func copyFiles(ssh *easyssh.MakeConfig, config *Config, createFiles []provisionF
 			buffer := bytes.NewBufferString(f.Content)
 			// Should we fail the complete provision on errors here?
 			_ = ssh.WriteFile(buffer, int64(buffer.Len()), f.Destination)
-			_, _ = config.Debug("Created remote file %s:%s: %d bytes\n", ssh.Server, f.Destination, buffer.Len())
+			_, _ = config.Debug("Created remote file %s:%s: %d bytes\n", ssh.Server, f.Destination, len(f.Content))
 		}
 	}
 	return nil
