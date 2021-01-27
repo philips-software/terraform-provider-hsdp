@@ -33,10 +33,10 @@ func Provider(build string) *schema.Provider {
 				Optional:    true,
 				Description: descriptions["idm_url"],
 			},
-			"credentials_url": {
+			"s3creds_url": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: descriptions["credentials_url"],
+				Description: descriptions["s3creds_url"],
 			},
 			"service_id": {
 				Type:          schema.TypeString,
@@ -175,7 +175,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_mfa_policy":      resourceIAMMFAPolicy(),
 			"hsdp_iam_password_policy": resourceIAMPasswordPolicy(),
 			"hsdp_iam_email_template":  resourceIAMEmailTemplate(),
-			"hsdp_credentials_policy":  resourceCredentialsPolicy(),
+			"hsdp_s3creds_policy":      resourceS3CredsPolicy(),
 			"hsdp_container_host":      resourceContainerHost(),
 			"hsdp_container_host_exec": resourceContainerHostExec(),
 			"hsdp_metrics_autoscaler":  resourceMetricsAutoscaler(),
@@ -190,8 +190,8 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_org":                     dataSourceIAMOrg(),
 			"hsdp_iam_proposition":             dataSourceIAMProposition(),
 			"hsdp_iam_application":             dataSourceIAMApplication(),
-			"hsdp_credentials_access":          dataSourceS3CredentialsAccess(),
-			"hsdp_credentials_policy":          dataSourceCredentialsPolicy(),
+			"hsdp_s3creds_access":              dataSourceS3CredsAccess(),
+			"hsdp_s3creds_policy":              dataSourceS3CredsPolicy(),
 			"hsdp_config":                      dataSourceConfig(),
 			"hsdp_container_host_subnet_types": dataSourceContainerHostSubnetTypes(),
 			"hsdp_cdr_fhir_store":              dataSourceCDRFHIRStore(),
@@ -208,7 +208,7 @@ func init() {
 		"environment":         "The HSDP environment to configure for",
 		"iam_url":             "The HSDP IAM instance URL",
 		"idm_url":             "The HSDP IDM instance URL",
-		"credentials_url":     "The HSDP S3 Credentials instance URL",
+		"s3creds_url":         "The HSDP S3 Credentials instance URL",
 		"oauth2_client_id":    "The OAuth2 client id",
 		"oauth2_password":     "The OAuth2 password",
 		"service_id":          "The service ID to use as Organization Admin",
@@ -253,7 +253,7 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		config.SharedKey = d.Get("shared_key").(string)
 		config.SecretKey = d.Get("secret_key").(string)
 		config.DebugLog = d.Get("debug_log").(string)
-		config.S3CredsURL = d.Get("credentials_url").(string)
+		config.S3CredsURL = d.Get("s3creds_url").(string)
 		config.CartelHost = d.Get("cartel_host").(string)
 		config.CartelToken = d.Get("cartel_token").(string)
 		config.CartelSecret = d.Get("cartel_secret").(string)

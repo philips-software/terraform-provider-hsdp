@@ -10,9 +10,9 @@ import (
 	creds "github.com/philips-software/go-hsdp-api/credentials"
 )
 
-func dataSourceCredentialsPolicy() *schema.Resource {
+func dataSourceS3CredsPolicy() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceCredentialsPolicyRead,
+		ReadContext: dataSourceS3CredsPolicyRead,
 		Schema: map[string]*schema.Schema{
 			"username": {
 				Type:     schema.TypeString,
@@ -59,7 +59,7 @@ func dataSourceCredentialsPolicy() *schema.Resource {
 
 }
 
-func dataSourceCredentialsPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceS3CredsPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	var diags diag.Diagnostics
 	productKey := ""
@@ -97,7 +97,7 @@ func dataSourceCredentialsPolicyRead(ctx context.Context, d *schema.ResourceData
 	if id == 0 {
 		idPtr = nil
 	}
-	client, err := config.CredentialsClient()
+	client, err := config.S3CredsClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}

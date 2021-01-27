@@ -1,13 +1,13 @@
-# hsdp_credentials_policy
+# hsdp_s3creds_policy
 
 Gets information on defined S3 Credential policies
 
-> This resource is only available when `credentials_url` is set in the provider config
+> This resource is only available when `s3creds_url` is set in the provider config
 
 ## Example Usage
 
 ```hcl
-data "hsdp_credentials_policy" "my_org_policies" {
+data "hsdp_s3creds_policy" "my_org_policies" {
    product_key = var.product_key
    username = "my_iam_login"
    password = "MyP@ssw0rd"
@@ -20,7 +20,7 @@ data "hsdp_credentials_policy" "my_org_policies" {
 
 ```hcl
 output "s3_credential_policies_my_org" {
-   value = data.hsdp_credentials_policy.my_org_policies.policies
+   value = data.hsdp_s3creds_policy.my_org_policies.policies
 }
 ```
 ## Argument Reference

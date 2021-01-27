@@ -8,7 +8,7 @@ import (
 	creds "github.com/philips-software/go-hsdp-api/credentials"
 )
 
-func dataSourceS3CredentialsAccess() *schema.Resource {
+func dataSourceS3CredsAccess() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceS3CredsAccessRead,
 		Schema: map[string]*schema.Schema{
@@ -53,7 +53,7 @@ func dataSourceS3CredsAccessRead(ctx context.Context, d *schema.ResourceData, me
 			return diag.FromErr(err)
 		}
 	} else {
-		client, err = config.CredentialsClient()
+		client, err = config.S3CredsClient()
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -61,13 +61,13 @@ func dataSourceS3CredsAccessRead(ctx context.Context, d *schema.ResourceData, me
 	if client == nil {
 		return diag.FromErr(ErrMissingClientPassword)
 	}
-	credentials, _, err := client.Access.GetAccess(&creds.GetAccessOptions{
+	s3creds, _, err := client.Access.GetAccess(&creds.GetAccessOptions{
 		ProductKey: &productKey,
 	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	jsonBytes, err := json.Marshal(&credentials)
+	jsonBytes, err := json.Marshal(&s3creds)
 	if err != nil {
 		return diag.FromErr(err)
 	}

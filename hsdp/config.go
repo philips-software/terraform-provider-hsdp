@@ -33,7 +33,7 @@ type Config struct {
 
 	iamClient        *iam.Client
 	cartelClient     *cartel.Client
-	credsClient      *credentials.Client
+	s3credsClient    *credentials.Client
 	consoleClient    *console.Client
 	debugFile        *os.File
 	credsClientErr   error
@@ -53,8 +53,8 @@ func (c *Config) CartelClient() (*cartel.Client, error) {
 	return c.cartelClient, c.cartelClientErr
 }
 
-func (c *Config) CredentialsClient() (*credentials.Client, error) {
-	return c.credsClient, c.credsClientErr
+func (c *Config) S3CredsClient() (*credentials.Client, error) {
+	return c.s3credsClient, c.credsClientErr
 }
 
 func (c *Config) ConsoleClient() (*console.Client, error) {
@@ -112,7 +112,7 @@ func (c *Config) setupIAMClient() {
 // setupS3CredsClient sets up an HSDP S3 Credentials client
 func (c *Config) setupS3CredsClient() {
 	if c.iamClientErr != nil {
-		c.credsClient = nil
+		c.s3credsClient = nil
 		c.credsClientErr = c.iamClientErr
 		return
 	}
@@ -129,11 +129,11 @@ func (c *Config) setupS3CredsClient() {
 		DebugLog: c.DebugLog,
 	})
 	if err != nil {
-		c.credsClient = nil
+		c.s3credsClient = nil
 		c.credsClientErr = err
 		return
 	}
-	c.credsClient = client
+	c.s3credsClient = client
 }
 
 // setupCartelClient sets up an Cartel client
