@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.9.2
+- Improve error handling for Cartel
+
 ## v0.9.1
 - Add support for file sources
 - Improve error handling
