@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	creds "github.com/philips-software/go-hsdp-api/credentials"
+	creds "github.com/philips-software/go-hsdp-api/s3creds"
 )
 
 func dataSourceS3CredsAccess() *schema.Resource {
@@ -35,7 +35,7 @@ func dataSourceS3CredsAccess() *schema.Resource {
 
 }
 
-func dataSourceS3CredsAccessRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceS3CredsAccessRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 
 	var diags diag.Diagnostics

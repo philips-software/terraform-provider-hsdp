@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	creds "github.com/philips-software/go-hsdp-api/credentials"
+	creds "github.com/philips-software/go-hsdp-api/s3creds"
 )
 
 func resourceS3CredsPolicy() *schema.Resource {
@@ -24,7 +24,7 @@ func resourceS3CredsPolicy() *schema.Resource {
 				ValidateFunc:     validatePolicyJSON,
 				DiffSuppressFunc: suppressEquivalentPolicyDiffs,
 			},
-			"product_key": &schema.Schema{
+			"product_key": {
 				Type:      schema.TypeString,
 				Sensitive: true,
 				ForceNew:  true,
@@ -34,7 +34,7 @@ func resourceS3CredsPolicy() *schema.Resource {
 	}
 }
 
-func resourceS3CredsPolicyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceS3CredsPolicyCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -62,7 +62,7 @@ func resourceS3CredsPolicyCreate(ctx context.Context, d *schema.ResourceData, m 
 	return diags
 }
 
-func resourceS3CredsPolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceS3CredsPolicyRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -104,7 +104,7 @@ func resourceS3CredsPolicyRead(ctx context.Context, d *schema.ResourceData, m in
 	return diags
 }
 
-func resourceS3CredsPolicyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceS3CredsPolicyDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics

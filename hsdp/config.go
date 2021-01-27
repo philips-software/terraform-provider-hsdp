@@ -8,8 +8,8 @@ import (
 	"github.com/philips-software/go-hsdp-api/cdr"
 	"github.com/philips-software/go-hsdp-api/config"
 	"github.com/philips-software/go-hsdp-api/console"
-	"github.com/philips-software/go-hsdp-api/credentials"
 	"github.com/philips-software/go-hsdp-api/iam"
+	"github.com/philips-software/go-hsdp-api/s3creds"
 	"net/http"
 	"os"
 )
@@ -33,7 +33,7 @@ type Config struct {
 
 	iamClient        *iam.Client
 	cartelClient     *cartel.Client
-	s3credsClient    *credentials.Client
+	s3credsClient    *s3creds.Client
 	consoleClient    *console.Client
 	debugFile        *os.File
 	credsClientErr   error
@@ -53,7 +53,7 @@ func (c *Config) CartelClient() (*cartel.Client, error) {
 	return c.cartelClient, c.cartelClientErr
 }
 
-func (c *Config) S3CredsClient() (*credentials.Client, error) {
+func (c *Config) S3CredsClient() (*s3creds.Client, error) {
 	return c.s3credsClient, c.credsClientErr
 }
 
@@ -61,7 +61,7 @@ func (c *Config) ConsoleClient() (*console.Client, error) {
 	return c.consoleClient, c.consoleClientErr
 }
 
-func (c *Config) CredentialsClientWithLogin(username, password string) (*credentials.Client, error) {
+func (c *Config) CredentialsClientWithLogin(username, password string) (*s3creds.Client, error) {
 	if c.iamClientErr != nil {
 		return nil, c.iamClientErr
 	}
@@ -69,7 +69,7 @@ func (c *Config) CredentialsClientWithLogin(username, password string) (*credent
 	if err != nil {
 		return nil, err
 	}
-	return credentials.NewClient(newIAMClient, &credentials.Config{
+	return s3creds.NewClient(newIAMClient, &s3creds.Config{
 		BaseURL:  c.S3CredsURL,
 		DebugLog: c.DebugLog,
 	})
@@ -124,7 +124,7 @@ func (c *Config) setupS3CredsClient() {
 			}
 		}
 	}
-	client, err := credentials.NewClient(c.iamClient, &credentials.Config{
+	client, err := s3creds.NewClient(c.iamClient, &s3creds.Config{
 		BaseURL:  c.S3CredsURL,
 		DebugLog: c.DebugLog,
 	})

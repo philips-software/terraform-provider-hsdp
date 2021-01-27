@@ -7,7 +7,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	creds "github.com/philips-software/go-hsdp-api/credentials"
+	creds "github.com/philips-software/go-hsdp-api/s3creds"
 )
 
 func dataSourceS3CredsPolicy() *schema.Resource {
@@ -28,7 +28,7 @@ func dataSourceS3CredsPolicy() *schema.Resource {
 				Sensitive: true,
 				Required:  true,
 			},
-			"filter": &schema.Schema{
+			"filter": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				MaxItems: 1,
@@ -59,7 +59,7 @@ func dataSourceS3CredsPolicy() *schema.Resource {
 
 }
 
-func dataSourceS3CredsPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceS3CredsPolicyRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	var diags diag.Diagnostics
 	productKey := ""

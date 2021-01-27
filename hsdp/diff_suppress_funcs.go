@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	creds "github.com/philips-software/go-hsdp-api/credentials"
+	creds "github.com/philips-software/go-hsdp-api/s3creds"
 )
 
 func suppressEquivalentPolicyDiffs(k, old, new string, d *schema.ResourceData) bool {
