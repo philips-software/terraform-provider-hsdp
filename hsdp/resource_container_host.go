@@ -327,6 +327,8 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		cartel.Tags(tags),
 		cartel.InSubnet(subnet),
 	)
+	instanceID := ""
+	ipAddress := ""
 	if err != nil {
 		if resp == nil {
 			return diag.FromErr(fmt.Errorf("create error (resp=nil): %w", err))
@@ -334,9 +336,21 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		if ch == nil {
 			return diag.FromErr(fmt.Errorf("create error (instance=nil): %w", err))
 		}
-		return diag.FromErr(fmt.Errorf("create error (description=[%s]): %w", ch.Description, err))
+		if resp.StatusCode >= 500 { // Possible 504, or other timeout, try to recover anyway!
+			if details := findInstanceByName(client, tagName); details != nil {
+				instanceID = details.InstanceID
+				ipAddress = details.PrivateAddress
+			} else {
+				return diag.FromErr(fmt.Errorf("create error (status=%d): %w", resp.StatusCode, err))
+			}
+		} else {
+			return diag.FromErr(fmt.Errorf("create error (description=[%s]): %w", ch.Description, err))
+		}
+	} else {
+		instanceID = ch.InstanceID()
+		ipAddress = ch.IPAddress()
 	}
-	d.SetId(ch.InstanceID())
+	d.SetId(instanceID)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"provisioning", "indeterminate"},
@@ -356,10 +370,10 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 	d.SetConnInfo(map[string]string{
 		"type": "ssh",
-		"host": ch.IPAddress(),
+		"host": ipAddress,
 	})
 	// Collect SSH details
-	privateIP := ch.IPAddress()
+	privateIP := ipAddress
 	ssh := &easyssh.MakeConfig{
 		User:   user,
 		Server: privateIP,
@@ -394,6 +408,19 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 	readDiags := resourceContainerHostRead(ctx, d, m)
 	return append(diags, readDiags...)
+}
+
+func findInstanceByName(client *cartel.Client, name string) *cartel.InstanceDetails {
+	instances, _, err := client.GetAllInstances()
+	if err != nil {
+		return nil
+	}
+	for _, i := range *instances {
+		if i.NameTag == name {
+			return &i
+		}
+	}
+	return nil
 }
 
 func copyFiles(ssh *easyssh.MakeConfig, config *Config, createFiles []provisionFile) error {
