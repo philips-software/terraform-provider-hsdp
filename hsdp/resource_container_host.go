@@ -331,20 +331,20 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	ipAddress := ""
 	if err != nil {
 		if resp == nil {
+			_, _, _ = client.Destroy(tagName)
 			return diag.FromErr(fmt.Errorf("create error (resp=nil): %w", err))
 		}
-		if ch == nil {
-			return diag.FromErr(fmt.Errorf("create error (instance=nil): %w", err))
-		}
-		if resp.StatusCode >= 500 { // Possible 504, or other timeout, try to recover anyway!
+		if ch == nil || resp.StatusCode >= 500 { // Possible 504, or other timeout, try to recover!
 			if details := findInstanceByName(client, tagName); details != nil {
 				instanceID = details.InstanceID
 				ipAddress = details.PrivateAddress
 			} else {
+				_, _, _ = client.Destroy(tagName)
 				return diag.FromErr(fmt.Errorf("create error (status=%d): %w", resp.StatusCode, err))
 			}
 		} else {
-			return diag.FromErr(fmt.Errorf("create error (description=[%s]): %w", ch.Description, err))
+			_, _, _ = client.Destroy(tagName)
+			return diag.FromErr(fmt.Errorf("create error (description=[%s], code=[%d]): %w", ch.Description, resp.StatusCode, err))
 		}
 	} else {
 		instanceID = ch.InstanceID()
@@ -365,8 +365,8 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		// Trigger a delete to prevent failed instances from lingering
 		_, _, _ = client.Destroy(tagName)
 		return diag.FromErr(fmt.Errorf(
-			"error waiting for instance (%s) to become ready: %s",
-			ch.InstanceID(), err))
+			"error waiting for instance '%s' to become ready: %s",
+			instanceID, err))
 	}
 	d.SetConnInfo(map[string]string{
 		"type": "ssh",
