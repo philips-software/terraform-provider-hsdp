@@ -9,8 +9,8 @@ resource "hsdp_dicom_store_config" "dicom" {
   base_url = var.dicom_base_url
   
   cdr_service_account {
-    service_id = "a@b.com"
-    private_key = var.service_private_key
+    service_id = hsdp_iam_service.cdr.service_id
+    private_key = hsdp_iam_service.cdr.private_key
   }
   
   fhir_store {
