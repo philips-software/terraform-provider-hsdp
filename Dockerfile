@@ -12,7 +12,7 @@ COPY . .
 RUN --mount=type=cache,target=/root/.cache/go-build \
 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -o /out/terraform-provider-hsdp -ldflags "-X main.GitCommit=${GIT_COMMIT}" .
 
-FROM hashicorp/terraform:0.14.4
+FROM hashicorp/terraform:0.14.5
 RUN apk add --no-cache tzdata
 ARG TARGETOS
 ARG TARGETARCH

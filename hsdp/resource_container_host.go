@@ -327,16 +327,30 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		cartel.Tags(tags),
 		cartel.InSubnet(subnet),
 	)
+	instanceID := ""
+	ipAddress := ""
 	if err != nil {
 		if resp == nil {
+			_, _, _ = client.Destroy(tagName)
 			return diag.FromErr(fmt.Errorf("create error (resp=nil): %w", err))
 		}
-		if ch == nil {
-			return diag.FromErr(fmt.Errorf("create error (instance=nil): %w", err))
+		if ch == nil || resp.StatusCode >= 500 { // Possible 504, or other timeout, try to recover!
+			if details := findInstanceByName(client, tagName); details != nil {
+				instanceID = details.InstanceID
+				ipAddress = details.PrivateAddress
+			} else {
+				_, _, _ = client.Destroy(tagName)
+				return diag.FromErr(fmt.Errorf("create error (status=%d): %w", resp.StatusCode, err))
+			}
+		} else {
+			_, _, _ = client.Destroy(tagName)
+			return diag.FromErr(fmt.Errorf("create error (description=[%s], code=[%d]): %w", ch.Description, resp.StatusCode, err))
 		}
-		return diag.FromErr(fmt.Errorf("create error (description=[%s]): %w", ch.Description, err))
+	} else {
+		instanceID = ch.InstanceID()
+		ipAddress = ch.IPAddress()
 	}
-	d.SetId(ch.InstanceID())
+	d.SetId(instanceID)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"provisioning", "indeterminate"},
@@ -351,15 +365,15 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		// Trigger a delete to prevent failed instances from lingering
 		_, _, _ = client.Destroy(tagName)
 		return diag.FromErr(fmt.Errorf(
-			"error waiting for instance (%s) to become ready: %s",
-			ch.InstanceID(), err))
+			"error waiting for instance '%s' to become ready: %s",
+			instanceID, err))
 	}
 	d.SetConnInfo(map[string]string{
 		"type": "ssh",
-		"host": ch.IPAddress(),
+		"host": ipAddress,
 	})
 	// Collect SSH details
-	privateIP := ch.IPAddress()
+	privateIP := ipAddress
 	ssh := &easyssh.MakeConfig{
 		User:   user,
 		Server: privateIP,
@@ -394,6 +408,19 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 	readDiags := resourceContainerHostRead(ctx, d, m)
 	return append(diags, readDiags...)
+}
+
+func findInstanceByName(client *cartel.Client, name string) *cartel.InstanceDetails {
+	instances, _, err := client.GetAllInstances()
+	if err != nil {
+		return nil
+	}
+	for _, i := range *instances {
+		if i.NameTag == name {
+			return &i
+		}
+	}
+	return nil
 }
 
 func copyFiles(ssh *easyssh.MakeConfig, config *Config, createFiles []provisionFile) error {

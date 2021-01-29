@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.9.4
+- Better cleanup logic for failed container host provisions
+
+## v0.9.3
+- Recovery code for Cartel HTTP 500 error during create
+
+## v0.9.2
+- Improve error handling for Cartel
+
 ## v0.9.1
 - Add support for file sources
 - Improve error handling
