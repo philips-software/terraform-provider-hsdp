@@ -6,7 +6,7 @@ The following example demonstrates the basic configuration of a DICOM store
 
 ```hcl
 resource "hsdp_dicom_store_config" "dicom" {
-  base_url = var.dicom_base_url
+  config_url = var.dicom_base_url
   
   cdr_service_account {
     service_id = hsdp_iam_service.cdr.service_id
@@ -19,3 +19,17 @@ resource "hsdp_dicom_store_config" "dicom" {
 }
 ```
 
+# Argument reference
+
+* `config_url` - (Required) The base config URL of the DICOM Store instance
+* `cdr_service_account` - (Optional) Details of the CDR service account
+  * `service_id` - the service id
+  * `private_key` - the service private key
+* `fhir_store` - (Optional) the FHIR store configuration
+  * `mpi_endpoint` - the FHIR mpi endpoint
+  
+# Attribute reference
+* `data_management_url` - Data management API endpoint URL
+* `qido_url` - QIDO API endpoint URL
+* `stow_url` - STOW API endpoint URL
+* `wado_url` - WADO API endpoint URL

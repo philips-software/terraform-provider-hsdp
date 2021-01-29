@@ -5,7 +5,7 @@ This resource manages DICOM Object stores
 
 ```hcl
 resource "hsdp_dicom_object_store" "store1" {
-  base_url = var.dicom_base_url
+  config_url = var.dicom_base_url
   
   description = "Store 1"
   

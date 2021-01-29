@@ -8,6 +8,7 @@ import (
 	"github.com/philips-software/go-hsdp-api/cdr"
 	"github.com/philips-software/go-hsdp-api/config"
 	"github.com/philips-software/go-hsdp-api/console"
+	"github.com/philips-software/go-hsdp-api/dicom"
 	"github.com/philips-software/go-hsdp-api/iam"
 	"github.com/philips-software/go-hsdp-api/s3creds"
 	"net/http"
@@ -222,4 +223,19 @@ func (c *Config) Debug(format string, a ...interface{}) (int, error) {
 		return c.debugFile.WriteString(output)
 	}
 	return 0, nil
+}
+
+func (c *Config) getDICOMConfigClient(url string) (*dicom.Client, error) {
+	if c.iamClientErr != nil {
+		return nil, fmt.Errorf("DICM client error in getDICOMConfigClient: %w", c.iamClientErr)
+	}
+	client, err := dicom.NewClient(c.iamClient, &dicom.Config{
+		DICOMConfigURL: url,
+		TimeZone:       c.TimeZone,
+		DebugLog:       c.DebugLog,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("getDICOMConfigClient: %w", err)
+	}
+	return client, nil
 }
