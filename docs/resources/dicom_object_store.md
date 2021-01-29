@@ -6,6 +6,7 @@ This resource manages DICOM Object stores
 ```hcl
 resource "hsdp_dicom_object_store" "store1" {
   config_url = var.dicom_base_url
+  organization_id = var.iam_org_id
   
   description = "Store 1"
   
@@ -28,3 +29,26 @@ resource "hsdp_dicom_object_store" "store1" {
   }
 }
 ```
+
+# Argument reference
+
+* `config_url` - (Required) The base config URL of the DICOM Object store instance
+* `organization_id` - (Required) the IAM organization ID to use for authorization
+* `description` - (Optional) Description of the object store
+* `static_access` - (Optional) Details of the CDR service account
+    * `endpoint` - (Required) The S3 bucket endpoint
+    * `bucket_name` - (Required) The S3 bucket name
+    * `access_key` - (Required) The S3 access key
+    * `secret_key` - (Required) The S3 secret key
+* `s3creds_access` - (Optional) the FHIR store configuration
+    * `endpoint` - (Required) The S3Creds bucket endpoint
+    * `product_key` - (Required) The S3Creds product key  
+    * `bucket_name` - (Required) The S3Creds bucket name
+    * `folder_path` - (Required) The S3Creds folder path to use
+    * `service_account` - (Required) The IAM service account to use
+      * `service_id` - (Required) The IAM service id
+      * `private_key` - (Required) The IAM service private key
+
+# Attribute reference
+* `access_type` - The access type for this object store
+
