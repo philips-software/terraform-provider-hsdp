@@ -25,6 +25,11 @@ func resourceDICOMStoreConfig() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"organization_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
 			"cdr_service_account": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -89,6 +94,7 @@ func resourceDICOMStoreConfigUpdate(_ context.Context, d *schema.ResourceData, m
 	var diags diag.Diagnostics
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
+	_ = d.Get("organization_id").(string)
 	client, err := config.getDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
@@ -159,29 +165,25 @@ func resourceDICOMStoreConfigRead(_ context.Context, d *schema.ResourceData, m i
 
 	// CDR
 	configured, _, err := client.Config.GetCDRServiceAccount()
-	if err != nil {
-		return diag.FromErr(err)
+	if err == nil && configured != nil {
+		cdrSettings := make(map[string]interface{})
+		cdrSettings["service_id"] = configured.ServiceID
+		cdrSettings["private_key"] = configured.PrivateKey
+		cdrSettings["id"] = configured.ID
+		s := &schema.Set{F: resourceMetricsThresholdHash}
+		s.Add(cdrSettings)
+		_ = d.Set("cdr_service_account", s)
 	}
-	cdrSettings := make(map[string]interface{})
-	cdrSettings["service_id"] = configured.ServiceID
-	cdrSettings["private_key"] = configured.PrivateKey
-	cdrSettings["id"] = configured.ID
-	s := &schema.Set{F: resourceMetricsThresholdHash}
-	s.Add(cdrSettings)
-	_ = d.Set("cdr_service_account", s)
-
 	// FHIR
 	fhirConfigured, _, err := client.Config.GetFHIRStore()
-	if err != nil {
-		return diag.FromErr(err)
+	if err == nil && fhirConfigured != nil {
+		fhirSettings := make(map[string]interface{})
+		fhirSettings["mpi_endpoint"] = fhirConfigured.MPIEndpoint
+		fhirSettings["id"] = fhirConfigured.ID
+		s := &schema.Set{F: resourceMetricsThresholdHash}
+		s.Add(fhirSettings)
+		_ = d.Set("fhir_store", s)
 	}
-	fhirSettings := make(map[string]interface{})
-	fhirSettings["mpi_endpoint"] = fhirConfigured.MPIEndpoint
-	fhirSettings["id"] = fhirConfigured.ID
-	s = &schema.Set{F: resourceMetricsThresholdHash}
-	s.Add(fhirSettings)
-	_ = d.Set("fhir_store", s)
-
 	return diags
 }
 

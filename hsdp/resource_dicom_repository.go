@@ -40,12 +40,13 @@ func resourceDICOMRepositoryDelete(_ context.Context, d *schema.ResourceData, m 
 	var diags diag.Diagnostics
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
+	orgID := d.Get("organization_id").(string)
 	client, err := config.getDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	defer client.Close()
-	_, _, err = client.Config.DeleteRepository(dicom.Repository{ID: d.Id()})
+	_, _, err = client.Config.DeleteRepository(dicom.Repository{ID: d.Id()}, &dicom.GetOptions{OrganizationID: &orgID})
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -57,12 +58,13 @@ func resourceDICOMRepositoryRead(_ context.Context, d *schema.ResourceData, m in
 	var diags diag.Diagnostics
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
+	orgID := d.Get("organization_id").(string)
 	client, err := config.getDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	defer client.Close()
-	repo, _, err := client.Config.GetRepository(d.Id())
+	repo, _, err := client.Config.GetRepository(d.Id(), &dicom.GetOptions{OrganizationID: &orgID})
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -74,6 +76,7 @@ func resourceDICOMRepositoryRead(_ context.Context, d *schema.ResourceData, m in
 func resourceDICOMRepositoryCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
+	orgID := d.Get("organization_id").(string)
 	client, err := config.getDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
@@ -83,7 +86,7 @@ func resourceDICOMRepositoryCreate(ctx context.Context, d *schema.ResourceData, 
 		OrganizationID:      d.Get("organization_id").(string),
 		ActiveObjectStoreID: d.Get("object_store_id").(string),
 	}
-	created, _, err := client.Config.CreateRepository(repo)
+	created, _, err := client.Config.CreateRepository(repo, &dicom.GetOptions{OrganizationID: &orgID})
 	if err != nil {
 		return diag.FromErr(err)
 	}

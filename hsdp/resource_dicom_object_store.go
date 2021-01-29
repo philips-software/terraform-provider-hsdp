@@ -22,6 +22,11 @@ func resourceDICOMObjectStore() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"organization_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -54,6 +59,10 @@ func resourceDICOMObjectStore() *schema.Resource {
 						},
 					},
 				},
+			},
+			"access_type": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"s3creds_access": {
 				Type:     schema.TypeSet,
@@ -114,13 +123,15 @@ func resourceDICOMObjectStoreDelete(_ context.Context, d *schema.ResourceData, m
 	var diags diag.Diagnostics
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
+	orgID := d.Get("organization_id").(string)
 	client, err := config.getDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	defer client.Close()
-
-	_, _, err = client.Config.DeleteObjectStore(dicom.ObjectStore{ID: d.Id()}, nil)
+	_, _, err = client.Config.DeleteObjectStore(dicom.ObjectStore{ID: d.Id()}, &dicom.GetOptions{
+		OrganizationID: &orgID,
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -132,17 +143,21 @@ func resourceDICOMObjectStoreRead(_ context.Context, d *schema.ResourceData, m i
 	var diags diag.Diagnostics
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
+	orgID := d.Get("organization_id").(string)
 	client, err := config.getDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	defer client.Close()
 
-	store, _, err := client.Config.GetObjectStore(d.Id(), nil)
+	store, _, err := client.Config.GetObjectStore(d.Id(), &dicom.GetOptions{
+		OrganizationID: &orgID,
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	_ = d.Set("description", store.Description)
+	_ = d.Set("access_type", store.AccessType)
 	if store.StaticAccess != nil {
 		staticSettings := make(map[string]interface{})
 		staticSettings["endpoint"] = store.StaticAccess.Endpoint
@@ -180,6 +195,7 @@ func resourceDICOMObjectStoreCreate(ctx context.Context, d *schema.ResourceData,
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
 	client, err := config.getDICOMConfigClient(configURL)
+	orgID := d.Get("organization_id").(string)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -222,7 +238,9 @@ func resourceDICOMObjectStoreCreate(ctx context.Context, d *schema.ResourceData,
 		store.CredServiceAccess = credsAccess
 		store.AccessType = "s3Creds"
 	}
-	created, _, err := client.Config.CreateObjectStore(store, nil)
+	created, _, err := client.Config.CreateObjectStore(store, &dicom.GetOptions{
+		OrganizationID: &orgID,
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
