@@ -129,7 +129,7 @@ func resourceDICOMObjectStoreDelete(_ context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 	defer client.Close()
-	_, _, err = client.Config.DeleteObjectStore(dicom.ObjectStore{ID: d.Id()}, &dicom.GetOptions{
+	_, _, err = client.Config.DeleteObjectStore(dicom.ObjectStore{ID: d.Id()}, &dicom.QueryOptions{
 		OrganizationID: &orgID,
 	})
 	if err != nil {
@@ -150,7 +150,7 @@ func resourceDICOMObjectStoreRead(_ context.Context, d *schema.ResourceData, m i
 	}
 	defer client.Close()
 
-	store, _, err := client.Config.GetObjectStore(d.Id(), &dicom.GetOptions{
+	store, _, err := client.Config.GetObjectStore(d.Id(), &dicom.QueryOptions{
 		OrganizationID: &orgID,
 	})
 	if err != nil {
@@ -238,7 +238,7 @@ func resourceDICOMObjectStoreCreate(ctx context.Context, d *schema.ResourceData,
 		store.CredServiceAccess = credsAccess
 		store.AccessType = "s3Creds"
 	}
-	created, _, err := client.Config.CreateObjectStore(store, &dicom.GetOptions{
+	created, _, err := client.Config.CreateObjectStore(store, &dicom.QueryOptions{
 		OrganizationID: &orgID,
 	})
 	if err != nil {

@@ -94,7 +94,7 @@ func resourceDICOMStoreConfigUpdate(_ context.Context, d *schema.ResourceData, m
 	var diags diag.Diagnostics
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
-	_ = d.Get("organization_id").(string)
+	orgID := d.Get("organization_id").(string)
 	client, err := config.getDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
@@ -114,7 +114,9 @@ func resourceDICOMStoreConfigUpdate(_ context.Context, d *schema.ResourceData, m
 			if !cdrService.Valid() {
 				return diag.FromErr(fmt.Errorf("cdr_service_account is not valid"))
 			}
-			configured, _, err := client.Config.SetCDRServiceAccount(cdrService)
+			configured, _, err := client.Config.SetCDRServiceAccount(cdrService, &dicom.QueryOptions{
+				OrganizationID: &orgID,
+			})
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -138,7 +140,9 @@ func resourceDICOMStoreConfigUpdate(_ context.Context, d *schema.ResourceData, m
 			if !fhirStore.Valid() {
 				return diag.FromErr(fmt.Errorf("fhir_store is not valid"))
 			}
-			configured, _, err := client.Config.SetFHIRStore(fhirStore)
+			configured, _, err := client.Config.SetFHIRStore(fhirStore, &dicom.QueryOptions{
+				OrganizationID: &orgID,
+			})
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -157,6 +161,7 @@ func resourceDICOMStoreConfigRead(_ context.Context, d *schema.ResourceData, m i
 	var diags diag.Diagnostics
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
+	orgID := d.Get("organization_id").(string)
 	client, err := config.getDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
@@ -164,7 +169,9 @@ func resourceDICOMStoreConfigRead(_ context.Context, d *schema.ResourceData, m i
 	defer client.Close()
 
 	// CDR
-	configured, _, err := client.Config.GetCDRServiceAccount()
+	configured, _, err := client.Config.GetCDRServiceAccount(&dicom.QueryOptions{
+		OrganizationID: &orgID,
+	})
 	if err == nil && configured != nil {
 		cdrSettings := make(map[string]interface{})
 		cdrSettings["service_id"] = configured.ServiceID
@@ -175,7 +182,9 @@ func resourceDICOMStoreConfigRead(_ context.Context, d *schema.ResourceData, m i
 		_ = d.Set("cdr_service_account", s)
 	}
 	// FHIR
-	fhirConfigured, _, err := client.Config.GetFHIRStore()
+	fhirConfigured, _, err := client.Config.GetFHIRStore(&dicom.QueryOptions{
+		OrganizationID: &orgID,
+	})
 	if err == nil && fhirConfigured != nil {
 		fhirSettings := make(map[string]interface{})
 		fhirSettings["mpi_endpoint"] = fhirConfigured.MPIEndpoint
@@ -191,6 +200,7 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 	var diags diag.Diagnostics
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
+	orgID := d.Get("organization_id").(string)
 	client, err := config.getDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
@@ -210,7 +220,9 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 		if !cdrService.Valid() {
 			return diag.FromErr(fmt.Errorf("cdr_service_account is not valid"))
 		}
-		configured, _, err := client.Config.SetCDRServiceAccount(cdrService)
+		configured, _, err := client.Config.SetCDRServiceAccount(cdrService, &dicom.QueryOptions{
+			OrganizationID: &orgID,
+		})
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -233,7 +245,9 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 		if !fhirStore.Valid() {
 			return diag.FromErr(fmt.Errorf("fhir_store is not valid"))
 		}
-		configured, _, err := client.Config.SetFHIRStore(fhirStore)
+		configured, _, err := client.Config.SetFHIRStore(fhirStore, &dicom.QueryOptions{
+			OrganizationID: &orgID,
+		})
 		if err != nil {
 			return diag.FromErr(err)
 		}
