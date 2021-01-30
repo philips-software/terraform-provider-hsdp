@@ -1,11 +1,11 @@
-# hsdp_credentials_access
+# hsdp_s3creds_access
 
 Gets credentials for an S3 Credentials access
 
 ## Example Usage
 
 ```hcl
-data "hsdp_credentials_access" "my_access" {
+data "hsdp_s3creds_access" "my_access" {
    product_key = var.product_key
    username = "my_iam_login"
    password = "MyP@ssw0rd"
@@ -14,7 +14,7 @@ data "hsdp_credentials_access" "my_access" {
 
 ```hcl
 output "s3_credentials" {
-   value = data.hsdp_credentials_access.my_access.access
+   value = data.hsdp_s3creds_access.my_access.access
 }
 ```
 

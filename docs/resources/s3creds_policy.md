@@ -1,4 +1,4 @@
-# hsdp_credentials_policy
+# hsdp_s3creds_policy
 Provides a resource for managing HSDP S3 Credentials policies
 
 > This resource is only available when `credentials_url` is set in the provider config
@@ -8,7 +8,7 @@ Provides a resource for managing HSDP S3 Credentials policies
 The following example creates a new policy
 
 ```hcl
-resource "hsdp_credentials_policy" "policy1" {
+resource "hsdp_s3creds_policy" "policy1" {
   product_key = var.credentials_product_key
 
   policy = <<POLICY

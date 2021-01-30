@@ -21,19 +21,20 @@ func resourceIAMService() *schema.Resource {
 		DeleteContext: resourceIAMServiceDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
+				Type:             schema.TypeString,
+				Required:         true,
+				DiffSuppressFunc: suppressCaseDiffs,
+			},
+			"description": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": &schema.Schema{
+			"application_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"application_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"validity": &schema.Schema{
+			"validity": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  12,
@@ -41,31 +42,31 @@ func resourceIAMService() *schema.Resource {
 				// TODO
 				ValidateFunc: validation.IntBetween(1, 600),
 			},
-			"private_key": &schema.Schema{
+			"private_key": {
 				Type:      schema.TypeString,
 				Sensitive: true,
 				Computed:  true,
 			},
-			"service_id": &schema.Schema{
+			"service_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"organization_id": &schema.Schema{
+			"organization_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"expires_on": &schema.Schema{
+			"expires_on": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"scopes": &schema.Schema{
+			"scopes": {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				MinItems: 1, // openid
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"default_scopes": &schema.Schema{
+			"default_scopes": {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				MinItems: 1, // openid
@@ -76,7 +77,7 @@ func resourceIAMService() *schema.Resource {
 	}
 }
 
-func resourceIAMServiceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMServiceCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -115,7 +116,7 @@ func resourceIAMServiceCreate(ctx context.Context, d *schema.ResourceData, m int
 	return diags
 }
 
-func resourceIAMServiceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMServiceRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -149,7 +150,7 @@ func resourceIAMServiceRead(ctx context.Context, d *schema.ResourceData, m inter
 	return diags
 }
 
-func resourceIAMServiceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMServiceUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -197,7 +198,7 @@ func resourceIAMServiceUpdate(ctx context.Context, d *schema.ResourceData, m int
 	return diags
 }
 
-func resourceIAMServiceDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMServiceDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics

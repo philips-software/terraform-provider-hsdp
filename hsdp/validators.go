@@ -6,7 +6,7 @@ import (
 	"github.com/philips-software/go-hsdp-api/cartel"
 	"strings"
 
-	creds "github.com/philips-software/go-hsdp-api/credentials"
+	creds "github.com/philips-software/go-hsdp-api/s3creds"
 )
 
 func validateUpperString(val interface{}, key string) (warns []string, errs []error) {
