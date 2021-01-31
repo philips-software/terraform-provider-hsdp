@@ -20,32 +20,33 @@ func resourceIAMGroup() *schema.Resource {
 		DeleteContext: resourceIAMGroupDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+			"name": {
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: suppressCaseDiffs,
 			},
-			"description": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"managing_organization": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"roles": &schema.Schema{
+			"managing_organization": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"roles": {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"users": &schema.Schema{
+			"users": {
 				Type:     schema.TypeSet,
 				MaxItems: 2000,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"services": &schema.Schema{
+			"services": {
 				Type:     schema.TypeSet,
 				MaxItems: 2000,
 				Optional: true,
@@ -55,7 +56,7 @@ func resourceIAMGroup() *schema.Resource {
 	}
 }
 
-func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMGroupCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -112,7 +113,7 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 	return diags
 }
 
-func resourceIAMGroupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMGroupRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -146,7 +147,7 @@ func resourceIAMGroupRead(ctx context.Context, d *schema.ResourceData, m interfa
 	return diags
 }
 
-func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMGroupUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -200,9 +201,9 @@ func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	if d.HasChange("roles") {
 		o, n := d.GetChange("roles")
 		old := expandStringList(o.(*schema.Set).List())
-		new := expandStringList(n.(*schema.Set).List())
-		toAdd := difference(new, old)
-		toRemove := difference(old, new)
+		newValues := expandStringList(n.(*schema.Set).List())
+		toAdd := difference(newValues, old)
+		toRemove := difference(old, newValues)
 
 		// Handle additions
 		if len(toAdd) > 0 {
@@ -215,7 +216,7 @@ func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m inter
 			}
 		}
 
-		// Remove every role. Simpler to remove and add new ones,
+		// Remove every role. Simpler to remove and add newValues ones,
 		for _, v := range toRemove {
 			var role = iam.Role{ID: v}
 			_, _, err := client.Groups.RemoveRole(group, role)
@@ -228,7 +229,7 @@ func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	return diags
 }
 
-func resourceIAMGroupDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMGroupDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics

@@ -7,14 +7,14 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	creds "github.com/philips-software/go-hsdp-api/credentials"
+	creds "github.com/philips-software/go-hsdp-api/s3creds"
 )
 
-func resourceCredentialsPolicy() *schema.Resource {
+func resourceS3CredsPolicy() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceCredentialsPolicyCreate,
-		ReadContext:   resourceCredentialsPolicyRead,
-		DeleteContext: resourceCredentialsPolicyDelete,
+		CreateContext: resourceS3CredsPolicyCreate,
+		ReadContext:   resourceS3CredsPolicyRead,
+		DeleteContext: resourceS3CredsPolicyDelete,
 
 		Schema: map[string]*schema.Schema{
 			"policy": {
@@ -24,7 +24,7 @@ func resourceCredentialsPolicy() *schema.Resource {
 				ValidateFunc:     validatePolicyJSON,
 				DiffSuppressFunc: suppressEquivalentPolicyDiffs,
 			},
-			"product_key": &schema.Schema{
+			"product_key": {
 				Type:      schema.TypeString,
 				Sensitive: true,
 				ForceNew:  true,
@@ -34,12 +34,12 @@ func resourceCredentialsPolicy() *schema.Resource {
 	}
 }
 
-func resourceCredentialsPolicyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceS3CredsPolicyCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
 
-	client, err := config.CredentialsClient()
+	client, err := config.S3CredsClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -62,12 +62,12 @@ func resourceCredentialsPolicyCreate(ctx context.Context, d *schema.ResourceData
 	return diags
 }
 
-func resourceCredentialsPolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceS3CredsPolicyRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
 
-	client, err := config.CredentialsClient()
+	client, err := config.S3CredsClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -104,12 +104,12 @@ func resourceCredentialsPolicyRead(ctx context.Context, d *schema.ResourceData, 
 	return diags
 }
 
-func resourceCredentialsPolicyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceS3CredsPolicyDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
 
-	client, err := config.CredentialsClient()
+	client, err := config.S3CredsClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}

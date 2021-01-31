@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1-experimental
 
-ARG hsdp_provider_version=0.9.2
-FROM --platform=${BUILDPLATFORM} golang:1.15.6-alpine AS build
+ARG hsdp_provider_version=0.9.5
+FROM --platform=${BUILDPLATFORM} golang:1.16rc1-alpine3.13 AS build
 ARG TARGETOS
 ARG TARGETARCH
 WORKDIR /src
