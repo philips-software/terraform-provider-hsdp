@@ -4,6 +4,7 @@ This resource manages a DICOM repository
 # Example Usage
 ```hcl
 resource "hsdp_dicom_repository" "repo1" {
+  config_url = hsdp_dicom_store_config.dicom.config_url
   organization_id = hsdp_iam_org.root_org.id
   object_store_id = hsdp_dicom_object_store.store1.id
 }
