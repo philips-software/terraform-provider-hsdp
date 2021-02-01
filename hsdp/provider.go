@@ -198,6 +198,8 @@ func Provider(build string) *schema.Provider {
 			"hsdp_config":                      dataSourceConfig(),
 			"hsdp_container_host_subnet_types": dataSourceContainerHostSubnetTypes(),
 			"hsdp_cdr_fhir_store":              dataSourceCDRFHIRStore(),
+			"hsdp_pki_root":                    dataSourcePKIRoot(),
+			"hsdp_pki_policy":                  dataSourcePKIPolicy(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
@@ -272,6 +274,7 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		config.setupS3CredsClient()
 		config.setupCartelClient()
 		config.setupConsoleClient()
+		config.setupPKIClient()
 
 		if config.DebugLog != "" {
 			debugFile, err := os.OpenFile(config.DebugLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
