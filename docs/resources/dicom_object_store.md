@@ -6,16 +6,21 @@ This resource manages DICOM Object stores
 ```hcl
 resource "hsdp_dicom_object_store" "store1" {
   config_url = var.dicom_base_url
-  organization_id = var.iam_org_id
-  
+  organization_id = var.iam_org_one_id
   description = "Store 1"
-  
+
   static_access {
     endpoint = "https://s3-external.amazonaws.com"
     bucket_name = "xxxx-xxxx-xxxx-xxxx"
     access_key = "xxx"
     secret_key = "yyy"
   }
+}
+
+resource "hsdp_dicom_object_store" "store2" {
+  config_url = var.dicom_base_url
+  organization_id = var.iam_org_two_id
+  description = "Store 2"
   
   s3creds_access {
     endpoint = "https://xxx.com"
@@ -48,6 +53,9 @@ resource "hsdp_dicom_object_store" "store1" {
     * `service_account` - (Required) The IAM service account to use
       * `service_id` - (Required) The IAM service id
       * `private_key` - (Required) The IAM service private key
+      * `name` - (Optional) Name of the service
+      * `access_token_endpoint` - (Optional) The IAM access token endpoint
+      * `token_endpoint` - (Optional) The IAM token endpoint
 
 # Attribute reference
 * `access_type` - The access type for this object store

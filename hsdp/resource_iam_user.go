@@ -143,6 +143,7 @@ func resourceIAMUserRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("first_name", user.Name.Given)
 	_ = d.Set("email", user.EmailAddress)
 	_ = d.Set("login", user.LoginID)
+	_ = d.Set("organization_id", user.ManagingOrganization)
 	return nil
 }
 
