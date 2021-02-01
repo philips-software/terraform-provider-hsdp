@@ -48,6 +48,9 @@ resource "hsdp_dicom_object_store" "store1" {
     * `service_account` - (Required) The IAM service account to use
       * `service_id` - (Required) The IAM service id
       * `private_key` - (Required) The IAM service private key
+      * `name` - (Optional) Name of the service
+      * `access_token_endpoint` - (Optional) The IAM access token endpoint
+      * `token_endpoint` - (Optional) The IAM token endpoint
 
 # Attribute reference
 * `access_type` - The access type for this object store

@@ -91,6 +91,10 @@ func resourceDICOMObjectStore() *schema.Resource {
 							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:     schema.TypeString,
+										Required: true,
+									},
 									"service_id": {
 										Type:      schema.TypeString,
 										Required:  true,
@@ -179,6 +183,7 @@ func resourceDICOMObjectStoreRead(_ context.Context, d *schema.ResourceData, m i
 		accountSettings["private_key"] = store.CredServiceAccess.ServiceAccount.PrivateKey
 		accountSettings["access_token_endpoint"] = store.CredServiceAccess.ServiceAccount.AccessTokenEndPoint
 		accountSettings["token_endpoint"] = store.CredServiceAccess.ServiceAccount.TokenEndPoint
+		accountSettings["name"] = store.CredServiceAccess.ServiceAccount.Name
 		s := &schema.Set{F: resourceMetricsThresholdHash}
 		s.Add(accountSettings)
 		credsSettings["service_account"] = s
@@ -234,6 +239,7 @@ func resourceDICOMObjectStoreCreate(ctx context.Context, d *schema.ResourceData,
 			credsAccess.ServiceAccount.PrivateKey = mVi["private_key"].(string)
 			credsAccess.ServiceAccount.ServiceID = mVi["service_id"].(string)
 			credsAccess.ServiceAccount.TokenEndPoint = mVi["token_endpoint"].(string)
+			credsAccess.ServiceAccount.Name = mVi["name"].(string)
 		}
 		store.CredServiceAccess = credsAccess
 		store.AccessType = "s3Creds"
