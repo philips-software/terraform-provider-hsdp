@@ -31,7 +31,6 @@ resource "hsdp_dicom_store_config" "dicom" {
   * `mpi_endpoint` - the FHIR mpi endpoint
   
 # Attribute reference
-* `data_management_url` - Data management API endpoint URL
 * `qido_url` - QIDO API endpoint URL
 * `stow_url` - STOW API endpoint URL
 * `wado_url` - WADO API endpoint URL
