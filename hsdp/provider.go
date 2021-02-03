@@ -184,6 +184,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_dicom_store_config":  resourceDICOMStoreConfig(),
 			"hsdp_dicom_object_store":  resourceDICOMObjectStore(),
 			"hsdp_dicom_repository":    resourceDICOMRepository(),
+			"hsdp_pki_tenant":          resourcePKITenant(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":              dataSourceIAMIntrospect(),

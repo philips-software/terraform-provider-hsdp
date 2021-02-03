@@ -14,10 +14,11 @@ require (
 	github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152
 	github.com/loafoe/easyssh-proxy/v2 v2.0.2
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
-	github.com/philips-software/go-hsdp-api v0.34.3-0.20210201100117-4907c0e61bdf
+	github.com/philips-software/go-hsdp-api v0.34.4-0.20210202200422-9caa8507af74
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.6.1
 	github.com/zclconf/go-cty v1.7.1 // indirect
+	go.elastic.co/apm/module/apmhttp v1.8.0 // indirect
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad // indirect
 	golang.org/x/net v0.0.0-20210119194325-5f4716e94777 // indirect
 	golang.org/x/sys v0.0.0-20210123231150-1d476976d117 // indirect

@@ -572,6 +572,16 @@ github.com/peterbourgon/diskv v2.0.1+incompatible/go.mod h1:uqqh8zWWbv1HBMNONnaR
 github.com/philhofer/fwd v1.0.0/go.mod h1:gk3iGcWd9+svBvR0sR+KPcfE+RNWozjowpeBVG3ZVNU=
 github.com/philips-software/go-hsdp-api v0.34.3-0.20210201100117-4907c0e61bdf h1:KkFfNFB4iqCbmVdHtF8fGWZYGL3eGl0U/xaoeT7nHxU=
 github.com/philips-software/go-hsdp-api v0.34.3-0.20210201100117-4907c0e61bdf/go.mod h1:nqa3LCYKcRiiGlfSGV3hC8SEpEHPcWoBPp2l+bCtbME=
+github.com/philips-software/go-hsdp-api v0.34.4-0.20210202100253-ae1e71343452 h1:Ah6FsQsGnsybaBGTeUewuDyrTJtvOmw8EnJIHsH1QEk=
+github.com/philips-software/go-hsdp-api v0.34.4-0.20210202100253-ae1e71343452/go.mod h1:vkJQW6KIyuPZ2mXpcSywrgey+KccZv/LTyfBGdevK9I=
+github.com/philips-software/go-hsdp-api v0.34.4-0.20210202192816-47e4b002d7f3 h1:EWVWkaasEKuUFLcitET04PcA6lAA42mRKKP9ZSM3zgI=
+github.com/philips-software/go-hsdp-api v0.34.4-0.20210202192816-47e4b002d7f3/go.mod h1:vkJQW6KIyuPZ2mXpcSywrgey+KccZv/LTyfBGdevK9I=
+github.com/philips-software/go-hsdp-api v0.34.4-0.20210202194050-98f26d19553f h1:Y5IhK503n3LAgLSB2jkI2wyHQqA2Ok4NfZHG6BI6Jp8=
+github.com/philips-software/go-hsdp-api v0.34.4-0.20210202194050-98f26d19553f/go.mod h1:vkJQW6KIyuPZ2mXpcSywrgey+KccZv/LTyfBGdevK9I=
+github.com/philips-software/go-hsdp-api v0.34.4-0.20210202195149-6056fea6acf4 h1:jMCu7rc0CI3S3zNne4OQHaXDuV/xBQLP7Z9SF/8xQXc=
+github.com/philips-software/go-hsdp-api v0.34.4-0.20210202195149-6056fea6acf4/go.mod h1:vkJQW6KIyuPZ2mXpcSywrgey+KccZv/LTyfBGdevK9I=
+github.com/philips-software/go-hsdp-api v0.34.4-0.20210202200422-9caa8507af74 h1:NEltkeEb7lsh0cfts7u3MBrZbmTGCmqL9oWrURhlcfU=
+github.com/philips-software/go-hsdp-api v0.34.4-0.20210202200422-9caa8507af74/go.mod h1:vkJQW6KIyuPZ2mXpcSywrgey+KccZv/LTyfBGdevK9I=
 github.com/philips-software/go-hsdp-signer v1.3.0 h1:Si1voDE/GHzthmxpasPdntbu8aUW6EYJfI6gHVf7BCc=
 github.com/philips-software/go-hsdp-signer v1.3.0/go.mod h1:/QehZ/+Aks2t1TFpjhF/7ZSB8PJIIJHzLc03rOqwLw0=
 github.com/pierrec/lz4 v2.0.5+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi+IEE17M5jbnwPHcY=
