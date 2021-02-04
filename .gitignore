@@ -4,6 +4,7 @@
 *.out
 *.tf
 *.exe
+b.sh
 .swp
 .DS_Store
 terraform-provider-hsdp

@@ -10,6 +10,7 @@ import (
 	"github.com/philips-software/go-hsdp-api/console"
 	"github.com/philips-software/go-hsdp-api/dicom"
 	"github.com/philips-software/go-hsdp-api/iam"
+	"github.com/philips-software/go-hsdp-api/pki"
 	"github.com/philips-software/go-hsdp-api/s3creds"
 	"net/http"
 	"os"
@@ -36,11 +37,13 @@ type Config struct {
 	cartelClient     *cartel.Client
 	s3credsClient    *s3creds.Client
 	consoleClient    *console.Client
+	pkiClient        *pki.Client
 	debugFile        *os.File
 	credsClientErr   error
 	cartelClientErr  error
 	iamClientErr     error
 	consoleClientErr error
+	pkiClientErr     error
 	TimeZone         string
 
 	ma *jsonformat.Marshaller
@@ -60,6 +63,19 @@ func (c *Config) S3CredsClient() (*s3creds.Client, error) {
 
 func (c *Config) ConsoleClient() (*console.Client, error) {
 	return c.consoleClient, c.consoleClientErr
+}
+
+func (c *Config) PKIClient(regionEnvironment ...string) (*pki.Client, error) {
+	if len(regionEnvironment) == 2 && c.consoleClient != nil && c.iamClient != nil {
+		region := regionEnvironment[0]
+		environment := regionEnvironment[1]
+		return pki.NewClient(c.consoleClient, c.iamClient, &pki.Config{
+			Region:      region,
+			Environment: environment,
+			DebugLog:    c.DebugLog,
+		})
+	}
+	return c.pkiClient, c.pkiClientErr
 }
 
 func (c *Config) CredentialsClientWithLogin(username, password string) (*s3creds.Client, error) {
@@ -238,4 +254,28 @@ func (c *Config) getDICOMConfigClient(url string) (*dicom.Client, error) {
 		return nil, fmt.Errorf("getDICOMConfigClient: %w", err)
 	}
 	return client, nil
+}
+
+func (c *Config) setupPKIClient() {
+	if c.iamClientErr != nil {
+		c.pkiClientErr = fmt.Errorf("IAM client error in setupPKIClient: %w", c.iamClientErr)
+		return
+	}
+	if c.consoleClientErr != nil {
+		c.pkiClientErr = fmt.Errorf("Console client error in setupPKIClient: %w", c.consoleClientErr)
+		return
+	}
+	client, err := pki.NewClient(c.consoleClient, c.iamClient, &pki.Config{
+		Region:      c.Region,
+		Environment: c.Environment,
+		DebugLog:    c.DebugLog,
+	})
+	if err != nil {
+		c.pkiClient = nil
+		c.pkiClientErr = err
+		return
+	}
+	c.pkiClient = client
+	c.pkiClientErr = nil
+	return
 }
