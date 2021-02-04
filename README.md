@@ -25,23 +25,20 @@ terraform {
 ## Development requirements
 
 -	[Terraform](https://www.terraform.io/downloads.html) 0.14.x
--	[Go](https://golang.org/doc/install) 1.15 or newer (to build the provider plugin)
+-	[Go](https://golang.org/doc/install) 1.16 or newer (to build the provider plugin)
 
 ## Building the provider
 
-Clone repository somewhere *outside* your $GOPATH:
+Clone repository somewhere:
 
 ```sh
 $ git clone git@github.com:philips-software/terraform-provider-hsdp
 $ cd terraform-provider-hsdp
 $ go build .
 ```
+## Buildx Dockerfile
 
-Copy the resulting binary to the appropriate [plugin directory](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) e.g. `.terraform.d/plugins/darwin_amd64/terraform-provider-hsdp`
-
-## Dockerfile
-
-A Dockerfile is provided, useful for local testing. Example usage:
+A Buildx Dockerfile is provided, useful for local testing. Example usage:
 
 ```sh
 $ docker buildx build --push -t loafoe/terraform-provider-hsdp .
