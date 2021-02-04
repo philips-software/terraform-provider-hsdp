@@ -9,7 +9,7 @@ data "hsdp_pki_policy" "info" {
 }
 
 output "policy_ca" {
-  value = hsdp_pki_policy.info.ca_pem
+  value = data.hsdp_pki_policy.info.ca_pem
 }
 ```
 # Argument reference

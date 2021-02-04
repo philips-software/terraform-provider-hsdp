@@ -9,11 +9,11 @@ data "hsdp_pki_root" "info" {
 }
 
 output "root_ca" {
-  value = hsdp_pki_root.info.ca_pem
+  value = data.hsdp_pki_root.info.ca_pem
 }
 
 output "root_crl" {
-  value = hsdp_pki_root.info.crl_pem
+  value = data.hsdp_pki_root.info.crl_pem
 }
 ```
 # Argument reference
