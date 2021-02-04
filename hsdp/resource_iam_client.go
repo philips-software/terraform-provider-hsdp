@@ -89,7 +89,7 @@ func resourceIAMClient() *schema.Resource {
 			"access_token_lifetime": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
-				Default:  3600,
+				Default:  1800,
 			},
 			"refresh_token_lifetime": &schema.Schema{
 				Type:     schema.TypeInt,
@@ -99,7 +99,7 @@ func resourceIAMClient() *schema.Resource {
 			"id_token_lifetime": &schema.Schema{
 				Type:     schema.TypeInt,
 				Optional: true,
-				Default:  31536000,
+				Default:  3600,
 			},
 			"disabled": &schema.Schema{
 				Type:     schema.TypeBool,
