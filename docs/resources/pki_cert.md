@@ -1,4 +1,5 @@
 # hsdp_pki_cert
+Create and manage HSDP PKI leaf certificates
 
 # Example usage
 
@@ -9,11 +10,10 @@ resource "hsdp_pki_cert" "cert" {
   
   common_name = "myapp.com"
   alt_name    = "myapp.io"
-  ip_sans     = ""
-  uri_sans    = ""
-  other_sans  = ""
+  ip_sans     = []
+  uri_sans    = []
+  other_sans  = []
   ttl         = 86400
-  format      = "ec"
   
   exclude_cn_from_sans = false
 }

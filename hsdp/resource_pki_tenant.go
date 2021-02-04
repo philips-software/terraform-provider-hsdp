@@ -16,7 +16,7 @@ func resourcePKITenant() *schema.Resource {
 		CreateContext: resourcePKITenantCreate,
 		ReadContext:   resourcePKITenantRead,
 		UpdateContext: resourcePKITenantUpdate,
-		DeleteContext: resourceDPKITenantDelete,
+		DeleteContext: resourcePKITenantDelete,
 
 		Schema: map[string]*schema.Schema{
 			"organization_name": {
@@ -136,7 +136,7 @@ func resourcePKITenant() *schema.Resource {
 	}
 }
 
-func resourceDPKITenantDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourcePKITenantDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	config := m.(*Config)
 	var err error
