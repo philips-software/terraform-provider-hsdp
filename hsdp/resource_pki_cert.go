@@ -48,6 +48,7 @@ func resourcePKICert() *schema.Resource {
 			"uri_sans": {
 				Type:     schema.TypeSet,
 				ForceNew: true,
+				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"other_sans": {
@@ -57,7 +58,7 @@ func resourcePKICert() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"ttl": {
-				Type:     schema.TypeInt,
+				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
@@ -70,15 +71,20 @@ func resourcePKICert() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"private_key_pem": {
+			"ca_chain_pem": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"private_key_pem": {
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Computed:  true,
 			},
 			"expiration": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"issuing_ca": {
+			"issuing_ca_pem": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -112,7 +118,7 @@ func resourcePKICertCreate(_ context.Context, d *schema.ResourceData, m interfac
 		return diag.FromErr(err)
 	}
 	roleName := d.Get("role").(string)
-	ttl := d.Get("ttl").(int)
+	ttl := d.Get("ttl").(string)
 	ipSANS := expandStringList(d.Get("ip_sans").(*schema.Set).List())
 	uriSANS := expandStringList(d.Get("uri_sans").(*schema.Set).List())
 	otherSANS := expandStringList(d.Get("other_sans").(*schema.Set).List())
@@ -129,7 +135,7 @@ func resourcePKICertCreate(_ context.Context, d *schema.ResourceData, m interfac
 		IPSANS:            strings.Join(ipSANS, ","),
 		URISANS:           strings.Join(uriSANS, ","),
 		OtherSANS:         strings.Join(otherSANS, ","),
-		TTL:               fmt.Sprintf("%d", ttl),
+		TTL:               ttl,
 		ExcludeCNFromSANS: &excludeCNFromSANS,
 		PrivateKeyFormat:  "pem",
 		Format:            "pem",
@@ -152,9 +158,10 @@ func certToSchema(cert *pki.IssueResponse, d *schema.ResourceData, _ interface{}
 		_ = d.Set("private_key_pem", cert.Data.PrivateKey)
 	}
 	_ = d.Set("serial_number", cert.Data.SerialNumber)
-	_ = d.Set("issuing_ca", cert.Data.IssuingCa)
+	_ = d.Set("issuing_ca_pem", cert.Data.IssuingCa)
 	_ = d.Set("cert_pem", cert.Data.Certificate)
 	_ = d.Set("expiration", cert.Data.Expiration)
+	_ = d.Set("ca_chain_pem", strings.Join(cert.Data.CaChain, "\n"))
 	return nil
 }
 
