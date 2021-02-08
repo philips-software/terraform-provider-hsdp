@@ -12,6 +12,7 @@ import (
 	"github.com/philips-software/go-hsdp-api/iam"
 	"github.com/philips-software/go-hsdp-api/pki"
 	"github.com/philips-software/go-hsdp-api/s3creds"
+	"github.com/philips-software/go-hsdp-api/stl"
 	"net/http"
 	"os"
 )
@@ -23,6 +24,7 @@ type Config struct {
 	ServiceID         string
 	ServicePrivateKey string
 	S3CredsURL        string
+	STLURL            string
 	CartelHost        string
 	CartelToken       string
 	CartelSecret      string
@@ -38,12 +40,14 @@ type Config struct {
 	s3credsClient    *s3creds.Client
 	consoleClient    *console.Client
 	pkiClient        *pki.Client
+	stlClient        *stl.Client
 	debugFile        *os.File
 	credsClientErr   error
 	cartelClientErr  error
 	iamClientErr     error
 	consoleClientErr error
 	pkiClientErr     error
+	stlClientErr     error
 	TimeZone         string
 
 	ma *jsonformat.Marshaller
@@ -63,6 +67,10 @@ func (c *Config) S3CredsClient() (*s3creds.Client, error) {
 
 func (c *Config) ConsoleClient() (*console.Client, error) {
 	return c.consoleClient, c.consoleClientErr
+}
+
+func (c *Config) STLClient(endpoint ...string) (*stl.Client, error) {
+	return c.stlClient, c.stlClientErr
 }
 
 func (c *Config) PKIClient(regionEnvironment ...string) (*pki.Client, error) {
@@ -126,7 +134,34 @@ func (c *Config) setupIAMClient() {
 	c.iamClient = client
 }
 
-// setupS3CredsClient sets up an HSDP S3 Credentials client
+func (c *Config) setupSTLClient() {
+	if c.consoleClientErr != nil {
+		c.stlClient = nil
+		c.stlClientErr = c.consoleClientErr
+		return
+	}
+	region := c.Region
+	if region == "" {
+		region = "dev"
+	}
+	ac, err := config.New(config.WithRegion(c.Region))
+	if err == nil {
+		if url := ac.Service("stl").URL; c.STLURL == "" {
+			c.STLURL = url
+		}
+	}
+	client, err := stl.NewClient(c.consoleClient, &stl.Config{
+		STLAPIURL: c.STLURL,
+		DebugLog:  c.DebugLog,
+	})
+	if err != nil {
+		c.stlClient = nil
+		c.stlClientErr = err
+		return
+	}
+	c.stlClient = client
+}
+
 func (c *Config) setupS3CredsClient() {
 	if c.iamClientErr != nil {
 		c.s3credsClient = nil

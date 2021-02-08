@@ -35,6 +35,6 @@ The following attributes are exported:
 An existing application can be imported using `terraform import hsdp_iam_application`, e.g.
 
 ```shell
-$ terraform import hsdp_iam_application.myapp a-guid
+> terraform import hsdp_iam_application.myapp a-guid
 ```
 

@@ -47,6 +47,6 @@ The following attributes are exported:
 An existing role can be imported using `terraform import hsdp_iam_role`, e.g.
 
 ```shell
-$ terraform import hsdp_iam_role.myrole a-guid
+> terraform import hsdp_iam_role.myrole a-guid
 ```
 

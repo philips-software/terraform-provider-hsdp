@@ -13,15 +13,15 @@ func Provider(build string) *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"region": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				RequiredWith: []string{"environment"},
-				Description:  descriptions["region"],
-			},
-			"environment": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: descriptions["environment"],
+				Description: descriptions["region"],
+			},
+			"environment": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  descriptions["environment"],
+				RequiredWith: []string{"region"},
 			},
 			"iam_url": {
 				Type:        schema.TypeString,
@@ -186,6 +186,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_dicom_repository":    resourceDICOMRepository(),
 			"hsdp_pki_tenant":          resourcePKITenant(),
 			"hsdp_pki_cert":            resourcePKICert(),
+			"hsdp_stl_app":             resourceSTLApp(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":              dataSourceIAMIntrospect(),
@@ -202,6 +203,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_cdr_fhir_store":              dataSourceCDRFHIRStore(),
 			"hsdp_pki_root":                    dataSourcePKIRoot(),
 			"hsdp_pki_policy":                  dataSourcePKIPolicy(),
+			"hsdp_stl_device":                  dataSourceSTLDevice(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
@@ -277,6 +279,7 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		config.setupCartelClient()
 		config.setupConsoleClient()
 		config.setupPKIClient()
+		config.setupSTLClient()
 
 		if config.DebugLog != "" {
 			debugFile, err := os.OpenFile(config.DebugLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
