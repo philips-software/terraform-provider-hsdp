@@ -59,5 +59,5 @@ The following attributes are exported:
 An existing Subscription can be imported using `terraform import hsdp_cdr_subscription`, e.g.
 
 ```bash
-terraform import hsdp_cdr_subscription.myorg a-guid
+> terraform import hsdp_cdr_subscription.myorg a-guid
 ```

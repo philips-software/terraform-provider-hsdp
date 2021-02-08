@@ -44,10 +44,6 @@ func dataSourceSTLDevice() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"device_id": {
-				Type:     schema.TypeInt,
-				Computed: true,
-			},
 		},
 	}
 
@@ -77,7 +73,6 @@ func dataSourceSTLDeviceRead(ctx context.Context, d *schema.ResourceData, m inte
 	_ = d.Set("name", device.Name)
 	_ = d.Set("state", device.State)
 	_ = d.Set("primary_interface_ip", device.PrimaryInterface.Address)
-	_ = d.Set("device_id", device.ID)
-	d.SetId(device.SerialNumber)
+	d.SetId(fmt.Sprintf("%d", device.ID))
 	return diags
 }

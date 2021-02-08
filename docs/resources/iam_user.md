@@ -41,6 +41,6 @@ The following attributes are exported:
 An existing user can be imported using `terraform import hsdp_iam_user`, e.g.
 
 ```shell
-$ terraform import hsdp_iam_user.developer a-guid
+> terraform import hsdp_iam_user.developer a-guid
 ```
 

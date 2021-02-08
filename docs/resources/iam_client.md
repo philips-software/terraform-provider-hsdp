@@ -63,5 +63,5 @@ The following attributes are exported:
 An existing client can be imported using `terraform import hsdp_iam_client`, e.g.
 
 ```shell
-$ terraform import hsdp_iam_client.myclient a-guid
+> terraform import hsdp_iam_client.myclient a-guid
 ```

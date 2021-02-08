@@ -1,4 +1,4 @@
-# hsdp_stl_device_config
+# hsdp_stl_config
 Manage configuration of a STL device
 
 ## Example usage
@@ -7,7 +7,7 @@ data "hsdp_stl_device" "sme100" {
   serial_number = "S4439394855830303"
 }
 
-resource "hsdp_stl_device_config" "sme100" {
+resource "hsdp_stl_config" "sme100" {
   serial_number = data.hsdp_stl_device.sme100.serial_number
   
   firewall_exceptions {
@@ -31,8 +31,8 @@ resource "hsdp_stl_device_config" "sme100" {
   
   cert {
     name = "test2"
-    private_key = hsdp_pki_cert.test2.private_key_pem
-    cert = hsdp_pki_cert.test2.cert_pem
+    private_key_pem = hsdp_pki_cert.test2.private_key_pem
+    cert_pem = hsdp_pki_cert.test2.cert_pem
   }
 }
 ```
@@ -41,8 +41,17 @@ resource "hsdp_stl_device_config" "sme100" {
 ## Argument reference
 * `serial_number` - (Required) The serial of the device this config should be applied to
 * `firewall_exceptions` - (Optional) Firewall exceptions
+  * `tcp` - (Optional, list(string)) Array of TCP ports to allow
+  * `udp` - (Optional, list(string)) Array of UDP ports to allow
 * `cert` - (Optional) A custom certificate to install on the device
+  * `name` - (Required) Name of the certificate
+  * `cert_pem`  - (Required) The certificate in PEM format
+  * `private_key_pem` - (Required) the private key of the certificate in PEM format  
 * `logging` - (Optional) Log forwarding and fluent-bit logging configuration for the device
-
+  * `raw_config` - (Optional) Fluent-bit raw configuration to use
+  * `hsdp_product_key` - (Optional) the HSDP logging product key
+  * `hsdp_shared_key` - (Optional) the HSDP logging shared key
+  * `hsdp_secret_key` - (Optional) the HSDP logging secret key
+  * `hsdp_logging_endpoint` - (Optional) The HSDP logging endpoint
 
 ## Attribute reference
