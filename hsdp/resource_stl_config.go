@@ -13,10 +13,10 @@ func resourceSTLConfig() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		CreateContext: resourceSTLDeviceConfigCreate,
-		ReadContext:   resourceSTLDeviceConfigRead,
-		UpdateContext: resourceSTLDeviceConfigUpdate,
-		DeleteContext: resourceSTLDeviceConfigDelete,
+		CreateContext: resourceSTLConfigCreate,
+		ReadContext:   resourceSTLConfigRead,
+		UpdateContext: resourceSTLConfigUpdate,
+		DeleteContext: resourceSTLConfigDelete,
 
 		Schema: map[string]*schema.Schema{
 			"serial_number": {
@@ -103,6 +103,16 @@ func resourceSTLConfig() *schema.Resource {
 	}
 }
 
+func resourceSTLConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+	return diags
+}
+
+func resourceSTLConfigUpdate(ctx context.Context, d *schema.ResourceData, im interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+	return diags
+}
+
 func resourceDataToInput(fwExceptions *stl.AppFirewallException, appLogging *stl.AppLogging, d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
 
@@ -175,17 +185,7 @@ func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.
 	return nil
 }
 
-func resourceSTLDeviceConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
-	return diags
-}
-
-func resourceSTLDeviceConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
-	return diags
-}
-
-func resourceSTLDeviceConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSTLConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
@@ -215,7 +215,7 @@ func resourceSTLDeviceConfigRead(ctx context.Context, d *schema.ResourceData, m 
 	return diags
 }
 
-func resourceSTLDeviceConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSTLConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	return diags
 }
