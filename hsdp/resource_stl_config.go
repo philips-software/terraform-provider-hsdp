@@ -27,19 +27,19 @@ func resourceSTLConfig() *schema.Resource {
 			"firewall_exceptions": {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
-				Optional: true,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"tcp": {
 							Type:     schema.TypeSet,
 							Required: true,
-							MaxItems: 1,
+							MaxItems: 65535,
 							Elem:     &schema.Schema{Type: schema.TypeInt},
 						},
 						"udp": {
 							Type:     schema.TypeSet,
 							Required: true,
-							MaxItems: 1,
+							MaxItems: 65535,
 							Elem:     &schema.Schema{Type: schema.TypeInt},
 						},
 					},
@@ -48,7 +48,7 @@ func resourceSTLConfig() *schema.Resource {
 			"logging": {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
-				Optional: true,
+				Required: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"raw_config": {
@@ -74,6 +74,7 @@ func resourceSTLConfig() *schema.Resource {
 						"hsdp_custom_field": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Default:  false,
 						},
 					},
 				},
@@ -104,13 +105,36 @@ func resourceSTLConfig() *schema.Resource {
 }
 
 func resourceSTLConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	config := m.(*Config)
 	var diags diag.Diagnostics
+	var client *stl.Client
+	var err error
+
+	if endpoint, ok := d.GetOk("endpoint"); ok {
+		client, err = config.STLClient(endpoint.(string))
+	} else {
+		client, err = config.STLClient()
+	}
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	var loggingRef stl.UpdateAppLoggingInput
+	var fwExceptionRef stl.UpdateAppFirewallExceptionInput
+	// Clear
+	_, err = client.Config.UpdateAppLogging(ctx, loggingRef)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppLogging: %w", err))
+	}
+	_, err = client.Config.UpdateAppFirewallExceptions(ctx, fwExceptionRef)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppFirewallExceptions: %w", err))
+	}
+	d.SetId("")
 	return diags
 }
 
-func resourceSTLConfigUpdate(ctx context.Context, d *schema.ResourceData, im interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
-	return diags
+func resourceSTLConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	return resourceSTLConfigCreate(ctx, d, m)
 }
 
 func resourceDataToInput(fwExceptions *stl.UpdateAppFirewallExceptionInput, appLogging *stl.UpdateAppLoggingInput, d *schema.ResourceData, m interface{}) error {
@@ -122,8 +146,8 @@ func resourceDataToInput(fwExceptions *stl.UpdateAppFirewallExceptionInput, appL
 	serialNumber := d.Get("serial_number").(string)
 	// check if serialNumber checks out, if not we may need to fetch by ID
 
-	// Logging
-	if v, ok := d.GetOk("logging"); ok {
+	// Firewall exceptions
+	if v, ok := d.GetOk("firewall_exceptions"); ok {
 		vL := v.(*schema.Set).List()
 		for i, vi := range vL {
 			_, _ = config.Debug("Reading Logging Set %d\n", i)
@@ -134,18 +158,33 @@ func resourceDataToInput(fwExceptions *stl.UpdateAppFirewallExceptionInput, appL
 	}
 	fwExceptions.SerialNumber = serialNumber
 
-	// Firewall exceptions
-	if v, ok := d.GetOk("firewall_exceptions"); ok {
+	// Logging
+	if v, ok := d.GetOk("logging"); ok {
 		vL := v.(*schema.Set).List()
 		for i, vi := range vL {
 			_, _ = config.Debug("Reading Firewall exception Set %d\n", i)
 			mVi := vi.(map[string]interface{})
-			appLogging.HSDPIngestorHost = mVi["hsdp_ingestor_host"].(string)
-			appLogging.HSDPProductKey = mVi["hsdp_product_key"].(string)
-			appLogging.HSDPSharedKey = mVi["hsdp_shared_key"].(string)
-			appLogging.HSDPSecretKey = mVi["hsdp_secret_key"].(string)
-			appLogging.HSDPCustomField = mVi["hsdp_custom_field"].(bool)
-			appLogging.RawConfig = mVi["raw_config"].(string)
+			if a, ok := mVi["hsdp_ingestor_host"].(string); ok {
+				appLogging.HSDPIngestorHost = a
+			}
+			if a, ok := mVi["hsdp_product_key"].(string); ok {
+				appLogging.HSDPProductKey = a
+			}
+			if a, ok := mVi["hsdp_shared_key"].(string); ok {
+				appLogging.HSDPSharedKey = a
+			}
+			if a, ok := mVi["hsdp_secret_key"].(string); ok {
+				appLogging.HSDPSecretKey = a
+			}
+			if a, ok := mVi["hsdp_custom_field"].(bool); ok {
+				appLogging.HSDPCustomField = a
+			}
+			if a, ok := mVi["raw_config"].(string); ok {
+				appLogging.RawConfig = a
+			}
+		}
+		if ok, err := appLogging.Validate(); !ok {
+			return err
 		}
 	}
 	appLogging.SerialNumber = serialNumber
@@ -250,6 +289,8 @@ func resourceSTLConfigCreate(ctx context.Context, d *schema.ResourceData, m inte
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppFirewallExceptions: %w", err))
 	}
-	d.SetId(loggingRef.SerialNumber)
+	if d.IsNewResource() {
+		d.SetId(loggingRef.SerialNumber)
+	}
 	return diags
 }
