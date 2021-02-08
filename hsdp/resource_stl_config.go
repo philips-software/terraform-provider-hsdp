@@ -113,27 +113,32 @@ func resourceSTLConfigUpdate(ctx context.Context, d *schema.ResourceData, im int
 	return diags
 }
 
-func resourceDataToInput(fwExceptions *stl.AppFirewallException, appLogging *stl.AppLogging, d *schema.ResourceData, m interface{}) error {
+func resourceDataToInput(fwExceptions *stl.UpdateAppFirewallExceptionInput, appLogging *stl.UpdateAppLoggingInput, d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
 
 	if d == nil {
 		return fmt.Errorf("dataToResourceData: schema.ResourceData is nil")
 	}
+	serialNumber := d.Get("serial_number").(string)
+	// check if serialNumber checks out, if not we may need to fetch by ID
+
 	// Logging
 	if v, ok := d.GetOk("logging"); ok {
 		vL := v.(*schema.Set).List()
 		for i, vi := range vL {
-			config.Debug("Reading Logging Set %d\n", i)
+			_, _ = config.Debug("Reading Logging Set %d\n", i)
 			mVi := vi.(map[string]interface{})
 			fwExceptions.TCP = expandIntList(mVi["tcp"].(*schema.Set).List())
 			fwExceptions.UDP = expandIntList(mVi["udp"].(*schema.Set).List())
 		}
 	}
+	fwExceptions.SerialNumber = serialNumber
+
 	// Firewall exceptions
 	if v, ok := d.GetOk("firewall_exceptions"); ok {
 		vL := v.(*schema.Set).List()
 		for i, vi := range vL {
-			config.Debug("Reading Firewall exception Set %d\n", i)
+			_, _ = config.Debug("Reading Firewall exception Set %d\n", i)
 			mVi := vi.(map[string]interface{})
 			appLogging.HSDPIngestorHost = mVi["hsdp_ingestor_host"].(string)
 			appLogging.HSDPProductKey = mVi["hsdp_product_key"].(string)
@@ -143,6 +148,8 @@ func resourceDataToInput(fwExceptions *stl.AppFirewallException, appLogging *stl
 			appLogging.RawConfig = mVi["raw_config"].(string)
 		}
 	}
+	appLogging.SerialNumber = serialNumber
+
 	// TODO: certs
 
 	return nil
@@ -216,6 +223,33 @@ func resourceSTLConfigRead(ctx context.Context, d *schema.ResourceData, m interf
 }
 
 func resourceSTLConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	config := m.(*Config)
 	var diags diag.Diagnostics
+	var client *stl.Client
+	var err error
+
+	if endpoint, ok := d.GetOk("endpoint"); ok {
+		client, err = config.STLClient(endpoint.(string))
+	} else {
+		client, err = config.STLClient()
+	}
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	var loggingRef stl.UpdateAppLoggingInput
+	var fwExceptionRef stl.UpdateAppFirewallExceptionInput
+	err = resourceDataToInput(&fwExceptionRef, &loggingRef, d, m)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	_, err = client.Config.UpdateAppLogging(ctx, loggingRef)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppLogging: %w", err))
+	}
+	_, err = client.Config.UpdateAppFirewallExceptions(ctx, fwExceptionRef)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppFirewallExceptions: %w", err))
+	}
+	d.SetId(loggingRef.SerialNumber)
 	return diags
 }
