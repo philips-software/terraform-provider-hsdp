@@ -11,8 +11,8 @@ resource "hsdp_stl_config" "sme100" {
   serial_number = data.hsdp_stl_device.sme100.serial_number
   
   firewall_exceptions {
-    tcp = ["8080", "4443"]
-    udp = ["53"]
+    tcp = [8080, 4443]
+    udp = [53]
   }
 
   logging {
@@ -20,7 +20,7 @@ resource "hsdp_stl_config" "sme100" {
     hsdp_product_key = var.logging_product_key
     hsdp_shared_key = var.logging_shared_key
     hsdp_secret_key = var.logging_secret_key
-    hsdp_logging_endpoint = var.logging_endpoint
+    hsdp_ingestor_host = var.logging_endpoint
   }
 
   cert {
@@ -41,8 +41,8 @@ resource "hsdp_stl_config" "sme100" {
 ## Argument reference
 * `serial_number` - (Required) The serial of the device this config should be applied to
 * `firewall_exceptions` - (Optional) Firewall exceptions
-  * `tcp` - (Optional, list(string)) Array of TCP ports to allow
-  * `udp` - (Optional, list(string)) Array of UDP ports to allow
+  * `tcp` - (Optional, list(int)) Array of TCP ports to allow
+  * `udp` - (Optional, list(int)) Array of UDP ports to allow
 * `cert` - (Optional) A custom certificate to install on the device
   * `name` - (Required) Name of the certificate
   * `cert_pem`  - (Required) The certificate in PEM format
@@ -52,6 +52,6 @@ resource "hsdp_stl_config" "sme100" {
   * `hsdp_product_key` - (Optional) the HSDP logging product key
   * `hsdp_shared_key` - (Optional) the HSDP logging shared key
   * `hsdp_secret_key` - (Optional) the HSDP logging secret key
-  * `hsdp_logging_endpoint` - (Optional) The HSDP logging endpoint
+  * `hsdp_ingestor_host` - (Optional) The HSDP logging endpoint
 
 ## Attribute reference
