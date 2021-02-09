@@ -24,6 +24,11 @@ func resourceSTLConfig() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"sync": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"firewall_exceptions": {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
@@ -115,6 +120,7 @@ func resourceSTLConfigDelete(ctx context.Context, d *schema.ResourceData, m inte
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppFirewallExceptions: %w", err))
 	}
+	syncSTLIfNeeded(ctx, client, d, m)
 	d.SetId("")
 	return diags
 }
@@ -275,5 +281,6 @@ func resourceSTLConfigCreate(ctx context.Context, d *schema.ResourceData, m inte
 	if d.IsNewResource() {
 		d.SetId(loggingRef.SerialNumber)
 	}
+	syncSTLIfNeeded(ctx, client, d, m)
 	return diags
 }

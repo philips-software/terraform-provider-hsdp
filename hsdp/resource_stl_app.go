@@ -37,6 +37,11 @@ func resourceSTLApp() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"sync": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -58,7 +63,7 @@ func resourceSTLAppUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	name := d.Get("name").(string)
 	content := d.Get("content").(string)
 	var resourceID int64
-	fmt.Sscanf(d.Id(), "%d", &resourceID)
+	_, _ = fmt.Sscanf(d.Id(), "%d", &resourceID)
 	_, err = client.Apps.UpdateAppResource(ctx, stl.UpdateApplicationResourceInput{
 		ID:       resourceID,
 		Name:     name,
@@ -68,6 +73,7 @@ func resourceSTLAppUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("stl_app: update STL app: %w", err))
 	}
+	syncSTLIfNeeded(ctx, client, d, m)
 	return diags
 }
 
@@ -86,13 +92,14 @@ func resourceSTLAppDelete(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 	var resourceID int64
-	fmt.Sscanf(d.Id(), "%d", &resourceID)
+	_, _ = fmt.Sscanf(d.Id(), "%d", &resourceID)
 	_, err = client.Apps.DeleteAppResource(ctx, stl.DeleteApplicationResourceInput{
 		ID: resourceID,
 	})
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("stl_app: delete STL resource: %w", err))
 	}
+	syncSTLIfNeeded(ctx, client, d, m)
 	d.SetId("")
 	return diags
 }
@@ -112,7 +119,7 @@ func resourceSTLAppRead(ctx context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 	var resourceID int64
-	fmt.Sscanf(d.Id(), "%d", &resourceID)
+	_, _ = fmt.Sscanf(d.Id(), "%d", &resourceID)
 	resource, err := client.Apps.GetAppResourceByID(ctx, resourceID)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("stl_app: read STL device: %w", err))
@@ -158,5 +165,6 @@ func resourceSTLAppCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(fmt.Errorf("stl_app: create STL app: %w", err))
 	}
 	d.SetId(fmt.Sprintf("%d", resource.ID))
+	syncSTLIfNeeded(ctx, client, d, m)
 	return diags
 }

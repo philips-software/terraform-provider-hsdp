@@ -65,6 +65,7 @@ func resourceSTLCustomCertDelete(ctx context.Context, d *schema.ResourceData, m 
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("stl_custom_cert delete: %w", err))
 	}
+	syncSTLIfNeeded(ctx, client, d, m)
 	d.SetId("")
 	return diags
 }
@@ -94,7 +95,7 @@ func resourceSTLCustomCertUpdate(ctx context.Context, d *schema.ResourceData, m 
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("stl_custom_cert update: %w", err))
 	}
-	syncSTLIfNeeded(client, d, m)
+	syncSTLIfNeeded(ctx, client, d, m)
 	return diags
 }
 
@@ -150,10 +151,11 @@ func resourceSTLCustomCertCreate(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 	d.SetId(fmt.Sprintf("%d", created.ID))
+	syncSTLIfNeeded(ctx, client, d, m)
 	return diags
 }
 
-func syncSTLIfNeeded(c *stl.Client, d *schema.ResourceData, m interface{}) {
+func syncSTLIfNeeded(ctx context.Context, c *stl.Client, d *schema.ResourceData, m interface{}) {
 	config := m.(*Config)
 	sync := d.Get("sync").(bool)
 	if !sync {
@@ -161,6 +163,6 @@ func syncSTLIfNeeded(c *stl.Client, d *schema.ResourceData, m interface{}) {
 	}
 	serialNumber := d.Get("name").(string)
 	_, _ = config.Debug("Syncing %s\n", serialNumber)
-	// TODO
+	_ = c.Devices.SyncDeviceConfig(ctx, serialNumber)
 	return
 }
