@@ -1,5 +1,6 @@
 # hsdp_stl_custom_cert
-Manage custom certificates for STL devices
+Manage custom certificates for STL devices. Set `sync` to true to immediately sync the certificate to the k3s cluster, otherwise
+you should create a dependency on a `hsdp_stl_sync` resource to batch sync changes.
 
 ## Example usage
 ```hcl

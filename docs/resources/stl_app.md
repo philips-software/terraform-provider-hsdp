@@ -1,5 +1,5 @@
 # hsdp_stl_app
-Manages an app resource on a STL device
+Manages an app resource on a STL device. At this time resources are synced immediately to the device after create or update.
 
 ## Example usage
 ```hcl

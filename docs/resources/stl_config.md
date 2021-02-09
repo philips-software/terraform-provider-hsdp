@@ -1,5 +1,6 @@
 # hsdp_stl_config
-Manage configuration of a STL device
+Manage configuration of a STL device. Set `sync` to true to immediately sync the config to the device, otherwise
+you should create a dependency on a `hsdp_stl_sync` resource to batch sync changes.
 
 ## Example usage
 ```hcl
