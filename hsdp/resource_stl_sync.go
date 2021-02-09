@@ -64,5 +64,6 @@ func resourceSTLSyncCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(fmt.Errorf("hsdp_stl_sync: %w", err))
 	}
 	setLastUpdate(d)
+	d.SetId(serialNumber)
 	return diags
 }
