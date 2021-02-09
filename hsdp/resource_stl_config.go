@@ -79,27 +79,6 @@ func resourceSTLConfig() *schema.Resource {
 					},
 				},
 			},
-			"cert": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				MaxItems: 100,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"name": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"private_key_pem": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"cert_pem": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-					},
-				},
-			},
 		},
 	}
 }
@@ -118,8 +97,15 @@ func resourceSTLConfigDelete(ctx context.Context, d *schema.ResourceData, m inte
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	var loggingRef stl.UpdateAppLoggingInput
-	var fwExceptionRef stl.UpdateAppFirewallExceptionInput
+	serialNumber := d.Get("serial_number").(string)
+	loggingRef := stl.UpdateAppLoggingInput{
+		SerialNumber: serialNumber,
+	}
+	fwExceptionRef := stl.UpdateAppFirewallExceptionInput{
+		SerialNumber: serialNumber,
+	}
+	fwExceptionRef.TCP = []int{}
+	fwExceptionRef.UDP = []int{}
 	// Clear
 	_, err = client.Config.UpdateAppLogging(ctx, loggingRef)
 	if err != nil {
@@ -177,7 +163,7 @@ func resourceDataToInput(fwExceptions *stl.UpdateAppFirewallExceptionInput, appL
 				appLogging.HSDPSecretKey = a
 			}
 			if a, ok := mVi["hsdp_custom_field"].(bool); ok {
-				appLogging.HSDPCustomField = a
+				appLogging.HSDPCustomField = &a
 			}
 			if a, ok := mVi["raw_config"].(string); ok {
 				appLogging.RawConfig = a
@@ -188,8 +174,6 @@ func resourceDataToInput(fwExceptions *stl.UpdateAppFirewallExceptionInput, appL
 		}
 	}
 	appLogging.SerialNumber = serialNumber
-
-	// TODO: certs
 
 	return nil
 }
@@ -226,7 +210,6 @@ func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.
 	if err != nil {
 		return fmt.Errorf("dataToResourceData: firewall_exceptions: %w", err)
 	}
-	// TODO: certs
 
 	return nil
 }

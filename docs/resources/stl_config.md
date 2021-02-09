@@ -22,18 +22,6 @@ resource "hsdp_stl_config" "sme100" {
     hsdp_secret_key = var.logging_secret_key
     hsdp_ingestor_host = var.logging_endpoint
   }
-
-  cert {
-    name = "test1"
-    private_key = hsdp_pki_cert.test1.private_key_pem
-    cert = hsdp_pki_cert.test1.cert_pem
-  }
-  
-  cert {
-    name = "test2"
-    private_key_pem = hsdp_pki_cert.test2.private_key_pem
-    cert_pem = hsdp_pki_cert.test2.cert_pem
-  }
 }
 ```
 
@@ -43,10 +31,6 @@ resource "hsdp_stl_config" "sme100" {
 * `firewall_exceptions` - (Optional) Firewall exceptions
   * `tcp` - (Optional, list(int)) Array of TCP ports to allow
   * `udp` - (Optional, list(int)) Array of UDP ports to allow
-* `cert` - (Optional) A custom certificate to install on the device
-  * `name` - (Required) Name of the certificate
-  * `cert_pem`  - (Required) The certificate in PEM format
-  * `private_key_pem` - (Required) the private key of the certificate in PEM format  
 * `logging` - (Optional) Log forwarding and fluent-bit logging configuration for the device
   * `raw_config` - (Optional) Fluent-bit raw configuration to use
   * `hsdp_product_key` - (Optional) the HSDP logging product key
