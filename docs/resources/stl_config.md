@@ -39,3 +39,4 @@ resource "hsdp_stl_config" "sme100" {
   * `hsdp_ingestor_host` - (Optional) The HSDP logging endpoint
 
 ## Attribute reference
+* `last_update` - RFC3339 timestamp of last update. Can be used to trigger `hsdp_stl_sync`

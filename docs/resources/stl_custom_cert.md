@@ -20,6 +20,7 @@ resource "hsdp_stl_custom_cert" "cert" {
 
 ## Attribute reference
 * `id` - The id of the custom certificate
+* `last_update` - RFC3339 timestamp of last update. Can be used to trigger `hsdp_stl_sync`
 
 ## Importing
 Importing a custom certificate is supported but not recommended.

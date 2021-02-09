@@ -6,7 +6,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/stl"
-	"time"
 )
 
 func resourceSTLSync() *schema.Resource {
@@ -28,7 +27,7 @@ func resourceSTLSync() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"synced_at": {
+			"last_update": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -36,12 +35,12 @@ func resourceSTLSync() *schema.Resource {
 	}
 }
 
-func resourceSTLSyncDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSTLSyncDelete(_ context.Context, d *schema.ResourceData, _m interface{}) diag.Diagnostics {
 	d.SetId("")
 	return diag.Diagnostics{}
 }
 
-func resourceSTLSyncRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSTLSyncRead(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	return diag.Diagnostics{}
 }
 
@@ -64,6 +63,6 @@ func resourceSTLSyncCreate(ctx context.Context, d *schema.ResourceData, m interf
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("hsdp_stl_sync: %w", err))
 	}
-	d.Set("synced_at", time.Now().Format(time.RFC3339))
+	setLastUpdate(d)
 	return diags
 }
