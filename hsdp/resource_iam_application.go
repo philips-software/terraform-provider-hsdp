@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -16,32 +17,35 @@ func resourceIAMApplication() *schema.Resource {
 
 		CreateContext: resourceIAMApplicationCreate,
 		ReadContext:   resourceIAMApplicationRead,
-		UpdateContext: resourceIAMApplicationUpdate,
 		DeleteContext: resourceIAMApplicationDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validateUpperString,
+				ForceNew:     true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
-			"proposition_id": &schema.Schema{
+			"proposition_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
-			"global_reference_id": &schema.Schema{
+			"global_reference_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 		},
 	}
 }
 
-func resourceIAMApplicationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMApplicationCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -57,9 +61,28 @@ func resourceIAMApplicationCreate(ctx context.Context, d *schema.ResourceData, m
 	app.PropositionID = d.Get("proposition_id").(string)
 	app.GlobalReferenceID = d.Get("global_reference_id").(string)
 
-	createdApp, _, err := client.Applications.CreateApplication(app)
+	createdApp, resp, err := client.Applications.CreateApplication(app)
 	if err != nil {
-		return diag.FromErr(err)
+		if resp == nil {
+			return diag.FromErr(err)
+		}
+		if resp.StatusCode != http.StatusConflict {
+			return diag.FromErr(err)
+		}
+		createdApp, _, err = client.Applications.GetApplicationByName(app.Name)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if createdApp.Description != app.Description {
+			return diag.FromErr(fmt.Errorf("existing application found but description mismatch: '%s' != '%s'", createdApp.Description, app.Description))
+		}
+		if createdApp.PropositionID != app.PropositionID {
+			return diag.FromErr(fmt.Errorf("existing application found but proposition_id mismatch: '%s' != '%s'", createdApp.PropositionID, app.PropositionID))
+		}
+		if createdApp.GlobalReferenceID != app.GlobalReferenceID {
+			return diag.FromErr(fmt.Errorf("existing application found but global_reference_id mismatch: '%s' != '%s'", createdApp.GlobalReferenceID, app.GlobalReferenceID))
+		}
+		// We found a matching existing application, go with it
 	}
 	d.SetId(createdApp.ID)
 	_ = d.Set("name", createdApp.Name)
@@ -69,7 +92,7 @@ func resourceIAMApplicationCreate(ctx context.Context, d *schema.ResourceData, m
 	return diags
 }
 
-func resourceIAMApplicationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMApplicationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -95,7 +118,7 @@ func resourceIAMApplicationRead(ctx context.Context, d *schema.ResourceData, m i
 	return diags
 }
 
-func resourceIAMApplicationUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMApplicationUpdate(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	if !d.HasChange("description") {
@@ -105,7 +128,8 @@ func resourceIAMApplicationUpdate(ctx context.Context, d *schema.ResourceData, m
 	return diags
 }
 
-func resourceIAMApplicationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMApplicationDelete(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
+	d.SetId("")
 	return diags
 }

@@ -19,11 +19,11 @@ func dataSourceIAMApplication() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"global_reference_id": &schema.Schema{
+			"global_reference_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -32,7 +32,7 @@ func dataSourceIAMApplication() *schema.Resource {
 
 }
 
-func dataSourceIAMApplicationRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIAMApplicationRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 
 	var diags diag.Diagnostics
@@ -44,19 +44,19 @@ func dataSourceIAMApplicationRead(ctx context.Context, d *schema.ResourceData, m
 	propID := d.Get("proposition_id").(string)
 	name := d.Get("name").(string)
 
-	prop, _, err := client.Applications.GetApplication(&iam.GetApplicationsOptions{
+	apps, _, err := client.Applications.GetApplications(&iam.GetApplicationsOptions{
 		PropositionID: &propID,
 		Name:          &name,
 	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if len(prop) == 0 {
+	if len(apps) == 0 {
 		return diag.FromErr(ErrResourceNotFound)
 	}
 
-	d.SetId(prop[0].ID)
-	_ = d.Set("description", prop[0].Description)
-	_ = d.Set("global_reference_id", prop[0].GlobalReferenceID)
+	d.SetId(apps[0].ID)
+	_ = d.Set("description", apps[0].Description)
+	_ = d.Set("global_reference_id", apps[0].GlobalReferenceID)
 	return diags
 }
