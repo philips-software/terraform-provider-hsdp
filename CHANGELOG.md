@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.12.0
+- [NEW] Secure Transport Layer (STL) support to manage Edge devices
+
 ## v0.11.3
 - Fix default IAM OAuth2 client TTLs
 
