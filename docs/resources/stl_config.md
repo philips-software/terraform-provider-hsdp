@@ -36,11 +36,13 @@ resource "hsdp_stl_config" "sme100" {
   * `udp` - (Optional, list(int)) Array of UDP ports to allow
 * `logging` - (Optional) Log forwarding and fluent-bit logging configuration for the device
   * `raw_config` - (Optional) Fluent-bit raw configuration to use
-  * `hsdp_logging` - (Optiona, boolean) Enable or disable HSDP Logging feature   
+  * `hsdp_logging` - (Optional, boolean) Enable or disable HSDP Logging feature   
   * `hsdp_product_key` - (Optional) the HSDP logging product key
   * `hsdp_shared_key` - (Optional) the HSDP logging shared key
   * `hsdp_secret_key` - (Optional) the HSDP logging secret key
   * `hsdp_ingestor_host` - (Optional) The HSDP logging endpoint
+* `sync` (Optional, boolean) - When set to true syncs the config after mutations. Default is true. 
+  Set this to false if you want to batch sync to your device using `hsdp_stl_sync`
 
 ## Attribute reference
 * `last_update` - RFC3339 timestamp of last update. Can be used to trigger `hsdp_stl_sync`

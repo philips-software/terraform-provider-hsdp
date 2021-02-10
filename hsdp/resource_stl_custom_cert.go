@@ -39,7 +39,7 @@ func resourceSTLCustomCert() *schema.Resource {
 			"sync": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				Default:  false,
+				Default:  true,
 			},
 			"last_update": {
 				Type:     schema.TypeString,
