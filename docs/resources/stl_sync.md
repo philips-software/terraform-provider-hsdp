@@ -8,4 +8,4 @@ per resource to batch syncs down to a single one as part of the `apply` stage.
 * `triggers` - (Required, Hashmap) Create dependencies on other resources
 
 ## Argument reference
-* `synced_at` - The time the sync was performed by this resource
+* `last_update` - The time the sync was performed by this resource

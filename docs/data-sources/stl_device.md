@@ -20,5 +20,5 @@ output "sme100_status" {
 ## Attribute reference
 * `id` - The device ID
 * `region` - The region to which this device is connected to
-* `status` - Status of the device
+* `state` - State of the device
 * `primary_interface_ip` - The IP of the primary interface
