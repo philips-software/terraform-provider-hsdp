@@ -18,32 +18,35 @@ func resourceIAMProposition() *schema.Resource {
 
 		CreateContext: resourceIAMPropositionCreate,
 		ReadContext:   resourceIAMPropositionRead,
-		UpdateContext: resourceIAMPropositionUpdate,
 		DeleteContext: resourceIAMPropositionDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: validateUpperString,
+				ForceNew:     true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
-			"organization_id": &schema.Schema{
+			"organization_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
-			"global_reference_id": &schema.Schema{
+			"global_reference_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 		},
 	}
 }
 
-func resourceIAMPropositionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMPropositionCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -73,8 +76,14 @@ func resourceIAMPropositionCreate(ctx context.Context, d *schema.ResourceData, m
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		if createdProp.OrganizationID != prop.OrganizationID || createdProp.GlobalReferenceID != prop.GlobalReferenceID {
-			return diag.FromErr(fmt.Errorf("conflict creating, but no proposition match found"))
+		if createdProp.Description != prop.Description {
+			return diag.FromErr(fmt.Errorf("existing proposition found but description mismatch: '%s' != '%s'", createdProp.Description, prop.Description))
+		}
+		if createdProp.OrganizationID != prop.OrganizationID {
+			return diag.FromErr(fmt.Errorf("existing proposition found but organization_id mismatch: '%s' != '%s'", createdProp.OrganizationID, prop.OrganizationID))
+		}
+		if createdProp.GlobalReferenceID != prop.GlobalReferenceID {
+			return diag.FromErr(fmt.Errorf("existing proposition found but global_reference_id mismatch: '%s' != '%s'", createdProp.OrganizationID, prop.OrganizationID))
 		}
 		// We found a matching existing proposition, go with it
 	}
@@ -86,7 +95,7 @@ func resourceIAMPropositionCreate(ctx context.Context, d *schema.ResourceData, m
 	return diags
 }
 
-func resourceIAMPropositionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMPropositionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -112,7 +121,7 @@ func resourceIAMPropositionRead(ctx context.Context, d *schema.ResourceData, m i
 	return diags
 }
 
-func resourceIAMPropositionUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMPropositionUpdate(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	if !d.HasChange("description") {
@@ -121,11 +130,12 @@ func resourceIAMPropositionUpdate(ctx context.Context, d *schema.ResourceData, m
 	return diag.FromErr(ErrNotImplementedByHSDP)
 }
 
-func resourceIAMPropositionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMPropositionDelete(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	// As HSDP IAM does not support IAM proposition deletion we simply
 	// clear the proposition from state. This will be properly implemented
 	// once the IAM API balances out
 	var diags diag.Diagnostics
+	d.SetId("")
 
 	return diags
 }
