@@ -2,22 +2,21 @@ package hsdp
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/stl"
 )
 
-func resourceSTLApp() *schema.Resource {
+func resourceSTLCustomCert() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		CreateContext: resourceSTLAppCreate,
-		ReadContext:   resourceSTLAppRead,
-		UpdateContext: resourceSTLAppUpdate,
-		DeleteContext: resourceSTLAppDelete,
+		CreateContext: resourceSTLCustomCertCreate,
+		ReadContext:   resourceSTLCustomCertRead,
+		UpdateContext: resourceSTLCustomCertUpdate,
+		DeleteContext: resourceSTLCustomCertDelete,
 
 		Schema: map[string]*schema.Schema{
 			"serial_number": {
@@ -29,13 +28,13 @@ func resourceSTLApp() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"content": {
+			"private_key_pem": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"device_id": {
-				Type:     schema.TypeInt,
-				Computed: true,
+			"cert_pem": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"sync": {
 				Type:     schema.TypeBool,
@@ -50,39 +49,7 @@ func resourceSTLApp() *schema.Resource {
 	}
 }
 
-func resourceSTLAppUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*Config)
-	var diags diag.Diagnostics
-	var client *stl.Client
-	var err error
-
-	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = config.STLClient(endpoint.(string))
-	} else {
-		client, err = config.STLClient()
-	}
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	name := d.Get("name").(string)
-	content := d.Get("content").(string)
-	var resourceID int64
-	_, _ = fmt.Sscanf(d.Id(), "%d", &resourceID)
-	_, err = client.Apps.UpdateAppResource(ctx, stl.UpdateApplicationResourceInput{
-		ID:       resourceID,
-		Name:     name,
-		Content:  base64.StdEncoding.EncodeToString([]byte(content)),
-		IsLocked: false,
-	})
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("stl_app: update STL app: %w", err))
-	}
-	setLastUpdate(d)
-	syncSTLIfNeeded(ctx, client, d, m)
-	return diags
-}
-
-func resourceSTLAppDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSTLCustomCertDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
@@ -98,11 +65,9 @@ func resourceSTLAppDelete(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 	var resourceID int64
 	_, _ = fmt.Sscanf(d.Id(), "%d", &resourceID)
-	_, err = client.Apps.DeleteAppResource(ctx, stl.DeleteApplicationResourceInput{
-		ID: resourceID,
-	})
+	_, err = client.Certs.DeleteCustomCert(ctx, stl.DeleteAppCustomCertInput{ID: resourceID})
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("stl_app: delete STL resource: %w", err))
+		return diag.FromErr(fmt.Errorf("stl_custom_cert delete: %w", err))
 	}
 	setLastUpdate(d)
 	syncSTLIfNeeded(ctx, client, d, m)
@@ -110,7 +75,7 @@ func resourceSTLAppDelete(ctx context.Context, d *schema.ResourceData, m interfa
 	return diags
 }
 
-func resourceSTLAppRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSTLCustomCertUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
@@ -126,25 +91,47 @@ func resourceSTLAppRead(ctx context.Context, d *schema.ResourceData, m interface
 	}
 	var resourceID int64
 	_, _ = fmt.Sscanf(d.Id(), "%d", &resourceID)
-	resource, err := client.Apps.GetAppResourceByID(ctx, resourceID)
+	_, err = client.Certs.UpdateCustomCert(ctx, stl.UpdateAppCustomCertInput{
+		ID:   resourceID,
+		Name: d.Get("name").(string),
+		Key:  d.Get("private_key_pem").(string),
+		Cert: d.Get("cert_pem").(string),
+	})
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("stl_app: read STL device: %w", err))
+		return diag.FromErr(fmt.Errorf("stl_custom_cert update: %w", err))
 	}
-	_ = d.Set("name", resource.Name)
-	content, err := base64.StdEncoding.DecodeString(resource.Content)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("stl_app: decode content: %w", err))
-	}
-	_ = d.Set("content", content)
-	_ = d.Set("device_id", resource.DeviceID)
-	device, err := client.Devices.GetDeviceByID(ctx, resource.DeviceID)
-	if err == nil {
-		_ = d.Set("serial_number", device.SerialNumber)
-	}
+	setLastUpdate(d)
+	syncSTLIfNeeded(ctx, client, d, m)
 	return diags
 }
 
-func resourceSTLAppCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceSTLCustomCertRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	config := m.(*Config)
+	var diags diag.Diagnostics
+	var client *stl.Client
+	var err error
+
+	if endpoint, ok := d.GetOk("endpoint"); ok {
+		client, err = config.STLClient(endpoint.(string))
+	} else {
+		client, err = config.STLClient()
+	}
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	var resourceID int64
+	_, _ = fmt.Sscanf(d.Id(), "%d", &resourceID)
+	readCert, err := client.Certs.GetCustomCertByID(ctx, resourceID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	_ = d.Set("name", readCert.Name)
+	_ = d.Set("cert_pem", readCert.Cert)
+	_ = d.Set("private_key_pem", readCert.Key)
+	return diags
+}
+
+func resourceSTLCustomCertCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
@@ -159,19 +146,30 @@ func resourceSTLAppCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 	serialNumber := d.Get("serial_number").(string)
-	name := d.Get("name").(string)
-	content := d.Get("content").(string)
-	resource, err := client.Apps.CreateAppResource(ctx, stl.CreateApplicationResourceInput{
+	newCert := stl.CreateAppCustomCertInput{
 		SerialNumber: serialNumber,
-		Name:         name,
-		Content:      base64.StdEncoding.EncodeToString([]byte(content)),
-		IsLocked:     false,
-	})
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("stl_app: create STL app: %w", err))
 	}
-	d.SetId(fmt.Sprintf("%d", resource.ID))
+	newCert.Name = d.Get("name").(string)
+	newCert.Key = d.Get("private_key_pem").(string)
+	newCert.Cert = d.Get("cert_pem").(string)
+	created, err := client.Certs.CreateCustomCert(ctx, newCert)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	d.SetId(fmt.Sprintf("%d", created.ID))
 	setLastUpdate(d)
 	syncSTLIfNeeded(ctx, client, d, m)
 	return diags
+}
+
+func syncSTLIfNeeded(ctx context.Context, c *stl.Client, d *schema.ResourceData, m interface{}) {
+	config := m.(*Config)
+	sync := d.Get("sync").(bool)
+	if !sync {
+		return
+	}
+	serialNumber := d.Get("name").(string)
+	_, _ = config.Debug("Syncing %s\n", serialNumber)
+	_ = c.Devices.SyncDeviceConfig(ctx, serialNumber)
+	return
 }

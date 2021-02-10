@@ -1,5 +1,10 @@
 package hsdp
 
+import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"time"
+)
+
 // difference returns the elements in a that aren't in b
 func difference(a, b []string) []string {
 	mb := map[string]bool{}
@@ -13,4 +18,8 @@ func difference(a, b []string) []string {
 		}
 	}
 	return ab
+}
+
+func setLastUpdate(d *schema.ResourceData) {
+	_ = d.Set("last_update", time.Now().Format(time.RFC3339))
 }

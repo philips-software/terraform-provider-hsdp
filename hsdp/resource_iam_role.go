@@ -217,3 +217,14 @@ func expandStringList(configured []interface{}) []string {
 	}
 	return vs
 }
+
+func expandIntList(configured []interface{}) []int {
+	vs := make([]int, 0, len(configured))
+	for _, v := range configured {
+		val, ok := v.(int)
+		if ok && val != 0 {
+			vs = append(vs, val)
+		}
+	}
+	return vs
+}

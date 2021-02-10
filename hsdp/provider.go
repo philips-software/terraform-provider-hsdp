@@ -187,6 +187,9 @@ func Provider(build string) *schema.Provider {
 			"hsdp_pki_tenant":          resourcePKITenant(),
 			"hsdp_pki_cert":            resourcePKICert(),
 			"hsdp_stl_app":             resourceSTLApp(),
+			"hsdp_stl_config":          resourceSTLConfig(),
+			"hsdp_stl_custom_cert":     resourceSTLCustomCert(),
+			"hsdp_stl_sync":            resourceSTLSync(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":              dataSourceIAMIntrospect(),
