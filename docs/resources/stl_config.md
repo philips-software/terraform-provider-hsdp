@@ -18,6 +18,8 @@ resource "hsdp_stl_config" "sme100" {
 
   logging {
     raw_config = file(var.raw_fluentbit_config)
+
+    hsdp_logging = true
     hsdp_product_key = var.logging_product_key
     hsdp_shared_key = var.logging_shared_key
     hsdp_secret_key = var.logging_secret_key
@@ -34,6 +36,7 @@ resource "hsdp_stl_config" "sme100" {
   * `udp` - (Optional, list(int)) Array of UDP ports to allow
 * `logging` - (Optional) Log forwarding and fluent-bit logging configuration for the device
   * `raw_config` - (Optional) Fluent-bit raw configuration to use
+  * `hsdp_logging` - (Optiona, boolean) Enable or disable HSDP Logging feature   
   * `hsdp_product_key` - (Optional) the HSDP logging product key
   * `hsdp_shared_key` - (Optional) the HSDP logging shared key
   * `hsdp_secret_key` - (Optional) the HSDP logging secret key

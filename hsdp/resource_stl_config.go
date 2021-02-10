@@ -64,6 +64,11 @@ func resourceSTLConfig() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
+						"hsdp_logging": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  false,
+						},
 						"hsdp_product_key": {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -161,6 +166,9 @@ func resourceDataToInput(fwExceptions *stl.UpdateAppFirewallExceptionInput, appL
 		for i, vi := range vL {
 			_, _ = config.Debug("Reading Firewall exception Set %d\n", i)
 			mVi := vi.(map[string]interface{})
+			if a, ok := mVi["hsdp_logging"].(bool); ok {
+				appLogging.HSDPLogging = a
+			}
 			if a, ok := mVi["hsdp_ingestor_host"].(string); ok {
 				appLogging.HSDPIngestorHost = a
 			}
@@ -204,6 +212,7 @@ func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.
 	appLoggingDef["hsdp_secret_key"] = appLogging.HSDPSecretKey
 	appLoggingDef["hsdp_ingestor_host"] = appLogging.HSDPIngestorHost
 	appLoggingDef["hsdp_custom_field"] = appLogging.HSDPCustomField
+	appLoggingDef["hsdp_logging"] = appLogging.HSDPLogging
 	s.Add(appLoggingDef)
 	_, _ = config.Debug("Adding logging data")
 	err := d.Set("logging", s)
