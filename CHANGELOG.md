@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.12.1
+- Improve Proposition and Application resource lifecycle and error handling 
+- Sync STL resources by default now. Users can choose to batch this using `hsdp_stl_sync`
+
 ## v0.12.0
 - [NEW] Secure Transport Layer (STL) support to manage Edge devices
 
