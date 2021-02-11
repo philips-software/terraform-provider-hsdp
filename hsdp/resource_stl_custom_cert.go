@@ -41,10 +41,6 @@ func resourceSTLCustomCert() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
-			"last_update": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -69,7 +65,6 @@ func resourceSTLCustomCertDelete(ctx context.Context, d *schema.ResourceData, m 
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("stl_custom_cert delete: %w", err))
 	}
-	setLastUpdate(d)
 	syncSTLIfNeeded(ctx, client, d, m)
 	d.SetId("")
 	return diags
@@ -100,7 +95,6 @@ func resourceSTLCustomCertUpdate(ctx context.Context, d *schema.ResourceData, m 
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("stl_custom_cert update: %w", err))
 	}
-	setLastUpdate(d)
 	syncSTLIfNeeded(ctx, client, d, m)
 	return diags
 }
@@ -157,7 +151,6 @@ func resourceSTLCustomCertCreate(ctx context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 	d.SetId(fmt.Sprintf("%d", created.ID))
-	setLastUpdate(d)
 	syncSTLIfNeeded(ctx, client, d, m)
 	return diags
 }
@@ -168,7 +161,7 @@ func syncSTLIfNeeded(ctx context.Context, c *stl.Client, d *schema.ResourceData,
 	if !sync {
 		return
 	}
-	serialNumber := d.Get("name").(string)
+	serialNumber := d.Get("serial_number").(string)
 	_, _ = config.Debug("Syncing %s\n", serialNumber)
 	_ = c.Devices.SyncDeviceConfig(ctx, serialNumber)
 	return

@@ -42,10 +42,6 @@ func resourceSTLApp() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
-			"last_update": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -77,7 +73,6 @@ func resourceSTLAppUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("stl_app: update STL app: %w", err))
 	}
-	setLastUpdate(d)
 	syncSTLIfNeeded(ctx, client, d, m)
 	return diags
 }
@@ -104,7 +99,6 @@ func resourceSTLAppDelete(ctx context.Context, d *schema.ResourceData, m interfa
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("stl_app: delete STL resource: %w", err))
 	}
-	setLastUpdate(d)
 	syncSTLIfNeeded(ctx, client, d, m)
 	d.SetId("")
 	return diags
@@ -171,7 +165,6 @@ func resourceSTLAppCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(fmt.Errorf("stl_app: create STL app: %w", err))
 	}
 	d.SetId(fmt.Sprintf("%d", resource.ID))
-	setLastUpdate(d)
 	syncSTLIfNeeded(ctx, client, d, m)
 	return diags
 }

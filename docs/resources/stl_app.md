@@ -19,7 +19,6 @@ resource "hsdp_stl_app" "myapp" {
 
 ## Attribute reference
 * `id` - The resource ID
-* `last_update` - RFC3339 timestamp of last update. Can be used to trigger `hsdp_stl_sync`
 
 ## Importing
 

@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v0.12.2
 - Fix STL cert update issue 
+- Remove last_update fields as it produced inconsistent state
 
 ## v0.12.1
 - Improve Proposition and Application resource lifecycle and error handling 

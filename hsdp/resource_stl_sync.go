@@ -27,15 +27,11 @@ func resourceSTLSync() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"last_update": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
 
-func resourceSTLSyncDelete(_ context.Context, d *schema.ResourceData, _m interface{}) diag.Diagnostics {
+func resourceSTLSyncDelete(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	d.SetId("")
 	return diag.Diagnostics{}
 }
@@ -63,7 +59,6 @@ func resourceSTLSyncCreate(ctx context.Context, d *schema.ResourceData, m interf
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("hsdp_stl_sync: %w", err))
 	}
-	setLastUpdate(d)
 	d.SetId(serialNumber)
 	return diags
 }

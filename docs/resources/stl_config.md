@@ -43,6 +43,3 @@ resource "hsdp_stl_config" "sme100" {
   * `hsdp_ingestor_host` - (Optional) The HSDP logging endpoint
 * `sync` (Optional, boolean) - When set to true syncs the config after mutations. Default is true. 
   Set this to false if you want to batch sync to your device using `hsdp_stl_sync`
-
-## Attribute reference
-* `last_update` - RFC3339 timestamp of last update. Can be used to trigger `hsdp_stl_sync`
