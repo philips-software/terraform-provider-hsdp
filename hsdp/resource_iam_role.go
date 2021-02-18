@@ -86,7 +86,8 @@ func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, meta int
 			return diag.FromErr(err)
 		}
 		if len(*roles) == 0 || (*roles)[0].ManagingOrganization != managingOrganization {
-			return diag.FromErr(fmt.Errorf("conflict creating, but no role match found"))
+			return diag.FromErr(fmt.Errorf("conflict creating role, mismatched managing_organization: '%s' != '%s'",
+				(*roles)[0].ManagingOrganization, managingOrganization))
 		}
 		role = &(*roles)[0]
 	}
