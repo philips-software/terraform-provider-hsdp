@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.12.3
+- Add missing fields for DICOM
+- Minor documentation fixes
+
 ## v0.12.2
 - Fix STL cert update issue 
 - Remove last_update fields as it produced inconsistent state
