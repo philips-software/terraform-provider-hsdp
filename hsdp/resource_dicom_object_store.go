@@ -76,11 +76,14 @@ func resourceDICOMObjectStore() *schema.Resource {
 							Required: true,
 						},
 						"bucket_name": {
-							Type:      schema.TypeString,
-							Required:  true,
-							Sensitive: true,
+							Type:     schema.TypeString,
+							Required: true,
 						},
 						"folder_path": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"product_key": {
 							Type:      schema.TypeString,
 							Required:  true,
 							Sensitive: true,
@@ -174,6 +177,7 @@ func resourceDICOMObjectStoreRead(_ context.Context, d *schema.ResourceData, m i
 	}
 	if store.CredServiceAccess != nil {
 		credsSettings := make(map[string]interface{})
+		credsSettings["endpoint"] = store.CredServiceAccess.Endpoint
 		credsSettings["folder_path"] = store.CredServiceAccess.FolderPath
 		credsSettings["bucket_name"] = store.CredServiceAccess.BucketName
 		credsSettings["product_key"] = store.CredServiceAccess.ProductKey
@@ -228,6 +232,7 @@ func resourceDICOMObjectStoreCreate(ctx context.Context, d *schema.ResourceData,
 		var aVi []interface{}
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})
+			credsAccess.Endpoint = mVi["endpoint"].(string)
 			credsAccess.BucketName = mVi["bucket_name"].(string)
 			credsAccess.FolderPath = mVi["folder_path"].(string)
 			credsAccess.ProductKey = mVi["product_key"].(string)

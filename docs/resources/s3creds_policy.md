@@ -21,7 +21,9 @@ resource "hsdp_s3creds_policy" "policy1" {
     "resources": [ "${var.org_id}/foo/*" ],
     "actions": [
       "GET",
-      "PUT"
+      "PUT",
+      "LIST",
+      "DELETE"
     ]
   }
 }
