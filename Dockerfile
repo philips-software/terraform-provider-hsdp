@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1-experimental
 
-ARG hsdp_provider_version=0.10.1
+ARG hsdp_provider_version=0.12.3
 FROM --platform=${BUILDPLATFORM} golang:1.16.0-alpine3.13 AS build
 ARG TARGETOS
 ARG TARGETARCH
@@ -18,6 +18,5 @@ ARG TARGETOS
 ARG TARGETARCH
 ARG hsdp_provider_version
 ENV HSDP_PROVIDER_VERSION ${hsdp_provider_version}
-LABEL maintainer="Andy Lo-A-Foe <andy.lo-a-foe@philips.com>"
 ENV HOME /root
 COPY --from=build /out/terraform-provider-hsdp $HOME/.terraform.d/plugins/registry.terraform.io/philips-software/hsdp/${HSDP_PROVIDER_VERSION}/${TARGETOS}_${TARGETARCH}/terraform-provider-hsdp_v${HSDP_PROVIDER_VERSION}
