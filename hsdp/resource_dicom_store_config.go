@@ -207,6 +207,9 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 	}
 	defer client.Close()
 
+	// Refresh token so we hopefully have DICOM permissions to proceed without error
+	_ = client.TokenRefresh()
+
 	// Set up CDR service account
 	cdrService := dicom.CDRServiceAccount{}
 	if v, ok := d.GetOk("cdr_service_account"); ok {
