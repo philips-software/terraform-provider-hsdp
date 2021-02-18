@@ -80,7 +80,8 @@ func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, meta int
 		// Already exists most likely, adopt it
 		var roles *[]iam.Role
 		roles, _, err = client.Roles.GetRoles(&iam.GetRolesOptions{
-			Name: &name,
+			Name:           &name,
+			OrganizationID: &managingOrganization,
 		})
 		if err != nil {
 			return diag.FromErr(err)
