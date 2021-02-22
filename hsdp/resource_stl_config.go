@@ -32,7 +32,7 @@ func resourceSTLConfig() *schema.Resource {
 			"firewall_exceptions": {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
-				Required: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"tcp": {
@@ -53,7 +53,7 @@ func resourceSTLConfig() *schema.Resource {
 			"logging": {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
-				Required: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"raw_config": {
@@ -199,33 +199,36 @@ func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.
 		return fmt.Errorf("dataToResourceData: schema.ResourceData is nil")
 	}
 	// Logging
-	s := &schema.Set{F: resourceMetricsThresholdHash}
-	appLoggingDef := make(map[string]interface{})
-	appLoggingDef["raw_config"] = appLogging.RawConfig
-	appLoggingDef["hsdp_product_key"] = appLogging.HSDPProductKey
-	appLoggingDef["hsdp_shared_key"] = appLogging.HSDPSharedKey
-	appLoggingDef["hsdp_secret_key"] = appLogging.HSDPSecretKey
-	appLoggingDef["hsdp_ingestor_host"] = appLogging.HSDPIngestorHost
-	appLoggingDef["hsdp_custom_field"] = appLogging.HSDPCustomField
-	appLoggingDef["hsdp_logging"] = appLogging.HSDPLogging
-	s.Add(appLoggingDef)
-	_, _ = config.Debug("Adding logging data")
-	err := d.Set("logging", s)
-	if err != nil {
-		return fmt.Errorf("dataToResourceData: logging: %w", err)
+	if _, ok := d.GetOk("logging"); ok {
+		s := &schema.Set{F: resourceMetricsThresholdHash}
+		appLoggingDef := make(map[string]interface{})
+		appLoggingDef["raw_config"] = appLogging.RawConfig
+		appLoggingDef["hsdp_product_key"] = appLogging.HSDPProductKey
+		appLoggingDef["hsdp_shared_key"] = appLogging.HSDPSharedKey
+		appLoggingDef["hsdp_secret_key"] = appLogging.HSDPSecretKey
+		appLoggingDef["hsdp_ingestor_host"] = appLogging.HSDPIngestorHost
+		appLoggingDef["hsdp_custom_field"] = appLogging.HSDPCustomField
+		appLoggingDef["hsdp_logging"] = appLogging.HSDPLogging
+		s.Add(appLoggingDef)
+		_, _ = config.Debug("Adding logging data")
+		err := d.Set("logging", s)
+		if err != nil {
+			return fmt.Errorf("dataToResourceData: logging: %w", err)
+		}
 	}
 	// Firewall exceptions
-	s = &schema.Set{F: resourceMetricsThresholdHash}
-	fwExceptionsDef := make(map[string]interface{})
-	fwExceptionsDef["tcp"] = fwExceptions.TCP
-	fwExceptionsDef["udp"] = fwExceptions.UDP
-	s.Add(fwExceptionsDef)
-	_, _ = config.Debug("Adding firewall exceptions data")
-	err = d.Set("firewall_exceptions", s)
-	if err != nil {
-		return fmt.Errorf("dataToResourceData: firewall_exceptions: %w", err)
+	if _, ok := d.GetOk("firewall_exceptions"); ok {
+		s := &schema.Set{F: resourceMetricsThresholdHash}
+		fwExceptionsDef := make(map[string]interface{})
+		fwExceptionsDef["tcp"] = fwExceptions.TCP
+		fwExceptionsDef["udp"] = fwExceptions.UDP
+		s.Add(fwExceptionsDef)
+		_, _ = config.Debug("Adding firewall exceptions data")
+		err := d.Set("firewall_exceptions", s)
+		if err != nil {
+			return fmt.Errorf("dataToResourceData: firewall_exceptions: %w", err)
+		}
 	}
-
 	return nil
 }
 
@@ -279,13 +282,17 @@ func resourceSTLConfigCreate(ctx context.Context, d *schema.ResourceData, m inte
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	_, err = client.Config.UpdateAppLogging(ctx, loggingRef)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppLogging: %w", err))
+	if _, ok := d.GetOk("logging"); ok {
+		_, err = client.Config.UpdateAppLogging(ctx, loggingRef)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppLogging: %w", err))
+		}
 	}
-	_, err = client.Config.UpdateAppFirewallExceptions(ctx, fwExceptionRef)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppFirewallExceptions: %w", err))
+	if _, ok := d.GetOk("firewall_exceptions"); ok {
+		_, err = client.Config.UpdateAppFirewallExceptions(ctx, fwExceptionRef)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppFirewallExceptions: %w", err))
+		}
 	}
 	if d.IsNewResource() {
 		d.SetId(loggingRef.SerialNumber)

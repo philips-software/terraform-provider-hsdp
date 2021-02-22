@@ -32,8 +32,8 @@ resource "hsdp_stl_config" "sme100" {
 ## Argument reference
 * `serial_number` - (Required) The serial of the device this config should be applied to
 * `firewall_exceptions` - (Optional) Firewall exceptions
-  * `tcp` - (Optional, list(int)) Array of TCP ports to allow
-  * `udp` - (Optional, list(int)) Array of UDP ports to allow
+  * `tcp` - (Required, list(int)) Array of TCP ports to allow
+  * `udp` - (Required, list(int)) Array of UDP ports to allow
 * `logging` - (Optional) Log forwarding and fluent-bit logging configuration for the device
   * `raw_config` - (Optional) Fluent-bit raw configuration to use
   * `hsdp_logging` - (Optional, boolean) Enable or disable HSDP Logging feature   
