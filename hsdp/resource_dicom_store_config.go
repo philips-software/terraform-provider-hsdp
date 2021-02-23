@@ -4,9 +4,11 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/dicom"
+	"net/http"
 )
 
 func resourceDICOMStoreConfig() *schema.Resource {
@@ -92,6 +94,7 @@ func resourceDICOMStoreConfigDelete(_ context.Context, d *schema.ResourceData, _
 
 func resourceDICOMStoreConfigUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
+	var resp *dicom.Response
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
 	orgID := d.Get("organization_id").(string)
@@ -114,9 +117,14 @@ func resourceDICOMStoreConfigUpdate(_ context.Context, d *schema.ResourceData, m
 			if !cdrService.Valid() {
 				return diag.FromErr(fmt.Errorf("cdr_service_account is not valid"))
 			}
-			configured, _, err := client.Config.SetCDRServiceAccount(cdrService, &dicom.QueryOptions{
-				OrganizationID: &orgID,
-			})
+			var configured *dicom.CDRServiceAccount
+			operation := func() error {
+				configured, resp, err = client.Config.SetCDRServiceAccount(cdrService, &dicom.QueryOptions{
+					OrganizationID: &orgID,
+				})
+				return checkForPermissionErrors(client, resp, err)
+			}
+			err := backoff.Retry(operation, backoff.NewExponentialBackOff())
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -140,9 +148,14 @@ func resourceDICOMStoreConfigUpdate(_ context.Context, d *schema.ResourceData, m
 			if !fhirStore.Valid() {
 				return diag.FromErr(fmt.Errorf("fhir_store is not valid"))
 			}
-			configured, _, err := client.Config.SetFHIRStore(fhirStore, &dicom.QueryOptions{
-				OrganizationID: &orgID,
-			})
+			var configured *dicom.FHIRStore
+			operation := func() error {
+				configured, resp, err = client.Config.SetFHIRStore(fhirStore, &dicom.QueryOptions{
+					OrganizationID: &orgID,
+				})
+				return checkForPermissionErrors(client, resp, err)
+			}
+			err = backoff.Retry(operation, backoff.NewExponentialBackOff())
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -169,9 +182,15 @@ func resourceDICOMStoreConfigRead(_ context.Context, d *schema.ResourceData, m i
 	defer client.Close()
 
 	// CDR
-	configured, _, err := client.Config.GetCDRServiceAccount(&dicom.QueryOptions{
-		OrganizationID: &orgID,
-	})
+	var configured *dicom.CDRServiceAccount
+	operation := func() error {
+		var resp *dicom.Response
+		configured, resp, err = client.Config.GetCDRServiceAccount(&dicom.QueryOptions{
+			OrganizationID: &orgID,
+		})
+		return checkForPermissionErrors(client, resp, err)
+	}
+	err = backoff.Retry(operation, backoff.NewExponentialBackOff())
 	if err == nil && configured != nil {
 		cdrSettings := make(map[string]interface{})
 		cdrSettings["service_id"] = configured.ServiceID
@@ -223,9 +242,15 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 		if !cdrService.Valid() {
 			return diag.FromErr(fmt.Errorf("cdr_service_account is not valid"))
 		}
-		configured, _, err := client.Config.SetCDRServiceAccount(cdrService, &dicom.QueryOptions{
-			OrganizationID: &orgID,
-		})
+		var configured *dicom.CDRServiceAccount
+		operation := func() error {
+			var resp *dicom.Response
+			configured, resp, err = client.Config.SetCDRServiceAccount(cdrService, &dicom.QueryOptions{
+				OrganizationID: &orgID,
+			})
+			return checkForPermissionErrors(client, resp, err)
+		}
+		err = backoff.Retry(operation, backoff.NewExponentialBackOff())
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -248,9 +273,16 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 		if !fhirStore.Valid() {
 			return diag.FromErr(fmt.Errorf("fhir_store is not valid"))
 		}
-		configured, _, err := client.Config.SetFHIRStore(fhirStore, &dicom.QueryOptions{
-			OrganizationID: &orgID,
-		})
+		var configured *dicom.FHIRStore
+		operation := func() error {
+			var resp *dicom.Response
+			_ = client.TokenRefresh()
+			configured, _, err = client.Config.SetFHIRStore(fhirStore, &dicom.QueryOptions{
+				OrganizationID: &orgID,
+			})
+			return checkForPermissionErrors(client, resp, err)
+		}
+		err = backoff.Retry(operation, backoff.NewExponentialBackOff())
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -270,4 +302,15 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 	generatedID := fmt.Sprintf("%x", md5.Sum([]byte(configURL)))
 	d.SetId(generatedID)
 	return diags
+}
+
+func checkForPermissionErrors(client *dicom.Client, resp *dicom.Response, err error) error {
+	if resp == nil || resp.StatusCode > 500 {
+		return err
+	}
+	if resp.StatusCode == http.StatusForbidden || resp.StatusCode == http.StatusMethodNotAllowed {
+		_ = client.TokenRefresh()
+		return err
+	}
+	return backoff.Permanent(err)
 }
