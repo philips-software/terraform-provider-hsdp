@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/dicom"
@@ -46,7 +47,12 @@ func resourceDICOMRepositoryDelete(_ context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 	defer client.Close()
-	_, _, err = client.Config.DeleteRepository(dicom.Repository{ID: d.Id()}, &dicom.QueryOptions{OrganizationID: &orgID})
+	operation := func() error {
+		var resp *dicom.Response
+		_, resp, err = client.Config.DeleteRepository(dicom.Repository{ID: d.Id()}, &dicom.QueryOptions{OrganizationID: &orgID})
+		return checkForPermissionErrors(client, resp, err)
+	}
+	err = backoff.Retry(operation, backoff.NewExponentialBackOff())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -64,7 +70,13 @@ func resourceDICOMRepositoryRead(_ context.Context, d *schema.ResourceData, m in
 		return diag.FromErr(err)
 	}
 	defer client.Close()
-	repo, _, err := client.Config.GetRepository(d.Id(), &dicom.QueryOptions{OrganizationID: &orgID})
+	var repo *dicom.Repository
+	operation := func() error {
+		var resp *dicom.Response
+		repo, resp, err = client.Config.GetRepository(d.Id(), &dicom.QueryOptions{OrganizationID: &orgID})
+		return checkForPermissionErrors(client, resp, err)
+	}
+	err = backoff.Retry(operation, backoff.NewExponentialBackOff())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -86,7 +98,13 @@ func resourceDICOMRepositoryCreate(ctx context.Context, d *schema.ResourceData, 
 		OrganizationID:      d.Get("organization_id").(string),
 		ActiveObjectStoreID: d.Get("object_store_id").(string),
 	}
-	created, _, err := client.Config.CreateRepository(repo, &dicom.QueryOptions{OrganizationID: &orgID})
+	var created *dicom.Repository
+	operation := func() error {
+		var resp *dicom.Response
+		created, resp, err = client.Config.CreateRepository(repo, &dicom.QueryOptions{OrganizationID: &orgID})
+		return checkForPermissionErrors(client, resp, err)
+	}
+	err = backoff.Retry(operation, backoff.NewExponentialBackOff())
 	if err != nil {
 		return diag.FromErr(err)
 	}

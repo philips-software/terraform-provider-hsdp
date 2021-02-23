@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/dicom"
@@ -136,9 +137,14 @@ func resourceDICOMObjectStoreDelete(_ context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 	defer client.Close()
-	_, _, err = client.Config.DeleteObjectStore(dicom.ObjectStore{ID: d.Id()}, &dicom.QueryOptions{
-		OrganizationID: &orgID,
-	})
+	operation := func() error {
+		var resp *dicom.Response
+		_, resp, err = client.Config.DeleteObjectStore(dicom.ObjectStore{ID: d.Id()}, &dicom.QueryOptions{
+			OrganizationID: &orgID,
+		})
+		return checkForPermissionErrors(client, resp, err)
+	}
+	err = backoff.Retry(operation, backoff.NewExponentialBackOff())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -157,9 +163,15 @@ func resourceDICOMObjectStoreRead(_ context.Context, d *schema.ResourceData, m i
 	}
 	defer client.Close()
 
-	store, _, err := client.Config.GetObjectStore(d.Id(), &dicom.QueryOptions{
-		OrganizationID: &orgID,
-	})
+	var store *dicom.ObjectStore
+	operation := func() error {
+		var resp *dicom.Response
+		store, resp, err = client.Config.GetObjectStore(d.Id(), &dicom.QueryOptions{
+			OrganizationID: &orgID,
+		})
+		return checkForPermissionErrors(client, resp, err)
+	}
+	err = backoff.Retry(operation, backoff.NewExponentialBackOff())
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -249,9 +261,15 @@ func resourceDICOMObjectStoreCreate(ctx context.Context, d *schema.ResourceData,
 		store.CredServiceAccess = credsAccess
 		store.AccessType = "s3Creds"
 	}
-	created, _, err := client.Config.CreateObjectStore(store, &dicom.QueryOptions{
-		OrganizationID: &orgID,
-	})
+	var created *dicom.ObjectStore
+	operation := func() error {
+		var resp *dicom.Response
+		created, resp, err = client.Config.CreateObjectStore(store, &dicom.QueryOptions{
+			OrganizationID: &orgID,
+		})
+		return checkForPermissionErrors(client, resp, err)
+	}
+	err = backoff.Retry(operation, backoff.NewExponentialBackOff())
 	if err != nil {
 		return diag.FromErr(err)
 	}
