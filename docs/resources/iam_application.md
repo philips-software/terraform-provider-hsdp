@@ -11,7 +11,6 @@ resource "hsdp_iam_application" "testapp" {
   name                = "TESTAPP"
   description         = "Test application"
   proposition_id      = hsdp_iam_proposition.testprop.id
-  global_reference_id = "some-app-ref-here"
 }
 ```
 
@@ -22,8 +21,7 @@ The following arguments are supported:
 * `name` - (Required) The name of the application
 * `description` - (Required) The description of the application
 * `proposition_id` - (Required) the proposition ID (GUID) to attach this a application to
-* `global_reference_id` - (Required) Reference identifier defined by the provisioning user. This reference Identifier will be carried over to identify the provisioned resource across deployment instances (ClientTest, Production). Invalid Characters:- "[&+’";=?()\[\]<>]
-
+* `global_reference_id` - (Optional, UUIDv4) Reference identifier defined by the provisioning user. Highly recommend to never set this and let Terraform generate a UUID for you. 
 ## Attributes Reference
 
 The following attributes are exported:

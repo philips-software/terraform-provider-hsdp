@@ -144,7 +144,7 @@ func resourceDICOMObjectStoreDelete(_ context.Context, d *schema.ResourceData, m
 		})
 		return checkForPermissionErrors(client, resp, err)
 	}
-	err = backoff.Retry(operation, backoff.NewExponentialBackOff())
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -171,7 +171,7 @@ func resourceDICOMObjectStoreRead(_ context.Context, d *schema.ResourceData, m i
 		})
 		return checkForPermissionErrors(client, resp, err)
 	}
-	err = backoff.Retry(operation, backoff.NewExponentialBackOff())
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -269,7 +269,7 @@ func resourceDICOMObjectStoreCreate(ctx context.Context, d *schema.ResourceData,
 		})
 		return checkForPermissionErrors(client, resp, err)
 	}
-	err = backoff.Retry(operation, backoff.NewExponentialBackOff())
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
 	if err != nil {
 		return diag.FromErr(err)
 	}

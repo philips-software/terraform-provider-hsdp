@@ -3,6 +3,7 @@ package hsdp
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -38,7 +39,7 @@ func resourceIAMApplication() *schema.Resource {
 			},
 			"global_reference_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 		},
@@ -60,6 +61,13 @@ func resourceIAMApplicationCreate(_ context.Context, d *schema.ResourceData, m i
 	app.Description = d.Get("description").(string)
 	app.PropositionID = d.Get("proposition_id").(string)
 	app.GlobalReferenceID = d.Get("global_reference_id").(string)
+	if app.GlobalReferenceID == "" {
+		result, err := uuid.GenerateUUID()
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("error generating uuid: %w", err))
+		}
+		app.GlobalReferenceID = result
+	}
 
 	createdApp, resp, err := client.Applications.CreateApplication(app)
 	if err != nil {
@@ -78,9 +86,6 @@ func resourceIAMApplicationCreate(_ context.Context, d *schema.ResourceData, m i
 		}
 		if createdApp.PropositionID != app.PropositionID {
 			return diag.FromErr(fmt.Errorf("existing application found but proposition_id mismatch: '%s' != '%s'", createdApp.PropositionID, app.PropositionID))
-		}
-		if createdApp.GlobalReferenceID != app.GlobalReferenceID {
-			return diag.FromErr(fmt.Errorf("existing application found but global_reference_id mismatch: '%s' != '%s'", createdApp.GlobalReferenceID, app.GlobalReferenceID))
 		}
 		// We found a matching existing application, go with it
 	}
@@ -118,16 +123,6 @@ func resourceIAMApplicationRead(_ context.Context, d *schema.ResourceData, m int
 	_ = d.Set("description", app.Description)
 	_ = d.Set("proposition_id", app.PropositionID)
 	_ = d.Set("global_reference_id", app.GlobalReferenceID)
-	return diags
-}
-
-func resourceIAMApplicationUpdate(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	if !d.HasChange("description") {
-		return diags
-	}
-	// Not implemented by HSDP
 	return diags
 }
 
