@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.12.7
+- Make global_reference_id optional for Application and Proposition
+
 ## v0.12.6
 - Fix crashing bug in create IAM application
 
