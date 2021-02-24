@@ -69,7 +69,7 @@ func resourceIAMApplicationCreate(_ context.Context, d *schema.ResourceData, m i
 		if resp.StatusCode != http.StatusConflict {
 			return diag.FromErr(err)
 		}
-		createdApp, _, err = client.Applications.GetApplicationByName(app.Name)
+		createdApp, resp, err = client.Applications.GetApplicationByName(app.Name)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -83,6 +83,9 @@ func resourceIAMApplicationCreate(_ context.Context, d *schema.ResourceData, m i
 			return diag.FromErr(fmt.Errorf("existing application found but global_reference_id mismatch: '%s' != '%s'", createdApp.GlobalReferenceID, app.GlobalReferenceID))
 		}
 		// We found a matching existing application, go with it
+	}
+	if createdApp == nil {
+		return diag.FromErr(fmt.Errorf("Unexpected failure creating '%s': [%v] [%v]", app.Name, err, resp))
 	}
 	d.SetId(createdApp.ID)
 	_ = d.Set("name", createdApp.Name)
