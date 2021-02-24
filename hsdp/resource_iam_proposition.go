@@ -3,6 +3,7 @@ package hsdp
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"net/http"
 
@@ -39,7 +40,7 @@ func resourceIAMProposition() *schema.Resource {
 			},
 			"global_reference_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 			},
 		},
@@ -61,6 +62,13 @@ func resourceIAMPropositionCreate(_ context.Context, d *schema.ResourceData, m i
 	prop.Description = d.Get("description").(string)
 	prop.OrganizationID = d.Get("organization_id").(string)
 	prop.GlobalReferenceID = d.Get("global_reference_id").(string)
+	if prop.GlobalReferenceID == "" {
+		result, err := uuid.GenerateUUID()
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("error generating uuid: %w", err))
+		}
+		prop.GlobalReferenceID = result
+	}
 
 	createdProp, resp, err := client.Propositions.CreateProposition(prop)
 	if err != nil {
@@ -82,10 +90,10 @@ func resourceIAMPropositionCreate(_ context.Context, d *schema.ResourceData, m i
 		if createdProp.OrganizationID != prop.OrganizationID {
 			return diag.FromErr(fmt.Errorf("existing proposition found but organization_id mismatch: '%s' != '%s'", createdProp.OrganizationID, prop.OrganizationID))
 		}
-		if createdProp.GlobalReferenceID != prop.GlobalReferenceID {
-			return diag.FromErr(fmt.Errorf("existing proposition found but global_reference_id mismatch: '%s' != '%s'", createdProp.OrganizationID, prop.OrganizationID))
-		}
 		// We found a matching existing proposition, go with it
+	}
+	if createdProp == nil {
+		return diag.FromErr(fmt.Errorf("Unexpected error creating proposition: %v", resp))
 	}
 	d.SetId(createdProp.ID)
 	_ = d.Set("name", createdProp.Name)
@@ -119,15 +127,6 @@ func resourceIAMPropositionRead(_ context.Context, d *schema.ResourceData, m int
 	_ = d.Set("organization_id", prop.OrganizationID)
 	_ = d.Set("global_reference_id", prop.GlobalReferenceID)
 	return diags
-}
-
-func resourceIAMPropositionUpdate(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	if !d.HasChange("description") {
-		return diags
-	}
-	return diag.FromErr(ErrNotImplementedByHSDP)
 }
 
 func resourceIAMPropositionDelete(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {

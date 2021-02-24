@@ -9,6 +9,7 @@ require (
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/go-getter v1.5.1 // indirect
 	github.com/hashicorp/go-retryablehttp v0.6.6
+	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/hcl/v2 v2.8.2 // indirect
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.4.0
 	github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152
