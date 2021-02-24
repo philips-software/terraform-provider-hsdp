@@ -277,7 +277,7 @@ func updateWithRetry(client *console.Client, instanceID string, app console.Appl
 		created, resp, err = client.Metrics.UpdateApplicationAutoscaler(instanceID, app)
 		return checkForIntermittentErrors(resp, err)
 	}
-	err := backoff.Retry(operation, backoff.NewExponentialBackOff())
+	err := backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 30))
 	return created, err
 }
 
@@ -289,7 +289,7 @@ func getWitRetry(client *console.Client, instanceID string, name string) (*conso
 		app, resp, err = client.Metrics.GetApplicationAutoscaler(instanceID, name)
 		return checkForIntermittentErrors(resp, err)
 	}
-	err := backoff.Retry(operation, backoff.NewExponentialBackOff())
+	err := backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 30))
 	return app, err
 }
 

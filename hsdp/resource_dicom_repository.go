@@ -52,7 +52,7 @@ func resourceDICOMRepositoryDelete(_ context.Context, d *schema.ResourceData, m 
 		_, resp, err = client.Config.DeleteRepository(dicom.Repository{ID: d.Id()}, &dicom.QueryOptions{OrganizationID: &orgID})
 		return checkForPermissionErrors(client, resp, err)
 	}
-	err = backoff.Retry(operation, backoff.NewExponentialBackOff())
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -76,7 +76,7 @@ func resourceDICOMRepositoryRead(_ context.Context, d *schema.ResourceData, m in
 		repo, resp, err = client.Config.GetRepository(d.Id(), &dicom.QueryOptions{OrganizationID: &orgID})
 		return checkForPermissionErrors(client, resp, err)
 	}
-	err = backoff.Retry(operation, backoff.NewExponentialBackOff())
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -104,7 +104,7 @@ func resourceDICOMRepositoryCreate(ctx context.Context, d *schema.ResourceData, 
 		created, resp, err = client.Config.CreateRepository(repo, &dicom.QueryOptions{OrganizationID: &orgID})
 		return checkForPermissionErrors(client, resp, err)
 	}
-	err = backoff.Retry(operation, backoff.NewExponentialBackOff())
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
 	if err != nil {
 		return diag.FromErr(err)
 	}

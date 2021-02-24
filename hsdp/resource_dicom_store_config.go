@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/dicom"
 	"net/http"
+	"time"
 )
 
 func resourceDICOMStoreConfig() *schema.Resource {
@@ -124,7 +125,7 @@ func resourceDICOMStoreConfigUpdate(_ context.Context, d *schema.ResourceData, m
 				})
 				return checkForPermissionErrors(client, resp, err)
 			}
-			err := backoff.Retry(operation, backoff.NewExponentialBackOff())
+			err := backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -155,7 +156,7 @@ func resourceDICOMStoreConfigUpdate(_ context.Context, d *schema.ResourceData, m
 				})
 				return checkForPermissionErrors(client, resp, err)
 			}
-			err = backoff.Retry(operation, backoff.NewExponentialBackOff())
+			err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -190,7 +191,7 @@ func resourceDICOMStoreConfigRead(_ context.Context, d *schema.ResourceData, m i
 		})
 		return checkForPermissionErrors(client, resp, err)
 	}
-	err = backoff.Retry(operation, backoff.NewExponentialBackOff())
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewConstantBackOff(2*time.Second), 5))
 	if err == nil && configured != nil {
 		cdrSettings := make(map[string]interface{})
 		cdrSettings["service_id"] = configured.ServiceID
@@ -250,7 +251,7 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 			})
 			return checkForPermissionErrors(client, resp, err)
 		}
-		err = backoff.Retry(operation, backoff.NewExponentialBackOff())
+		err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -282,7 +283,7 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 			})
 			return checkForPermissionErrors(client, resp, err)
 		}
-		err = backoff.Retry(operation, backoff.NewExponentialBackOff())
+		err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
 		if err != nil {
 			return diag.FromErr(err)
 		}
