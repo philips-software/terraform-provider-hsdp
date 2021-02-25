@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+# v0.12.8
+- Better error reporting and fix root cause of crashing bug
+
 ## v0.12.7
 - Make global_reference_id optional for Application and Proposition
 
