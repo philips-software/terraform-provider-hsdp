@@ -79,10 +79,11 @@ func resourceIAMPropositionCreate(_ context.Context, d *schema.ResourceData, m i
 			return diag.FromErr(err)
 		}
 		createdProp, _, err = client.Propositions.GetProposition(&iam.GetPropositionsOptions{
-			Name: &prop.Name,
+			Name:           &prop.Name,
+			OrganizationID: &prop.OrganizationID,
 		})
 		if err != nil {
-			return diag.FromErr(err)
+			return diag.FromErr(fmt.Errorf("CreateProposition 409 confict, but no match found: %w", err))
 		}
 		if createdProp.Description != prop.Description {
 			return diag.FromErr(fmt.Errorf("existing proposition found but description mismatch: '%s' != '%s'", createdProp.Description, prop.Description))

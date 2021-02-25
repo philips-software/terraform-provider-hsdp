@@ -77,10 +77,14 @@ func resourceIAMApplicationCreate(_ context.Context, d *schema.ResourceData, m i
 		if resp.StatusCode != http.StatusConflict {
 			return diag.FromErr(err)
 		}
-		createdApp, resp, err = client.Applications.GetApplicationByName(app.Name)
-		if err != nil {
-			return diag.FromErr(err)
+		createdApps, _, err := client.Applications.GetApplications(&iam.GetApplicationsOptions{
+			Name:          &app.Name,
+			PropositionID: &app.PropositionID,
+		})
+		if err != nil || len(createdApps) == 0 {
+			return diag.FromErr(fmt.Errorf("GetApplications after 409 (len=%d): %w", len(createdApps), err))
 		}
+		createdApp = createdApps[0]
 		if createdApp.Description != app.Description {
 			return diag.FromErr(fmt.Errorf("existing application found but description mismatch: '%s' != '%s'", createdApp.Description, app.Description))
 		}
