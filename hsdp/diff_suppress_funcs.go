@@ -30,3 +30,10 @@ func suppressDefault(k, old, new string, d *schema.ResourceData) bool {
 	}
 	return false
 }
+
+func suppressWhenGenerated(k, old, new string, d *schema.ResourceData) bool {
+	if new == "" {
+		return true
+	}
+	return false
+}

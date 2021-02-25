@@ -38,9 +38,10 @@ func resourceIAMApplication() *schema.Resource {
 				ForceNew: true,
 			},
 			"global_reference_id": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: suppressWhenGenerated,
 			},
 		},
 	}
