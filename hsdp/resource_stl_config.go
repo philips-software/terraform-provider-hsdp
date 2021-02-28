@@ -117,13 +117,17 @@ func resourceSTLConfigDelete(ctx context.Context, d *schema.ResourceData, m inte
 	fwExceptionRef.TCP = []int{}
 	fwExceptionRef.UDP = []int{}
 	// Clear
-	_, err = client.Config.UpdateAppLogging(ctx, loggingRef)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppLogging: %w", err))
+	if _, ok := d.GetOk("logging"); ok {
+		_, err = client.Config.UpdateAppLogging(ctx, loggingRef)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppLogging: %w", err))
+		}
 	}
-	_, err = client.Config.UpdateAppFirewallExceptions(ctx, fwExceptionRef)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppFirewallExceptions: %w", err))
+	if _, ok := d.GetOk("firewall_exceptions"); ok {
+		_, err = client.Config.UpdateAppFirewallExceptions(ctx, fwExceptionRef)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppFirewallExceptions: %w", err))
+		}
 	}
 	syncSTLIfNeeded(ctx, client, d, m)
 	d.SetId("")
