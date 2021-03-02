@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.12.10
+- [NEW] optional `password` argument for immediate activation of `hsdp_iam_user`
+- Support `hsdp_iam_user` field updates (first_name, last_name, login, email)
+
 ## v0.12.9
 - Suppress global_reference_id diffs changes when generated
 
