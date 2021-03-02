@@ -29,8 +29,12 @@ The following arguments are supported:
 * `last_name` - (Required) Last name of the user
 * `mobile` - (Required) Mobile number of the user. E.164 format
 * `organization_id` - (Required) The managing organization of the user
-* `password` - (Optional) When specified this will skip the email activation flow and immediately activate the IAM account. **Very Important**: you are responsible
-for sharing this password with the new IAM user through some channel of communication. No email will be triggered by the system. If unsure, do not set a password so the normal email activation flow is followed.
+* `password` - (Optional) When specified this will skip the email activation 
+  flow and immediately activate the IAM account. **Very Important**: you are responsible
+  for sharing this password with the new IAM user through some channel of communication. 
+  No email will be triggered by the system. If unsure, do not set a password so the normal 
+  email activation flow is followed. Finally, any password value changes after user creation
+  will have no effect on the users' actual password.
 
 ## Attributes Reference
 
