@@ -189,6 +189,7 @@ func resourceIAMUserUpdate(_ context.Context, d *schema.ResourceData, m interfac
 		profile.FamilyName = d.Get("last_name").(string)
 		profile.GivenName = d.Get("first_name").(string)
 		profile.Contact.EmailAddress = d.Get("email").(string)
+		profile.ID = d.Id()
 		_, _, err = client.Users.LegacyUpdateUser(*profile)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("resourceIAMUserUpdate LegacyUpdateUser: %w", err))
