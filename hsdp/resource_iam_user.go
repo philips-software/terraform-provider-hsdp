@@ -1,7 +1,9 @@
 package hsdp
 
 import (
+	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -13,11 +15,12 @@ func resourceIAMUser() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		Create: resourceIAMUserCreate,
-		Read:   resourceIAMUserRead,
-		Update: resourceIAMUserUpdate,
-		Delete: resourceIAMUserDelete,
+		CreateContext: resourceIAMUserCreate,
+		ReadContext:   resourceIAMUserRead,
+		UpdateContext: resourceIAMUserUpdate,
+		DeleteContext: resourceIAMUserDelete,
 
+		SchemaVersion: 1,
 		Schema: map[string]*schema.Schema{
 			"username": &schema.Schema{
 				Type:       schema.TypeString,
@@ -31,6 +34,11 @@ func resourceIAMUser() *schema.Resource {
 			"email": &schema.Schema{
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"password": {
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
 			},
 			"first_name": &schema.Schema{
 				Type:     schema.TypeString,
@@ -52,11 +60,13 @@ func resourceIAMUser() *schema.Resource {
 	}
 }
 
-func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	config := m.(*Config)
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	last := d.Get("last_name").(string)
@@ -64,6 +74,7 @@ func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
 	email := d.Get("username").(string) // Deprecated
 	mobile := d.Get("mobile").(string)
 	login := d.Get("login").(string)
+	password := d.Get("password").(string)
 	if login == "" {
 		login = email
 	}
@@ -78,13 +89,13 @@ func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
 			if user.AccountStatus.Disabled {
 				// Retrigger activation email
 				_, _, err = client.Users.ResendActivation(email)
-				return err
+				return diag.FromErr(err)
 			}
-			err = resourceIAMUserRead(d, m)
-			if err == nil {
+			diags = resourceIAMUserRead(ctx, d, m)
+			if len(diags) == 0 {
 				d.SetId(user.ID)
 			}
-			return nil
+			return diags
 		}
 	}
 	person := iam.Person{
@@ -93,7 +104,8 @@ func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
 			Family: last,
 			Given:  first,
 		},
-		LoginID: login,
+		LoginID:  login,
+		Password: password,
 		Telecom: []iam.TelecomEntry{
 			{
 				System: "email",
@@ -112,31 +124,34 @@ func resourceIAMUserCreate(d *schema.ResourceData, m interface{}) error {
 	}
 	user, _, err := client.Users.CreateUser(person)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 	if user == nil {
-		return fmt.Errorf("Error creating user")
+		return diag.FromErr(fmt.Errorf("Error creating user: %w", err))
 	}
 	d.SetId(user.ID)
-	return nil
+	return diags
 }
 
-func resourceIAMUserRead(d *schema.ResourceData, m interface{}) error {
+func resourceIAMUserRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	config := m.(*Config)
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id := d.Id()
 
 	user, _, err := client.Users.GetUserByID(id)
 	if err != nil {
+		// Means the user was cleared, probably due to not activating their account
 		if _, ok := err.(*iam.UserError); ok {
 			d.SetId("")
-			return nil
+			return diags
 		}
-		return err
+		return diag.FromErr(err)
 	}
 	_ = d.Set("login", user.LoginID)
 	_ = d.Set("last_name", user.Name.Family)
@@ -144,14 +159,16 @@ func resourceIAMUserRead(d *schema.ResourceData, m interface{}) error {
 	_ = d.Set("email", user.EmailAddress)
 	_ = d.Set("login", user.LoginID)
 	_ = d.Set("organization_id", user.ManagingOrganization)
-	return nil
+	return diags
 }
 
-func resourceIAMUserUpdate(d *schema.ResourceData, m interface{}) error {
+func resourceIAMUserUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	config := m.(*Config)
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var p iam.Person
@@ -161,17 +178,39 @@ func resourceIAMUserUpdate(d *schema.ResourceData, m interface{}) error {
 		newLogin := d.Get("login").(string)
 		_, _, err := client.Users.ChangeLoginID(p, newLogin)
 		if err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
-	return nil
+	if d.HasChange("last_name") || d.HasChange("first_name") || d.HasChange("email") {
+		profile, _, err := client.Users.LegacyGetUserByUUID(d.Id())
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("resourceIAMUserUpdate LegacyGetUserByUUID: %w", err))
+		}
+		profile.FamilyName = d.Get("last_name").(string)
+		profile.GivenName = d.Get("first_name").(string)
+		profile.Contact.EmailAddress = d.Get("email").(string)
+		_, _, err = client.Users.LegacyUpdateUser(*profile)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("resourceIAMUserUpdate LegacyUpdateUser: %w", err))
+		}
+	}
+	if d.HasChange("password") {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "password change not propagated",
+			Detail:   "changing the password after a user is created has no effect",
+		})
+	}
+	return diags
 }
 
-func resourceIAMUserDelete(d *schema.ResourceData, m interface{}) error {
+func resourceIAMUserDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	config := m.(*Config)
 	client, err := config.IAMClient()
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	id := d.Id()
@@ -180,12 +219,12 @@ func resourceIAMUserDelete(d *schema.ResourceData, m interface{}) error {
 	if err != nil {
 		if _, ok := err.(*iam.UserError); ok {
 			d.SetId("")
-			return nil
+			return diags
 		}
-		return err
+		return diag.FromErr(err)
 	}
 	if user == nil {
-		return nil
+		return diags
 	}
 	var person iam.Person
 	person.ID = user.ID
@@ -193,5 +232,5 @@ func resourceIAMUserDelete(d *schema.ResourceData, m interface{}) error {
 	if ok {
 		d.SetId("")
 	}
-	return nil
+	return diags
 }
