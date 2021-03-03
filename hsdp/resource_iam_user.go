@@ -49,9 +49,8 @@ func resourceIAMUser() *schema.Resource {
 				Required: true,
 			},
 			"mobile": &schema.Schema{
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "mobile is deprecated and no longer updated. It is safe to remove it",
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"organization_id": &schema.Schema{
 				Type:     schema.TypeString,
@@ -182,7 +181,7 @@ func resourceIAMUserUpdate(_ context.Context, d *schema.ResourceData, m interfac
 			return diag.FromErr(err)
 		}
 	}
-	if d.HasChange("last_name") || d.HasChange("first_name") || d.HasChange("email") {
+	if d.HasChange("last_name") || d.HasChange("first_name") || d.HasChange("email") || d.HasChange("mobile") {
 		profile, _, err := client.Users.LegacyGetUserByUUID(d.Id())
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("resourceIAMUserUpdate LegacyGetUserByUUID: %w", err))
@@ -193,6 +192,7 @@ func resourceIAMUserUpdate(_ context.Context, d *schema.ResourceData, m interfac
 		if profile.MiddleName == "" {
 			profile.MiddleName = " "
 		}
+		profile.Contact.MobilePhone = d.Get("mobile").(string)
 		profile.ID = d.Id()
 		_, _, err = client.Users.LegacyUpdateUser(*profile)
 		if err != nil {
