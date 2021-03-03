@@ -1,8 +1,8 @@
 # hsdp_iam_user
-Provides a resource for managing HSDP IAM application under a proposition. When a new user is created an invitation email is triggered with a validity of 24 hours. If the user fails to activate his/her account within this time period the account will be removed in the backend and the resource should be removed or cleared from tfstate.
-
->Typically this resource is used to only test account. We highly recommend using the IAM Self serviceUI which HSDP provides for day to day user management tasks
-
+Provides a resource for managing an HSDP IAM user. 
+When a new user is created an invitation email is triggered with a validity of 72 hours. 
+If not activated within this period IAM will purge the account.
+The provider will recreate the user in that case.
 
 ## Example Usage
 
@@ -14,7 +14,6 @@ resource "hsdp_iam_user" "developer" {
   email           = "developer@1e100.io"
   first_name      = "Devel"
   last_name       = "Oper"
-  mobile          = "316123456789"
   organization_id = hsdp_iam_org.testdev.id
 }
 ```
@@ -23,12 +22,13 @@ resource "hsdp_iam_user" "developer" {
 
 The following arguments are supported:
 
+* `organization_id` - (Required) The managing organization of the user
+
 * `login` - (Required) The login ID of the user (NEW since v0.4.0)
 * `email` - (Required) The email address of the user
 * `first_name` - (Required) First name of the user
 * `last_name` - (Required) Last name of the user
-* `mobile` - (Required) Mobile number of the user. E.164 format
-* `organization_id` - (Required) The managing organization of the user
+* `mobile` - (Optional, deprecated) Mobile number of the user. E.164 format
 * `password` - (Optional) When specified this will skip the email activation 
   flow and immediately activate the IAM account. **Very Important**: you are responsible
   for sharing this password with the new IAM user through some channel of communication. 

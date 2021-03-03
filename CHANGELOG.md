@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## v0.12.9
 - Suppress global_reference_id diffs changes when generated
 
-# v0.12.8
+## v0.12.8
 - Better error reporting and fix root cause of crashing bug
 
 ## v0.12.7

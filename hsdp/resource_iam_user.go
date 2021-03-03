@@ -20,7 +20,7 @@ func resourceIAMUser() *schema.Resource {
 		UpdateContext: resourceIAMUserUpdate,
 		DeleteContext: resourceIAMUserDelete,
 
-		SchemaVersion: 1,
+		SchemaVersion: 2,
 		Schema: map[string]*schema.Schema{
 			"username": &schema.Schema{
 				Type:       schema.TypeString,
@@ -49,8 +49,9 @@ func resourceIAMUser() *schema.Resource {
 				Required: true,
 			},
 			"mobile": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "mobile is deprecated and no longer updated. It is safe to remove it",
 			},
 			"organization_id": &schema.Schema{
 				Type:     schema.TypeString,
