@@ -15,7 +15,7 @@ require (
 	github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152
 	github.com/loafoe/easyssh-proxy/v2 v2.0.2
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
-	github.com/philips-software/go-hsdp-api v0.36.1
+	github.com/philips-software/go-hsdp-api v0.36.2-0.20210303095016-01c2b1b3c8f6
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
 	github.com/zclconf/go-cty v1.7.1 // indirect
