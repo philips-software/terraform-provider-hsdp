@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.12.11
+- Documentation fixes
+- Fix hsdp_iam_user.mobile field updating
+- Fix corner case where IAM generates error 104 on profile update
+
 ## v0.12.10
 - [NEW] optional `password` argument for immediate activation of `hsdp_iam_user`
 - Support `hsdp_iam_user` field updates (first_name, last_name, login, email)
