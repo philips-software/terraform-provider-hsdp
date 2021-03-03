@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.12.12
+- Workaround for IAM profile update issue
+
 ## v0.12.11
 - Documentation fixes
 - Fix hsdp_iam_user.mobile field updating
