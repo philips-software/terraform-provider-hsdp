@@ -20,7 +20,7 @@ func resourceIAMUser() *schema.Resource {
 		UpdateContext: resourceIAMUserUpdate,
 		DeleteContext: resourceIAMUserDelete,
 
-		SchemaVersion: 2,
+		SchemaVersion: 1,
 		Schema: map[string]*schema.Schema{
 			"username": &schema.Schema{
 				Type:       schema.TypeString,

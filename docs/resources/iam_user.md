@@ -28,7 +28,7 @@ The following arguments are supported:
 * `email` - (Required) The email address of the user
 * `first_name` - (Required) First name of the user
 * `last_name` - (Required) Last name of the user
-* `mobile` - (Optional, deprecated) Mobile number of the user. E.164 format
+* `mobile` - (Optional) Mobile number of the user. E.164 format
 * `password` - (Optional) When specified this will skip the email activation 
   flow and immediately activate the IAM account. **Very Important**: you are responsible
   for sharing this password with the new IAM user through some channel of communication. 
