@@ -309,7 +309,7 @@ func checkForPermissionErrors(client *dicom.Client, resp *dicom.Response, err er
 	if resp == nil || resp.StatusCode > 500 {
 		return err
 	}
-	if resp.StatusCode == http.StatusForbidden || resp.StatusCode == http.StatusMethodNotAllowed {
+	if resp.StatusCode == http.StatusForbidden {
 		_ = client.TokenRefresh()
 		return err
 	}
