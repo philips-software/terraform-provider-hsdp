@@ -6,6 +6,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/stl"
+	"log"
+	"sort"
 )
 
 func resourceSTLConfig() *schema.Resource {
@@ -37,14 +39,32 @@ func resourceSTLConfig() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"tcp": {
 							Type:     schema.TypeSet,
-							Required: true,
-							MaxItems: 65535,
+							Optional: true,
+							MaxItems: 1024,
 							Elem:     &schema.Schema{Type: schema.TypeInt},
 						},
 						"udp": {
 							Type:     schema.TypeSet,
-							Required: true,
-							MaxItems: 65535,
+							Optional: true,
+							MaxItems: 1024,
+							Elem:     &schema.Schema{Type: schema.TypeInt},
+						},
+						"clear_on_destroy": {
+							Description: "Clear all exceptions on resource destroy",
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+						},
+						"ensure_tcp": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							MaxItems: 1024,
+							Elem:     &schema.Schema{Type: schema.TypeInt},
+						},
+						"ensure_udp": {
+							Type:     schema.TypeSet,
+							Optional: true,
+							MaxItems: 1024,
 							Elem:     &schema.Schema{Type: schema.TypeInt},
 						},
 					},
@@ -93,6 +113,15 @@ func resourceSTLConfig() *schema.Resource {
 	}
 }
 
+func containsInt(s []int, e int) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
 func resourceSTLConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
@@ -129,6 +158,9 @@ func resourceSTLConfigDelete(ctx context.Context, d *schema.ResourceData, m inte
 			return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppFirewallExceptions: %w", err))
 		}
 	}
+	if clearFirewallExceptionsOnDestroy(d) {
+		_, err = client.Config.UpdateAppFirewallExceptions(ctx, fwExceptionRef)
+	}
 	syncSTLIfNeeded(ctx, client, d, m)
 	d.SetId("")
 	return diags
@@ -138,7 +170,7 @@ func resourceSTLConfigUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	return resourceSTLConfigCreate(ctx, d, m)
 }
 
-func resourceDataToInput(fwExceptions *stl.UpdateAppFirewallExceptionInput, appLogging *stl.UpdateAppLoggingInput, d *schema.ResourceData, m interface{}) error {
+func resourceDataToInput(ctx context.Context, client *stl.Client, fwExceptions *stl.UpdateAppFirewallExceptionInput, appLogging *stl.UpdateAppLoggingInput, d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
 
 	if d == nil {
@@ -148,13 +180,45 @@ func resourceDataToInput(fwExceptions *stl.UpdateAppFirewallExceptionInput, appL
 	// check if serialNumber checks out, if not we may need to fetch by ID
 
 	// Firewall exceptions
+	if err := validateFirewallExceptions(d); err != nil {
+		return err
+	}
+	tcp := []int{}
+	udp := []int{}
+	ensureTCP := []int{}
+	ensureUDP := []int{}
+
 	if v, ok := d.GetOk("firewall_exceptions"); ok {
 		vL := v.(*schema.Set).List()
 		for i, vi := range vL {
 			_, _ = config.Debug("Reading Logging Set %d\n", i)
 			mVi := vi.(map[string]interface{})
-			fwExceptions.TCP = expandIntList(mVi["tcp"].(*schema.Set).List())
-			fwExceptions.UDP = expandIntList(mVi["udp"].(*schema.Set).List())
+			if _, ok := mVi["tcp"].(*schema.Set); ok {
+				tcp = expandIntList(mVi["tcp"].(*schema.Set).List())
+			}
+			if _, ok := mVi["udp"].(*schema.Set); ok {
+				udp = expandIntList(mVi["udp"].(*schema.Set).List())
+			}
+			ensureTCP = expandIntList(mVi["ensure_tcp"].(*schema.Set).List())
+			ensureUDP = expandIntList(mVi["ensure_udp"].(*schema.Set).List())
+		}
+	}
+	if len(tcp) > 0 {
+		fwExceptions.TCP = tcp
+	}
+	if len(udp) > 0 {
+		fwExceptions.UDP = udp
+	}
+	if len(ensureTCP) > 0 || len(ensureUDP) > 0 { // Fetch current settings
+		currentSettings, err := client.Config.GetFirewallExceptionsBySerial(ctx, serialNumber)
+		if err != nil {
+			return err
+		}
+		if len(ensureTCP) > 0 {
+			fwExceptions.TCP = mergePorts(currentSettings.TCP, ensureTCP)
+		}
+		if len(ensureUDP) > 0 {
+			fwExceptions.UDP = mergePorts(currentSettings.UDP, ensureUDP)
 		}
 	}
 	fwExceptions.SerialNumber = serialNumber
@@ -196,6 +260,24 @@ func resourceDataToInput(fwExceptions *stl.UpdateAppFirewallExceptionInput, appL
 	return nil
 }
 
+func mergePorts(i []int, ensure []int) []int {
+	// Sort
+	ports := append(i, ensure...)
+	sort.Ints(ports)
+	// Unique
+	seen := make(map[int]struct{}, len(ports))
+	j := 0
+	for _, v := range ports {
+		if _, ok := seen[v]; ok {
+			continue
+		}
+		seen[v] = struct{}{}
+		ports[j] = v
+		j++
+	}
+	return ports[:j]
+}
+
 func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.AppLogging, d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
 
@@ -224,10 +306,30 @@ func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.
 	if _, ok := d.GetOk("firewall_exceptions"); ok {
 		s := &schema.Set{F: resourceMetricsThresholdHash}
 		fwExceptionsDef := make(map[string]interface{})
-		fwExceptionsDef["tcp"] = fwExceptions.TCP
-		fwExceptionsDef["udp"] = fwExceptions.UDP
+		ensureTCP := getPortList(d, "ensure_tcp")
+		actualTCP := []int{}
+		for _, p := range ensureTCP {
+			if containsInt(fwExceptions.TCP, p) {
+				actualTCP = append(actualTCP, p)
+			}
+		}
+		fwExceptionsDef["ensure_tcp"] = actualTCP
+		ensureUDP := getPortList(d, "ensure_udp")
+		actualUDP := []int{}
+		for _, p := range ensureUDP {
+			if containsInt(fwExceptions.UDP, p) {
+				actualUDP = append(actualUDP, p)
+			}
+		}
+		fwExceptionsDef["ensure_udp"] = actualUDP
+		if !hasFirewallExceptionField(d, "ensure_tcp") {
+			fwExceptionsDef["tcp"] = fwExceptions.TCP
+		}
+		if !hasFirewallExceptionField(d, "ensure_udp") {
+			fwExceptionsDef["udp"] = fwExceptions.UDP
+		}
 		s.Add(fwExceptionsDef)
-		_, _ = config.Debug("Adding firewall exceptions data")
+		_, _ = config.Debug("Adding firewall exceptions data\n")
 		err := d.Set("firewall_exceptions", s)
 		if err != nil {
 			return fmt.Errorf("dataToResourceData: firewall_exceptions: %w", err)
@@ -268,7 +370,6 @@ func resourceSTLConfigRead(ctx context.Context, d *schema.ResourceData, m interf
 
 func resourceSTLConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
-	var diags diag.Diagnostics
 	var client *stl.Client
 	var err error
 
@@ -282,7 +383,7 @@ func resourceSTLConfigCreate(ctx context.Context, d *schema.ResourceData, m inte
 	}
 	var loggingRef stl.UpdateAppLoggingInput
 	var fwExceptionRef stl.UpdateAppFirewallExceptionInput
-	err = resourceDataToInput(&fwExceptionRef, &loggingRef, d, m)
+	err = resourceDataToInput(ctx, client, &fwExceptionRef, &loggingRef, d, m)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -302,5 +403,75 @@ func resourceSTLConfigCreate(ctx context.Context, d *schema.ResourceData, m inte
 		d.SetId(loggingRef.SerialNumber)
 	}
 	syncSTLIfNeeded(ctx, client, d, m)
-	return diags
+	return resourceSTLConfigRead(ctx, d, m)
+}
+
+func clearFirewallExceptionsOnDestroy(d *schema.ResourceData) bool {
+	if v, ok := d.GetOk("firewall_exceptions"); ok {
+		vL := v.(*schema.Set).List()
+		for _, vi := range vL {
+			mVi := vi.(map[string]interface{})
+			if choice, ok := mVi["clear_on_destroy"].(bool); ok {
+				return choice
+			}
+		}
+	}
+	return false
+}
+
+func hasFirewallExceptionField(d *schema.ResourceData, fieldName string) bool {
+	if v, ok := d.GetOk("firewall_exceptions"); ok {
+		vL := v.(*schema.Set).List()
+		for _, vi := range vL {
+			mVi := vi.(map[string]interface{})
+			if mVi[fieldName] != nil {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func getPortList(d *schema.ResourceData, field string) []int {
+	if v, ok := d.GetOk("firewall_exceptions"); ok {
+		vL := v.(*schema.Set).List()
+		for _, vi := range vL {
+			mVi := vi.(map[string]interface{})
+			portList := expandIntList(mVi[field].(*schema.Set).List())
+			sort.Ints(portList)
+			return portList
+		}
+	}
+	return []int{}
+}
+
+func validateFirewallExceptions(d *schema.ResourceData) error {
+	log.Printf("Validating firewall Exceptions\n")
+	if v, ok := d.GetOk("firewall_exceptions"); ok {
+		foundTCP := []int{}
+		foundUDP := []int{}
+		foundEnsureTCP := []int{}
+		foundEnsureUDP := []int{}
+		vL := v.(*schema.Set).List()
+		for _, vi := range vL {
+			mVi := vi.(map[string]interface{})
+			foundTCP = expandIntList(mVi["tcp"].(*schema.Set).List())
+			foundUDP = expandIntList(mVi["udp"].(*schema.Set).List())
+			foundEnsureTCP = expandIntList(mVi["ensure_tcp"].(*schema.Set).List())
+			foundEnsureUDP = expandIntList(mVi["ensure_udp"].(*schema.Set).List())
+		}
+		if len(foundEnsureTCP) > 0 && len(foundTCP) > 0 {
+			return fmt.Errorf("conflicting 'ensure_tcp' and 'tcp")
+		}
+		if len(foundEnsureUDP) > 0 && len(foundUDP) > 0 {
+			return fmt.Errorf("conflicting 'ensure_udp' and 'udp")
+		}
+		if len(foundTCP) > 0 && len(foundEnsureTCP) > 0 {
+			return fmt.Errorf("conflicting 'tcp' and 'ensure_tcp")
+		}
+		if len(foundUDP) > 0 && len(foundEnsureUDP) > 0 {
+			return fmt.Errorf("conflicting 'udp' and 'ensure_udp")
+		}
+	}
+	return nil
 }
