@@ -12,8 +12,8 @@ resource "hsdp_stl_config" "sme100" {
   serial_number = data.hsdp_stl_device.sme100.serial_number
   
   firewall_exceptions {
-    tcp = [8080, 4443]
-    udp = [53]
+    ensure_tcp = [2575]
+    ensure_udp = [2345]
   }
 
   logging {
@@ -32,8 +32,11 @@ resource "hsdp_stl_config" "sme100" {
 ## Argument reference
 * `serial_number` - (Required) The serial of the device this config should be applied to
 * `firewall_exceptions` - (Optional) Firewall exceptions
-  * `tcp` - (Required, list(int)) Array of TCP ports to allow
-  * `udp` - (Required, list(int)) Array of UDP ports to allow
+  * `ensure_tcp` - (Optional, list(int)) Array of TCP ports to add. Conflicts with `tcp`
+  * `ensure_udp` - (Optional, list(int)) Array of UDP ports to add. Conflicts with `udp`
+  * `tcp` - (Optional, list(int)) Array of TCP ports to allow. Conflicts with `ensure_tcp`
+  * `udp` - (Optional, list(int)) Array of UDP ports to allow. Conflicts with `ensure_udp`
+  * `clear_on_destroy` - (Optional, boolean) When set to true, clears specified ports on destroy. Default is `true`
 * `logging` - (Optional) Log forwarding and fluent-bit logging configuration for the device
   * `raw_config` - (Optional) Fluent-bit raw configuration to use
   * `hsdp_logging` - (Optional, boolean) Enable or disable HSDP Logging feature   
