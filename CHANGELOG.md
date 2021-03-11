@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.13.0
+- Support `ensure_tcp` and `ensure_udp` in STL firewall exception config
+- Documentation fixes
+
 ## v0.12.12
 - Workaround for IAM profile update issue
 
