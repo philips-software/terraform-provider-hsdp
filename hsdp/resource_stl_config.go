@@ -152,14 +152,11 @@ func resourceSTLConfigDelete(ctx context.Context, d *schema.ResourceData, m inte
 			return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppLogging: %w", err))
 		}
 	}
-	if _, ok := d.GetOk("firewall_exceptions"); ok {
+	if _, ok := d.GetOk("firewall_exceptions"); ok && clearFirewallExceptionsOnDestroy(d) {
 		_, err = client.Config.UpdateAppFirewallExceptions(ctx, fwExceptionRef)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppFirewallExceptions: %w", err))
 		}
-	}
-	if clearFirewallExceptionsOnDestroy(d) {
-		_, err = client.Config.UpdateAppFirewallExceptions(ctx, fwExceptionRef)
 	}
 	syncSTLIfNeeded(ctx, client, d, m)
 	d.SetId("")
@@ -260,24 +257,6 @@ func resourceDataToInput(ctx context.Context, client *stl.Client, fwExceptions *
 	return nil
 }
 
-func mergePorts(i []int, ensure []int) []int {
-	// Sort
-	ports := append(i, ensure...)
-	sort.Ints(ports)
-	// Unique
-	seen := make(map[int]struct{}, len(ports))
-	j := 0
-	for _, v := range ports {
-		if _, ok := seen[v]; ok {
-			continue
-		}
-		seen[v] = struct{}{}
-		ports[j] = v
-		j++
-	}
-	return ports[:j]
-}
-
 func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.AppLogging, d *schema.ResourceData, m interface{}) error {
 	config := m.(*Config)
 
@@ -306,6 +285,8 @@ func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.
 	if _, ok := d.GetOk("firewall_exceptions"); ok {
 		s := &schema.Set{F: resourceMetricsThresholdHash}
 		fwExceptionsDef := make(map[string]interface{})
+
+		// Determine actual TCP/UDP settings
 		ensureTCP := getPortList(d, "ensure_tcp")
 		actualTCP := []int{}
 		for _, p := range ensureTCP {
@@ -322,6 +303,8 @@ func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.
 			}
 		}
 		fwExceptionsDef["ensure_udp"] = actualUDP
+
+		// This is explicit TCP/UDP port list mode
 		if !hasFirewallExceptionField(d, "ensure_tcp") {
 			fwExceptionsDef["tcp"] = fwExceptions.TCP
 		}
@@ -430,6 +413,48 @@ func hasFirewallExceptionField(d *schema.ResourceData, fieldName string) bool {
 		}
 	}
 	return false
+}
+
+func mergePorts(i []int, ensure []int) []int {
+	// Sort
+	ports := append(i, ensure...)
+	sort.Ints(ports)
+	// Unique
+	seen := make(map[int]struct{}, len(ports))
+	j := 0
+	for _, v := range ports {
+		if _, ok := seen[v]; ok {
+			continue
+		}
+		seen[v] = struct{}{}
+		ports[j] = v
+		j++
+	}
+	return ports[:j]
+}
+
+func prunePorts(i []int, pruneList []int) []int {
+	// Sort
+	ports := append(i)
+	sort.Ints(ports)
+	// Prune
+	j := 0
+	for _, v := range ports {
+		prune := false
+		for _, p := range pruneList {
+			if v == p {
+				prune = true
+				continue
+			}
+		}
+		if prune {
+			continue
+		}
+		ports[j] = v
+		j++
+	}
+
+	return ports[:j]
 }
 
 func getPortList(d *schema.ResourceData, field string) []int {
