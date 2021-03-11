@@ -51,10 +51,10 @@ func resourceSTLConfig() *schema.Resource {
 							Elem:     &schema.Schema{Type: schema.TypeInt},
 						},
 						"clear_on_destroy": {
-							Description: "Clear all exceptions on resource destroy",
+							Description: "Clear ports on resource destroy",
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Default:     false,
+							Default:     true,
 						},
 						"ensure_tcp": {
 							Type:     schema.TypeSet,
@@ -144,8 +144,6 @@ func resourceSTLConfigDelete(ctx context.Context, d *schema.ResourceData, m inte
 	fwExceptionRef := stl.UpdateAppFirewallExceptionInput{
 		SerialNumber: serialNumber,
 	}
-	fwExceptionRef.TCP = []int{}
-	fwExceptionRef.UDP = []int{}
 	// Clear
 	if _, ok := d.GetOk("logging"); ok {
 		_, err = client.Config.UpdateAppLogging(ctx, loggingRef)
@@ -154,6 +152,26 @@ func resourceSTLConfigDelete(ctx context.Context, d *schema.ResourceData, m inte
 		}
 	}
 	if _, ok := d.GetOk("firewall_exceptions"); ok && clearFirewallExceptionsOnDestroy(d) {
+		currentSettings, err := client.Config.GetFirewallExceptionsBySerial(ctx, serialNumber)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("delete STL config: %w", err))
+		}
+		fwExceptionRef.TCP = currentSettings.TCP
+		fwExceptionRef.UDP = currentSettings.UDP
+		if hasFirewallExceptionField(d, "tcp") {
+			fwExceptionRef.TCP = []int{}
+		}
+		if hasFirewallExceptionField(d, "udp") {
+			fwExceptionRef.UDP = []int{}
+		}
+		if hasFirewallExceptionField(d, "ensure_tcp") {
+			pruneList := getPortList(d, "ensure_tcp")
+			fwExceptionRef.TCP = prunePorts(currentSettings.TCP, pruneList)
+		}
+		if hasFirewallExceptionField(d, "ensure_udp") {
+			pruneList := getPortList(d, "ensure_udp")
+			fwExceptionRef.UDP = prunePorts(currentSettings.UDP, pruneList)
+		}
 		_, err = client.Config.UpdateAppFirewallExceptions(ctx, fwExceptionRef)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppFirewallExceptions: %w", err))
