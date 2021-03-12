@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.13.2
+- Fix clear_on_destroy state
+
+## v0.13.1
+- Documentation fix
+
 ## v0.13.0
 - Support `ensure_tcp` and `ensure_udp` in STL firewall exception config
 - Documentation fixes

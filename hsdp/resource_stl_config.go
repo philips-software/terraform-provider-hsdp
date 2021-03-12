@@ -330,6 +330,7 @@ func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.
 		if !hasFirewallExceptionField(d, "ensure_udp") {
 			fwExceptionsDef["udp"] = fwExceptions.UDP
 		}
+		fwExceptionsDef["clear_on_destroy"] = clearFirewallExceptionsOnDestroy(d)
 		s.Add(fwExceptionsDef)
 		_, _ = config.Debug("Adding firewall exceptions data\n")
 		err := d.Set("firewall_exceptions", s)
@@ -418,7 +419,7 @@ func clearFirewallExceptionsOnDestroy(d *schema.ResourceData) bool {
 			}
 		}
 	}
-	return false
+	return true
 }
 
 func hasFirewallExceptionField(d *schema.ResourceData, fieldName string) bool {
