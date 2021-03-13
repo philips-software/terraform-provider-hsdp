@@ -32,8 +32,5 @@ func suppressDefault(k, old, new string, d *schema.ResourceData) bool {
 }
 
 func suppressWhenGenerated(k, old, new string, d *schema.ResourceData) bool {
-	if new == "" {
-		return true
-	}
-	return false
+	return new == ""
 }

@@ -2,6 +2,9 @@ package hsdp
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/philips-software/go-hsdp-api/cartel"
@@ -13,8 +16,6 @@ import (
 	"github.com/philips-software/go-hsdp-api/pki"
 	"github.com/philips-software/go-hsdp-api/s3creds"
 	"github.com/philips-software/go-hsdp-api/stl"
-	"net/http"
-	"os"
 )
 
 // Config contains configuration for the client
@@ -144,7 +145,7 @@ func (c *Config) setupSTLClient() {
 	if region == "" {
 		region = "dev"
 	}
-	ac, err := config.New(config.WithRegion(c.Region))
+	ac, err := config.New(config.WithRegion(region))
 	if err == nil {
 		if url := ac.Service("stl").URL; c.STLURL == "" {
 			c.STLURL = url
@@ -312,5 +313,4 @@ func (c *Config) setupPKIClient() {
 	}
 	c.pkiClient = client
 	c.pkiClientErr = nil
-	return
 }

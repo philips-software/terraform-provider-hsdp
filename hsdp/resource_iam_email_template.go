@@ -3,6 +3,7 @@ package hsdp
 import (
 	"context"
 	"encoding/base64"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -24,41 +25,41 @@ func resourceIAMEmailTemplate() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"type": &schema.Schema{
+			"type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"from": &schema.Schema{
+			"from": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ForceNew:         true,
 				DiffSuppressFunc: suppressDefault,
 			},
-			"format": &schema.Schema{
+			"format": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Default:  "HTML",
 			},
-			"subject": &schema.Schema{
+			"subject": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Default:  "default",
 			},
-			"message": &schema.Schema{
+			"message": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"locale": &schema.Schema{
+			"locale": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ForceNew:         true,
 				DiffSuppressFunc: suppressDefault,
 			},
-			"link": &schema.Schema{
+			"link": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ForceNew:         true,
@@ -96,11 +97,8 @@ func resourceIAMEmailTemplateCreate(_ context.Context, d *schema.ResourceData, m
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	_ = d.Set("message_base64", createdTemplate.Message)
 	d.SetId(createdTemplate.ID)
-	d.Set("message_base64", createdTemplate.Message)
 	return diags
 }
 
@@ -118,17 +116,14 @@ func resourceIAMEmailTemplateRead(_ context.Context, d *schema.ResourceData, m i
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	d.Set("subject", template.Subject)
+	_ = d.Set("subject", template.Subject)
 	if template.Locale != "default" {
-		d.Set("locale", template.Locale)
+		_ = d.Set("locale", template.Locale)
 	}
-	d.Set("from", template.From)
-	d.Set("format", template.Format)
-	d.Set("type", template.Type)
-	d.Set("link", template.Link)
+	_ = d.Set("from", template.From)
+	_ = d.Set("format", template.Format)
+	_ = d.Set("type", template.Type)
+	_ = d.Set("link", template.Link)
 	// Message is not returned in the read call
 
 	d.SetId(template.ID)

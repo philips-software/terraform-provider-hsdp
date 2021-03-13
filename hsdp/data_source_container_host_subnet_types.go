@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -36,7 +37,7 @@ func dataSourceContainerHostSubnetTypes() *schema.Resource {
 
 }
 
-func dataSourceContainerHostSubnetTypesRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceContainerHostSubnetTypesRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 	var diags diag.Diagnostics
 
@@ -57,9 +58,9 @@ func dataSourceContainerHostSubnetTypesRead(ctx context.Context, d *schema.Resou
 		ids[name] = subnet.ID
 		networks[name] = subnet.Network
 	}
-	d.Set("ids", ids)
-	d.Set("networks", networks)
-	d.Set("names", names)
+	_ = d.Set("ids", ids)
+	_ = d.Set("networks", networks)
+	_ = d.Set("names", names)
 	d.SetId("subnets")
 	return diags
 }

@@ -3,6 +3,7 @@ package hsdp
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/stl"
@@ -164,5 +165,4 @@ func syncSTLIfNeeded(ctx context.Context, c *stl.Client, d *schema.ResourceData,
 	serialNumber := d.Get("serial_number").(string)
 	_, _ = config.Debug("Syncing %s\n", serialNumber)
 	_ = c.Devices.SyncDeviceConfig(ctx, serialNumber)
-	return
 }

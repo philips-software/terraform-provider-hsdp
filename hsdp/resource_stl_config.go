@@ -3,11 +3,12 @@ package hsdp
 import (
 	"context"
 	"fmt"
+	"log"
+	"sort"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/stl"
-	"log"
-	"sort"
 )
 
 const (
@@ -459,7 +460,7 @@ func mergePorts(i []int, ensure []int) []int {
 
 func prunePorts(i []int, pruneList []int) []int {
 	// Sort
-	ports := append(i)
+	ports := i
 	sort.Ints(ports)
 	// Prune
 	j := 0
