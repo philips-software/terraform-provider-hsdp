@@ -10,6 +10,10 @@ import (
 	"sort"
 )
 
+const (
+	clearOnDestroyDefault = true
+)
+
 func resourceSTLConfig() *schema.Resource {
 	return &schema.Resource{
 		SchemaVersion: 1,
@@ -54,7 +58,7 @@ func resourceSTLConfig() *schema.Resource {
 							Description: "Clear ports on resource destroy",
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Default:     true,
+							Default:     clearOnDestroyDefault,
 						},
 						"ensure_tcp": {
 							Type:     schema.TypeSet,
@@ -419,7 +423,7 @@ func clearFirewallExceptionsOnDestroy(d *schema.ResourceData) bool {
 			}
 		}
 	}
-	return true
+	return clearOnDestroyDefault
 }
 
 func hasFirewallExceptionField(d *schema.ResourceData, fieldName string) bool {
