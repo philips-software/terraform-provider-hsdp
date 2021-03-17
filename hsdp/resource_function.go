@@ -56,10 +56,12 @@ func resourceFunction() *schema.Resource {
 						"start": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"run_every": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 					},
 				},
@@ -74,11 +76,13 @@ func resourceFunction() *schema.Resource {
 						"type": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"credentials": {
 							Type:         schema.TypeString,
 							Optional:     true,
 							Sensitive:    true,
+							ForceNew:     true,
 							ValidateFunc: validation.StringIsJSON,
 						},
 					},
@@ -301,6 +305,9 @@ func getSchedule(d *schema.ResourceData) (*iron.Schedule, bool, error) {
 	if !ok {
 		return nil, false, nil
 	}
+	if len(schedule) == 0 {
+		return nil, false, nil
+	}
 	scheduleResource, ok := schedule[0].(map[string]interface{})
 	if !ok {
 		return nil, false, nil
@@ -323,9 +330,9 @@ func getSchedule(d *schema.ResourceData) (*iron.Schedule, bool, error) {
 func calcRunEvery(runEvery string) (int, error) {
 	var unit string
 	var value int
-	scanned, err := fmt.Sscanf("%d%s", runEvery, &value, &unit)
+	scanned, err := fmt.Sscanf(runEvery, "%d%s", &value, &unit)
 	if err != nil {
-		return 0, err
+		return 0, fmt.Errorf("runEvery scan [%s]: %w", runEvery, err)
 	}
 	if scanned != 2 {
 		return 0, fmt.Errorf("invalid run_every format: %s", runEvery)
