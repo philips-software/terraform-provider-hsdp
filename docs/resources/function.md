@@ -28,7 +28,7 @@ resource "hsdp_function" "rds_backup" {
   }
 
   schedule {
-    start = "2021-01-01T04:00Z"
+    start = "2021-01-01T04:00:00Z"
     run_every = "1d"
   }
 
