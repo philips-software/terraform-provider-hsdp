@@ -43,13 +43,13 @@ resource "hsdp_function" "rds_backup" {
 The following arguments are supported:
 
 * `name` - (Required) The name of the function
-* `docker_image` - (Required) The docker image that contains the logic for the function
-* `docker_credentials` - (Optionals) The docker registry credentials
+* `docker_image` - (Required) The docker image that contains the logic of the function
+* `docker_credentials` - (Optional) The docker registry credentials
   * `username` - (Required) The registry username
   * `password` - (Required) The registry password  
 * `environment` - (Optional, map) The environment variables to set in the docker container before executing the function
-* `schedule` - (Optional) Schedule the function. When not set, the function is just a task.
-  * `start` - (Required, RFC3339) When to start the schedule
+* `schedule` - (Optional) Schedule the function. When not set, the function becomes a task.
+  * `start` - (Required, RFC3339) When to start the schedule. Example: `2021-01-01T04:00:00Z`
   * `run_every` - (Required) Run the function every `{value}{unit}` period. Supported units are `s`, `m`, `h`, `d` for second, minute, hours, days respectively.
     Example: a value of `"20m"` would run the function every 20 minutes.
 * `backend` - (Required) The backend to use for scheduling your functions.

@@ -337,18 +337,23 @@ func calcRunEvery(runEvery string) (int, error) {
 	if scanned != 2 {
 		return 0, fmt.Errorf("invalid run_every format: %s", runEvery)
 	}
+	seconds := 0
 	switch unit {
 	case "s":
-		return value, nil
+		seconds = value
 	case "m":
-		return 60 * value, nil
+		seconds = 60 * value
 	case "h":
-		return 3600 * value, nil
+		seconds = 3600 * value
 	case "d":
-		return 86400 * value, nil
+		seconds = 86400 * value
 	default:
 		return 0, fmt.Errorf("unit '%s' not supported", unit)
 	}
+	if seconds < 60 {
+		return 0, fmt.Errorf("a value less than 60 seconds is not supported")
+	}
+	return seconds, nil
 }
 
 func newIronClient(d *schema.ResourceData) (*iron.Client, *iron.Config, error) {
