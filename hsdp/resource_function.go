@@ -40,6 +40,12 @@ func resourceFunction() *schema.Resource {
 				Optional:  true,
 				Sensitive: true,
 			},
+			"command": {
+				Type:     schema.TypeList,
+				Required: true,
+				ForceNew: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 			"environment": {
 				Type:      schema.TypeMap,
 				ForceNew:  true,
@@ -94,7 +100,7 @@ func resourceFunction() *schema.Resource {
 
 func resourceFunctionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	ironClient, _, err := newIronClient(d)
+	ironClient, _, _, err := newIronClient(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -122,7 +128,7 @@ func resourceFunctionDelete(ctx context.Context, d *schema.ResourceData, m inter
 
 func resourceFunctionUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	ironClient, _, err := newIronClient(d)
+	ironClient, _, _, err := newIronClient(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -139,7 +145,7 @@ func resourceFunctionUpdate(ctx context.Context, d *schema.ResourceData, m inter
 func resourceFunctionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	config := m.(*Config)
-	ironClient, ironConfig, err := newIronClient(d)
+	ironClient, ironConfig, _, err := newIronClient(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -171,24 +177,27 @@ func resourceFunctionRead(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 type payload struct {
-	Version string            `json:"version"`
-	Env     map[string]string `json:"env,omitempty"`
-	Cmd     []string          `json:"cmd,omitempty"`
+	Version  string            `json:"version"`
+	Type     string            `json:"type"`
+	Token    string            `json:"token,omitempty"`
+	Upstream string            `json:"upstream,omitempty"`
+	Env      map[string]string `json:"env,omitempty"`
+	Cmd      []string          `json:"cmd,omitempty"`
 }
 
 func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	ironClient, ironConfig, err := newIronClient(d)
+	ironClient, ironConfig, modConfig, err := newIronClient(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	taskType := "schedule"
-	schedule, ok, err := getSchedule(d)
+	schedule, isSchedule, err := getSchedule(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if !ok {
+	if !isSchedule {
 		taskType = "task"
 	}
 	name := d.Get("name").(string)
@@ -210,7 +219,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	encryptedPayload, err := preparePayload(d, ironConfig)
+	encryptedPayload, err := preparePayload(taskType, *modConfig, d, ironConfig)
 
 	if err != nil {
 		_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
@@ -242,12 +251,23 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	return diags
 }
 
-func preparePayload(d *schema.ResourceData, config *iron.Config) (string, error) {
+func preparePayload(taskType string, modConfig map[string]string, d *schema.ResourceData, config *iron.Config) (string, error) {
+	command := []string{"echo", "noop"}
+	if list, ok := d.Get("command").([]interface{}); ok && len(list) > 0 {
+		command = []string{}
+		for i := 0; i < len(list); i++ {
+			command = append(command, list[i].(string))
+		}
+	}
 	environment := getEnvironment(d)
+
 	payload := payload{
-		Version: "1",
-		Cmd:     []string{"/app/run.sh"},
-		Env:     environment,
+		Version:  "1",
+		Type:     taskType,
+		Token:    modConfig["siderite_token"],
+		Upstream: modConfig["siderite_upstream"],
+		Cmd:      command,
+		Env:      environment,
 	}
 	payloadJSON, err := json.Marshal(&payload)
 	if err != nil {
@@ -258,7 +278,7 @@ func preparePayload(d *schema.ResourceData, config *iron.Config) (string, error)
 
 func getEnvironment(d *schema.ResourceData) map[string]string {
 	environment := make(map[string]string)
-	if e, ok := d.GetOk("envirionment"); ok {
+	if e, ok := d.GetOk("environment"); ok {
 		env, ok := e.(map[string]interface{})
 		if !ok {
 			return map[string]string{}
@@ -356,33 +376,33 @@ func calcRunEvery(runEvery string) (int, error) {
 	return seconds, nil
 }
 
-func newIronClient(d *schema.ResourceData) (*iron.Client, *iron.Config, error) {
+func newIronClient(d *schema.ResourceData) (*iron.Client, *iron.Config, *map[string]string, error) {
 	backend, ok := d.Get("backend").([]interface{})
 	if !ok {
-		return nil, nil, fmt.Errorf("expected array of 'backend' config")
+		return nil, nil, nil, fmt.Errorf("expected array of 'backend' config")
 	}
 	backendResource, ok := backend[0].(map[string]interface{})
 	if !ok {
-		return nil, nil, fmt.Errorf("unexpected backend format")
+		return nil, nil, nil, fmt.Errorf("unexpected backend format")
 	}
 	backendType, ok := backendResource["type"].(string)
 	if !ok {
-		return nil, nil, fmt.Errorf("invalid backend type")
+		return nil, nil, nil, fmt.Errorf("invalid backend type")
 	}
 	if backendType != "iron" {
-		return nil, nil, fmt.Errorf("expected backed type of 'iron'")
+		return nil, nil, nil, fmt.Errorf("expected backed type of 'iron'")
 	}
 	configJSON, ok := backendResource["credentials"].(string)
 	if !ok {
-		return nil, nil, fmt.Errorf("invalid or missing iron config credentials")
+		return nil, nil, nil, fmt.Errorf("invalid or missing iron config credentials")
 	}
 	var config map[string]string
 	if err := json.Unmarshal([]byte(configJSON), &config); err != nil {
-		return nil, nil, fmt.Errorf("error parsing iron config: %w", err)
+		return nil, nil, nil, fmt.Errorf("error parsing iron config: %w", err)
 	}
 	ironConfig := iron.Config{
 		Email:     config["email"],
-		Password:  config["passsword"],
+		Password:  config["password"],
 		Project:   config["project"],
 		ProjectID: config["project_id"],
 		Token:     config["token"],
@@ -398,5 +418,5 @@ func newIronClient(d *schema.ResourceData) (*iron.Client, *iron.Config, error) {
 	}
 
 	client, err := iron.NewClient(&ironConfig)
-	return client, &ironConfig, err
+	return client, &ironConfig, &config, err
 }

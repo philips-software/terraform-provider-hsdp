@@ -9,12 +9,14 @@ only `iron` is supported.
 resource "hsdp_function" "rds_backup" {
   name = "streaming-backup"
   
+  # The docker packaged function business logic
   docker_image = var.streaming_backup_image
   docker_credentails = {
     username = var.docker_username
     password = var.docker_password
   }
   
+  # Environment variables available in the container
   environment = {
     db_name = "hsdp_pg"
     db_host = "rds.aws.com"
@@ -27,6 +29,7 @@ resource "hsdp_function" "rds_backup" {
     s3_prefix = "/backups"
   }
 
+  # Run every day at 4am
   schedule {
     start = "2021-01-01T04:00:00Z"
     run_every = "1d"
@@ -43,6 +46,7 @@ resource "hsdp_function" "rds_backup" {
 The following arguments are supported:
 
 * `name` - (Required) The name of the function
+* `command` - (Required) The command to execute in the container
 * `docker_image` - (Required) The docker image that contains the logic of the function
 * `docker_credentials` - (Optional) The docker registry credentials
   * `username` - (Required) The registry username
