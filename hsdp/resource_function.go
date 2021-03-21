@@ -42,7 +42,7 @@ func resourceFunction() *schema.Resource {
 			},
 			"command": {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
@@ -252,7 +252,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 func preparePayload(taskType string, modConfig map[string]string, d *schema.ResourceData, config *iron.Config) (string, error) {
-	command := []string{"echo", "noop"}
+	command := []string{"/app/server"}
 	if list, ok := d.Get("command").([]interface{}); ok && len(list) > 0 {
 		command = []string{}
 		for i := 0; i < len(list); i++ {
