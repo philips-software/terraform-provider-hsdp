@@ -10,7 +10,6 @@ import (
 	"github.com/docker/distribution/reference"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/philips-software/go-hsdp-api/iron"
 )
 
@@ -85,11 +84,11 @@ func resourceFunction() *schema.Resource {
 							ForceNew: true,
 						},
 						"credentials": {
-							Type:         schema.TypeString,
-							Optional:     true,
-							Sensitive:    true,
-							ForceNew:     true,
-							ValidateFunc: validation.StringIsJSON,
+							Type:      schema.TypeMap,
+							Optional:  true,
+							Sensitive: true,
+							ForceNew:  true,
+							//ValidateFunc: validation.StringIsJSON,
 						},
 					},
 				},
@@ -147,7 +146,7 @@ func resourceFunctionRead(ctx context.Context, d *schema.ResourceData, m interfa
 	config := m.(*Config)
 	ironClient, ironConfig, _, err := newIronClient(d)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("resourceFunctionRead.newIronClient: %w", err))
 	}
 	ids := strings.Split(d.Id(), "-")
 	taskType := ids[0]
@@ -156,7 +155,7 @@ func resourceFunctionRead(ctx context.Context, d *schema.ResourceData, m interfa
 
 	code, _, err := ironClient.Codes.GetCode(codeID)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("resourceFunctionRead.GetCode: %w", err))
 	}
 	switch taskType {
 	case "task":
@@ -251,7 +250,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	return diags
 }
 
-func preparePayload(taskType string, modConfig map[string]string, d *schema.ResourceData, config *iron.Config) (string, error) {
+func preparePayload(taskType string, modConfig map[string]interface{}, d *schema.ResourceData, config *iron.Config) (string, error) {
 	command := []string{"/app/server"}
 	if list, ok := d.Get("command").([]interface{}); ok && len(list) > 0 {
 		command = []string{}
@@ -264,14 +263,14 @@ func preparePayload(taskType string, modConfig map[string]string, d *schema.Reso
 	payload := payload{
 		Version:  "1",
 		Type:     taskType,
-		Token:    modConfig["siderite_token"],
-		Upstream: modConfig["siderite_upstream"],
+		Token:    modConfig["siderite_token"].(string),
+		Upstream: modConfig["siderite_upstream"].(string),
 		Cmd:      command,
 		Env:      environment,
 	}
 	payloadJSON, err := json.Marshal(&payload)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("preparePayload: %w", err)
 	}
 	return iron.EncryptPayload([]byte(config.ClusterInfo[0].Pubkey), payloadJSON)
 }
@@ -376,7 +375,7 @@ func calcRunEvery(runEvery string) (int, error) {
 	return seconds, nil
 }
 
-func newIronClient(d *schema.ResourceData) (*iron.Client, *iron.Config, *map[string]string, error) {
+func newIronClient(d *schema.ResourceData) (*iron.Client, *iron.Config, *map[string]interface{}, error) {
 	backend, ok := d.Get("backend").([]interface{})
 	if !ok {
 		return nil, nil, nil, fmt.Errorf("expected array of 'backend' config")
@@ -392,31 +391,36 @@ func newIronClient(d *schema.ResourceData) (*iron.Client, *iron.Config, *map[str
 	if backendType != "iron" {
 		return nil, nil, nil, fmt.Errorf("expected backed type of 'iron'")
 	}
-	configJSON, ok := backendResource["credentials"].(string)
+	config, ok := backendResource["credentials"].(map[string]interface{})
 	if !ok {
 		return nil, nil, nil, fmt.Errorf("invalid or missing iron config credentials")
 	}
-	var config map[string]string
-	if err := json.Unmarshal([]byte(configJSON), &config); err != nil {
-		return nil, nil, nil, fmt.Errorf("error parsing iron config: %w", err)
-	}
+	/*
+		var config map[string]string
+		if err := json.Unmarshal([]byte(configJSON), &config); err != nil {
+			return nil, nil, nil, fmt.Errorf("error parsing iron config: %w", err)
+		}
+	*/
 	ironConfig := iron.Config{
-		Email:     config["email"],
-		Password:  config["password"],
-		Project:   config["project"],
-		ProjectID: config["project_id"],
-		Token:     config["token"],
-		UserID:    config["user_id"],
+		Email:     config["email"].(string),
+		Password:  config["password"].(string),
+		Project:   config["project"].(string),
+		ProjectID: config["project_id"].(string),
+		Token:     config["token"].(string),
+		UserID:    config["user_id"].(string),
 		ClusterInfo: []iron.ClusterInfo{
 			{
-				ClusterID:   config["cluster_info_0_cluster_id"],
-				ClusterName: config["cluster_info_0_cluster_name"],
-				Pubkey:      config["cluster_info_0_pubkey"],
-				UserID:      config["cluster_info_0_user_id"],
+				ClusterID:   config["cluster_info_0_cluster_id"].(string),
+				ClusterName: config["cluster_info_0_cluster_name"].(string),
+				Pubkey:      config["cluster_info_0_pubkey"].(string),
+				UserID:      config["cluster_info_0_user_id"].(string),
 			},
 		},
 	}
 
 	client, err := iron.NewClient(&ironConfig)
-	return client, &ironConfig, &config, err
+	if err != nil {
+		return nil, nil, nil, fmt.Errorf("iron.NewClient: %w", err)
+	}
+	return client, &ironConfig, &config, nil
 }
