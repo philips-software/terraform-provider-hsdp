@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	creds "github.com/philips-software/go-hsdp-api/s3creds"
 )
 
@@ -15,6 +17,19 @@ func validateUpperString(val interface{}, key string) (warns []string, errs []er
 		errs = append(errs, fmt.Errorf("%q must be in uppercase: %s -> %s", key, v, u))
 	}
 	return
+}
+
+func validateFunctionBackend(val interface{}, _ cty.Path) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	v, ok := val.(string)
+	if !ok {
+		return diag.FromErr(fmt.Errorf("string expected for type"))
+	}
+	if !(v == "" || v == "siderite") {
+		return diag.FromErr(fmt.Errorf("unsupported backend type '%s'. This provider version only supports 'siderite'", v))
+	}
+	return diags
 }
 
 func validatePolicyJSON(val interface{}, key string) (warns []string, errs []error) {

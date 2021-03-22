@@ -79,9 +79,10 @@ func resourceFunction() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"type": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
+							Type:             schema.TypeString,
+							Required:         true,
+							ForceNew:         true,
+							ValidateDiagFunc: validateFunctionBackend,
 						},
 						"credentials": {
 							Type:      schema.TypeMap,
@@ -105,13 +106,13 @@ func resourceFunctionDelete(ctx context.Context, d *schema.ResourceData, m inter
 	}
 	ids := strings.Split(d.Id(), "-")
 	taskType := ids[0]
-	taskID := ids[1]
+	scheduleID := ids[1]
 	codeID := ids[2]
 	switch taskType {
-	case "task":
-		_, _, err = ironClient.Tasks.CancelTask(taskID)
+	case "function":
+		_, _, err = ironClient.Schedules.CancelSchedule(scheduleID)
 	case "schedule":
-		_, _, err = ironClient.Schedules.CancelSchedule(taskID)
+		_, _, err = ironClient.Schedules.CancelSchedule(scheduleID)
 	}
 	if err != nil {
 		return diag.FromErr(err)
@@ -150,7 +151,7 @@ func resourceFunctionRead(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 	ids := strings.Split(d.Id(), "-")
 	taskType := ids[0]
-	taskID := ids[1]
+	scheduleID := ids[1]
 	codeID := ids[2]
 
 	code, _, err := ironClient.Codes.GetCode(codeID)
@@ -158,18 +159,18 @@ func resourceFunctionRead(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(fmt.Errorf("resourceFunctionRead.GetCode: %w", err))
 	}
 	switch taskType {
-	case "task":
-		task, _, err := ironClient.Tasks.GetTask(taskID)
+	case "function":
+		function, _, err := ironClient.Schedules.GetSchedule(scheduleID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		_, _ = config.Debug("ProjectID: %v\nType: %v, ID: %v\nCode: %v\n", ironConfig.ProjectID, task, code)
+		_, _ = config.Debug("ProjectID: %v\nType: %v, ID: %v\nCode: %v\n", ironConfig.ProjectID, taskType, function, code)
 	case "schedule":
-		schedule, _, err := ironClient.Schedules.GetSchedule(taskID)
+		schedule, _, err := ironClient.Schedules.GetSchedule(scheduleID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		_, _ = config.Debug("ProjectID: %v\nType: %v, ID: %v\nCode: %v\n", ironConfig.ProjectID, schedule, code)
+		_, _ = config.Debug("ProjectID: %v\nType: %v, ID: %v\nCode: %v\n", ironConfig.ProjectID, taskType, schedule, code)
 
 	}
 	return diags
@@ -197,7 +198,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 	if !isSchedule {
-		taskType = "task"
+		taskType = "function"
 	}
 	name := d.Get("name").(string)
 	dockerImage := d.Get("docker_image").(string)
@@ -209,7 +210,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	if ironConfig == nil || len(ironConfig.ClusterInfo) == 0 {
 		return diag.FromErr(fmt.Errorf("invalid iron config: %v", ironConfig))
 	}
-	codeName := fmt.Sprintf("tf-%s", name)
+	codeName := fmt.Sprintf("hsdp-function-%s", name)
 	createdCode, _, err := ironClient.Codes.CreateOrUpdateCode(iron.Code{
 		Name:      codeName,
 		Image:     dockerImage,
@@ -225,17 +226,21 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 	switch taskType {
-	case "task":
-		task, _, err := ironClient.Tasks.QueueTask(iron.Task{
+	case "function":
+		startTime := time.Now().Add(30 * 365 * 86400 * time.Second)
+		schedule = &iron.Schedule{
 			CodeName: codeName,
 			Payload:  encryptedPayload,
 			Cluster:  ironConfig.ClusterInfo[0].ClusterID,
-		})
+			StartAt:  &startTime,
+			RunEvery: 86400 * 365 * 30,
+		}
+		schedule, _, err = ironClient.Schedules.CreateSchedule(*schedule)
 		if err != nil {
 			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
 			return diag.FromErr(err)
 		}
-		d.SetId(fmt.Sprintf("%s-%s-%s", taskType, task.ID, createdCode.ID))
+		d.SetId(fmt.Sprintf("%s-%s-%s", taskType, schedule.ID, createdCode.ID))
 	case "schedule":
 		schedule.CodeName = codeName
 		schedule.Payload = encryptedPayload
@@ -388,19 +393,13 @@ func newIronClient(d *schema.ResourceData) (*iron.Client, *iron.Config, *map[str
 	if !ok {
 		return nil, nil, nil, fmt.Errorf("invalid backend type")
 	}
-	if backendType != "iron" {
-		return nil, nil, nil, fmt.Errorf("expected backed type of 'iron'")
+	if backendType != "siderite" {
+		return nil, nil, nil, fmt.Errorf("expected backend type of 'siderite'")
 	}
 	config, ok := backendResource["credentials"].(map[string]interface{})
 	if !ok {
 		return nil, nil, nil, fmt.Errorf("invalid or missing iron config credentials")
 	}
-	/*
-		var config map[string]string
-		if err := json.Unmarshal([]byte(configJSON), &config); err != nil {
-			return nil, nil, nil, fmt.Errorf("error parsing iron config: %w", err)
-		}
-	*/
 	ironConfig := iron.Config{
 		Email:     config["email"].(string),
 		Password:  config["password"].(string),
