@@ -255,7 +255,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	return diags
 }
 
-func preparePayload(taskType string, modConfig map[string]interface{}, d *schema.ResourceData, config *iron.Config) (string, error) {
+func preparePayload(taskType string, modConfig map[string]string, d *schema.ResourceData, config *iron.Config) (string, error) {
 	command := []string{"/app/server"}
 	if list, ok := d.Get("command").([]interface{}); ok && len(list) > 0 {
 		command = []string{}
@@ -268,8 +268,8 @@ func preparePayload(taskType string, modConfig map[string]interface{}, d *schema
 	payload := payload{
 		Version:  "1",
 		Type:     taskType,
-		Token:    modConfig["siderite_token"].(string),
-		Upstream: modConfig["siderite_upstream"].(string),
+		Token:    modConfig["siderite_token"],
+		Upstream: modConfig["siderite_upstream"],
 		Cmd:      command,
 		Env:      environment,
 	}
@@ -380,7 +380,7 @@ func calcRunEvery(runEvery string) (int, error) {
 	return seconds, nil
 }
 
-func newIronClient(d *schema.ResourceData) (*iron.Client, *iron.Config, *map[string]interface{}, error) {
+func newIronClient(d *schema.ResourceData) (*iron.Client, *iron.Config, *map[string]string, error) {
 	backend, ok := d.Get("backend").([]interface{})
 	if !ok {
 		return nil, nil, nil, fmt.Errorf("expected array of 'backend' config")
@@ -396,23 +396,29 @@ func newIronClient(d *schema.ResourceData) (*iron.Client, *iron.Config, *map[str
 	if backendType != "siderite" {
 		return nil, nil, nil, fmt.Errorf("expected backend type of 'siderite'")
 	}
-	config, ok := backendResource["credentials"].(map[string]interface{})
+	configMap, ok := backendResource["credentials"].(map[string]interface{})
 	if !ok {
 		return nil, nil, nil, fmt.Errorf("invalid or missing iron config credentials")
 	}
+	config := make(map[string]string)
+	for k, v := range configMap {
+		if str, ok := v.(string); ok {
+			config[k] = str
+		}
+	}
 	ironConfig := iron.Config{
-		Email:     config["email"].(string),
-		Password:  config["password"].(string),
-		Project:   config["project"].(string),
-		ProjectID: config["project_id"].(string),
-		Token:     config["token"].(string),
-		UserID:    config["user_id"].(string),
+		Email:     config["email"],
+		Password:  config["password"],
+		Project:   config["project"],
+		ProjectID: config["project_id"],
+		Token:     config["token"],
+		UserID:    config["user_id"],
 		ClusterInfo: []iron.ClusterInfo{
 			{
-				ClusterID:   config["cluster_info_0_cluster_id"].(string),
-				ClusterName: config["cluster_info_0_cluster_name"].(string),
-				Pubkey:      config["cluster_info_0_pubkey"].(string),
-				UserID:      config["cluster_info_0_user_id"].(string),
+				ClusterID:   config["cluster_info_0_cluster_id"],
+				ClusterName: config["cluster_info_0_cluster_name"],
+				Pubkey:      config["cluster_info_0_pubkey"],
+				UserID:      config["cluster_info_0_user_id"],
 			},
 		},
 	}
