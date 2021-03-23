@@ -61,6 +61,7 @@ func resourceFunction() *schema.Resource {
 						"start": {
 							Type:     schema.TypeString,
 							Required: true,
+							Default:  "2020-10-28T00:00:00Z",
 							ForceNew: true,
 						},
 						"run_every": {

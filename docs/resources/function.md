@@ -53,7 +53,8 @@ The following arguments are supported:
 * `command` - (Optional) The command to execute in the container. Default is `/app/server`
 * `environment` - (Optional, map) The environment variables to set in the docker container before executing the function
 * `schedule` - (Optional) Schedule the function. When not set, the function becomes a task.
-  * `start` - (Required, RFC3339) When to start the schedule. Example: `2021-01-01T04:00:00Z`
+  * `start` - (Optional, RFC3339) When to start the schedule. Example: `2021-01-01T04:00:00Z`. Default is a date in the past.
+  Setting the start argument allows you to control the specific time within the day when your task will be scheduled. 
   * `run_every` - (Required) Run the function every `{value}{unit}` period. Supported units are `s`, `m`, `h`, `d` for second, minute, hours, days respectively.
     Example: a value of `"20m"` would run the function every 20 minutes.
 * `backend` - (Required) The backend to use for scheduling your functions.
