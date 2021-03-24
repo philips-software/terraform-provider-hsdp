@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.13.3
+- [NEW] Support for setting permissions, owner and group for CH files
+- Detect copy errors for SSH copy files
+
 ## v0.13.2
 - Fix clear_on_destroy state
 
