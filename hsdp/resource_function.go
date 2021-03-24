@@ -155,8 +155,9 @@ func resourceFunctionRead(_ context.Context, d *schema.ResourceData, m interface
 	}
 	if code == nil || code.ID != codeID {
 		_, _ = config.Debug("could not find code with ID: %s. marking resource as gone\n", codeID)
-		d.SetId("")
-		return diags
+		d.Set("docker_image", "")
+	} else {
+		d.Set("docker_image", code.Image)
 	}
 	schedule, _, err := ironClient.Schedules.GetSchedule(scheduleID)
 	if err != nil {
@@ -164,7 +165,7 @@ func resourceFunctionRead(_ context.Context, d *schema.ResourceData, m interface
 	}
 	if schedule == nil || schedule.ID != scheduleID {
 		_, _ = config.Debug("could not schedule with ID: %s. marking resource as gone\n", scheduleID)
-		d.SetId("")
+		d.Set("docker_image", "") // Treat missing schedule as destroyed code as well
 		return diags
 	}
 	var codeName string
