@@ -36,15 +36,27 @@ $ git clone git@github.com:philips-software/terraform-provider-hsdp
 $ cd terraform-provider-hsdp
 $ go build .
 ```
-## Buildx Dockerfile
+## Debugging the provider
 
-A Buildx Dockerfile is provided, useful for local testing. Example usage:
+You can build and debug the provider locally:
 
 ```sh
-$ docker buildx build --push -t loafoe/terraform-provider-hsdp .
-$ docker pull loafoe/terraform-provider-hsdp
-$ docker run --rm -v /Location/With/Terraform/Files:/terraform -w /terraform -it loafoe/terraform-provider-hsdp init
+$ go build .
+$ ./terraform-provider-hsdp -debug 
+Provider started, to attach Terraform set the TF_REATTACH_PROVIDERS env var:
+
+	TF_REATTACH_PROVIDERS='{"registry.terraform.io/philips-software/hsdp":{...}}}'
 ```
+
+Copy the `TF_REATTACH_PROVIDERS` and run Terraform with this value set:
+
+```sh
+$ TF_REATTACH_PROVIDERS='...' terraform init -upgrade
+$ TF_REATTACH_PROVIDERS='...' terraform plan
+...
+```
+
+Terraform will now use the local running copy instead of the `philips-labs/hsdp` registry version. Happy debugging!
 
 ## Issues
 
