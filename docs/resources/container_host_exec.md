@@ -17,6 +17,7 @@ resource "hsdp_container_host_exec" "init" {
   file {
     content = "echo Hello world"
     destination = "/tmp/hello.sh"
+    permissions = "0755"
   }
   
   commands = [
@@ -42,6 +43,9 @@ Each `file` block can contain the following fields. Use either `content` or `sou
 * `source` - (Optional, file path) Content of the file. Conflicts with `content`
 * `content` - (Optional, string) Content of the file. Conflicts with `source`
 * `destination` - (Required, string) Remote filename to store the content in
+* `permissions` - (Optional, string) The file permissions. Default permissions are "0644"
+* `owner` - (Optional, string) The file owner. Default owner the SSH user
+* `group` - (Optional, string) The file group. Default group is the SSH user's group
 
 ## Attributes Reference
 
