@@ -3,12 +3,13 @@ package hsdp
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/loafoe/easyssh-proxy/v2"
 	"math/rand"
 	"net/http"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/loafoe/easyssh-proxy/v2"
 )
 
 func resourceContainerHostExec() *schema.Resource {
@@ -75,6 +76,18 @@ The ` + "`triggers`" + ` argument allows specifying an arbitrary set of values t
 							Type:     schema.TypeString,
 							Required: true,
 							ForceNew: true,
+						},
+						"permissions": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"owner": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"group": {
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 					},
 				},

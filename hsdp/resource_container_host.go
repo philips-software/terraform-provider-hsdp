@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"os"
+
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -11,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/loafoe/easyssh-proxy/v2"
 	"github.com/philips-software/go-hsdp-api/cartel"
-	"os"
 
 	"log"
 	"net/http"
@@ -187,6 +188,18 @@ func resourceContainerHost() *schema.Resource {
 						"destination": {
 							Type:     schema.TypeString,
 							Required: true,
+						},
+						"permissions": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"owner": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"group": {
+							Type:     schema.TypeString,
+							Optional: true,
 						},
 					},
 				},
@@ -446,6 +459,30 @@ func copyFiles(ssh *easyssh.MakeConfig, config *Config, createFiles []provisionF
 			_ = ssh.WriteFile(buffer, int64(buffer.Len()), f.Destination)
 			_, _ = config.Debug("Created remote file %s:%s: %d bytes\n", ssh.Server, f.Destination, len(f.Content))
 		}
+		// Permissions change
+		if f.Permissions != "" {
+			outStr, errStr, _, err := ssh.Run(fmt.Sprintf("chmod %s \"%s\"", f.Permissions, f.Destination))
+			_, _ = config.Debug("Permissions file %s:%s: %v %v\n", f.Destination, f.Permissions, outStr, errStr)
+			if err != nil {
+				return err
+			}
+		}
+		// Owner
+		if f.Owner != "" {
+			outStr, errStr, _, err := ssh.Run(fmt.Sprintf("chown %s \"%s\"", f.Owner, f.Destination))
+			_, _ = config.Debug("Owner file %s:%s: %v %v\n", f.Destination, f.Owner, outStr, errStr)
+			if err != nil {
+				return err
+			}
+		}
+		// Group
+		if f.Group != "" {
+			outStr, errStr, _, err := ssh.Run(fmt.Sprintf("chgrp %s \"%s\"", f.Group, f.Destination))
+			_, _ = config.Debug("Group file %s:%s: %v %v\n", f.Destination, f.Group, outStr, errStr)
+			if err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
@@ -465,6 +502,9 @@ type provisionFile struct {
 	Source      string
 	Content     string
 	Destination string
+	Permissions string
+	Owner       string
+	Group       string
 }
 
 func collectFilesToCreate(d *schema.ResourceData) ([]provisionFile, diag.Diagnostics) {
@@ -478,6 +518,9 @@ func collectFilesToCreate(d *schema.ResourceData) ([]provisionFile, diag.Diagnos
 				Source:      mVi["source"].(string),
 				Content:     mVi["content"].(string),
 				Destination: mVi["destination"].(string),
+				Permissions: mVi["permissions"].(string),
+				Owner:       mVi["owner"].(string),
+				Group:       mVi["group"].(string),
 			}
 			if file.Source == "" && file.Content == "" {
 				diags = append(diags, diag.Diagnostic{
