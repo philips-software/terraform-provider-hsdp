@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -26,6 +27,11 @@ func resourceDICOMRepository() *schema.Resource {
 			"organization_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
+			},
+			"repository_organization_id": {
+				Type:     schema.TypeString,
+				Optional: true,
 				ForceNew: true,
 			},
 			"object_store_id": {
@@ -89,14 +95,18 @@ func resourceDICOMRepositoryCreate(ctx context.Context, d *schema.ResourceData, 
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
 	orgID := d.Get("organization_id").(string)
+	repositoryOrgID := d.Get("repository_organization_id").(string)
 	client, err := config.getDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	defer client.Close()
 	repo := dicom.Repository{
-		OrganizationID:      d.Get("organization_id").(string),
+		OrganizationID:      orgID,
 		ActiveObjectStoreID: d.Get("object_store_id").(string),
+	}
+	if repositoryOrgID != "" {
+		repo.OrganizationID = repositoryOrgID
 	}
 	var created *dicom.Repository
 	operation := func() error {
