@@ -60,7 +60,7 @@ func resourceFunction() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"start": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 							Default:  "2020-10-28T00:00:00Z",
 							ForceNew: true,
 						},
