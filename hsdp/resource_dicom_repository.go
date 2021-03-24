@@ -102,7 +102,7 @@ func resourceDICOMRepositoryCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 	defer client.Close()
 	repo := dicom.Repository{
-		OrganizationID:      d.Get("organization_id").(string),
+		OrganizationID:      orgID,
 		ActiveObjectStoreID: d.Get("object_store_id").(string),
 	}
 	if repositoryOrgID != "" {
