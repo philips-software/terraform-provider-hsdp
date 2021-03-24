@@ -448,15 +448,23 @@ func copyFiles(ssh *easyssh.MakeConfig, config *Config, createFiles []provisionF
 			if statErr != nil {
 				_, _ = config.Debug("Failed to stat source file %s: %v\n", f.Source, statErr)
 				_ = src.Close()
-				return statErr
+				return fmt.Errorf("copyFiles: %w", statErr)
 			}
-			_ = ssh.WriteFile(src, srcStat.Size(), f.Destination)
+			err := ssh.WriteFile(src, srcStat.Size(), f.Destination)
+			if err != nil {
+				_, _ = config.Debug("Error copying %s to remote file %s:%s: %v\n", f.Source, ssh.Server, f.Destination, err)
+				return fmt.Errorf("copyFiles: %w", err)
+			}
 			_, _ = config.Debug("Copied %s to remote file %s:%s: %d bytes\n", f.Source, ssh.Server, f.Destination, srcStat.Size())
 			_ = src.Close()
 		} else {
 			buffer := bytes.NewBufferString(f.Content)
 			// Should we fail the complete provision on errors here?
-			_ = ssh.WriteFile(buffer, int64(buffer.Len()), f.Destination)
+			err := ssh.WriteFile(buffer, int64(buffer.Len()), f.Destination)
+			if err != nil {
+				_, _ = config.Debug("Error copying content to remote file %s:%s: %v\n", ssh.Server, f.Destination, err)
+				return fmt.Errorf("copyFiles: %w", err)
+			}
 			_, _ = config.Debug("Created remote file %s:%s: %d bytes\n", ssh.Server, f.Destination, len(f.Content))
 		}
 		// Permissions change
