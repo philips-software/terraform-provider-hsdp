@@ -15,3 +15,5 @@ resource "hsdp_dicom_repository" "repo1" {
 * `config_url` - (Required) The base config URL of the DICOM Store instance
 * `organization_id` - (Required) The organization ID
 * `object_store_id` - (Required) the Object store ID
+* `repository_organization_id` - (Optional) The organization ID attached to this repository.
+  When not specified, the root organization is used.
