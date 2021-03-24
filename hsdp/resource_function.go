@@ -99,22 +99,16 @@ func resourceFunction() *schema.Resource {
 	}
 }
 
-func resourceFunctionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFunctionDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	ironClient, _, _, err := newIronClient(d)
+	ironClient, _, _, err := newIronClient(d, m)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	ids := strings.Split(d.Id(), "-")
-	taskType := ids[0]
 	scheduleID := ids[1]
 	codeID := ids[2]
-	switch taskType {
-	case "function":
-		_, _, err = ironClient.Schedules.CancelSchedule(scheduleID)
-	case "schedule":
-		_, _, err = ironClient.Schedules.CancelSchedule(scheduleID)
-	}
+	_, _, err = ironClient.Schedules.CancelSchedule(scheduleID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -127,9 +121,9 @@ func resourceFunctionDelete(ctx context.Context, d *schema.ResourceData, m inter
 
 }
 
-func resourceFunctionUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFunctionUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	ironClient, _, _, err := newIronClient(d)
+	ironClient, _, _, err := newIronClient(d, m)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -143,10 +137,10 @@ func resourceFunctionUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	return diags
 }
 
-func resourceFunctionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceFunctionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	config := m.(*Config)
-	ironClient, ironConfig, _, err := newIronClient(d)
+	ironClient, ironConfig, _, err := newIronClient(d, m)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("resourceFunctionRead.newIronClient: %w", err))
 	}
@@ -159,21 +153,29 @@ func resourceFunctionRead(ctx context.Context, d *schema.ResourceData, m interfa
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("resourceFunctionRead.GetCode: %w", err))
 	}
-	switch taskType {
-	case "function":
-		function, _, err := ironClient.Schedules.GetSchedule(scheduleID)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		_, _ = config.Debug("ProjectID: %v\nType: %v, ID: %v\nCode: %v\n", ironConfig.ProjectID, taskType, function, code)
-	case "schedule":
-		schedule, _, err := ironClient.Schedules.GetSchedule(scheduleID)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		_, _ = config.Debug("ProjectID: %v\nType: %v, ID: %v\nCode: %v\n", ironConfig.ProjectID, taskType, schedule, code)
-
+	if code == nil || code.ID != codeID {
+		_, _ = config.Debug("could not find code with ID: %s. marking resource as gone\n", codeID)
+		d.SetId("")
+		return diags
 	}
+	schedule, _, err := ironClient.Schedules.GetSchedule(scheduleID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if schedule == nil || schedule.ID != scheduleID {
+		_, _ = config.Debug("could not schedule with ID: %s. marking resource as gone\n", scheduleID)
+		d.SetId("")
+		return diags
+	}
+	var codeName string
+	_, _ = fmt.Sscanf(schedule.CodeName, "hsdp-function-%s", &codeName)
+	if codeName == "" {
+		_, _ = config.Debug("could not match schedule name: '%s'. marking resource as gone\n", schedule.CodeName)
+		d.SetId("")
+		return diags
+	}
+	_ = d.Set("name", codeName)
+	_, _ = config.Debug("ProjectID: %v\nType: %v, Schedule: %v\nCode: %v\n", ironConfig.ProjectID, taskType, schedule, code)
 	return diags
 }
 
@@ -187,9 +189,7 @@ type payload struct {
 }
 
 func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
-
-	ironClient, ironConfig, modConfig, err := newIronClient(d)
+	ironClient, ironConfig, modConfig, err := newIronClient(d, m)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -253,7 +253,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 		}
 		d.SetId(fmt.Sprintf("%s-%s-%s", taskType, schedule.ID, createdCode.ID))
 	}
-	return diags
+	return resourceFunctionRead(ctx, d, m)
 }
 
 func preparePayload(taskType string, modConfig map[string]string, d *schema.ResourceData, config *iron.Config) (string, error) {
@@ -381,7 +381,9 @@ func calcRunEvery(runEvery string) (int, error) {
 	return seconds, nil
 }
 
-func newIronClient(d *schema.ResourceData) (*iron.Client, *iron.Config, *map[string]string, error) {
+func newIronClient(d *schema.ResourceData, m interface{}) (*iron.Client, *iron.Config, *map[string]string, error) {
+	c := m.(*Config)
+
 	backend, ok := d.Get("backend").([]interface{})
 	if !ok {
 		return nil, nil, nil, fmt.Errorf("expected array of 'backend' config")
@@ -414,6 +416,7 @@ func newIronClient(d *schema.ResourceData) (*iron.Client, *iron.Config, *map[str
 		ProjectID: config["project_id"],
 		Token:     config["token"],
 		UserID:    config["user_id"],
+		DebugLog:  c.DebugLog,
 		ClusterInfo: []iron.ClusterInfo{
 			{
 				ClusterID:   config["cluster_info_0_cluster_id"],
