@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.13.5
+- Fix state issue in DICOM repository
+
 ## v0.13.4
 - Improve DICOM repository onboarding
 
