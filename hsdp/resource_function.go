@@ -95,6 +95,23 @@ func resourceFunction() *schema.Resource {
 					},
 				},
 			},
+			"token": {
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Computed:  true,
+			},
+			"endpoint": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"async_endpoint": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"auth_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -106,9 +123,11 @@ func resourceFunctionDelete(_ context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 	ids := strings.Split(d.Id(), "-")
-	scheduleID := ids[1]
+	schedules := strings.Split(ids[1], ",")
 	codeID := ids[2]
-	_, _, err = ironClient.Schedules.CancelSchedule(scheduleID)
+	for _, scheduleID := range schedules {
+		_, _, err = ironClient.Schedules.CancelSchedule(scheduleID)
+	}
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -146,7 +165,7 @@ func resourceFunctionRead(_ context.Context, d *schema.ResourceData, m interface
 	}
 	ids := strings.Split(d.Id(), "-")
 	taskType := ids[0]
-	scheduleID := ids[1]
+	schedules := strings.Split(ids[1], ",")
 	codeID := ids[2]
 
 	code, _, err := ironClient.Codes.GetCode(codeID)
@@ -155,38 +174,42 @@ func resourceFunctionRead(_ context.Context, d *schema.ResourceData, m interface
 	}
 	if code == nil || code.ID != codeID {
 		_, _ = config.Debug("could not find code with ID: %s. marking resource as gone\n", codeID)
-		d.Set("docker_image", "")
+		_ = d.Set("docker_image", "")
 	} else {
-		d.Set("docker_image", code.Image)
-	}
-	schedule, _, err := ironClient.Schedules.GetSchedule(scheduleID)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	if schedule == nil || schedule.ID != scheduleID {
-		_, _ = config.Debug("could not schedule with ID: %s. marking resource as gone\n", scheduleID)
-		d.Set("docker_image", "") // Treat missing schedule as destroyed code as well
-		return diags
+		_ = d.Set("docker_image", code.Image)
 	}
 	var codeName string
-	_, _ = fmt.Sscanf(schedule.CodeName, "hsdp-function-%s", &codeName)
-	if codeName == "" {
-		_, _ = config.Debug("could not match schedule name: '%s'. marking resource as gone\n", schedule.CodeName)
-		d.SetId("")
-		return diags
+	for _, scheduleID := range schedules {
+		schedule, _, err := ironClient.Schedules.GetSchedule(scheduleID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if schedule == nil || schedule.ID != scheduleID {
+			_, _ = config.Debug("could not schedule with ID: %s. marking resource as gone\n", scheduleID)
+			_ = d.Set("docker_image", "") // Treat missing schedule as destroyed code as well
+			return diags
+		}
+		_, _ = fmt.Sscanf(schedule.CodeName, "hsdp-function-%s", &codeName)
+		if codeName == "" {
+			_, _ = config.Debug("could not match schedule name: '%s'. marking resource as gone\n", schedule.CodeName)
+			_ = d.Set("docker_image", "")
+			return diags
+		}
 	}
 	_ = d.Set("name", codeName)
-	_, _ = config.Debug("ProjectID: %v\nType: %v, Schedule: %v\nCode: %v\n", ironConfig.ProjectID, taskType, schedule, code)
+	_, _ = config.Debug("ProjectID: %v\nType: %v, Schedules: %v\nCode: %v\n", ironConfig.ProjectID, taskType, schedules, code)
 	return diags
 }
 
 type payload struct {
 	Version  string            `json:"version"`
-	Type     string            `json:"type"`
-	Token    string            `json:"token,omitempty"`
-	Upstream string            `json:"upstream,omitempty"`
 	Env      map[string]string `json:"env,omitempty"`
 	Cmd      []string          `json:"cmd,omitempty"`
+	Type     string            `json:"type"`
+	Token    string            `json:"token,omitempty"`
+	Auth     string            `json:"auth,omitempty"`
+	Upstream string            `json:"upstream,omitempty"`
+	Mode     string            `json:"mode,omitempty"`
 }
 
 func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -221,43 +244,66 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	encryptedPayload, err := preparePayload(taskType, *modConfig, d, ironConfig)
+	encryptedSyncPayload, encryptedAsyncPayload, err := preparePayloads(taskType, *modConfig, d, ironConfig)
 
 	if err != nil {
 		_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
 		return diag.FromErr(err)
 	}
+	var syncSchedule *iron.Schedule
+	var asyncSchedule *iron.Schedule
 	switch taskType {
 	case "function":
 		startTime := time.Now().Add(30 * 365 * 86400 * time.Second)
-		schedule = &iron.Schedule{
+		syncSchedule = &iron.Schedule{
 			CodeName: codeName,
-			Payload:  encryptedPayload,
+			Payload:  encryptedSyncPayload,
 			Cluster:  ironConfig.ClusterInfo[0].ClusterID,
 			StartAt:  &startTime,
 			RunEvery: 86400 * 365 * 30,
 		}
-		schedule, _, err = ironClient.Schedules.CreateSchedule(*schedule)
+		syncSchedule, _, err = ironClient.Schedules.CreateSchedule(*syncSchedule)
 		if err != nil {
 			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
 			return diag.FromErr(err)
 		}
-		d.SetId(fmt.Sprintf("%s-%s-%s", taskType, schedule.ID, createdCode.ID))
+		asyncSchedule = &iron.Schedule{
+			CodeName: codeName,
+			Payload:  encryptedAsyncPayload,
+			Cluster:  ironConfig.ClusterInfo[0].ClusterID,
+			StartAt:  &startTime,
+			RunEvery: 86400 * 365 * 30,
+		}
+		asyncSchedule, _, err = ironClient.Schedules.CreateSchedule(*asyncSchedule)
+		if err != nil {
+			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
+			_, _, _ = ironClient.Schedules.CancelSchedule(syncSchedule.ID)
+			return diag.FromErr(err)
+		}
+		d.SetId(fmt.Sprintf("%s-%s,%s-%s", taskType, syncSchedule.ID, asyncSchedule.ID, createdCode.ID))
 	case "schedule":
 		schedule.CodeName = codeName
-		schedule.Payload = encryptedPayload
+		schedule.Payload = encryptedSyncPayload
 		schedule.Cluster = ironConfig.ClusterInfo[0].ClusterID
 		schedule, _, err = ironClient.Schedules.CreateSchedule(*schedule)
 		if err != nil {
 			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
 			return diag.FromErr(err)
 		}
-		d.SetId(fmt.Sprintf("%s-%s-%s", taskType, schedule.ID, createdCode.ID))
+		d.SetId(fmt.Sprintf("%s-%s,0-%s", taskType, schedule.ID, createdCode.ID))
 	}
+	if syncSchedule != nil {
+		_ = d.Set("endpoint", fmt.Sprintf("https://%s/function/%s", (*modConfig)["siderite_upstream"], syncSchedule.ID))
+	}
+	if asyncSchedule != nil {
+		_ = d.Set("async_endpoint", fmt.Sprintf("https://%s/async-function/%s", (*modConfig)["siderite_upstream"], asyncSchedule.ID))
+	}
+	_ = d.Set("token", (*modConfig)["siderite_token"])
+	_ = d.Set("auth_type", (*modConfig)["siderite_auth_type"])
 	return resourceFunctionRead(ctx, d, m)
 }
 
-func preparePayload(taskType string, modConfig map[string]string, d *schema.ResourceData, config *iron.Config) (string, error) {
+func preparePayloads(taskType string, modConfig map[string]string, d *schema.ResourceData, config *iron.Config) (string, string, error) {
 	command := []string{"/app/server"}
 	if list, ok := d.Get("command").([]interface{}); ok && len(list) > 0 {
 		command = []string{}
@@ -272,14 +318,30 @@ func preparePayload(taskType string, modConfig map[string]string, d *schema.Reso
 		Type:     taskType,
 		Token:    modConfig["siderite_token"],
 		Upstream: modConfig["siderite_upstream"],
+		Auth:     modConfig["siderite_auth_type"],
 		Cmd:      command,
 		Env:      environment,
+		Mode:     "sync",
 	}
 	payloadJSON, err := json.Marshal(&payload)
 	if err != nil {
-		return "", fmt.Errorf("preparePayload: %w", err)
+		return "", "", fmt.Errorf("preparePayload: %w", err)
 	}
-	return iron.EncryptPayload([]byte(config.ClusterInfo[0].Pubkey), payloadJSON)
+	syncPayload, err := iron.EncryptPayload([]byte(config.ClusterInfo[0].Pubkey), payloadJSON)
+	if err != nil {
+		return "", "", fmt.Errorf("preparePayloads.sync: %w", err)
+	}
+	// Async
+	payload.Mode = "async"
+	payloadJSON, err = json.Marshal(&payload)
+	if err != nil {
+		return "", "", fmt.Errorf("preparePayload: %w", err)
+	}
+	asyncPayload, err := iron.EncryptPayload([]byte(config.ClusterInfo[0].Pubkey), payloadJSON)
+	if err != nil {
+		return "", "", fmt.Errorf("preparePayloads.async: %w", err)
+	}
+	return syncPayload, asyncPayload, nil
 }
 
 func getEnvironment(d *schema.ResourceData) map[string]string {
