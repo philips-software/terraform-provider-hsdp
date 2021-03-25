@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -236,7 +237,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(fmt.Errorf("invalid iron config: %v", ironConfig))
 	}
 	codeName := fmt.Sprintf("hsdp-function-%s", name)
-	createdCode, _, err := ironClient.Codes.CreateOrUpdateCode(iron.Code{
+	createdCode, resp, err := ironClient.Codes.CreateOrUpdateCode(iron.Code{
 		Name:      codeName,
 		Image:     dockerImage,
 		ProjectID: ironConfig.ProjectID,
@@ -244,8 +245,10 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	if resp.StatusCode == http.StatusNotFound {
+		return diag.FromErr(fmt.Errorf("code %s not found", dockerImage))
+	}
 	encryptedSyncPayload, encryptedAsyncPayload, err := preparePayloads(taskType, *modConfig, d, ironConfig)
-
 	if err != nil {
 		_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
 		return diag.FromErr(err)
@@ -262,10 +265,14 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 			StartAt:  &startTime,
 			RunEvery: 86400 * 365 * 30,
 		}
-		syncSchedule, _, err = ironClient.Schedules.CreateSchedule(*syncSchedule)
+		syncSchedule, resp, err = ironClient.Schedules.CreateSchedule(*syncSchedule)
 		if err != nil {
 			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
 			return diag.FromErr(err)
+		}
+		if resp.StatusCode != http.StatusOK {
+			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
+			return diag.FromErr(fmt.Errorf("creating sync schedule failed with code %d", resp.StatusCode))
 		}
 		asyncSchedule = &iron.Schedule{
 			CodeName: codeName,
@@ -274,20 +281,28 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 			StartAt:  &startTime,
 			RunEvery: 86400 * 365 * 30,
 		}
-		asyncSchedule, _, err = ironClient.Schedules.CreateSchedule(*asyncSchedule)
+		asyncSchedule, resp, err = ironClient.Schedules.CreateSchedule(*asyncSchedule)
 		if err != nil {
 			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
 			_, _, _ = ironClient.Schedules.CancelSchedule(syncSchedule.ID)
 			return diag.FromErr(err)
+		}
+		if resp.StatusCode != http.StatusOK {
+			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
+			_, _, _ = ironClient.Schedules.CancelSchedule(syncSchedule.ID)
+			return diag.FromErr(fmt.Errorf("creating async schedule failed with code %d", resp.StatusCode))
 		}
 		d.SetId(fmt.Sprintf("%s-%s,%s-%s", taskType, syncSchedule.ID, asyncSchedule.ID, createdCode.ID))
 	case "schedule":
 		schedule.CodeName = codeName
 		schedule.Payload = encryptedSyncPayload
 		schedule.Cluster = ironConfig.ClusterInfo[0].ClusterID
-		schedule, _, err = ironClient.Schedules.CreateSchedule(*schedule)
-		if err != nil {
+		schedule, resp, err = ironClient.Schedules.CreateSchedule(*schedule)
+		if err != nil || resp.StatusCode != http.StatusOK {
 			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
+			if err == nil {
+				return diag.FromErr(fmt.Errorf("createing schedule failed with code %d", resp.StatusCode))
+			}
 			return diag.FromErr(err)
 		}
 		d.SetId(fmt.Sprintf("%s-%s,0-%s", taskType, schedule.ID, createdCode.ID))
