@@ -62,3 +62,10 @@ The following arguments are supported:
   * `credentials` - (Required, map) The backend credentials. Must be iron configuration details at this time.
     
 ## Attribute reference
+
+The following attributes are exported:
+
+* `endpoint` - The gateway endpoint where you can trigger this function
+* `async_endpoint` - The gateway endpoint where eyou can schedule the function asychnronously  
+* `token` - The token to use in case `auth_type` is set to `token`. This token must be pased in the HTTP `Authorization` header as `Token TOKENHERE`  
+* `auth_type` - The authentication type. Possible values [`none`, `token`, `iam`]
