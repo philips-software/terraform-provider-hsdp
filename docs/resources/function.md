@@ -1,7 +1,7 @@
 # hsdp_function
 
 Define function-as-a-service using various backends. Currently
-only `iron` is supported. 
+only `siderite` (HSDP Iron) is supported.
 
 ## Example usage
 
@@ -36,8 +36,8 @@ resource "hsdp_function" "rds_backup" {
   }
 
   backend {
-    type = "iron"
-    credentials = module.iron_backend.credentials
+    type = "siderite"
+    credentials = module.siderite_backend.credentials
   }  
 }
 ```
@@ -58,7 +58,7 @@ The following arguments are supported:
   * `run_every` - (Required) Run the function every `{value}{unit}` period. Supported units are `s`, `m`, `h`, `d` for second, minute, hours, days respectively.
     Example: a value of `"20m"` would run the function every 20 minutes.
 * `backend` - (Required) The backend to use for scheduling your functions.
-  * `type` - (Required) The backend type. Only `iron` is supported at this time.
+  * `type` - (Required) The backend type. Only `siderite` is supported at this time.
   * `credentials` - (Required, map) The backend credentials. Must be iron configuration details at this time.
     
 ## Attribute reference
