@@ -2,10 +2,11 @@ package hsdp
 
 import (
 	"context"
+	"os"
+
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"os"
 )
 
 // Provider returns an instance of the HSDP provider
@@ -190,6 +191,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_stl_config":          resourceSTLConfig(),
 			"hsdp_stl_custom_cert":     resourceSTLCustomCert(),
 			"hsdp_stl_sync":            resourceSTLSync(),
+			"hsdp_function":            resourceFunction(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":              dataSourceIAMIntrospect(),

@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/aws/aws-sdk-go v1.31.9 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.0
+	github.com/docker/distribution v2.7.1+incompatible
 	github.com/google/fhir/go v0.0.0-20201203001644-a2580b6ea022
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/go-getter v1.5.1 // indirect
@@ -15,7 +16,8 @@ require (
 	github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152
 	github.com/loafoe/easyssh-proxy/v2 v2.0.2
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
-	github.com/philips-software/go-hsdp-api v0.36.2-0.20210303152344-a7d868cd7a89
+	github.com/opencontainers/go-digest v1.0.0 // indirect
+	github.com/philips-software/go-hsdp-api v0.36.2-0.20210316170038-e9674cda4528
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
 	github.com/zclconf/go-cty v1.7.1 // indirect

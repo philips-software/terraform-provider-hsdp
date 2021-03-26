@@ -3,10 +3,12 @@ package hsdp
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/pki"
-	"strings"
 )
 
 func resourcePKICert() *schema.Resource {
@@ -182,8 +184,12 @@ func resourcePKICertRead(_ context.Context, d *schema.ResourceData, m interface{
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("read PKI cert logicalPath: %w", err))
 	}
-	cert, _, err := client.Services.GetCertificateBySerial(logicalPath, d.Id())
+	cert, resp, err := client.Services.GetCertificateBySerial(logicalPath, d.Id())
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound { // Expired, pruned
+			d.SetId("")
+			return diags
+		}
 		return diag.FromErr(fmt.Errorf("read PKI cert: %w", err))
 	}
 	err = certToSchema(cert, d, m)
