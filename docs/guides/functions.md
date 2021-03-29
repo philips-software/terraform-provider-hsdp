@@ -1,7 +1,7 @@
 ---
 page_title: "Working with hsdp_function"
 ---
-# Introducing the hsdp_function resource
+# Getting started with hsdp_function
 The `hsdp_function` resource is a higher level abstraction of the [HSDP Iron](https://www.hsdp.io/documentation/ironio-service-broker) 
 service. It uses an Iron service broker instance together with an (optional) function Gateway running in Cloud foundry. This combination
 unlocks capabilities beyond the standard Iron services:
