@@ -87,7 +87,7 @@ func (c *Config) PKIClient(regionEnvironment ...string) (*pki.Client, error) {
 	return c.pkiClient, c.pkiClientErr
 }
 
-func (c *Config) CredentialsClientWithLogin(username, password string) (*s3creds.Client, error) {
+func (c *Config) S3CredsClientWithLogin(username, password string) (*s3creds.Client, error) {
 	if c.iamClientErr != nil {
 		return nil, c.iamClientErr
 	}
@@ -169,8 +169,12 @@ func (c *Config) setupS3CredsClient() {
 		c.credsClientErr = c.iamClientErr
 		return
 	}
-	if c.Environment != "" && c.Region != "" {
-		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(c.Environment))
+	if c.Region != "" {
+		env := c.Environment
+		if env == "" {
+			env = "prod"
+		}
+		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(env))
 		if err == nil {
 			if url := ac.Service("s3creds").URL; c.S3CredsURL == "" {
 				c.S3CredsURL = url

@@ -3,6 +3,7 @@ package hsdp
 import (
 	"context"
 	"encoding/json"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	creds "github.com/philips-software/go-hsdp-api/s3creds"
@@ -48,7 +49,7 @@ func dataSourceS3CredsAccessRead(_ context.Context, d *schema.ResourceData, meta
 	var err error
 
 	if username != "" && password != "" {
-		client, err = config.CredentialsClientWithLogin(username, password)
+		client, err = config.S3CredsClientWithLogin(username, password)
 		if err != nil {
 			return diag.FromErr(err)
 		}
