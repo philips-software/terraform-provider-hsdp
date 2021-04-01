@@ -47,8 +47,6 @@ The following arguments are supported:
 
 * `uaa_url` - (Optional) The URL of the UAA authentication service
 
-* `org_id` - **Deprecated** Your IAM root ORG id as provided by HSDP
-
 * `shared_key` - (Optional) The shared key as provided by HSDP. Actions which require API signing will not work if this value is missing.
 
 * `secret_key` - (Optional) The secret key as provided by HSDP. Actions which require API signing will not work if this value is missing.
@@ -60,8 +58,6 @@ The following arguments are supported:
 * `cartel_secret` - (Optional) The cartel secret as provided by HSDP.
 
 * `retry_max` - (Optional) Integer, when > 0 will use a retry-able HTTP client and retry requests when applicable.
-
-* `debug` - **deprecated** If set to true, outputs details on API calls. Deprecated, just setting `debug_log` is sufficient.
-
+  
 * `debug_log` - (Optional) If set to a path, when debug is enabled outputs details to this file
 
