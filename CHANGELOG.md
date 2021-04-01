@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.14.2
+- Fix some DICOM optional fields
+- Improve endpoint auto-discovery
+- Work on guides
+
 ## v0.14.1
 - Update S3Policy actions list
 
