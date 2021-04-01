@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -97,7 +98,7 @@ func resourceDICOMObjectStore() *schema.Resource {
 								Schema: map[string]*schema.Schema{
 									"name": {
 										Type:     schema.TypeString,
-										Required: true,
+										Optional: true,
 									},
 									"service_id": {
 										Type:      schema.TypeString,
