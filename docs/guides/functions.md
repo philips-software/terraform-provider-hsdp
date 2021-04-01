@@ -45,6 +45,8 @@ Cloud foundry space. If no space is specified one will be created automatically.
 
 > The (optional) Gateway app is very lean and is set up to use no more than 64MB RAM
  
+> Iron service broker plan names can differ between CF regions so make sure the `iron_plan` you specify is available in the region
+
 # Defining your first function
 
 With the above module in place you can continue defining a function:
