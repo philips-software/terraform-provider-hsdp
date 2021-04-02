@@ -6,7 +6,7 @@ Provides a resource for managing HSDP IAM [password policies](https://www.hsdp.i
 The following example manages a password policy for an org 
 
 ```hcl
-resource "hsdp_iam_pasword_policy" "mypolicy" {
+resource "hsdp_iam_password_policy" "mypolicy" {
   managing_organization = data.hsdp_iam_org.myorg.id
   
   expiry_period_in_days = 180

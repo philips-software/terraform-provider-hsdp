@@ -38,7 +38,7 @@ The following arguments are supported:
 * `description` - (Required) The description of the client
 * `type` - (Required) Either `Public` or `Confidential`
 * `client_id` - (Required) The client id 
-* `password` - (Required) The pasword to use (8-16 chars, at least capital, number, special char)
+* `password` - (Required) The password to use (8-16 chars, at least one capital, number, special char)
 * `application_id` - (Required) the application ID (GUID) to attach this client to
 * `global_reference_id` - (Required) Reference identifier defined by the provisioning user. This reference Identifier will be carried over to identify the provisioned resource across deployment instances (ClientTest, Production). Invalid Characters:- "[&+’";=?()\[\]<>]
 * `response_types` - (Required) Array. Examples of response types are "code id\_token", "token id\_token", etc.
