@@ -2,10 +2,11 @@ package hsdp
 
 import (
 	"context"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
-	"net/http"
 )
 
 func resourceIAMGroup() *schema.Resource {
@@ -27,8 +28,9 @@ func resourceIAMGroup() *schema.Resource {
 				DiffSuppressFunc: suppressCaseDiffs,
 			},
 			"description": {
-				Type:     schema.TypeString,
-				Required: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: suppressWhenGenerated,
 			},
 			"managing_organization": {
 				Type:     schema.TypeString,

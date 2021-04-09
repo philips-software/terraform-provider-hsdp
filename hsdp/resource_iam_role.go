@@ -29,8 +29,10 @@ func resourceIAMRole() *schema.Resource {
 				ValidateFunc: validateUpperString,
 			},
 			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: suppressWhenGenerated,
 			},
 			"managing_organization": {
 				Type:     schema.TypeString,

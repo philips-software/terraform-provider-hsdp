@@ -30,11 +30,12 @@ resource "hsdp_iam_role" "TDRALL" {
 The following arguments are supported:
 
 * `name` - (Required) The name of the group
-* `description` - (Required) The description of the group
 * `permissions` - (Required) The list of permission to assign to this role
 * `managing_organization` - (Required) The managing organization ID of this role
+* `description` - (Optional) The description of the group
 * `ticket_protection` - (Optional) Defaults to true. Set to false to remove e.g. `CLIENT.SCOPES` permission which is only addable using a HSDP support ticket. 
 
+~> IAM roles cannot be deleted through the API at this time. Therefore, the provider tries to auto-import existing roles with matching names. We suggest not to use the `description` field as this could complicate the auto-import behaviour.
 
 ## Attributes Reference
 
