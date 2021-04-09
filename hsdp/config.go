@@ -52,6 +52,7 @@ type Config struct {
 	TimeZone         string
 
 	ma *jsonformat.Marshaller
+	um *jsonformat.Unmarshaller
 }
 
 func (c *Config) IAMClient() (*iam.Client, error) {
@@ -302,7 +303,7 @@ func (c *Config) setupPKIClient() {
 		return
 	}
 	if c.consoleClientErr != nil {
-		c.pkiClientErr = fmt.Errorf("Console client error in setupPKIClient: %w", c.consoleClientErr)
+		c.pkiClientErr = fmt.Errorf("console client error in setupPKIClient: %w", c.consoleClientErr)
 		return
 	}
 	client, err := pki.NewClient(c.consoleClient, c.iamClient, &pki.Config{
