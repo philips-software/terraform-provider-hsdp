@@ -81,6 +81,7 @@ The following arguments are supported:
 * `name` - (Required) The container host name. Must be unique.
 * `instance_type` - (Optional) The EC2 instance type to use. Default `m5.large`
 * `instance_role` - (Optional) The role to use. Default `container-host` (other values: `vanilla`, `base`)
+* `image` - (Optional) The OS image to use. Only use this if you have access to additional image types (example: `centos7`). Conflicts with `instance_role` value `container-host`
 * `volume_type` - (Optional) The EBS volume type. Default is `gp2`. You can also choose `io1` which is default when you specify `iops` value
 * `iops` - (Optional) Number of guaranteed IOPs to provision. Supported value range `1-4000`
 * `protect` - (Optional) Boolean when set will enable protection for container host.
@@ -93,7 +94,7 @@ The following arguments are supported:
 * `subnet_type` - (Optional) What subnet type to use. Can be `public` or `private`. Default is `private`. 
 * `tags` - (Optional) Map of tags to assign to the instances
 * `user` - (Optional) The username to use for provision activities using SSH
-* `private_key` - (Optiona) The SSH private key to use for provision activities
+* `private_key` - (Optional) The SSH private key to use for provision activities
 * `file` - (Optional) Block specifying content to be written to the container host after creation
 * `commands` - (Optional, list(string)) List of commands to execute after creation of container host
 * `bastion_host` - (Optional) The bastion host to use.  When not set, this will be deduced from the container host location
