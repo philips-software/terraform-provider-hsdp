@@ -96,6 +96,11 @@ func resourceContainerHost() *schema.Resource {
 				ForceNew: true,
 				Default:  "container-host",
 			},
+			"image": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"instance_type": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -293,6 +298,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	if bastionHost == "" {
 		bastionHost = client.BastionHost()
 	}
+	image := d.Get("image").(string)
 	user := d.Get("user").(string)
 	privateKey := d.Get("private_key").(string)
 
@@ -339,6 +345,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		cartel.SubnetType(subnetType),
 		cartel.Tags(tags),
 		cartel.InSubnet(subnet),
+		cartel.Image(image),
 	)
 	instanceID := ""
 	ipAddress := ""
