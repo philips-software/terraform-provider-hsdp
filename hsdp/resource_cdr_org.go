@@ -2,10 +2,18 @@ package hsdp
 
 import (
 	"context"
+	"fmt"
+	"net/http"
+	"net/url"
+	"path"
+	"time"
+
 	"github.com/google/fhir/go/proto/google/fhir/proto/stu3/datatypes_go_proto"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	jsonpatch "github.com/herkyl/patchwerk"
+	"github.com/philips-software/go-hsdp-api/cdr"
 	"github.com/philips-software/go-hsdp-api/cdr/helper/fhir/stu3"
 )
 
@@ -38,6 +46,11 @@ func resourceCDROrg() *schema.Resource {
 			"part_of": {
 				Type:     schema.TypeString,
 				Optional: true,
+			},
+			"purge_delete": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 		},
 	}
@@ -185,7 +198,98 @@ func resourceCDROrgUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceCDROrgDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	config := m.(*Config)
 	var diags diag.Diagnostics
-	// TODO: will be supported in CDR release of Q1 2021
+
+	endpoint := d.Get("fhir_store").(string)
+	id := d.Id()
+
+	client, err := config.getFHIRClientFromEndpoint(endpoint)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	defer client.Close()
+
+	purgeDelete := d.Get("purge_delete").(bool)
+
+	if !purgeDelete {
+		deleted, resp, err := client.OperationsSTU3.Delete(path.Join("Organization", id))
+		if resp != nil && resp.StatusCode == http.StatusNotFound { // Already gone
+			d.SetId("")
+			return diags
+		}
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if !deleted {
+			if resp != nil {
+				return diag.FromErr(fmt.Errorf("delete failed with status code %d", resp.StatusCode))
+			}
+			return diag.FromErr(fmt.Errorf("delete failed with nil response"))
+		}
+		return diags
+	}
+	// Purge delete with purge-status check
+	_, resp, err := client.OperationsSTU3.Post(path.Join("$purge"), []byte(``), func(request *http.Request) error {
+		request.URL.Opaque = "/store/fhir/" + id + "/$purge"
+		return nil
+	})
+	if resp != nil && resp.StatusCode == http.StatusNotFound { // Already gone
+		d.SetId("")
+		return diags
+	}
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if resp == nil {
+		return diag.FromErr(fmt.Errorf("unexpected nil response for $purge operation"))
+	}
+	if resp.StatusCode != http.StatusAccepted {
+		return diag.FromErr(fmt.Errorf("$purge operation returned unexpected statusCode %d", resp.StatusCode))
+	}
+	stateConf := &resource.StateChangeConf{
+		Pending:    []string{"PURGING"},
+		Target:     []string{"SUCCESS"},
+		Refresh:    purgeStateRefreshFunc(client, resp.Header.Get("Location"), id),
+		Timeout:    d.Timeout(schema.TimeoutCreate),
+		Delay:      10 * time.Second,
+		MinTimeout: 3 * time.Second,
+	}
+	_, err = stateConf.WaitForStateContext(ctx)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf(
+			"error waiting for FHIR ORG purge '%s' operation: %v",
+			id, err))
+	}
+	d.SetId("")
 	return diags
+}
+
+func purgeStateRefreshFunc(client *cdr.Client, purgeStatusURL, id string) resource.StateRefreshFunc {
+	statusURL, err := url.Parse(purgeStatusURL)
+	if err != nil {
+		return func() (result interface{}, state string, err error) {
+			return nil, "FAILED", err
+		}
+	}
+	return func() (interface{}, string, error) {
+		contained, resp, err := client.OperationsSTU3.Get(id, func(request *http.Request) error {
+			request.URL = statusURL
+			return nil
+		})
+		if err != nil {
+			return resp, "FAILED", err
+		}
+		if resp.StatusCode == http.StatusAccepted { // In progress
+			return resp, "PURGING", nil
+		}
+		params := contained.GetParameters()
+		// Return the status value
+		for _, p := range params.Parameter {
+			if p.Name.Value == "status" {
+				return resp, p.Value.GetStringValue().Value, nil
+			}
+		}
+		return resp, "FAILED", fmt.Errorf("missing status parameter for GET %s", purgeStatusURL)
+	}
 }

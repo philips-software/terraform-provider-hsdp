@@ -301,6 +301,12 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		}
 		config.ma = ma
 
+		um, err := jsonformat.NewUnmarshaller("UTC", jsonformat.STU3)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+		config.um = um
+
 		return config, diags
 	}
 }

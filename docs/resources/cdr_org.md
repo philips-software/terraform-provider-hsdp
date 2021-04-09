@@ -19,8 +19,9 @@ resource "hsdp_cdr_org" "hospital" {
   org_id = var.sub_org_id
 
   name = "Hospital"
-  
   part_of = var.root_org_id
+  
+  purge_delete = false
 }
 ```
 
@@ -32,6 +33,9 @@ The following arguments are supported:
 * `org_id` - (Required) The Org ID (GUID) under which to onboard. Usually same as IAM Org ID
 * `name` - (Required) The name of the FHIR Org
 * `part_of` - (Optional) The parent Organization ID (GUID) this Org is part of
+* `purge_delete` - (Optional) If set to `true` will purge all FHIR resources associated with the Organization. Default: `false`
+
+~> Only use `purge_delete = true` when you are sure recursive deletetion of FHIR resources under the Organization is acceptable for the given deployment.
 
 ## Attributes Reference
 
