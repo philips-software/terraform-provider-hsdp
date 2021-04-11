@@ -11,6 +11,7 @@ import (
 	"github.com/docker/distribution/reference"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/philips-labs/siderite"
 	"github.com/philips-software/go-hsdp-api/iron"
 	"github.com/robfig/cron/v3"
 )
@@ -211,25 +212,6 @@ func resourceFunctionRead(_ context.Context, d *schema.ResourceData, m interface
 	return diags
 }
 
-// TODO Move this to siderite
-type payload struct {
-	Version  string            `json:"version"`
-	Env      map[string]string `json:"env,omitempty"`
-	Cmd      []string          `json:"cmd,omitempty"`
-	Type     string            `json:"type"`
-	Token    string            `json:"token,omitempty"`
-	Auth     string            `json:"auth,omitempty"`
-	Upstream string            `json:"upstream,omitempty"`
-	Mode     string            `json:"mode,omitempty"`
-}
-
-// TODO Move this to siderite
-type cronPayload struct {
-	CRON             string `json:"cron"`
-	EncryptedPayload string `json:"encrypted_payload"`
-	Timeout          int    `json:"timeout,omitempty"`
-}
-
 func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	ironClient, ironConfig, modConfig, err := newIronClient(d, m)
 	if err != nil {
@@ -278,8 +260,8 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	switch taskType {
 	case "cron":
 		startAt := time.Now().Add(time.Duration(86400 * 365 * 30))
-		cfg := cronPayload{
-			CRON:             *schedule.CRON,
+		cfg := siderite.CronPayload{
+			Schedule:         *schedule.CRON,
 			EncryptedPayload: encryptedSyncPayload,
 			Timeout:          schedule.Timeout,
 		}
@@ -372,7 +354,7 @@ func preparePayloads(taskType string, modConfig map[string]string, d *schema.Res
 	}
 	environment := getEnvironment(d)
 
-	payload := payload{
+	payload := siderite.Payload{
 		Version:  "1",
 		Type:     taskType,
 		Token:    modConfig["siderite_token"],
