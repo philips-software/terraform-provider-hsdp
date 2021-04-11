@@ -16,6 +16,7 @@ import (
 
 func resourceFunction() *schema.Resource {
 	return &schema.Resource{
+		SchemaVersion: 1,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -68,6 +69,12 @@ func resourceFunction() *schema.Resource {
 						"run_every": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
+						},
+						"timeout": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Default:  1800,
 							ForceNew: true,
 						},
 					},
@@ -423,9 +430,11 @@ func getSchedule(d *schema.ResourceData) (*iron.Schedule, bool, error) {
 	if err != nil {
 		return nil, false, err
 	}
+	timeout := scheduleResource["timeout"].(int)
 	ironSchedule := iron.Schedule{
 		StartAt:  &startAt,
 		RunEvery: runEvery,
+		Timeout:  timeout,
 	}
 	return &ironSchedule, true, nil
 }

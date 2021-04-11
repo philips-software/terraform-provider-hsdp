@@ -57,6 +57,7 @@ The following arguments are supported:
   Setting the start argument allows you to control the specific time within the day when your task will be scheduled. 
   * `run_every` - (Required) Run the function every `{value}{unit}` period. Supported units are `s`, `m`, `h`, `d` for second, minute, hours, days respectively.
     Example: a value of `"20m"` would run the function every 20 minutes.
+  * `timeout` - (Optional, int) When set, limits the execution time (seconds) to this value. Default: `1800` (30 minutes)
 * `backend` - (Required) The backend to use for scheduling your functions.
   * `type` - (Required) The backend type. Only `siderite` is supported at this time.
   * `credentials` - (Required, map) The backend credentials. Must be iron configuration details at this time.
