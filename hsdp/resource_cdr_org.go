@@ -227,6 +227,7 @@ func resourceCDROrgDelete(ctx context.Context, d *schema.ResourceData, m interfa
 			}
 			return diag.FromErr(fmt.Errorf("delete failed with nil response"))
 		}
+		d.SetId("")
 		return diags
 	}
 	// Purge delete with purge-status check
