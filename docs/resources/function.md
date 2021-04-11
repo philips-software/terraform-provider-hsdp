@@ -55,8 +55,9 @@ The following arguments are supported:
 * `schedule` - (Optional) Schedule the function. When not set, the function becomes a task.
   * `start` - (Optional, RFC3339) When to start the schedule. Example: `2021-01-01T04:00:00Z`. Default is a date in the past.
   Setting the start argument allows you to control the specific time within the day when your task will be scheduled. 
-  * `run_every` - (Required) Run the function every `{value}{unit}` period. Supported units are `s`, `m`, `h`, `d` for second, minute, hours, days respectively.
+  * `run_every` - (Optional) Run the function every `{value}{unit}` period. Supported units are `s`, `m`, `h`, `d` for second, minute, hours, days respectively. Conflicts with `cron`
     Example: a value of `"20m"` would run the function every 20 minutes.
+  * `cron` - (Optional) set schedule using cron format. This requires a backend with activated gateway. Conflicts with `run_every`
   * `timeout` - (Optional, int) When set, limits the execution time (seconds) to this value. Default: `1800` (30 minutes)
 * `backend` - (Required) The backend to use for scheduling your functions.
   * `type` - (Required) The backend type. Only `siderite` is supported at this time.
