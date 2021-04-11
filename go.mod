@@ -17,7 +17,7 @@ require (
 	github.com/loafoe/easyssh-proxy/v2 v2.0.2
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
-	github.com/philips-software/go-hsdp-api v0.36.7-0.20210409115340-748e71714b41
+	github.com/philips-software/go-hsdp-api v0.36.7-0.20210410194021-dc7e4e5f1ccf
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
 	github.com/zclconf/go-cty v1.7.1 // indirect

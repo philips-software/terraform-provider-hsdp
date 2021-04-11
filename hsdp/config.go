@@ -104,10 +104,10 @@ func (c *Config) S3CredsClientWithLogin(username, password string) (*s3creds.Cli
 
 // setupIAMClient sets up an HSDP IAM client
 func (c *Config) setupIAMClient() {
-	standardClient := http.DefaultClient
+	var standardClient *http.Client
 	if c.RetryMax > 0 {
 		retryClient := retryablehttp.NewClient()
-		retryClient.RetryMax = 5
+		retryClient.RetryMax = c.RetryMax
 		standardClient = retryClient.StandardClient()
 	}
 	c.iamClient = nil
