@@ -31,8 +31,7 @@ resource "hsdp_function" "rds_backup" {
 
   # Run every day at 4am
   schedule {
-    start = "2021-01-01T04:00:00Z"
-    run_every = "1d"
+    cron = "0 4 * * *"
   }
 
   backend {

@@ -15,10 +15,10 @@ HSDP S3 Buckets can be used to store Terraform state. The instructions below ass
 and provisioning services using the [CF CLI](https://github.com/cloudfoundry/cli). Steps to provision an S3 Bucket:
 
 ### Log into your CF Org and space. 
-It's advisable to create the bucket in a separate space so you can restrict access.
+It's advisable to create the bucket in a separate space, so you can restrict access.
 
-~> Terraform state usually contains secrets and possibly other sensitive values related to your infrastructure and applications. Access to
-state should be limited to deployment pipelines and authorized personel only.
+!> Terraform state usually contains secrets and possibly other sensitive values related to your infrastructure and applications. Access to
+state should be limited to deployment pipelines and authorized personnel only.
 
 ### Provision a HSDP S3 Bucket
 It's advised to set a region

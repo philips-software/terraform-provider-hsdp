@@ -139,7 +139,7 @@ schedule {
 }
 ```
 
-~> Even though you can specify an up-to-the-minute accurate schedule, your function is still queued on the
+-> Even though you can specify an up-to-the-minute accurate schedule, your function is still queued on the
 Iron cluster, so the exact start time is always determined by how busy the cluster is at that moment.
 
 Finally, an example of using the Iron.io native scheduler:
@@ -152,9 +152,9 @@ schedule {
 This will run your function once every day, the time of day however depends on when Terraform deployed
 your function.
 
-~> Always set a timeout value for your scheduled function. This sets a limit on the runtime for each invocation.
+-> Always set a timeout value for your scheduled function. This sets a limit on the runtime for each invocation.
 
-> If you define a schedule with a `run_every` you do not need an active gateway.
+-> If you define a schedule with a `run_every` you do not need an active gateway.
 
 ### cron field description
 
