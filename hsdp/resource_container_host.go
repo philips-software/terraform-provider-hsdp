@@ -142,7 +142,7 @@ func resourceContainerHost() *schema.Resource {
 				Default:      0,
 				Optional:     true,
 				ForceNew:     true,
-				ValidateFunc: validation.IntBetween(0, 1000),
+				ValidateFunc: validation.IntBetween(0, 16000),
 			},
 			"security_groups": {
 				Type:     schema.TypeSet,
