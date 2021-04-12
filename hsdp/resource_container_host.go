@@ -421,6 +421,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	for i := 0; i < len(commands); i++ {
 		stdout, stderr, done, err := ssh.Run(commands[i], 5*time.Minute)
 		if err != nil {
+			_, _, _ = client.Destroy(tagName)
 			return append(diags, diag.FromErr(fmt.Errorf("command [%s]: %w", commands[i], err))...)
 		} else {
 			_, _ = config.Debug("command: %s\ndone: %t\nstdout:\n%s\nstderr:\n%s\n", commands[i], done, stdout, stderr)
