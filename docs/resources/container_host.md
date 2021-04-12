@@ -96,7 +96,6 @@ The following arguments are supported:
 * `user` - (Optional) The username to use for provision activities using SSH
 * `private_key` - (Optional) The SSH private key to use for provision activities
 * `file` - (Optional) Block specifying content to be written to the container host after creation
-* `commands` - (Optional, list(string)) List of commands to execute after creation of container host
 * `bastion_host` - (Optional) The bastion host to use.  When not set, this will be deduced from the container host location
 
 Each `file` block can contain the following fields. Use either `content` or `source`:
@@ -107,6 +106,9 @@ Each `file` block can contain the following fields. Use either `content` or `sou
 * `permissions` - (Optional, string) The file permissions. Default permissions are "0644"
 * `owner` - (Optional, string) The file owner. Default owner the SSH user
 * `group` - (Optional, string) The file group. Default group is the SSH user's group
+* `commands` - (Optional, list(string)) List of commands to execute after creation of container host
+
+-> We recommend using a [hsdp_container_host_exec](https://registry.terraform.io/providers/philips-software/hsdp/latest/docs/resources/container_host_exec) resource to provision files and commands on your instance. This decouples software bootstrapping from the instance provisioning, which can take between 5-15 minutes on its own.
 
 
 ## Attributes Reference

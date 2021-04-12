@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.14.5
+- Increase `volume_size` to 16000 (16T) for `hsdp_container_host` resources
+- Bugfix: clean up container host instance in case of failed commands
+- Documentation fixes
+
 ## v0.14.4
 - [NEW] `cron` support for `hsdp_function.schedule` configuration
 - [NEW] `timeout` support `for hsdp_function.schedule` configuration
