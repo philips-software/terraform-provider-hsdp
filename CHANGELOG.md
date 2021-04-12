@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.14.4
+- [NEW] `cron` support for `hsdp_function.schedule` configuration
+- [NEW] `timeout` support `for hsdp_function.schedule` configuration
+- Fix duplicate debug logging output
+
 ## v0.14.3
 - Support CDR Org delete with optional support for $purge
 - Add support for `image` field for `hsdp_container_host`
