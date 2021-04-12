@@ -1,14 +1,14 @@
 ---
 page_title: "Working with hsdp_function"
 ---
-# Getting started with hsdp_function
+# Working with hsdp_function
 The `hsdp_function` resource is a higher level abstraction of the [HSDP Iron](https://www.hsdp.io/documentation/ironio-service-broker) 
 service. It uses an Iron service broker instance together with an (optional) function Gateway running in Cloud foundry. This combination
 unlocks capabilities beyond the standard Iron services:
 
 - No need to use Iron CLI to schedule tasks or upload code
 - Manage Iron codes fully via Terraform
-- Periodically schedule Docker workloads using Terraform (**CRONJOB** like functionality)
+- **CRON** compatible scheduling of Docker workloads using Terraform, leapfrogging Iron.io scheduling capabilities
 - Full control over the Docker container **ENVIRONMENT** variables, allowing easy workload configuration
 - Automatic encryption of workload payloads 
 - Synchronously call a Docker workload running on an Iron Worker, with **streaming support**
@@ -31,7 +31,7 @@ module "siderite-backend" {
 
   cf_region   = "eu-west"
   cf_org_name = "my-cf-org"
-  cf_space    = "myspacw"
+  cf_space    = "myspace"
   cf_user     = var.cf_user
 
   gateway_enabled = true
@@ -54,7 +54,7 @@ With the above module in place you can continue defining a function:
 ```hcl
 resource "hsdp_function" "hello_world" {
   name         = "hello-world"
-  docker_image = "philipslabs/hsdp-function-hello-world:v0.9.2"
+  docker_image = "philipslabs/hsdp-function-hello-world:v0.9.4"
 
   backend {
     type        = "siderite"
@@ -85,7 +85,7 @@ for synchronous requests to come in. In asychronous mode the Siderite helper wil
 execute the request (again by spawining `/app/server`). Optionally it will `POST` the response back to an URL if one specified in an `X-Callback-URL` header in the HTTP call to the asychronous endpoint.
 ## Example Docker file
 ```dockerfile
-FROM golang:1.16.0-alpine3.13 as builder
+FROM golang:1.16.3-alpine3.13 as builder
 RUN apk add --no-cache git openssh gcc musl-dev
 WORKDIR /src
 COPY go.mod .
@@ -98,7 +98,7 @@ RUN go mod download
 COPY . .
 RUN go build -o server .
 
-FROM philipslabs/siderite:v0.5.1 AS siderite
+FROM philipslabs/siderite:v0.6.0 AS siderite
 
 FROM alpine:latest
 RUN apk add --no-cache git openssh openssl bash postgresql-client
@@ -113,11 +113,75 @@ Notes:
 - You can use ANY programming language (even COBOL), as long as you produce an executable binary or script which spawns
   listens on port `8080` after startup.
 - We pull the `siderite` binary from the official `philipslabs/siderite` registry. Use a version tag for stability.
-- The `CMD` statement should always execute `/app/siderite function` as the main command
+- The `CMD` statement should execute `/app/siderite function` as the main command
+- If your function is always scheduled use `/app/siderite task` instead. This will automatically exit after a single run. 
 - Include any additional tools in your final image
 
+# Scheduling a function to run periodically (Task)
+Enabling the gateway in the `siderite` backend unlocks full **CRON** compatible scheduling of `hsdp_function` resources.
+It provides much finer control over scheduling behaviour compared to the standard Iron.io `run_every`
+option. To achieve this the gateway runs an internal CRON scheduler which is driven by the provider managed schedule entries
+in the Iron.io backend, syncing the config every few seconds.
+
+```hcl
+schedule {
+    cron = "14 15 * * *"
+    timeout = 900
+  }
+```
+The above example would queue your `hsdp_function` every day at exactly 3.14pm.
+The following one would queue your function every Sunday morning at 5am:
+
+```hcl
+schedule {
+   cron = "0 5 * * 0"
+   timeout = 1800
+}
+```
+
+~> Even though you can specify an up-to-the-minute accurate schedule, your function is still queued on the
+Iron cluster, so the exact start time is always determined by how busy the cluster is at that moment.
+
+Finally, an example of using the Iron.io native scheduler:
+
+```hcl
+schedule {
+  run_every = "1d"
+}
+```
+This will run your function once every day, the time of day however depends on when Terraform deployed
+your function.
+
+~> Always set a timeout value for your scheduled function. This sets a limit on the runtime for each invocation.
+
+> If you define a schedule with a `run_every` you do not need an active gateway.
+
+### cron field description
+
+```text
+1. Entry: Minute when the process will be started [0-60]
+2. Entry: Hour when the process will be started [0-23]
+3. Entry: Day of the month when the process will be started [1-28/29/30/31]
+4. Entry: Month of the year when the process will be started [1-12]
+5. Entry: Weekday when the process will be started [0-6] [0 is Sunday]
+
+all x min = */x
+```
+
+## Function vs Task
+The `hsdp_function` resource supports defining functions which are automatically executed 
+periodically i.e. `Tasks`. A Docker image which defines a task should use the following `CMD`:
+
+```dockerfile
+CMD ["/app/siderite","task"]
+```
+
+This ensures that after a single run the container exits gracefully instead of waiting to timeout.
+
 ## Naming convention
-Please name and publish your `hsdp_function` compatible Docker images as `hsdp-function-xxx` so others can easily identify them.
+Please name and publish your `hsdp_function` compatible Docker images using a repository name starting with `hsdp-function-...`. 
+This will help others identify the primary usage pattern for your image. 
+If your image represents a task, please use the prefix `hsdp-task-...`
 
 # Gateway authentication
 The gateway supports a number of authentication methods which you can configure via the `auth_type` argument.
@@ -152,19 +216,5 @@ environment = {
   AUTH_IAM_ROLES         = "HSDP_FUNCTION"
 }
 ```
-
 With the above configuration the gateway will do an introspect call on the Bearer token and if the user/service has the
 `HSDP_FUNCTION` role in either of the ORGs specified will be allowed to execute the function.
-
-# Periodically scheduling a function aka CRONJOB
-You may schedule a function to run periodically by specifing `schedule` by defining a `schedule` block in your function resource:
-
-```hcl
-schedule {
-    start = "2021-01-01T04:00:00Z"
-    run_every = "1d"
-  }
-```
-The above `schedule` will run your function every day at around `4am`.
-
-> If you only define functions with a `schedule` you can disable the Gateway completely as it is not needed for any operations

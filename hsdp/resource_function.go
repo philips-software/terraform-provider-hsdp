@@ -11,7 +11,9 @@ import (
 	"github.com/docker/distribution/reference"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/philips-labs/siderite"
 	"github.com/philips-software/go-hsdp-api/iron"
+	"github.com/robfig/cron/v3"
 )
 
 func resourceFunction() *schema.Resource {
@@ -68,8 +70,14 @@ func resourceFunction() *schema.Resource {
 						},
 						"run_every": {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 							ForceNew: true,
+						},
+						"cron": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ForceNew:         true,
+							ValidateDiagFunc: validateCron,
 						},
 						"timeout": {
 							Type:     schema.TypeInt,
@@ -171,6 +179,7 @@ func resourceFunctionRead(_ context.Context, d *schema.ResourceData, m interface
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("resourceFunctionRead.newIronClient: %w", err))
 	}
+	// ID Format: {taskType}-{scheduleID}[,{scheduleID},...]-{codeID}
 	ids := strings.Split(d.Id(), "-")
 	taskType := ids[0]
 	schedules := strings.Split(ids[1], ",")
@@ -193,31 +202,28 @@ func resourceFunctionRead(_ context.Context, d *schema.ResourceData, m interface
 			return diag.FromErr(err)
 		}
 		if schedule == nil || schedule.ID != scheduleID {
-			_, _ = config.Debug("could not schedule with ID: %s. marking resource as gone\n", scheduleID)
+			_, _ = config.Debug("could not find schedule with ID: %s. marking resource as gone\n", scheduleID)
 			_ = d.Set("docker_image", "") // Treat missing schedule as destroyed code as well
 			return diags
 		}
-		_, _ = fmt.Sscanf(schedule.CodeName, "hsdp-function-%s", &codeName)
-		if codeName == "" {
+		var scheduleTaskType string
+		parts := strings.Split(schedule.CodeName, "-")
+		if len(parts) < 2 {
 			_, _ = config.Debug("could not match schedule name: '%s'. marking resource as gone\n", schedule.CodeName)
 			_ = d.Set("docker_image", "")
 			return diags
 		}
+		scheduleTaskType = parts[0]
+		if scheduleTaskType != taskType {
+			_, _ = config.Debug("could not match schedule name: '%s'. marking resource as gone\n", schedule.CodeName)
+			_ = d.Set("docker_image", "")
+			return diags
+		}
+		codeName = strings.Join(parts[1:], "-")
 	}
 	_ = d.Set("name", codeName)
 	_, _ = config.Debug("ProjectID: %v\nType: %v, Schedules: %v\nCode: %v\n", ironConfig.ProjectID, taskType, schedules, code)
 	return diags
-}
-
-type payload struct {
-	Version  string            `json:"version"`
-	Env      map[string]string `json:"env,omitempty"`
-	Cmd      []string          `json:"cmd,omitempty"`
-	Type     string            `json:"type"`
-	Token    string            `json:"token,omitempty"`
-	Auth     string            `json:"auth,omitempty"`
-	Upstream string            `json:"upstream,omitempty"`
-	Mode     string            `json:"mode,omitempty"`
 }
 
 func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -233,6 +239,9 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	if !isSchedule {
 		taskType = "function"
 	}
+	if schedule != nil && schedule.CRON != nil {
+		taskType = "cron"
+	}
 	name := d.Get("name").(string)
 	dockerImage := d.Get("docker_image").(string)
 	if _, ok := d.GetOk("docker_credentials"); ok {
@@ -243,7 +252,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	if ironConfig == nil || len(ironConfig.ClusterInfo) == 0 {
 		return diag.FromErr(fmt.Errorf("invalid iron config: %v", ironConfig))
 	}
-	codeName := fmt.Sprintf("hsdp-function-%s", name)
+	codeName := fmt.Sprintf("%s-%s", taskType, name)
 	createdCode, resp, err := ironClient.Codes.CreateOrUpdateCode(iron.Code{
 		Name:      codeName,
 		Image:     dockerImage,
@@ -263,6 +272,30 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	var syncSchedule *iron.Schedule
 	var asyncSchedule *iron.Schedule
 	switch taskType {
+	case "cron":
+		startAt := time.Now().Add(time.Duration(86400 * 365 * 30))
+		cfg := siderite.CronPayload{
+			Schedule:         *schedule.CRON,
+			EncryptedPayload: encryptedSyncPayload,
+			Timeout:          schedule.Timeout,
+		}
+		jsonPayload, _ := json.Marshal(cfg)
+		cronSchedule := iron.Schedule{
+			CodeName: codeName,
+			Payload:  string(jsonPayload),
+			Cluster:  ironConfig.ClusterInfo[0].ClusterID,
+			StartAt:  &startAt,
+			RunEvery: 86400 * 365 * 30,
+		}
+		createdSchedule, resp, err := ironClient.Schedules.CreateSchedule(cronSchedule)
+		if err != nil || resp.StatusCode != http.StatusOK {
+			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
+			if err == nil {
+				return diag.FromErr(fmt.Errorf("create CRON schedule failed with code %d", resp.StatusCode))
+			}
+			return diag.FromErr(err)
+		}
+		d.SetId(fmt.Sprintf("%s-%s-%s", taskType, createdSchedule.ID, createdCode.ID))
 	case "function":
 		startTime := time.Now().Add(30 * 365 * 86400 * time.Second)
 		syncSchedule = &iron.Schedule{
@@ -301,18 +334,18 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 		}
 		d.SetId(fmt.Sprintf("%s-%s,%s-%s", taskType, syncSchedule.ID, asyncSchedule.ID, createdCode.ID))
 	case "schedule":
-		schedule.CodeName = codeName
-		schedule.Payload = encryptedSyncPayload
-		schedule.Cluster = ironConfig.ClusterInfo[0].ClusterID
-		schedule, resp, err = ironClient.Schedules.CreateSchedule(*schedule)
+		schedule.Iron.CodeName = codeName
+		schedule.Iron.Payload = encryptedSyncPayload
+		schedule.Iron.Cluster = ironConfig.ClusterInfo[0].ClusterID
+		createdSchedule, resp, err := ironClient.Schedules.CreateSchedule(*schedule.Iron)
 		if err != nil || resp.StatusCode != http.StatusOK {
 			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
 			if err == nil {
-				return diag.FromErr(fmt.Errorf("createing schedule failed with code %d", resp.StatusCode))
+				return diag.FromErr(fmt.Errorf("create schedule failed with code %d", resp.StatusCode))
 			}
 			return diag.FromErr(err)
 		}
-		d.SetId(fmt.Sprintf("%s-%s,0-%s", taskType, schedule.ID, createdCode.ID))
+		d.SetId(fmt.Sprintf("%s-%s-%s", taskType, createdSchedule.ID, createdCode.ID))
 	}
 	if syncSchedule != nil {
 		_ = d.Set("endpoint", fmt.Sprintf("https://%s/function/%s", (*modConfig)["siderite_upstream"], syncSchedule.ID))
@@ -335,7 +368,7 @@ func preparePayloads(taskType string, modConfig map[string]string, d *schema.Res
 	}
 	environment := getEnvironment(d)
 
-	payload := payload{
+	payload := siderite.Payload{
 		Version:  "1",
 		Type:     taskType,
 		Token:    modConfig["siderite_token"],
@@ -410,7 +443,13 @@ func dockerLogin(ironClient *iron.Client, d *schema.ResourceData) (bool, error) 
 	return true, nil
 }
 
-func getSchedule(d *schema.ResourceData) (*iron.Schedule, bool, error) {
+type functionSchedule struct {
+	Timeout int
+	Iron    *iron.Schedule
+	CRON    *string
+}
+
+func getSchedule(d *schema.ResourceData) (*functionSchedule, bool, error) {
 	schedule, ok := d.Get("schedule").([]interface{})
 	if !ok {
 		return nil, false, nil
@@ -426,17 +465,26 @@ func getSchedule(d *schema.ResourceData) (*iron.Schedule, bool, error) {
 	if err != nil {
 		return nil, false, err
 	}
+	timeout := scheduleResource["timeout"].(int)
+	// Check for cron
+	cronSchedule := scheduleResource["cron"].(string)
+	if cronSchedule != "" {
+		_, err := cron.ParseStandard(cronSchedule)
+		if err != nil {
+			return nil, false, fmt.Errorf("parsing cron field: %w", err)
+		}
+		return &functionSchedule{CRON: &cronSchedule, Timeout: timeout}, true, nil
+	}
 	runEvery, err := calcRunEvery(scheduleResource["run_every"].(string))
 	if err != nil {
 		return nil, false, err
 	}
-	timeout := scheduleResource["timeout"].(int)
 	ironSchedule := iron.Schedule{
 		StartAt:  &startAt,
 		RunEvery: runEvery,
 		Timeout:  timeout,
 	}
-	return &ironSchedule, true, nil
+	return &functionSchedule{Iron: &ironSchedule}, true, nil
 }
 
 func calcRunEvery(runEvery string) (int, error) {
