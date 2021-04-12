@@ -156,7 +156,7 @@ environment = {
 With the above configuration the gateway will do an introspect call on the Bearer token and if the user/service has the
 `HSDP_FUNCTION` role in either of the ORGs specified will be allowed to execute the function.
 
-# Scheduling a function using CRON
+# Scheduling a function to run periodically
 Enabling the gateway in the `siderite` backend unlocks full **CRON** compatible scheduling of `hsdp_function` resources.
 It provides much finer control over scheduling behaviour compared to the standard Iron.io `run_every` 
 option. To achieve this the gateway runs an internal CRON scheduler which is driven by the provider managed schedule entries 
@@ -168,7 +168,8 @@ schedule {
     timeout = 900
   }
 ```
-The above example would run your `hsdp_function` every day at exactly 3.14pm.
+The above example would queue your `hsdp_function` every day at exactly 3.14pm.
+The following one would queue your function every Sunday morning at 5am:
 
 ```hcl
 schedule {
@@ -177,11 +178,22 @@ schedule {
 }
 ```
 
-while this one would trigger your function every Sunday morning at 5am.
+~> Even though you can specify an up-to-the-minute accurate schedule, your function is still queued on the
+Iron cluster, so the exact start time is always determined by how busy the cluster is at that moment.
 
-~> Always set a timeout value for your schedule. This sets a limit on the runtime for each invocation.
+Finally, an example of using the Iron.io native scheduler:
 
-> If you define a schedule with a `run_every` you do not need the gateway to be active.
+```hcl
+schedule {
+  run_every = "1d"
+}
+```
+This will run your function once every day, the time of day however depends on when Terraform deployed
+your function.
+
+~> Always set a timeout value for your scheduled function. This sets a limit on the runtime for each invocation.
+
+> If you define a schedule with a `run_every` you do not need an active gateway.
 
 ### cron field description
 
