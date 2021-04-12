@@ -113,53 +113,14 @@ Notes:
 - You can use ANY programming language (even COBOL), as long as you produce an executable binary or script which spawns
   listens on port `8080` after startup.
 - We pull the `siderite` binary from the official `philipslabs/siderite` registry. Use a version tag for stability.
-- The `CMD` statement should always execute `/app/siderite function` as the main command
+- The `CMD` statement should execute `/app/siderite function` as the main command
+- If your function is always scheduled use `/app/siderite task` instead. This will automatically exit after a single run. 
 - Include any additional tools in your final image
 
-## Naming convention
-Please name and publish your `hsdp_function` compatible Docker images as `hsdp-function-xxx` so others can easily identify them.
-
-# Gateway authentication
-The gateway supports a number of authentication methods which you can configure via the `auth_type` argument.
-
-| Name | Description |
-|------|-------------|
-| `none` | Authentication disabled. Only recommended for testing |
-| `token` | The default. Token based authentication |
-| `iam`  | [HSDP IAM](https://www.hsdp.io/documentation/identity-and-access-management-iam) based authentication |
-
-
-## Token based authentication
-The default authentication method is token based. The endpoint check the following HTTP header for the token
-
-```http
-Authorization: Token TOKENHERE
-```
-
-if the token matches up the request is allowed.
-
-## IAM integration
-The gateway also supports Role Based Access Control (RBAC) using HSDP IAM. The following values should be added to the
-siderite backend module block:
-
-```hcl
-environment = {
-  AUTH_IAM_CLIENT_ID     = "client_id_here"
-  AUTH_IAM_CLIENT_SECRET = "Secr3tH3rE"
-  AUTH_IAM_REGION        = "eu-west"
-  AUTH_IAM_ENVIRONMENT   = "prod"
-  AUTH_IAM_ORGS          = "org-uuid1,org-uuid2"
-  AUTH_IAM_ROLES         = "HSDP_FUNCTION"
-}
-```
-
-With the above configuration the gateway will do an introspect call on the Bearer token and if the user/service has the
-`HSDP_FUNCTION` role in either of the ORGs specified will be allowed to execute the function.
-
-# Scheduling a function to run periodically
+# Scheduling a function to run periodically (Task)
 Enabling the gateway in the `siderite` backend unlocks full **CRON** compatible scheduling of `hsdp_function` resources.
-It provides much finer control over scheduling behaviour compared to the standard Iron.io `run_every` 
-option. To achieve this the gateway runs an internal CRON scheduler which is driven by the provider managed schedule entries 
+It provides much finer control over scheduling behaviour compared to the standard Iron.io `run_every`
+option. To achieve this the gateway runs an internal CRON scheduler which is driven by the provider managed schedule entries
 in the Iron.io backend, syncing the config every few seconds.
 
 ```hcl
@@ -205,4 +166,55 @@ your function.
 5. Entry: Weekday when the process will be started [0-6] [0 is Sunday]
 
 all x min = */x
-````
+```
+
+## Function vs Task
+The `hsdp_function` resource supports defining functions which are automatically executed 
+periodically i.e. `Tasks`. A Docker image which defines a task should use the following `CMD`:
+
+```dockerfile
+CMD ["/app/siderite","task"]
+```
+
+This ensures that after a single run the container exits gracefully instead of waiting to timeout.
+
+## Naming convention
+Please name and publish your `hsdp_function` compatible Docker images using a repository name starting with `hsdp-function-...`. 
+This will help others identify the primary usage pattern for your image. 
+If your image represents a task, please use the prefix `hsdp-task-...`
+
+# Gateway authentication
+The gateway supports a number of authentication methods which you can configure via the `auth_type` argument.
+
+| Name | Description |
+|------|-------------|
+| `none` | Authentication disabled. Only recommended for testing |
+| `token` | The default. Token based authentication |
+| `iam`  | [HSDP IAM](https://www.hsdp.io/documentation/identity-and-access-management-iam) based authentication |
+
+
+## Token based authentication
+The default authentication method is token based. The endpoint check the following HTTP header for the token
+
+```http
+Authorization: Token TOKENHERE
+```
+
+if the token matches up the request is allowed.
+
+## IAM integration
+The gateway also supports Role Based Access Control (RBAC) using HSDP IAM. The following values should be added to the
+siderite backend module block:
+
+```hcl
+environment = {
+  AUTH_IAM_CLIENT_ID     = "client_id_here"
+  AUTH_IAM_CLIENT_SECRET = "Secr3tH3rE"
+  AUTH_IAM_REGION        = "eu-west"
+  AUTH_IAM_ENVIRONMENT   = "prod"
+  AUTH_IAM_ORGS          = "org-uuid1,org-uuid2"
+  AUTH_IAM_ROLES         = "HSDP_FUNCTION"
+}
+```
+With the above configuration the gateway will do an introspect call on the Bearer token and if the user/service has the
+`HSDP_FUNCTION` role in either of the ORGs specified will be allowed to execute the function.
