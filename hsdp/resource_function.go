@@ -206,6 +206,20 @@ func resourceFunctionRead(_ context.Context, d *schema.ResourceData, m interface
 			_ = d.Set("docker_image", "") // Treat missing schedule as destroyed code as well
 			return diags
 		}
+		var scheduleTaskType string
+		parts := strings.Split(schedule.CodeName, "-")
+		if len(parts) < 2 {
+			_, _ = config.Debug("could not match schedule name: '%s'. marking resource as gone\n", schedule.CodeName)
+			_ = d.Set("docker_image", "")
+			return diags
+		}
+		scheduleTaskType = parts[0]
+		if scheduleTaskType != taskType {
+			_, _ = config.Debug("could not match schedule name: '%s'. marking resource as gone\n", schedule.CodeName)
+			_ = d.Set("docker_image", "")
+			return diags
+		}
+		codeName = strings.Join(parts[1:], "-")
 	}
 	_ = d.Set("name", codeName)
 	_, _ = config.Debug("ProjectID: %v\nType: %v, Schedules: %v\nCode: %v\n", ironConfig.ProjectID, taskType, schedules, code)
