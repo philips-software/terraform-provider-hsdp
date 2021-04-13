@@ -18,7 +18,7 @@ import (
 
 func resourceFunction() *schema.Resource {
 	return &schema.Resource{
-		SchemaVersion: 1,
+		SchemaVersion: 2,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -97,7 +97,8 @@ func resourceFunction() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"type": {
 							Type:             schema.TypeString,
-							Required:         true,
+							Optional:         true,
+							Default:          "siderite",
 							ForceNew:         true,
 							ValidateDiagFunc: validateFunctionBackend,
 						},
