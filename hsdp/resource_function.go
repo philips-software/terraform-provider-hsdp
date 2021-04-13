@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/docker/distribution/reference"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-labs/siderite"
@@ -250,10 +251,12 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 			return diag.FromErr(err)
 		}
 	}
+	signature := strings.Replace(uuid.New().String(), "-", "", -1)
+
 	if ironConfig == nil || len(ironConfig.ClusterInfo) == 0 {
 		return diag.FromErr(fmt.Errorf("invalid iron config: %v", ironConfig))
 	}
-	codeName := fmt.Sprintf("%s-%s", taskType, name)
+	codeName := fmt.Sprintf("%s-%s-%s", taskType, name, signature)
 	createdCode, resp, err := ironClient.Codes.CreateOrUpdateCode(iron.Code{
 		Name:      codeName,
 		Image:     dockerImage,
