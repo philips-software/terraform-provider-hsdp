@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.14.6
+- Prevent container host cleanup for colliding hosts (#69)
+- Add additional security group validation (#68)  
+- Fix potential hsdp_function code collision
+
 ## v0.14.5
 - Increase `volume_size` to 16000 (16T) for `hsdp_container_host` resources
 - Bugfix: clean up container host instance in case of failed commands
