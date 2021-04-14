@@ -19,7 +19,7 @@ import (
 
 func resourceFunction() *schema.Resource {
 	return &schema.Resource{
-		SchemaVersion: 2,
+		SchemaVersion: 3,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -181,11 +181,16 @@ func resourceFunctionRead(_ context.Context, d *schema.ResourceData, m interface
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("resourceFunctionRead.newIronClient: %w", err))
 	}
-	// ID Format: {taskType}-{scheduleID}[,{scheduleID},...]-{codeID}
+	// ID Format: {taskType}-{scheduleID}[,{scheduleID},...]-{codeID}-{signature}
 	ids := strings.Split(d.Id(), "-")
+	if len(ids) < 4 {
+		d.SetId("") // Malformed
+		return diags
+	}
 	taskType := ids[0]
 	schedules := strings.Split(ids[1], ",")
 	codeID := ids[2]
+	_ = ids[3] // signature
 
 	code, _, err := ironClient.Codes.GetCode(codeID)
 	if err != nil {
@@ -221,7 +226,7 @@ func resourceFunctionRead(_ context.Context, d *schema.ResourceData, m interface
 			_ = d.Set("docker_image", "")
 			return diags
 		}
-		codeName = strings.Join(parts[1:], "-")
+		codeName = strings.Join(parts[1:len(parts)-1], "-")
 	}
 	_ = d.Set("name", codeName)
 	_, _ = config.Debug("ProjectID: %v\nType: %v, Schedules: %v\nCode: %v\n", ironConfig.ProjectID, taskType, schedules, code)
@@ -299,7 +304,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 			}
 			return diag.FromErr(err)
 		}
-		d.SetId(fmt.Sprintf("%s-%s-%s", taskType, createdSchedule.ID, createdCode.ID))
+		d.SetId(fmt.Sprintf("%s-%s-%s-%s", taskType, createdSchedule.ID, createdCode.ID, signature))
 	case "function":
 		startTime := time.Now().Add(30 * 365 * 86400 * time.Second)
 		syncSchedule = &iron.Schedule{
@@ -336,7 +341,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 			_, _, _ = ironClient.Schedules.CancelSchedule(syncSchedule.ID)
 			return diag.FromErr(fmt.Errorf("creating async schedule failed with code %d", resp.StatusCode))
 		}
-		d.SetId(fmt.Sprintf("%s-%s,%s-%s", taskType, syncSchedule.ID, asyncSchedule.ID, createdCode.ID))
+		d.SetId(fmt.Sprintf("%s-%s,%s-%s-%s", taskType, syncSchedule.ID, asyncSchedule.ID, createdCode.ID, signature))
 	case "schedule":
 		schedule.Iron.CodeName = codeName
 		schedule.Iron.Payload = encryptedSyncPayload
@@ -349,7 +354,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 			}
 			return diag.FromErr(err)
 		}
-		d.SetId(fmt.Sprintf("%s-%s-%s", taskType, createdSchedule.ID, createdCode.ID))
+		d.SetId(fmt.Sprintf("%s-%s-%s-%s", taskType, createdSchedule.ID, createdCode.ID, signature))
 	}
 	if syncSchedule != nil {
 		_ = d.Set("endpoint", fmt.Sprintf("https://%s/function/%s", (*modConfig)["siderite_upstream"], syncSchedule.ID))
