@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"sort"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -122,6 +123,15 @@ func resourceSTLConfig() *schema.Resource {
 func containsInt(s []int, e int) bool {
 	for _, a := range s {
 		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
+func containsString(haystack []string, needle string) bool {
+	for _, a := range haystack {
+		if strings.EqualFold(a, needle) {
 			return true
 		}
 	}
