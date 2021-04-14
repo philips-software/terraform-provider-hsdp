@@ -355,6 +355,10 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	instanceID := ""
 	ipAddress := ""
 	if err != nil {
+		// Do not clean up existing hosts
+		if err == cartel.ErrHostnameAlreadyExists {
+			return diag.FromErr(fmt.Errorf("the host '%s' already exists", tagName))
+		}
 		if resp == nil {
 			_, _, _ = client.Destroy(tagName)
 			return diag.FromErr(fmt.Errorf("create error (resp=nil): %w", err))
