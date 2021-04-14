@@ -17,6 +17,10 @@ import (
 	"github.com/robfig/cron/v3"
 )
 
+const (
+	aLongTime = 86400 * 365 * 30
+)
+
 func resourceFunction() *schema.Resource {
 	return &schema.Resource{
 		SchemaVersion: 3,
@@ -108,7 +112,6 @@ func resourceFunction() *schema.Resource {
 							Optional:  true,
 							Sensitive: true,
 							ForceNew:  true,
-							//ValidateFunc: validation.StringIsJSON,
 						},
 					},
 				},
@@ -282,7 +285,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	var asyncSchedule *iron.Schedule
 	switch taskType {
 	case "cron":
-		startAt := time.Now().Add(time.Duration(86400 * 365 * 30))
+		startAt := time.Now().Add(time.Duration(aLongTime))
 		cfg := siderite.CronPayload{
 			Schedule:         *schedule.CRON,
 			EncryptedPayload: encryptedSyncPayload,
@@ -294,7 +297,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 			Payload:  string(jsonPayload),
 			Cluster:  ironConfig.ClusterInfo[0].ClusterID,
 			StartAt:  &startAt,
-			RunEvery: 86400 * 365 * 30,
+			RunEvery: aLongTime,
 		}
 		createdSchedule, resp, err := ironClient.Schedules.CreateSchedule(cronSchedule)
 		if err != nil || resp.StatusCode != http.StatusOK {
@@ -306,13 +309,13 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 		}
 		d.SetId(fmt.Sprintf("%s-%s-%s-%s", taskType, createdSchedule.ID, createdCode.ID, signature))
 	case "function":
-		startTime := time.Now().Add(30 * 365 * 86400 * time.Second)
+		startTime := time.Now().Add(aLongTime * time.Second)
 		syncSchedule = &iron.Schedule{
 			CodeName: codeName,
 			Payload:  encryptedSyncPayload,
 			Cluster:  ironConfig.ClusterInfo[0].ClusterID,
 			StartAt:  &startTime,
-			RunEvery: 86400 * 365 * 30,
+			RunEvery: aLongTime,
 		}
 		syncSchedule, resp, err = ironClient.Schedules.CreateSchedule(*syncSchedule)
 		if err != nil {
@@ -328,7 +331,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 			Payload:  encryptedAsyncPayload,
 			Cluster:  ironConfig.ClusterInfo[0].ClusterID,
 			StartAt:  &startTime,
-			RunEvery: 86400 * 365 * 30,
+			RunEvery: aLongTime,
 		}
 		asyncSchedule, resp, err = ironClient.Schedules.CreateSchedule(*asyncSchedule)
 		if err != nil {
