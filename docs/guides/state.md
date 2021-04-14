@@ -8,7 +8,14 @@ and to improve performance for large infrastructures.
 
 - [Introduction to Terraform state](https://www.terraform.io/docs/language/state/index.html)
 
-We will discuss the various options you you have to manage Terraform state on HSDP
+We will discuss the various options you have to manage Terraform state on HSDP
+
+# Local
+This is the default state location which Terraform uses when you do not configure a backend.
+It works fine when just getting your feet wet. Terraform
+will store the state in your current directory called `terraform.tfstate`. This works for small
+tests and projects with only a single user. As soon as you start collaborating you will want to
+use a remote state backend, like S3.
 
 # S3
 HSDP S3 Buckets can be used to store Terraform state. The instructions below assume some familiarity with Cloud foundry
@@ -67,3 +74,5 @@ terraform init \
   -backend-config="region=<region>" \
   -backend-config="key=<project_id>/<your_state_name>"
 ```
+
+Your Terraform setup will now store state remotely in the S3 bucket.

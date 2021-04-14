@@ -27,16 +27,13 @@ Example:
 ```hcl
 module "siderite-backend" {
   source  = "philips-labs/siderite-backend/cloudfoundry"
-  version = "0.2.0"
+  version = "0.4.0"
 
   cf_region   = "eu-west"
   cf_org_name = "my-cf-org"
   cf_space    = "myspace"
   cf_user     = var.cf_user
 
-  gateway_enabled = true
-  auth_type       = "token"
-  
   iron_plan   = "large-encrypted-gpu"
 }
 ```
@@ -52,12 +49,12 @@ Cloud foundry space. If no space is specified one will be created automatically.
 With the above module in place you can continue defining a function:
 
 ```hcl
-resource "hsdp_function" "hello_world" {
-  name         = "hello-world"
-  docker_image = "philipslabs/hsdp-function-hello-world:v0.9.4"
-
+resource "hsdp_function" "cuda_test" {
+  name         = "cuda-test"
+  docker_image = "philipslabs/hsdp-task-cuda-test:v0.0.4"
+  command      = ["/app/cudatest"]
+  
   backend {
-    type        = "siderite"
     credentials = module.siderite_backend.credentials
   }
 }
@@ -153,8 +150,6 @@ This will run your function once every day, the time of day however depends on w
 your function.
 
 -> Always set a timeout value for your scheduled function. This sets a limit on the runtime for each invocation.
-
--> If you define a schedule with a `run_every` you do not need an active gateway.
 
 ### cron field description
 
