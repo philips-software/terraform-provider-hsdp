@@ -146,7 +146,7 @@ func resourceContainerHost() *schema.Resource {
 			},
 			"security_groups": {
 				Type:     schema.TypeSet,
-				MaxItems: 5,
+				MaxItems: 10,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
@@ -313,6 +313,11 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 			tags[t] = val
 		}
 	}
+	// Validation
+	if diags := validateContainerHostSchema(d); len(diags) > 0 {
+		return diags
+	}
+
 	// Fetch files first before starting provisioning
 	createFiles, diags := collectFilesToCreate(d)
 	if len(diags) > 0 {
@@ -429,6 +434,17 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 	readDiags := resourceContainerHostRead(ctx, d, m)
 	return append(diags, readDiags...)
+}
+
+func validateContainerHostSchema(d *schema.ResourceData) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	securityGroups := expandStringList(d.Get("security_groups").(*schema.Set).List())
+
+	if containsString(securityGroups, "base") {
+		return diag.FromErr(fmt.Errorf("the 'base' security group is internal and should not be specified"))
+	}
+	return diags
 }
 
 func findInstanceByName(client *cartel.Client, name string) *cartel.InstanceDetails {
@@ -599,6 +615,11 @@ func resourceContainerHostUpdate(_ context.Context, d *schema.ResourceData, m in
 	}
 	if ch.InstanceID != d.Id() {
 		return diag.FromErr(ErrInstanceIDMismatch)
+	}
+
+	// Validation
+	if diags := validateContainerHostSchema(d); len(diags) > 0 {
+		return diags
 	}
 
 	if d.HasChange("tags") {
