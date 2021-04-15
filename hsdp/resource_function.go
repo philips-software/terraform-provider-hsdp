@@ -281,11 +281,11 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 		_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
 		return diag.FromErr(err)
 	}
+	startAt := time.Now().Add(aLongTime * time.Second)
 	var syncSchedule *iron.Schedule
 	var asyncSchedule *iron.Schedule
 	switch taskType {
 	case "cron":
-		startAt := time.Now().Add(time.Duration(aLongTime))
 		cfg := siderite.CronPayload{
 			Schedule:         *schedule.CRON,
 			EncryptedPayload: encryptedSyncPayload,
@@ -309,12 +309,11 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 		}
 		d.SetId(fmt.Sprintf("%s-%s-%s-%s", taskType, createdSchedule.ID, createdCode.ID, signature))
 	case "function":
-		startTime := time.Now().Add(aLongTime * time.Second)
 		syncSchedule = &iron.Schedule{
 			CodeName: codeName,
 			Payload:  encryptedSyncPayload,
 			Cluster:  ironConfig.ClusterInfo[0].ClusterID,
-			StartAt:  &startTime,
+			StartAt:  &startAt,
 			RunEvery: aLongTime,
 		}
 		syncSchedule, resp, err = ironClient.Schedules.CreateSchedule(*syncSchedule)
@@ -330,7 +329,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 			CodeName: codeName,
 			Payload:  encryptedAsyncPayload,
 			Cluster:  ironConfig.ClusterInfo[0].ClusterID,
-			StartAt:  &startTime,
+			StartAt:  &startAt,
 			RunEvery: aLongTime,
 		}
 		asyncSchedule, resp, err = ironClient.Schedules.CreateSchedule(*asyncSchedule)
