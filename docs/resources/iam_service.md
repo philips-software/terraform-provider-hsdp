@@ -28,6 +28,9 @@ The following arguments are supported:
 * `scopes` - (Required) Array. List of supported scopes for this service. Minimum: ["openid"]
 * `validity` - (Optional) Integer. Validity of service (in months). Minimum: 1, Maximum: 600, Default: 12
 * `default_scopes` - (Required) Array. Default scopes. You do not have to specify these explicitly when requesting a token. Minimum: ["openid"]
+* `self_private_key` - (Optional) RSA private key in PEM format. When provided, overrides the generated certificate / private key combination of the
+  IAM service. This gives you full control over the credentials.
+* `self_expires_on` - (Optional) Sets the certificate validity generated from `self_private_key`. When not specified, the generated certificate will have a validity of 5 years.  
 
 ## Attributes Reference
 

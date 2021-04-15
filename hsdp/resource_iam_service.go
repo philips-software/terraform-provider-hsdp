@@ -2,11 +2,16 @@ package hsdp
 
 import (
 	"context"
+	"crypto/x509"
+	"encoding/pem"
+	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/philips-software/go-hsdp-api/iam"
-	"net/http"
 )
 
 func resourceIAMService() *schema.Resource {
@@ -14,7 +19,7 @@ func resourceIAMService() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
+		SchemaVersion: 1,
 		CreateContext: resourceIAMServiceCreate,
 		ReadContext:   resourceIAMServiceRead,
 		UpdateContext: resourceIAMServiceUpdate,
@@ -35,11 +40,10 @@ func resourceIAMService() *schema.Resource {
 				Required: true,
 			},
 			"validity": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  12,
-				ForceNew: true,
-				// TODO
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      12,
+				ForceNew:     true,
 				ValidateFunc: validation.IntBetween(1, 600),
 			},
 			"private_key": {
@@ -73,6 +77,15 @@ func resourceIAMService() *schema.Resource {
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"self_private_key": {
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			"self_expires_on": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -103,10 +116,19 @@ func resourceIAMServiceCreate(_ context.Context, d *schema.ResourceData, m inter
 	_ = d.Set("expires_on", createdService.ExpiresOn)
 	_ = d.Set("scopes", createdService.Scopes)
 	_ = d.Set("default_scopes", createdService.DefaultScopes)
-	_ = d.Set("private_key", createdService.PrivateKey)
 	_ = d.Set("service_id", createdService.ServiceID)
 	_ = d.Set("organization_id", createdService.OrganizationID)
-	_ = d.Set("description", s.Description) // RITM0021326
+	_ = d.Set("description", createdService.Description)
+	_ = d.Set("private_key", createdService.PrivateKey)
+
+	// Set certificate if set from the get go
+	if selfPrivateKey := d.Get("self_private_key").(string); selfPrivateKey != "" {
+		diags = setSelfPrivateKey(client, *createdService, d)
+		if len(diags) > 0 {
+			_, _, _ = client.Services.DeleteService(*createdService) // Cleanup
+			return diags
+		}
+	}
 
 	// Set scopes and default_scopes
 	_, _, err = client.Services.AddScopes(*createdService, scopes, defaultScopes)
@@ -135,22 +157,25 @@ func resourceIAMServiceRead(_ context.Context, d *schema.ResourceData, m interfa
 		}
 		return diag.FromErr(err)
 	}
-	// Until RITM0021326 is implemented, this will always clear the field
-	// d.Set("description", s.Description)
-
+	_ = d.Set("description", s.Description)
 	_ = d.Set("name", s.Name)
 	_ = d.Set("application_id", s.ApplicationID)
-	_ = d.Set("expires_on", s.ExpiresOn)
 	_ = d.Set("organization_id", s.OrganizationID)
 	_ = d.Set("service_id", s.ServiceID)
 	_ = d.Set("scopes", s.Scopes)
 	_ = d.Set("expires_on", s.ExpiresOn)
+	if eo := d.Get("self_expires_on").(string); eo != "" {
+		_ = d.Set("expires_on", eo)
+	}
 	_ = d.Set("default_scopes", s.DefaultScopes)
-	// The private key is only returned on create
+	// Only set if provided
+	if privateKey := d.Get("self_private_key").(string); privateKey != "" {
+		_ = d.Set("private_key", privateKey)
+	}
 	return diags
 }
 
-func resourceIAMServiceUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMServiceUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -162,6 +187,7 @@ func resourceIAMServiceUpdate(_ context.Context, d *schema.ResourceData, m inter
 
 	var s iam.Service
 	s.ID = d.Id()
+	s.ServiceID = d.Get("service_id").(string)
 
 	if d.HasChange("scopes") {
 		o, n := d.GetChange("scopes")
@@ -195,7 +221,18 @@ func resourceIAMServiceUpdate(_ context.Context, d *schema.ResourceData, m inter
 			_, _, _ = client.Services.AddScopes(s, []string{}, toAdd)
 		}
 	}
-	return diags
+	if d.HasChange("self_private_key") || d.HasChange("self_expires_on") {
+		_, n := d.GetChange("self_private_key")
+		if n.(string) == "" {
+			return diag.FromErr(fmt.Errorf("you cannot revert to a server side managed private key once you set a 'self_private_key'"))
+		}
+		diags = setSelfPrivateKey(client, s, d)
+		if len(diags) > 0 {
+			return diags
+		}
+	}
+
+	return resourceIAMServiceRead(ctx, d, m)
 }
 
 func resourceIAMServiceDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -218,5 +255,36 @@ func resourceIAMServiceDelete(_ context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(ErrDeleteServiceFailed)
 	}
 	d.SetId("")
+	return diags
+}
+
+func setSelfPrivateKey(client *iam.Client, service iam.Service, d *schema.ResourceData) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	selfPrivateKey := d.Get("self_private_key").(string)
+	selfExpiresOn := d.Get("self_expires_on").(string)
+	expiresOn := time.Now().Add(5 * 86400 * 365 * time.Second)
+	if selfExpiresOn != "" {
+		parsedExpiresOn, err := time.Parse(time.RFC3339, selfExpiresOn)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("parsing self_expires_on: %w", err))
+		}
+		expiresOn = parsedExpiresOn
+	}
+	block, _ := pem.Decode([]byte(selfPrivateKey))
+	if block == nil {
+		return diag.FromErr(fmt.Errorf("error decoding 'self_private_key'"))
+	}
+	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("parsing self private key: %w", err))
+	}
+	_, _, err = client.Services.UpdateServiceCertificate(service, privateKey, func(cert *x509.Certificate) error {
+		cert.NotAfter = expiresOn
+		return nil
+	})
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("setting self private key: %w", err))
+	}
 	return diags
 }
