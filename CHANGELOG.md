@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.14.7
+- [NEW] Implement `private_key` and `expires_on` configurable fields for IAM Services
+- Fix `hsdp_function` start time issue
+
 ## v0.14.6
 - Prevent container host cleanup for colliding hosts (#69)
 - Add additional security group validation (#68)  
