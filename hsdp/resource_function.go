@@ -41,7 +41,6 @@ func resourceFunction() *schema.Resource {
 			"docker_image": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"docker_credentials": {
 				Type:      schema.TypeMap,
@@ -156,6 +155,7 @@ func resourceFunctionUpdate(_ context.Context, d *schema.ResourceData, m interfa
 			}
 		}
 	}
+
 	// ID Format: {codeID}-{signature}
 	ids := strings.Split(d.Id(), "-")
 	if len(ids) < 2 {
@@ -166,20 +166,37 @@ func resourceFunctionUpdate(_ context.Context, d *schema.ResourceData, m interfa
 	signature := ids[1]
 	name := d.Get("name").(string)
 	codeName := fmt.Sprintf("%s-%s", name, signature)
+	if d.HasChange("docker_image") {
+		code, _, err := ironClient.Codes.GetCode(codeID)
+		if err != nil {
+			d.SetId("")
+			return diags
+		}
+		code.Image = d.Get("docker_image").(string)
+		_, resp, err := ironClient.Codes.CreateOrUpdateCode(*code)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("CreateOrUpdateCode(%v): %w", code, err))
+		}
+		if resp.StatusCode != http.StatusOK {
+			return diag.FromErr(fmt.Errorf("failed to update code: %d", resp.StatusCode))
+		}
+	}
 
 	if d.HasChange("schedule") || d.HasChange("command") ||
-		d.HasChange("run_every") || d.HasChange("environment") {
+		d.HasChange("run_every") || d.HasChange("environment") ||
+		d.HasChange("image") {
 		schedules, _, err := ironClient.Schedules.GetSchedulesWithCode(codeName)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("GetSchedulesWithCode(%s): %w", codeName, err))
 		}
-		// Clear existing
-		for _, s := range *schedules {
-			_, _, _ = ironClient.Schedules.CancelSchedule(s.ID)
-		}
+		// Create new schedules
 		diags = createSchedules(ironClient, ironConfig, *modConfig, d, codeName, codeID, signature)
 		if len(diags) > 0 {
 			return diags
+		}
+		// Clear old ones
+		for _, s := range *schedules {
+			_, _, _ = ironClient.Schedules.CancelSchedule(s.ID)
 		}
 	}
 	_, _ = config.Debug("ProjectID: %v\nSignature: %v\nCode: %v\n", ironConfig.ProjectID, signature, codeID)
@@ -469,16 +486,20 @@ func getSchedule(d *schema.ResourceData) (*functionSchedule, bool, error) {
 		}
 		return &functionSchedule{CRON: &cronSchedule, Timeout: timeout}, true, nil
 	}
-	runEvery, err := calcRunEvery(d.Get("run_every").(string))
-	if err != nil {
-		return nil, false, err
+	runEverySchedule := d.Get("run_every").(string)
+	if runEverySchedule != "" {
+		runEvery, err := calcRunEvery(runEverySchedule)
+		if err != nil {
+			return nil, false, err
+		}
+		ironSchedule := iron.Schedule{
+			StartAt:  &startAt,
+			RunEvery: runEvery,
+			Timeout:  timeout,
+		}
+		return &functionSchedule{Iron: &ironSchedule}, true, nil
 	}
-	ironSchedule := iron.Schedule{
-		StartAt:  &startAt,
-		RunEvery: runEvery,
-		Timeout:  timeout,
-	}
-	return &functionSchedule{Iron: &ironSchedule}, true, nil
+	return nil, false, nil
 }
 
 func calcRunEvery(runEvery string) (int, error) {
