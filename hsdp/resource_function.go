@@ -23,7 +23,7 @@ const (
 
 func resourceFunction() *schema.Resource {
 	return &schema.Resource{
-		SchemaVersion: 3,
+		SchemaVersion: 4,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -51,47 +51,28 @@ func resourceFunction() *schema.Resource {
 			"command": {
 				Type:     schema.TypeList,
 				Optional: true,
-				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"environment": {
 				Type:      schema.TypeMap,
-				ForceNew:  true,
 				Optional:  true,
 				Sensitive: true,
 			},
+			"run_every": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"schedule"},
+			},
 			"schedule": {
-				Type:     schema.TypeList,
+				Type:             schema.TypeString,
+				Optional:         true,
+				ConflictsWith:    []string{"run_every"},
+				ValidateDiagFunc: validateCron,
+			},
+			"timeout": {
+				Type:     schema.TypeInt,
 				Optional: true,
-				ForceNew: true,
-				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"start": {
-							Type:     schema.TypeString,
-							Optional: true,
-							Default:  "2020-10-28T00:00:00Z",
-							ForceNew: true,
-						},
-						"run_every": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-						},
-						"cron": {
-							Type:             schema.TypeString,
-							Optional:         true,
-							ForceNew:         true,
-							ValidateDiagFunc: validateCron,
-						},
-						"timeout": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  1800,
-							ForceNew: true,
-						},
-					},
-				},
+				Default:  1800,
 			},
 			"backend": {
 				Type:     schema.TypeList,
@@ -144,15 +125,13 @@ func resourceFunctionDelete(_ context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 	ids := strings.Split(d.Id(), "-")
-	schedules := strings.Split(ids[1], ",")
-	codeID := ids[2]
-	for _, scheduleID := range schedules {
-		_, _, err = ironClient.Schedules.CancelSchedule(scheduleID)
+	if len(ids) < 2 {
+		d.SetId("") // Malformed
+		return diags
 	}
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	_, _, err = ironClient.Codes.DeleteCode(codeID)
+	codeID := ids[0]
+	_ = ids[1]                                      // signature
+	_, _, err = ironClient.Codes.DeleteCode(codeID) // Deleting a code cascade deletes schedules as well, jobs done!
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -163,10 +142,13 @@ func resourceFunctionDelete(_ context.Context, d *schema.ResourceData, m interfa
 
 func resourceFunctionUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	ironClient, _, _, err := newIronClient(d, m)
+
+	ironClient, ironConfig, modConfig, err := newIronClient(d, m)
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	config := m.(*Config)
+
 	if d.HasChange("docker_credentials") {
 		if _, ok := d.GetOk("docker_credentials"); ok {
 			if _, err := dockerLogin(ironClient, d); err != nil {
@@ -174,6 +156,33 @@ func resourceFunctionUpdate(_ context.Context, d *schema.ResourceData, m interfa
 			}
 		}
 	}
+	// ID Format: {codeID}-{signature}
+	ids := strings.Split(d.Id(), "-")
+	if len(ids) < 2 {
+		d.SetId("") // Malformed
+		return diags
+	}
+	codeID := ids[0]
+	signature := ids[1]
+	name := d.Get("name").(string)
+	codeName := fmt.Sprintf("%s-%s", name, signature)
+
+	if d.HasChange("schedule") || d.HasChange("command") ||
+		d.HasChange("run_every") || d.HasChange("environment") {
+		schedules, _, err := ironClient.Schedules.GetSchedulesWithCode(codeName)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("GetSchedulesWithCode(%s): %w", codeName, err))
+		}
+		// Clear existing
+		for _, s := range *schedules {
+			_, _, _ = ironClient.Schedules.CancelSchedule(s.ID)
+		}
+		diags = createSchedules(ironClient, ironConfig, *modConfig, d, codeName, codeID, signature)
+		if len(diags) > 0 {
+			return diags
+		}
+	}
+	_, _ = config.Debug("ProjectID: %v\nSignature: %v\nCode: %v\n", ironConfig.ProjectID, signature, codeID)
 	return diags
 }
 
@@ -184,16 +193,10 @@ func resourceFunctionRead(_ context.Context, d *schema.ResourceData, m interface
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("resourceFunctionRead.newIronClient: %w", err))
 	}
-	// ID Format: {taskType}-{scheduleID}[,{scheduleID},...]-{codeID}-{signature}
+	// ID Format: {codeID}-{signature}
 	ids := strings.Split(d.Id(), "-")
-	if len(ids) < 4 {
-		d.SetId("") // Malformed
-		return diags
-	}
-	taskType := ids[0]
-	schedules := strings.Split(ids[1], ",")
-	codeID := ids[2]
-	_ = ids[3] // signature
+	codeID := ids[0]
+	signature := ids[1]
 
 	code, _, err := ironClient.Codes.GetCode(codeID)
 	if err != nil {
@@ -205,34 +208,18 @@ func resourceFunctionRead(_ context.Context, d *schema.ResourceData, m interface
 	} else {
 		_ = d.Set("docker_image", code.Image)
 	}
-	var codeName string
-	for _, scheduleID := range schedules {
-		schedule, _, err := ironClient.Schedules.GetSchedule(scheduleID)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		if schedule == nil || schedule.ID != scheduleID {
-			_, _ = config.Debug("could not find schedule with ID: %s. marking resource as gone\n", scheduleID)
-			_ = d.Set("docker_image", "") // Treat missing schedule as destroyed code as well
-			return diags
-		}
-		var scheduleTaskType string
-		parts := strings.Split(schedule.CodeName, "-")
-		if len(parts) < 2 {
-			_, _ = config.Debug("could not match schedule name: '%s'. marking resource as gone\n", schedule.CodeName)
-			_ = d.Set("docker_image", "")
-			return diags
-		}
-		scheduleTaskType = parts[0]
-		if scheduleTaskType != taskType {
-			_, _ = config.Debug("could not match schedule name: '%s'. marking resource as gone\n", schedule.CodeName)
-			_ = d.Set("docker_image", "")
-			return diags
-		}
-		codeName = strings.Join(parts[1:len(parts)-1], "-")
+	schedules, _, err := ironClient.Schedules.GetSchedulesWithCode(code.Name)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("resourceFunctionRead.GetSchedulesWithCode: %w", err))
 	}
-	_ = d.Set("name", codeName)
-	_, _ = config.Debug("ProjectID: %v\nType: %v, Schedules: %v\nCode: %v\n", ironConfig.ProjectID, taskType, schedules, code)
+
+	// Check schedules
+	if len(*schedules) == 0 {
+		_, _ = config.Debug("no schedules found for code '%s'. marking resource as gone\n", code.Name)
+		_ = d.Set("docker_image", "")
+		return diags
+	}
+	_, _ = config.Debug("ProjectID: %v\nSignature: %v\nCode: %v\nSchedules: %d\n", ironConfig.ProjectID, signature, codeID, len(*schedules))
 	return diags
 }
 
@@ -241,17 +228,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	taskType := "schedule"
-	schedule, isSchedule, err := getSchedule(d)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	if !isSchedule {
-		taskType = "function"
-	}
-	if schedule != nil && schedule.CRON != nil {
-		taskType = "cron"
-	}
+
 	name := d.Get("name").(string)
 	dockerImage := d.Get("docker_image").(string)
 	if _, ok := d.GetOk("docker_credentials"); ok {
@@ -264,7 +241,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	if ironConfig == nil || len(ironConfig.ClusterInfo) == 0 {
 		return diag.FromErr(fmt.Errorf("invalid iron config: %v", ironConfig))
 	}
-	codeName := fmt.Sprintf("%s-%s-%s", taskType, name, signature)
+	codeName := fmt.Sprintf("%s-%s", name, signature)
 	createdCode, resp, err := ironClient.Codes.CreateOrUpdateCode(iron.Code{
 		Name:      codeName,
 		Image:     dockerImage,
@@ -276,9 +253,33 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	if resp.StatusCode == http.StatusNotFound {
 		return diag.FromErr(fmt.Errorf("code %s not found", dockerImage))
 	}
-	encryptedSyncPayload, encryptedAsyncPayload, err := preparePayloads(taskType, *modConfig, d, ironConfig)
+	diags := createSchedules(ironClient, ironConfig, *modConfig, d, codeName, createdCode.ID, signature)
+	if len(diags) > 0 {
+		return diags
+	}
+
+	_ = d.Set("token", (*modConfig)["siderite_token"])
+	_ = d.Set("auth_type", (*modConfig)["siderite_auth_type"])
+	return resourceFunctionRead(ctx, d, m)
+}
+
+func createSchedules(ironClient *iron.Client, ironConfig *iron.Config, modConfig map[string]string, d *schema.ResourceData, codeName, codeID, signature string) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	taskType := "schedule"
+	schedule, isSchedule, err := getSchedule(d)
 	if err != nil {
-		_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
+		return diag.FromErr(err)
+	}
+	if !isSchedule {
+		taskType = "function"
+	}
+	if schedule != nil && schedule.CRON != nil {
+		taskType = "cron"
+	}
+	encryptedSyncPayload, encryptedAsyncPayload, err := preparePayloads(taskType, modConfig, d, ironConfig)
+	if err != nil {
+		_, _, _ = ironClient.Codes.DeleteCode(codeID)
 		return diag.FromErr(err)
 	}
 	startAt := time.Now().Add(aLongTime * time.Second)
@@ -299,15 +300,15 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 			StartAt:  &startAt,
 			RunEvery: aLongTime,
 		}
-		createdSchedule, resp, err := ironClient.Schedules.CreateSchedule(cronSchedule)
+		_, resp, err := ironClient.Schedules.CreateSchedule(cronSchedule)
 		if err != nil || resp.StatusCode != http.StatusOK {
-			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
+			_, _, _ = ironClient.Codes.DeleteCode(codeID)
 			if err == nil {
 				return diag.FromErr(fmt.Errorf("create CRON schedule failed with code %d", resp.StatusCode))
 			}
 			return diag.FromErr(err)
 		}
-		d.SetId(fmt.Sprintf("%s-%s-%s-%s", taskType, createdSchedule.ID, createdCode.ID, signature))
+		d.SetId(fmt.Sprintf("%s-%s", codeID, signature))
 	case "function":
 		syncSchedule = &iron.Schedule{
 			CodeName: codeName,
@@ -316,13 +317,13 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 			StartAt:  &startAt,
 			RunEvery: aLongTime,
 		}
-		syncSchedule, resp, err = ironClient.Schedules.CreateSchedule(*syncSchedule)
+		_, resp, err := ironClient.Schedules.CreateSchedule(*syncSchedule)
 		if err != nil {
-			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
+			_, _, _ = ironClient.Codes.DeleteCode(codeID)
 			return diag.FromErr(err)
 		}
 		if resp.StatusCode != http.StatusOK {
-			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
+			_, _, _ = ironClient.Codes.DeleteCode(codeID)
 			return diag.FromErr(fmt.Errorf("creating sync schedule failed with code %d", resp.StatusCode))
 		}
 		asyncSchedule = &iron.Schedule{
@@ -332,41 +333,37 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 			StartAt:  &startAt,
 			RunEvery: aLongTime,
 		}
-		asyncSchedule, resp, err = ironClient.Schedules.CreateSchedule(*asyncSchedule)
+		_, resp, err = ironClient.Schedules.CreateSchedule(*asyncSchedule)
 		if err != nil {
-			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
-			_, _, _ = ironClient.Schedules.CancelSchedule(syncSchedule.ID)
+			_, _, _ = ironClient.Codes.DeleteCode(codeID)
 			return diag.FromErr(err)
 		}
 		if resp.StatusCode != http.StatusOK {
-			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
-			_, _, _ = ironClient.Schedules.CancelSchedule(syncSchedule.ID)
+			_, _, _ = ironClient.Codes.DeleteCode(codeID)
 			return diag.FromErr(fmt.Errorf("creating async schedule failed with code %d", resp.StatusCode))
 		}
-		d.SetId(fmt.Sprintf("%s-%s,%s-%s-%s", taskType, syncSchedule.ID, asyncSchedule.ID, createdCode.ID, signature))
+		d.SetId(fmt.Sprintf("%s-%s", codeID, signature))
 	case "schedule":
 		schedule.Iron.CodeName = codeName
 		schedule.Iron.Payload = encryptedSyncPayload
 		schedule.Iron.Cluster = ironConfig.ClusterInfo[0].ClusterID
-		createdSchedule, resp, err := ironClient.Schedules.CreateSchedule(*schedule.Iron)
+		_, resp, err := ironClient.Schedules.CreateSchedule(*schedule.Iron)
 		if err != nil || resp.StatusCode != http.StatusOK {
-			_, _, _ = ironClient.Codes.DeleteCode(createdCode.ID)
+			_, _, _ = ironClient.Codes.DeleteCode(codeID)
 			if err == nil {
 				return diag.FromErr(fmt.Errorf("create schedule failed with code %d", resp.StatusCode))
 			}
 			return diag.FromErr(err)
 		}
-		d.SetId(fmt.Sprintf("%s-%s-%s-%s", taskType, createdSchedule.ID, createdCode.ID, signature))
+		d.SetId(fmt.Sprintf("%s-%s", codeID, signature))
 	}
 	if syncSchedule != nil {
-		_ = d.Set("endpoint", fmt.Sprintf("https://%s/function/%s", (*modConfig)["siderite_upstream"], syncSchedule.ID))
+		_ = d.Set("endpoint", fmt.Sprintf("https://%s/function/%s", (modConfig)["siderite_upstream"], signature))
 	}
 	if asyncSchedule != nil {
-		_ = d.Set("async_endpoint", fmt.Sprintf("https://%s/async-function/%s", (*modConfig)["siderite_upstream"], asyncSchedule.ID))
+		_ = d.Set("async_endpoint", fmt.Sprintf("https://%s/async-function/%s", (modConfig)["siderite_upstream"], signature))
 	}
-	_ = d.Set("token", (*modConfig)["siderite_token"])
-	_ = d.Set("auth_type", (*modConfig)["siderite_auth_type"])
-	return resourceFunctionRead(ctx, d, m)
+	return diags
 }
 
 func preparePayloads(taskType string, modConfig map[string]string, d *schema.ResourceData, config *iron.Config) (string, string, error) {
@@ -461,24 +458,10 @@ type functionSchedule struct {
 }
 
 func getSchedule(d *schema.ResourceData) (*functionSchedule, bool, error) {
-	schedule, ok := d.Get("schedule").([]interface{})
-	if !ok {
-		return nil, false, nil
-	}
-	if len(schedule) == 0 {
-		return nil, false, nil
-	}
-	scheduleResource, ok := schedule[0].(map[string]interface{})
-	if !ok {
-		return nil, false, nil
-	}
-	startAt, err := time.Parse(time.RFC3339, scheduleResource["start"].(string))
-	if err != nil {
-		return nil, false, err
-	}
-	timeout := scheduleResource["timeout"].(int)
+	startAt := time.Now()
+	timeout := d.Get("timeout").(int)
 	// Check for cron
-	cronSchedule := scheduleResource["cron"].(string)
+	cronSchedule := d.Get("schedule").(string)
 	if cronSchedule != "" {
 		_, err := cron.ParseStandard(cronSchedule)
 		if err != nil {
@@ -486,7 +469,7 @@ func getSchedule(d *schema.ResourceData) (*functionSchedule, bool, error) {
 		}
 		return &functionSchedule{CRON: &cronSchedule, Timeout: timeout}, true, nil
 	}
-	runEvery, err := calcRunEvery(scheduleResource["run_every"].(string))
+	runEvery, err := calcRunEvery(d.Get("run_every").(string))
 	if err != nil {
 		return nil, false, err
 	}
