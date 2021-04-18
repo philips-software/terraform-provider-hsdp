@@ -1,6 +1,6 @@
 # hsdp_function
 
-Define function-as-a-service using various backends. Currently
+Define function-as-a-service using various backends. Currently,
 only `siderite` (HSDP Iron) is supported.
 
 ## Example usage
@@ -11,7 +11,7 @@ resource "hsdp_function" "rds_backup" {
   
   # The docker packaged function business logic
   docker_image = var.streaming_backup_image
-  docker_credentails = {
+  docker_credentials = {
     username = var.docker_username
     password = var.docker_password
   }
@@ -64,6 +64,6 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `endpoint` - The gateway endpoint where you can trigger this function
-* `async_endpoint` - The gateway endpoint where eyou can schedule the function asychnronously  
-* `token` - The token to use in case `auth_type` is set to `token`. This token must be pased in the HTTP `Authorization` header as `Token TOKENHERE`  
+* `async_endpoint` - The gateway endpoint where you can schedule the function asynchronously  
+* `token` - The token to use in case `auth_type` is set to `token`. This token must be pasted in the HTTP `Authorization` header as `Token TOKENHERE`  
 * `auth_type` - The authentication type. Possible values [`none`, `token`, `iam`]
