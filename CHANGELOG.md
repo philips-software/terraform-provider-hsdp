@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.14.8
+- Extra validation for `hsdp_iam_service`
+- Format generated IAM Service PEM key to be more parser friendly (#72)
+
 ## v0.14.7
 - [NEW] Implement `private_key` and `expires_on` configurable fields for IAM Services
 - Fix `hsdp_function` start time issue
