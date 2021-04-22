@@ -84,7 +84,7 @@ func resourceIAMService() *schema.Resource {
 	}
 }
 
-func resourceIAMServiceCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMServiceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -101,18 +101,17 @@ func resourceIAMServiceCreate(_ context.Context, d *schema.ResourceData, m inter
 	s.Validity = d.Get("validity").(int)
 	scopes := expandStringList(d.Get("scopes").(*schema.Set).List())
 	defaultScopes := expandStringList(d.Get("default_scopes").(*schema.Set).List())
+	expiresOn := d.Get("expires_on").(string)
+	privateKey := d.Get("private_key").(string)
+	if privateKey == "" && expiresOn != "" {
+		return diag.FromErr(fmt.Errorf("you cannot set an 'expires_on' value without also specifying the 'private_key'"))
+	}
 
 	createdService, _, err := client.Services.CreateService(s)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	d.SetId(createdService.ID)
-	_ = d.Set("expires_on", createdService.ExpiresOn)
-	_ = d.Set("scopes", createdService.Scopes)
-	_ = d.Set("default_scopes", createdService.DefaultScopes)
-	_ = d.Set("service_id", createdService.ServiceID)
-	_ = d.Set("organization_id", createdService.OrganizationID)
-	_ = d.Set("description", createdService.Description)
 
 	// Set certificate if set from the get go
 	if selfPrivateKey := d.Get("private_key").(string); selfPrivateKey != "" {
@@ -122,7 +121,7 @@ func resourceIAMServiceCreate(_ context.Context, d *schema.ResourceData, m inter
 			return diags
 		}
 	} else {
-		_ = d.Set("private_key", createdService.PrivateKey)
+		_ = d.Set("private_key", iam.FixPEM(createdService.PrivateKey))
 	}
 
 	// Set scopes and default_scopes
@@ -130,7 +129,7 @@ func resourceIAMServiceCreate(_ context.Context, d *schema.ResourceData, m inter
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
-	return diags
+	return resourceIAMServiceRead(ctx, d, m)
 }
 
 func resourceIAMServiceRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -259,7 +258,7 @@ func setSelfPrivateKey(client *iam.Client, service iam.Service, d *schema.Resour
 		}
 		expiresOn = parsedExpiresOn
 	}
-	block, _ := pem.Decode([]byte(fixHSDPPEM(selfPrivateKey)))
+	block, _ := pem.Decode([]byte(iam.FixPEM(selfPrivateKey)))
 	if block == nil {
 		return diag.FromErr(fmt.Errorf("error decoding 'private_key'"))
 	}
@@ -278,10 +277,18 @@ func setSelfPrivateKey(client *iam.Client, service iam.Service, d *schema.Resour
 }
 
 func fixHSDPPEM(pemString string) string {
-	pre := strings.Replace(pemString,
-		"-----BEGIN RSA PRIVATE KEY-----",
-		"-----BEGIN RSA PRIVATE KEY-----\n", -1)
-	return strings.Replace(pre,
-		"-----END RSA PRIVATE KEY-----",
-		"\n-----END RSA PRIVATE KEY-----", -1)
+	begin := "KEY-----"
+	end := "-----END"
+	pre := pemString
+	if !strings.Contains(pre, begin+"\n") {
+		pre = strings.Replace(pemString,
+			begin,
+			begin+"\n", -1)
+	}
+	if !strings.Contains(pre, "\n"+end) {
+		return strings.Replace(pre,
+			end,
+			"\n"+end, -1)
+	}
+	return pre
 }
