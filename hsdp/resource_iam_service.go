@@ -6,7 +6,6 @@ import (
 	"encoding/pem"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -274,21 +273,4 @@ func setSelfPrivateKey(client *iam.Client, service iam.Service, d *schema.Resour
 		return diag.FromErr(fmt.Errorf("setting private key: %w", err))
 	}
 	return diags
-}
-
-func fixHSDPPEM(pemString string) string {
-	begin := "KEY-----"
-	end := "-----END"
-	pre := pemString
-	if !strings.Contains(pre, begin+"\n") {
-		pre = strings.Replace(pemString,
-			begin,
-			begin+"\n", -1)
-	}
-	if !strings.Contains(pre, "\n"+end) {
-		return strings.Replace(pre,
-			end,
-			"\n"+end, -1)
-	}
-	return pre
 }
