@@ -546,8 +546,8 @@ func newIronClient(d *schema.ResourceData, m interface{}) (*iron.Client, *iron.C
 	if !ok {
 		return nil, nil, nil, fmt.Errorf("invalid backend type")
 	}
-	if backendType != "siderite" {
-		return nil, nil, nil, fmt.Errorf("expected backend type of 'siderite'")
+	if !(backendType == "siderite" || backendType == "ferrite") {
+		return nil, nil, nil, fmt.Errorf("expected backend type of ['siderite' | 'ferrite']")
 	}
 	configMap, ok := backendResource["credentials"].(map[string]interface{})
 	if !ok {
@@ -560,6 +560,7 @@ func newIronClient(d *schema.ResourceData, m interface{}) (*iron.Client, *iron.C
 		}
 	}
 	ironConfig := iron.Config{
+		BaseURL:   config["base_url"],
 		Email:     config["email"],
 		Password:  config["password"],
 		Project:   config["project"],
