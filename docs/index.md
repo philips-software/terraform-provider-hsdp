@@ -51,7 +51,7 @@ The following arguments are supported:
 
 * `secret_key` - (Optional) The secret key as provided by HSDP. Actions which require API signing will not work if this value is missing.
 
-* `cartel_host` - (Optional) The cartel host as provided by HSDP. Auto-discovered when region and environment are specified.
+* `cartel_host` - (Optional) The cartel host as provided by HSDP. Auto-discovered when region is specified.
 
 * `cartel_token` - (Optional) The cartel token as provided by HSDP.
 
