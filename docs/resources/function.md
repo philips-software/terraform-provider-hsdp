@@ -30,12 +30,9 @@ resource "hsdp_function" "rds_backup" {
   }
 
   # Run every day at 4am
-  schedule {
-    cron = "0 4 * * *"
-  }
+  schedule = "0 4 * * *"
 
   backend {
-    type = "siderite"
     credentials = module.siderite_backend.credentials
   }  
 }
@@ -56,7 +53,6 @@ The following arguments are supported:
   Example: a value of `"20m"` would run the function every 20 minutes.
 * `timeout` - (Optional, int) When set, limits the execution time (seconds) to this value. Default: `1800` (30 minutes)
 * `backend` - (Required) The backend to use for scheduling your functions.
-  * `type` - (Optional) The backend type. Only `siderite` is supported at this time. Defaults to: `siderite`
   * `credentials` - (Required, map) The backend credentials. Must be iron configuration details at this time.
     
 ## Attribute reference
