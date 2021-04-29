@@ -17,6 +17,7 @@ func resourceDICOMObjectStore() *schema.Resource {
 		CreateContext: resourceDICOMObjectStoreCreate,
 		ReadContext:   resourceDICOMObjectStoreRead,
 		DeleteContext: resourceDICOMObjectStoreDelete,
+		SchemaVersion: 1,
 
 		Schema: map[string]*schema.Schema{
 			"config_url": {
@@ -38,6 +39,7 @@ func resourceDICOMObjectStore() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
+				ForceNew: true,
 			},
 			"static_access": {
 				Type:     schema.TypeSet,
