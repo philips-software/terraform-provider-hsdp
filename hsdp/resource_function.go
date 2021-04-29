@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/philips-labs/ferrite/server"
 	"github.com/philips-labs/siderite"
 	"github.com/philips-software/go-hsdp-api/iron"
 	"github.com/robfig/cron/v3"
@@ -23,7 +24,7 @@ const (
 
 func resourceFunction() *schema.Resource {
 	return &schema.Resource{
-		SchemaVersion: 4,
+		SchemaVersion: 6,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -80,13 +81,6 @@ func resourceFunction() *schema.Resource {
 				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"type": {
-							Type:             schema.TypeString,
-							Optional:         true,
-							Default:          "siderite",
-							ForceNew:         true,
-							ValidateDiagFunc: validateFunctionBackend,
-						},
 						"credentials": {
 							Type:      schema.TypeMap,
 							Optional:  true,
@@ -533,7 +527,6 @@ func calcRunEvery(runEvery string) (int, error) {
 
 func newIronClient(d *schema.ResourceData, m interface{}) (*iron.Client, *iron.Config, *map[string]string, error) {
 	c := m.(*Config)
-
 	backend, ok := d.Get("backend").([]interface{})
 	if !ok {
 		return nil, nil, nil, fmt.Errorf("expected array of 'backend' config")
@@ -542,13 +535,7 @@ func newIronClient(d *schema.ResourceData, m interface{}) (*iron.Client, *iron.C
 	if !ok {
 		return nil, nil, nil, fmt.Errorf("unexpected backend format")
 	}
-	backendType, ok := backendResource["type"].(string)
-	if !ok {
-		return nil, nil, nil, fmt.Errorf("invalid backend type")
-	}
-	if !(backendType == "siderite" || backendType == "ferrite") {
-		return nil, nil, nil, fmt.Errorf("expected backend type of ['siderite' | 'ferrite']")
-	}
+
 	configMap, ok := backendResource["credentials"].(map[string]interface{})
 	if !ok {
 		return nil, nil, nil, fmt.Errorf("invalid or missing iron config credentials")
@@ -558,6 +545,23 @@ func newIronClient(d *schema.ResourceData, m interface{}) (*iron.Client, *iron.C
 		if str, ok := v.(string); ok {
 			config[k] = str
 		}
+	}
+	backendType := config["type"]
+	if !(backendType == "siderite" || backendType == "ferrite") {
+		return nil, nil, nil, fmt.Errorf("expected backend type of ['siderite' | 'ferrite']")
+	}
+	// Bootstrap ferrite
+	if backendType == "ferrite" {
+		token := config["token"]
+		bootstrap, err := server.Bootstrap(config["base_url"], token)
+		if err != nil {
+			return nil, nil, nil, fmt.Errorf("error bootstrapping ferrite: %w", err)
+		}
+		// Inject bootstrap data
+		config["project"] = bootstrap.ProjectID
+		config["project_id"] = bootstrap.ProjectID
+		config["cluster_info_0_cluster_id"] = bootstrap.ClusterID
+		config["cluster_info_0_pubkey"] = bootstrap.PublicKey
 	}
 	ironConfig := iron.Config{
 		BaseURL:   config["base_url"],
