@@ -34,6 +34,11 @@ func resourceDICOMObjectStore() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"force_delete": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			"static_access": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -133,11 +138,16 @@ func resourceDICOMObjectStoreDelete(_ context.Context, d *schema.ResourceData, m
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
 	orgID := d.Get("organization_id").(string)
+	forceDelete := d.Get("force_delete").(bool)
 	client, err := config.getDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	defer client.Close()
+	if !forceDelete { // soft delete
+		d.SetId("")
+		return diags
+	}
 	operation := func() error {
 		var resp *dicom.Response
 		_, resp, err = client.Config.DeleteObjectStore(dicom.ObjectStore{ID: d.Id()}, &dicom.QueryOptions{
