@@ -27,7 +27,7 @@ Example:
 ```hcl
 module "siderite-backend" {
   source  = "philips-labs/siderite-backend/cloudfoundry"
-  version = "0.4.0"
+  version = "0.5.0"
 
   cf_region   = "eu-west"
   cf_org_name = "my-cf-org"
@@ -95,7 +95,7 @@ RUN go mod download
 COPY . .
 RUN go build -o server .
 
-FROM philipslabs/siderite:v0.6.0 AS siderite
+FROM philipslabs/siderite:v0.7.0 AS siderite
 
 FROM alpine:latest
 RUN apk add --no-cache git openssh openssl bash postgresql-client
