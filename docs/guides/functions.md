@@ -121,18 +121,34 @@ option. To achieve this the gateway runs an internal CRON scheduler which is dri
 in the Iron.io backend, syncing the config every few seconds.
 
 ```hcl
-schedule {
-    cron = "14 15 * * *"
-    timeout = 900
+resource "hsdp_function" "cuda_test" {
+  name         = "cuda-test"
+  docker_image = "philipslabs/hsdp-task-cuda-test:v0.0.5"
+  command      = ["/app/cudatest"]
+
+  schedule = "14 15 * * * *"
+  timeout  = 120
+
+  backend {
+    credentials = module.siderite_backend.credentials
   }
+}
 ```
 The above example would queue your `hsdp_function` every day at exactly 3.14pm.
 The following one would queue your function every Sunday morning at 5am:
 
 ```hcl
-schedule {
-   cron = "0 5 * * 0"
-   timeout = 1800
+resource "hsdp_function" "cuda_test" {
+  name         = "cuda-test"
+  docker_image = "philipslabs/hsdp-task-cuda-test:v0.0.4"
+  command      = ["/app/cudatest"]
+
+  schedule = "0 5 * * * 0"
+  timeout  = 120
+
+  backend {
+    credentials = module.siderite_backend.credentials
+  }
 }
 ```
 
@@ -142,12 +158,20 @@ Iron cluster, so the exact start time is always determined by how busy the clust
 Finally, an example of using the Iron.io native scheduler:
 
 ```hcl
-schedule {
-  run_every = "1d"
+resource "hsdp_function" "cuda_test" {
+  name         = "cuda-test"
+  docker_image = "philipslabs/hsdp-task-cuda-test:v0.0.5"
+  command      = ["/app/cudatest"]
+
+  run_every = "20m"
+  timeout  = 120
+
+  backend {
+    credentials = module.siderite_backend.credentials
+  }
 }
 ```
-This will run your function once every day, the time of day however depends on when Terraform deployed
-your function.
+This will run your function every 20 minutes.
 
 -> Always set a timeout value for your scheduled function. This sets a limit on the runtime for each invocation.
 
