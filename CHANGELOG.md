@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.15.0
+- Refactor and announce `hsdp_function` beta status
+- Filter out sensitive fields from debug logs
+- Add support for `ferrite` backend for `hsdp_function`
+- DICOM Object stores are soft deleted by default, with option to `force_delete`
+
 ## v0.14.8
 - Extra validation for `hsdp_iam_service`
 - Format generated IAM Service PEM key to be more parser friendly (#72)
