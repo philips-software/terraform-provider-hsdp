@@ -27,7 +27,7 @@ Example:
 ```hcl
 module "siderite-backend" {
   source  = "philips-labs/siderite-backend/cloudfoundry"
-  version = "0.5.0"
+  version = "0.6.0"
 
   cf_region   = "eu-west"
   cf_org_name = "my-cf-org"
@@ -79,8 +79,13 @@ A `hsdp_function` compatible Docker image needs to adhere to a number of criteri
 a helper application called `siderite`. Siderite started as a convenience tool to ease Iron Worker usage. It now has a 
 `function` mode where it will look for an `/app/server` (configurable) and execute it. The server should start up and 
 listen on port `8080` for regular HTTP requests. The siderite binary will establish a connection to the gateway and wait
-for synchronous requests to come in. In asychronous mode the Siderite helper will pull the payload from the Gateway and
-execute the request (again by spawining `/app/server`). Optionally it will `POST` the response back to an URL if one specified in an `X-Callback-URL` header in the HTTP call to the asychronous endpoint.
+for synchronous requests to come in. 
+
+## Asynchronous function
+In asychronous mode the Siderite helper will pull the payload from the Gateway and execute the request
+(again by spawning `/app/server`). It will `POST` the response back to a URL specified in the original request Header called
+`X-Callback-URL` header.
+
 ## Example Docker file
 ```dockerfile
 FROM golang:1.16.3-alpine3.13 as builder
@@ -96,7 +101,7 @@ RUN go mod download
 COPY . .
 RUN go build -o server .
 
-FROM philipslabs/siderite:v0.7.0 AS siderite
+FROM philipslabs/siderite:v0.8.0 AS siderite
 
 FROM alpine:latest
 RUN apk add --no-cache git openssh openssl bash postgresql-client
@@ -114,6 +119,17 @@ Notes:
 - The `CMD` statement should execute `/app/siderite function` as the main command
 - If your function is always scheduled use `/app/siderite task` instead. This will automatically exit after a single run. 
 - Include any additional tools in your final image
+
+## Example using curl:
+```text
+curl -v \
+    -X POST \
+    -H "Authorization: Token XXX" \
+    -H "X-Callback-URL: https://hook.bin/XYZ" \
+    https://hsdp-func-gateway-yyy.eu-west.philips-healthsuite.com/function/zzz
+```
+This would schedule the function to run. The result of the request will then be posted to `https://hook.bin/XYZ`. Calls
+will be queued up and picked up by workers.
 
 # Scheduling a function to run periodically (Task)
 Enabling the gateway in the `siderite` backend unlocks full **CRON** compatible scheduling of `hsdp_function` resources.
