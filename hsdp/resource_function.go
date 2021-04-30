@@ -323,7 +323,6 @@ func createSchedules(ironClient *iron.Client, ironConfig *iron.Config, modConfig
 	case "function":
 		cfg := siderite.CronPayload{
 			EncryptedPayload: encryptedSyncPayload,
-			Timeout:          schedule.Timeout,
 			Type:             "sync",
 		}
 		jsonPayload, _ := json.Marshal(cfg)
@@ -345,7 +344,6 @@ func createSchedules(ironClient *iron.Client, ironConfig *iron.Config, modConfig
 		}
 		cfg = siderite.CronPayload{
 			EncryptedPayload: encryptedAsyncPayload,
-			Timeout:          schedule.Timeout,
 			Type:             "async",
 		}
 		jsonPayload, _ = json.Marshal(cfg)
@@ -367,6 +365,9 @@ func createSchedules(ironClient *iron.Client, ironConfig *iron.Config, modConfig
 		}
 		d.SetId(fmt.Sprintf("%s-%s", codeID, signature))
 	case "schedule":
+		if schedule == nil {
+			return diag.FromErr(fmt.Errorf("expected schedule to not be nil"))
+		}
 		schedule.Iron.CodeName = codeName
 		schedule.Iron.Payload = encryptedSyncPayload
 		schedule.Iron.Cluster = ironConfig.ClusterInfo[0].ClusterID
