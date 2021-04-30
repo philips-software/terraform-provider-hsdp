@@ -382,10 +382,10 @@ func createSchedules(ironClient *iron.Client, ironConfig *iron.Config, modConfig
 		d.SetId(fmt.Sprintf("%s-%s", codeID, signature))
 	}
 	if syncSchedule != nil {
-		_ = d.Set("endpoint", fmt.Sprintf("https://%s/function/%s", (modConfig)["siderite_upstream"], signature))
+		_ = d.Set("endpoint", fmt.Sprintf("https://%s/function/%s", (modConfig)["siderite_upstream"], codeID))
 	}
 	if asyncSchedule != nil {
-		_ = d.Set("async_endpoint", fmt.Sprintf("https://%s/async-function/%s", (modConfig)["siderite_upstream"], signature))
+		_ = d.Set("async_endpoint", fmt.Sprintf("https://%s/async-function/%s", (modConfig)["siderite_upstream"], codeID))
 	}
 	return diags
 }
