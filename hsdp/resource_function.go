@@ -321,9 +321,15 @@ func createSchedules(ironClient *iron.Client, ironConfig *iron.Config, modConfig
 		}
 		d.SetId(fmt.Sprintf("%s-%s", codeID, signature))
 	case "function":
+		cfg := siderite.CronPayload{
+			EncryptedPayload: encryptedSyncPayload,
+			Timeout:          schedule.Timeout,
+			Type:             "sync",
+		}
+		jsonPayload, _ := json.Marshal(cfg)
 		syncSchedule = &iron.Schedule{
 			CodeName: codeName,
-			Payload:  encryptedSyncPayload,
+			Payload:  string(jsonPayload),
 			Cluster:  ironConfig.ClusterInfo[0].ClusterID,
 			StartAt:  &startAt,
 			RunEvery: aLongTime,
@@ -337,9 +343,15 @@ func createSchedules(ironClient *iron.Client, ironConfig *iron.Config, modConfig
 			_, _, _ = ironClient.Codes.DeleteCode(codeID)
 			return diag.FromErr(fmt.Errorf("creating sync schedule failed with code %d", resp.StatusCode))
 		}
+		cfg = siderite.CronPayload{
+			EncryptedPayload: encryptedAsyncPayload,
+			Timeout:          schedule.Timeout,
+			Type:             "async",
+		}
+		jsonPayload, _ = json.Marshal(cfg)
 		asyncSchedule = &iron.Schedule{
 			CodeName: codeName,
-			Payload:  encryptedAsyncPayload,
+			Payload:  string(jsonPayload),
 			Cluster:  ironConfig.ClusterInfo[0].ClusterID,
 			StartAt:  &startAt,
 			RunEvery: aLongTime,
