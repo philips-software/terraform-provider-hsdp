@@ -181,6 +181,7 @@ resource "hsdp_function" "cuda_test" {
   command      = ["/app/cudatest"]
 
   run_every = "20m"
+  start_at = "2021-01-01T07:00:00.00Z" # Start at 7am UTC
   timeout  = 120
 
   backend {
