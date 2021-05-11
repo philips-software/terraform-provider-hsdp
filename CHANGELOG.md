@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.15.2
+- Bring back `start_at` for `run_every` scheduling of `hsdp_function`
+- Documentation fixes
+
 ## v0.15.1
 - Fix ferrite backend support
 - Documentation fixes
