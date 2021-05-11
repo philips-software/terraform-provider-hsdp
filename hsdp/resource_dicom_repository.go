@@ -24,12 +24,12 @@ func resourceDICOMRepository() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"organization_id": {
+			"organization_id": { // Query
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"repository_organization_id": {
+			"repository_organization_id": { // Body
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
