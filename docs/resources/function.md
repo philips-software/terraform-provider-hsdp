@@ -51,8 +51,10 @@ The following arguments are supported:
 * `schedule` - (Optional) set schedule using cron format. This requires a backend with activated gateway. Conflicts with `run_every`
 * `run_every` - (Optional) Run the function every `{value}{unit}` period. Supported units are `s`, `m`, `h`, `d` for second, minute, hours, days respectively. Conflicts with `cron`
   Example: a value of `"20m"` would run the function every 20 minutes.
-* `start_at` - (Optional) Only valid for `run_every`. This is a hint for when the first run should be. This determines the time of day the schedule will run at. Depending on the frequency of the runs and the time of day when the Terraform
-  script was run, it can take up to 24 hours for the first run to happen.
+* `start_at` - (Optional) Only valid for `run_every`. This is a hint for when the first run should be. 
+  This determines the time of day the schedule will run at. Depending on the frequency of the runs and
+  the time of day when the Terraform script was run, it can take up to 24 hours for the first run to happen.
+  Use `schedule` for more accurate scheduling behaviour.
 * `timeout` - (Optional, int) When set, limits the execution time (seconds) to this value. Default: `1800` (30 minutes)
 * `backend` - (Required) The backend to use for scheduling your functions.
   * `credentials` - (Required, map) The backend credentials. Must be iron configuration details at this time.
