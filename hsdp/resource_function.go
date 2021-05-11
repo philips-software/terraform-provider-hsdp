@@ -63,10 +63,15 @@ func resourceFunction() *schema.Resource {
 				Optional:      true,
 				ConflictsWith: []string{"schedule"},
 			},
+			"start_at": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				ConflictsWith: []string{"schedule"},
+			},
 			"schedule": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				ConflictsWith:    []string{"run_every"},
+				ConflictsWith:    []string{"run_every", "start_at"},
 				ValidateDiagFunc: validateCron,
 			},
 			"timeout": {
@@ -178,7 +183,7 @@ func resourceFunctionUpdate(_ context.Context, d *schema.ResourceData, m interfa
 
 	if d.HasChange("schedule") || d.HasChange("command") ||
 		d.HasChange("run_every") || d.HasChange("environment") ||
-		d.HasChange("image") {
+		d.HasChange("start_at") || d.HasChange("image") {
 		schedules, _, err := ironClient.Schedules.GetSchedulesWithCode(codeName)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("GetSchedulesWithCode(%s): %w", codeName, err))
@@ -482,7 +487,6 @@ type functionSchedule struct {
 }
 
 func getSchedule(d *schema.ResourceData) (*functionSchedule, bool, error) {
-	startAt := time.Now()
 	timeout := d.Get("timeout").(int)
 	// Check for cron
 	cronSchedule := d.Get("schedule").(string)
@@ -494,13 +498,14 @@ func getSchedule(d *schema.ResourceData) (*functionSchedule, bool, error) {
 		return &functionSchedule{CRON: &cronSchedule, Timeout: timeout}, true, nil
 	}
 	runEverySchedule := d.Get("run_every").(string)
+	startAtSchedule := d.Get("start_at").(string)
 	if runEverySchedule != "" {
-		runEvery, err := calcRunEvery(runEverySchedule)
+		runEvery, firstRun, err := calcRunEvery(runEverySchedule, startAtSchedule)
 		if err != nil {
 			return nil, false, err
 		}
 		ironSchedule := iron.Schedule{
-			StartAt:  &startAt,
+			StartAt:  firstRun,
 			RunEvery: runEvery,
 			Timeout:  timeout,
 		}
@@ -509,15 +514,15 @@ func getSchedule(d *schema.ResourceData) (*functionSchedule, bool, error) {
 	return nil, false, nil
 }
 
-func calcRunEvery(runEvery string) (int, error) {
+func calcRunEvery(runEvery, startAt string) (int, *time.Time, error) {
 	var unit string
 	var value int
 	scanned, err := fmt.Sscanf(runEvery, "%d%s", &value, &unit)
 	if err != nil {
-		return 0, fmt.Errorf("runEvery scan [%s]: %w", runEvery, err)
+		return 0, nil, fmt.Errorf("runEvery scan [%s]: %w", runEvery, err)
 	}
 	if scanned != 2 {
-		return 0, fmt.Errorf("invalid run_every format: %s", runEvery)
+		return 0, nil, fmt.Errorf("invalid run_every format: %s", runEvery)
 	}
 	seconds := 0
 	switch unit {
@@ -530,12 +535,28 @@ func calcRunEvery(runEvery string) (int, error) {
 	case "d":
 		seconds = 86400 * value
 	default:
-		return 0, fmt.Errorf("unit '%s' not supported", unit)
+		return 0, nil, fmt.Errorf("unit '%s' not supported", unit)
 	}
 	if seconds < 60 {
-		return 0, fmt.Errorf("a value less than 60 seconds is not supported")
+		return 0, nil, fmt.Errorf("a value less than 60 seconds is not supported")
 	}
-	return seconds, nil
+	now := time.Now()
+	firstRun := now
+	if startAt != "" {
+		userFirstRun, err := time.Parse(time.RFC3339, startAt)
+		if err != nil {
+			return 0, nil, fmt.Errorf("invalid start_at time: %s", startAt)
+		}
+		firstRun = userFirstRun
+	}
+	if firstRun.Before(now) { // In the past so figure out the firstRun time
+		timeComponent := firstRun.Sub(firstRun.Truncate(24 * time.Hour))
+		firstRun = now.Truncate(24 * time.Hour).Add(timeComponent)
+		if now.After(firstRun) { // Start tomorrow
+			firstRun = firstRun.Add(24 * time.Hour)
+		}
+	}
+	return seconds, &firstRun, nil
 }
 
 func newIronClient(d *schema.ResourceData, m interface{}) (*iron.Client, *iron.Config, *map[string]string, error) {

@@ -181,6 +181,7 @@ resource "hsdp_function" "cuda_test" {
   command      = ["/app/cudatest"]
 
   run_every = "20m"
+  start_at = "2021-01-01T07:00:00.00Z" # Start at 7am UTC
   timeout  = 120
 
   backend {
@@ -252,5 +253,5 @@ environment = {
   AUTH_IAM_ROLES         = "HSDP_FUNCTION"
 }
 ```
-With the above configuration the gateway will do an introspect call on the Bearer token and if the user/service has the
+With the above configuration the gateway will do a introspect call on the Bearer token and if the user/service has the
 `HSDP_FUNCTION` role in either of the ORGs specified will be allowed to execute the function.
