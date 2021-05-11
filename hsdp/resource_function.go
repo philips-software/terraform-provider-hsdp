@@ -183,7 +183,7 @@ func resourceFunctionUpdate(_ context.Context, d *schema.ResourceData, m interfa
 
 	if d.HasChange("schedule") || d.HasChange("command") ||
 		d.HasChange("run_every") || d.HasChange("environment") ||
-		d.HasChange("image") {
+		d.HasChange("start_at") || d.HasChange("image") {
 		schedules, _, err := ironClient.Schedules.GetSchedulesWithCode(codeName)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("GetSchedulesWithCode(%s): %w", codeName, err))
@@ -549,9 +549,12 @@ func calcRunEvery(runEvery, startAt string) (int, *time.Time, error) {
 		}
 		firstRun = userFirstRun
 	}
-	if firstRun.Before(now) { // In the past so start run tomorrow
+	if firstRun.Before(now) { // In the past so figure out the firstRun time
 		timeComponent := firstRun.Sub(firstRun.Truncate(24 * time.Hour))
-		firstRun = now.Truncate(24 * time.Hour).Add(24 * time.Hour).Add(timeComponent)
+		firstRun = now.Truncate(24 * time.Hour).Add(timeComponent)
+		if now.After(firstRun) { // Start tomorrow
+			firstRun = firstRun.Add(24 * time.Hour)
+		}
 	}
 	return seconds, &firstRun, nil
 }
