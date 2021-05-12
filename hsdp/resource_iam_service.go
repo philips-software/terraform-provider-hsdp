@@ -19,7 +19,7 @@ func resourceIAMService() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		SchemaVersion: 1,
+		SchemaVersion: 2,
 		CreateContext: resourceIAMServiceCreate,
 		ReadContext:   resourceIAMServiceRead,
 		UpdateContext: resourceIAMServiceUpdate,
@@ -46,11 +46,15 @@ func resourceIAMService() *schema.Resource {
 				ForceNew:     true,
 				ValidateFunc: validation.IntBetween(1, 600),
 			},
+			"self_managed_private_key": {
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
+			},
 			"private_key": {
-				Type:             schema.TypeString,
-				Sensitive:        true,
-				Optional:         true,
-				DiffSuppressFunc: suppressWhenGenerated,
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Computed:  true,
 			},
 			"service_id": {
 				Type:     schema.TypeString,
@@ -101,24 +105,24 @@ func resourceIAMServiceCreate(ctx context.Context, d *schema.ResourceData, m int
 	scopes := expandStringList(d.Get("scopes").(*schema.Set).List())
 	defaultScopes := expandStringList(d.Get("default_scopes").(*schema.Set).List())
 	expiresOn := d.Get("expires_on").(string)
-	privateKey := d.Get("private_key").(string)
-	if privateKey == "" && expiresOn != "" {
-		return diag.FromErr(fmt.Errorf("you cannot set an 'expires_on' value without also specifying the 'private_key'"))
+	selfPrivateKey := d.Get("self_managed_private_key").(string)
+	if selfPrivateKey == "" && expiresOn != "" {
+		return diag.FromErr(fmt.Errorf("you cannot set an 'expires_on' value without also specifying the 'self_managed_private_key'"))
 	}
 
 	createdService, _, err := client.Services.CreateService(s)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(createdService.ID)
 
 	// Set certificate if set from the get go
-	if selfPrivateKey := d.Get("private_key").(string); selfPrivateKey != "" {
+	if selfPrivateKey != "" {
 		diags = setSelfPrivateKey(client, *createdService, d)
 		if len(diags) > 0 {
 			_, _, _ = client.Services.DeleteService(*createdService) // Cleanup
 			return diags
 		}
+		_ = d.Set("private_key", selfPrivateKey)
 	} else {
 		_ = d.Set("private_key", iam.FixPEM(createdService.PrivateKey))
 	}
@@ -128,6 +132,12 @@ func resourceIAMServiceCreate(ctx context.Context, d *schema.ResourceData, m int
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
+	if len(diags) > 0 {
+		_, _, _ = client.Services.DeleteService(*createdService) // Cleanup
+		return diags
+	}
+
+	d.SetId(createdService.ID)
 	return resourceIAMServiceRead(ctx, d, m)
 }
 
