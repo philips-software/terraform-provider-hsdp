@@ -1,3 +1,4 @@
+# hsdp_iam_user
 Provides details of a given HSDP IAM user. 
 
 >Typically, this resource is used to only test account. We highly recommend using the IAM Self serviceUI which HSDP provides for day to day user management tasks
