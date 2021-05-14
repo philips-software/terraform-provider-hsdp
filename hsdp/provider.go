@@ -199,6 +199,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_function":                resourceFunction(),
 			"hsdp_notification_producer":   resourceNotificationProducer(),
 			"hsdp_notification_subscriber": resourceNotificationSubscriber(),
+			"hsdp_notification_topic":      resourceNotificationTopic(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":              dataSourceIAMIntrospect(),

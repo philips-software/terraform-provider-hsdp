@@ -136,7 +136,7 @@ func resourceNotificationSubscriberCreate(ctx context.Context, d *schema.Resourc
 		created, _, err = client.Subscriber.CreateSubscriber(subscriber)
 		return checkForNotificationPermissionErrors(client, resp, err)
 	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
 		return diag.FromErr(err)
 	}
