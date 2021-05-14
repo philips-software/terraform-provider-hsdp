@@ -2,7 +2,9 @@ package hsdp
 
 import (
 	"context"
+	"net/http"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/notification"
@@ -115,6 +117,7 @@ func resourceNotificationProducerCreate(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 	defer client.Close()
+
 	producer := notification.Producer{
 		ManagingOrganizationID:      d.Get("managing_organization_id").(string),
 		ManagingOrganization:        d.Get("managing_organization").(string),
@@ -126,10 +129,30 @@ func resourceNotificationProducerCreate(ctx context.Context, d *schema.ResourceD
 		Description:                 d.Get("description").(string),
 	}
 
-	created, _, err := client.Producer.CreateProducer(producer)
+	var created *notification.Producer
+
+	operation := func() error {
+		var resp *notification.Response
+		_ = client.TokenRefresh()
+		created, _, err = client.Producer.CreateProducer(producer)
+		return checkForNotificationPermissionErrors(client, resp, err)
+	}
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	d.SetId(created.ID)
 	return resourceNotificationProducerRead(ctx, d, m)
+}
+
+func checkForNotificationPermissionErrors(client *notification.Client, resp *notification.Response, err error) error {
+	if resp == nil || resp.StatusCode > 500 {
+		return err
+	}
+	if resp.StatusCode == http.StatusForbidden {
+		_ = client.TokenRefresh()
+		return err
+	}
+	return backoff.Permanent(err)
 }
