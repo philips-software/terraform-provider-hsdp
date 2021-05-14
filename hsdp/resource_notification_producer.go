@@ -90,6 +90,10 @@ func resourceNotificationProducerRead(_ context.Context, d *schema.ResourceData,
 	defer client.Close()
 	producer, _, err := client.Producer.GetProducer(d.Id())
 	if err != nil {
+		if err == notification.ErrEmptyResult { // Removed
+			d.SetId("")
+			return diags
+		}
 		return diag.FromErr(err)
 	}
 	_ = d.Set("managing_organization_id", producer.ManagingOrganizationID)

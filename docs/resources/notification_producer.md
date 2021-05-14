@@ -11,7 +11,7 @@ resource "hsdp_notification_producer" "producer" {
   producer_service_name = "exampleServiceName"
   producer_service_instance_name = "exampleServiceInstance"
   producer_service_base_url = "https://ns-producer.cloud.pcftest.com/"
-  producer_service_path  = "notification/create"
+  producer_service_path_url  = "notification/create"
   description =  "product description"
 }
 ```
