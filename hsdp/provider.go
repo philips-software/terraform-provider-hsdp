@@ -39,6 +39,11 @@ func Provider(build string) *schema.Provider {
 				Optional:    true,
 				Description: descriptions["s3creds_url"],
 			},
+			"notification_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: descriptions["notification_url"],
+			},
 			"service_id": {
 				Type:          schema.TypeString,
 				Optional:      true,
@@ -224,6 +229,7 @@ func init() {
 		"iam_url":             "The HSDP IAM instance URL",
 		"idm_url":             "The HSDP IDM instance URL",
 		"s3creds_url":         "The HSDP S3 Credentials instance URL",
+		"notification_url":    "The HSDP Notification service base URL to use",
 		"oauth2_client_id":    "The OAuth2 client id",
 		"oauth2_password":     "The OAuth2 password",
 		"service_id":          "The service ID to use as Organization Admin",
