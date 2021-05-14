@@ -27,8 +27,9 @@ The following arguments are supported:
 
 * `idm_url` - (Optioanl) IDM API endpoint (e.g. https://idm-client-test.us-east.philips-healthsuite.com). Auto-discovered when region and environment are specified.
 
-* `s3creds_url` - (Optional) S3 Credenials API endpoint (e.g. https://s3creds-client-test.us-east.philips-healthsuite.com). Auto-discovered when region and environment are specified.
+* `s3creds_url` - (Optional) S3 Credentials API endpoint (e.g. https://s3creds-client-test.us-east.philips-healthsuite.com). Auto-discovered when region and environment are specified.
 
+* `notification_url` - (Optional) Notification service URL
 * `oauth2_client_id` - (Required) The OAuth2 client ID as provided by HSDP
 
 * `oauth2_password` - (Required) The OAuth2 password as provided by HSDP

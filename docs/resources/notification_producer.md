@@ -18,7 +18,7 @@ resource "hsdp_notification_producer" "producer" {
 
 ## Argument reference
 * `managing_organization_id` - (Required) The UUID of the IAM organization or tenant
-* `managing_organization` - (Required) The name of IAM organization or tenant
+* `managing_organization_id` - (Required) The name of IAM organization or tenant
 * `producer_product_name` - (Required) TThe name of the product
 * `producer_service_name` - (Required) The name of the service within the product
 * `producer_service_instance_name` - (Required) The name of a service instance in the product. Used to differentiate multiple copies of the same service used in an organization

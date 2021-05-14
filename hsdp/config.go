@@ -13,6 +13,7 @@ import (
 	"github.com/philips-software/go-hsdp-api/console"
 	"github.com/philips-software/go-hsdp-api/dicom"
 	"github.com/philips-software/go-hsdp-api/iam"
+	"github.com/philips-software/go-hsdp-api/notification"
 	"github.com/philips-software/go-hsdp-api/pki"
 	"github.com/philips-software/go-hsdp-api/s3creds"
 	"github.com/philips-software/go-hsdp-api/stl"
@@ -25,6 +26,7 @@ type Config struct {
 	ServiceID         string
 	ServicePrivateKey string
 	S3CredsURL        string
+	NotificationURL   string
 	STLURL            string
 	CartelHost        string
 	CartelToken       string
@@ -36,20 +38,22 @@ type Config struct {
 	UAAPassword       string
 	UAAURL            string
 
-	iamClient        *iam.Client
-	cartelClient     *cartel.Client
-	s3credsClient    *s3creds.Client
-	consoleClient    *console.Client
-	pkiClient        *pki.Client
-	stlClient        *stl.Client
-	debugFile        *os.File
-	credsClientErr   error
-	cartelClientErr  error
-	iamClientErr     error
-	consoleClientErr error
-	pkiClientErr     error
-	stlClientErr     error
-	TimeZone         string
+	iamClient             *iam.Client
+	cartelClient          *cartel.Client
+	s3credsClient         *s3creds.Client
+	consoleClient         *console.Client
+	pkiClient             *pki.Client
+	stlClient             *stl.Client
+	notificationClient    *notification.Client
+	debugFile             *os.File
+	credsClientErr        error
+	cartelClientErr       error
+	iamClientErr          error
+	consoleClientErr      error
+	pkiClientErr          error
+	stlClientErr          error
+	notificationClientErr error
+	TimeZone              string
 
 	ma *jsonformat.Marshaller
 	um *jsonformat.Unmarshaller
@@ -100,6 +104,10 @@ func (c *Config) S3CredsClientWithLogin(username, password string) (*s3creds.Cli
 		BaseURL:  c.S3CredsURL,
 		DebugLog: c.DebugLog,
 	})
+}
+
+func (c *Config) NotificationClient() (*notification.Client, error) {
+	return c.notificationClient, c.notificationClientErr
 }
 
 // setupIAMClient sets up an HSDP IAM client
@@ -192,6 +200,36 @@ func (c *Config) setupS3CredsClient() {
 		return
 	}
 	c.s3credsClient = client
+}
+
+func (c *Config) setupNotificationClient() {
+	if c.iamClientErr != nil {
+		c.notificationClient = nil
+		c.notificationClientErr = c.iamClientErr
+		return
+	}
+	if c.Region != "" {
+		env := c.Environment
+		if env == "" {
+			env = "prod"
+		}
+		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(env))
+		if err == nil {
+			if url := ac.Service("notification").URL; c.NotificationURL == "" {
+				c.NotificationURL = url
+			}
+		}
+	}
+	client, err := notification.NewClient(c.iamClient, &notification.Config{
+		NotificationURL: c.NotificationURL,
+		DebugLog:        c.DebugLog,
+	})
+	if err != nil {
+		c.notificationClient = nil
+		c.notificationClientErr = err
+		return
+	}
+	c.notificationClient = client
 }
 
 // setupCartelClient sets up an Cartel client
