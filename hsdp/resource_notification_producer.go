@@ -90,7 +90,16 @@ func resourceNotificationProducerRead(_ context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 	defer client.Close()
-	producer, _, err := client.Producer.GetProducer(d.Id())
+
+	var producer *notification.Producer
+
+	operation := func() error {
+		var resp *notification.Response
+		_ = client.TokenRefresh()
+		producer, resp, err = client.Producer.GetProducer(d.Id())
+		return checkForNotificationPermissionErrors(client, resp, err)
+	}
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
 	if err != nil {
 		if err == notification.ErrEmptyResult { // Removed
 			d.SetId("")
@@ -134,7 +143,7 @@ func resourceNotificationProducerCreate(ctx context.Context, d *schema.ResourceD
 	operation := func() error {
 		var resp *notification.Response
 		_ = client.TokenRefresh()
-		created, _, err = client.Producer.CreateProducer(producer)
+		created, resp, err = client.Producer.CreateProducer(producer)
 		return checkForNotificationPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
@@ -153,6 +162,9 @@ func checkForNotificationPermissionErrors(client *notification.Client, resp *not
 	if resp.StatusCode == http.StatusForbidden {
 		_ = client.TokenRefresh()
 		return err
+	}
+	if err != nil && err == notification.ErrBadRequest {
+		return backoff.Permanent(err)
 	}
 	return backoff.Permanent(err)
 }

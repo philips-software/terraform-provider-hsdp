@@ -119,7 +119,7 @@ func resourceNotificationTopicCreate(ctx context.Context, d *schema.ResourceData
 	operation := func() error {
 		var resp *notification.Response
 		_ = client.TokenRefresh()
-		created, _, err = client.Topic.CreateTopic(topic)
+		created, resp, err = client.Topic.CreateTopic(topic)
 		return checkForNotificationPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))

@@ -89,7 +89,17 @@ func resourceNotificationSubscriberRead(_ context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 	defer client.Close()
-	subscriber, _, err := client.Subscriber.GetSubscriber(d.Id())
+
+	var subscriber *notification.Subscriber
+
+	operation := func() error {
+		var resp *notification.Response
+		var err error
+		_ = client.TokenRefresh()
+		subscriber, resp, err = client.Subscriber.GetSubscriber(d.Id())
+		return checkForNotificationPermissionErrors(client, resp, err)
+	}
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
 		if err == notification.ErrEmptyResult { // Removed
 			d.SetId("")
@@ -133,7 +143,7 @@ func resourceNotificationSubscriberCreate(ctx context.Context, d *schema.Resourc
 	operation := func() error {
 		var resp *notification.Response
 		_ = client.TokenRefresh()
-		created, _, err = client.Subscriber.CreateSubscriber(subscriber)
+		created, resp, err = client.Subscriber.CreateSubscriber(subscriber)
 		return checkForNotificationPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
