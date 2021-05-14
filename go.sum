@@ -908,8 +908,8 @@ github.com/philips-labs/siderite v0.8.0/go.mod h1:vELGuq6uWTRqLci6Z22kjdn+b12eJP
 github.com/philips-software/gautocloud-connectors v0.4.0/go.mod h1:k5VG78BLnDI75Ra5HzdkM8eYk0Sc7bLuwlOEn++j2Ic=
 github.com/philips-software/go-hsdp-api v0.20.0/go.mod h1:agJtsgjb1W4xq5cVUdk06uUVETKO1nKZAZJ4Y1Dumg4=
 github.com/philips-software/go-hsdp-api v0.38.1-0.20210428141703-9f4371331e80/go.mod h1:vzZX4kCmgVwuJcAmd75Yeh/tNu1dNnBRbyau7CFWsuQ=
-github.com/philips-software/go-hsdp-api v0.38.2-0.20210514144724-2f7f445db877 h1:glrbwn4Pu8stJWrfDyImSQrulnlsRT0UGiKdBFRO1HY=
-github.com/philips-software/go-hsdp-api v0.38.2-0.20210514144724-2f7f445db877/go.mod h1:twdgSnQNy7gcol5IhLRbImquVkioZG1Q7lYZ7R61qGs=
+github.com/philips-software/go-hsdp-api v0.38.2-0.20210514182350-e4506ca886ff h1:6j8zzyf7NjAJTJbdEjBEWFULZhFLop25yQ3JIdn0pC4=
+github.com/philips-software/go-hsdp-api v0.38.2-0.20210514182350-e4506ca886ff/go.mod h1:twdgSnQNy7gcol5IhLRbImquVkioZG1Q7lYZ7R61qGs=
 github.com/philips-software/go-hsdp-signer v1.3.0 h1:Si1voDE/GHzthmxpasPdntbu8aUW6EYJfI6gHVf7BCc=
 github.com/philips-software/go-hsdp-signer v1.3.0/go.mod h1:/QehZ/+Aks2t1TFpjhF/7ZSB8PJIIJHzLc03rOqwLw0=
 github.com/pierrec/lz4 v1.0.2-0.20190131084431-473cd7ce01a1/go.mod h1:3/3N9NVKO0jef7pBehbT1qWhCMrIgbYNnFAZCqQ5LRc=
