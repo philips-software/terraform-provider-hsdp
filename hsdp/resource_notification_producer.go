@@ -60,6 +60,12 @@ func resourceNotificationProducer() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"soft_delete": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -73,8 +79,15 @@ func resourceNotificationProducerDelete(_ context.Context, d *schema.ResourceDat
 	}
 	defer client.Close()
 
-	_, _, err = client.Producer.DeleteProducer(notification.Producer{ID: d.Id()})
+	_, resp, err := client.Producer.DeleteProducer(notification.Producer{ID: d.Id()})
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusForbidden {
+			softDelete := d.Get("soft_delete").(bool)
+			if softDelete {
+				d.SetId("")
+				return diags
+			}
+		}
 		return diag.FromErr(err)
 	}
 

@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -49,6 +50,11 @@ func resourceNotificationTopic() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"soft_delete": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -62,8 +68,15 @@ func resourceNotificationTopicDelete(_ context.Context, d *schema.ResourceData, 
 	}
 	defer client.Close()
 
-	_, _, err = client.Topic.DeleteTopic(notification.Topic{ID: d.Id()})
+	_, resp, err := client.Topic.DeleteTopic(notification.Topic{ID: d.Id()})
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusForbidden {
+			softDelete := d.Get("soft_delete").(bool)
+			if softDelete { // No error on delete
+				d.SetId("")
+				return diags
+			}
+		}
 		return diag.FromErr(err)
 	}
 

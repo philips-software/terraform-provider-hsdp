@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -34,6 +35,12 @@ func resourceNotificationSubscription() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
+			"soft_delete": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -47,8 +54,15 @@ func resourceNotificationSubscriptionDelete(_ context.Context, d *schema.Resourc
 	}
 	defer client.Close()
 
-	_, _, err = client.Subscription.DeleteSubscription(notification.Subscription{ID: d.Id()})
+	_, resp, err := client.Subscription.DeleteSubscription(notification.Subscription{ID: d.Id()})
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusForbidden {
+			softDelete := d.Get("soft_delete").(bool)
+			if softDelete { // No error on delete
+				d.SetId("")
+				return diags
+			}
+		}
 		return diag.FromErr(err)
 	}
 
