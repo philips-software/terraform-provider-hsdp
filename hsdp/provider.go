@@ -218,6 +218,12 @@ func Provider(build string) *schema.Provider {
 			"hsdp_pki_root":                    dataSourcePKIRoot(),
 			"hsdp_pki_policy":                  dataSourcePKIPolicy(),
 			"hsdp_stl_device":                  dataSourceSTLDevice(),
+			"hsdp_notification_producers":      dataSourceNotificationProducers(),
+			"hsdp_notification_producer":       dataSourceNotificationProducer(),
+			"hsdp_notification_topics":         dataSourceNotificationTopics(),
+			"hsdp_notification_topic":          dataSourceNotificationTopic(),
+			"hsdp_notification_subscription":   dataSourceNotificationSubscription(),
+			"hsdp_notification_subscriber":     dataSourceNotificationSubscriber(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
