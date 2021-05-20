@@ -119,11 +119,11 @@ func resourceDICOMObjectStore() *schema.Resource {
 									},
 									"access_token_endpoint": {
 										Type:     schema.TypeString,
-										Optional: true,
+										Required: true,
 									},
 									"token_endpoint": {
 										Type:     schema.TypeString,
-										Optional: true,
+										Required: true,
 									},
 								},
 							},

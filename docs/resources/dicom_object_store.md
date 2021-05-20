@@ -4,19 +4,6 @@ This resource manages DICOM Object stores
 # Example Usage
 
 ```hcl
-resource "hsdp_dicom_object_store" "store1" {
-  config_url = var.dicom_base_url
-  organization_id = var.iam_org_one_id
-  description = "Store 1"
-
-  static_access {
-    endpoint = "https://s3-external.amazonaws.com"
-    bucket_name = "xxxx-xxxx-xxxx-xxxx"
-    access_key = "xxx"
-    secret_key = "yyy"
-  }
-}
-
 resource "hsdp_dicom_object_store" "store2" {
   config_url = var.dicom_base_url
   organization_id = var.iam_org_two_id
@@ -28,8 +15,10 @@ resource "hsdp_dicom_object_store" "store2" {
     bucket_name = "yyyy-yyyy-yyy-yyyy"
     folder_path = "/store1"
     service_account {
-      service_id = "a@b.com"
-      private_key = var.service_private_key
+      service_id            = "a@b.com"
+      private_key           = var.service_private_key
+      access_token_endpoint = "${data.hsdp_config.iam.url}/oauth2/access_token"
+      token_endpoint        = "${data.hsdp_config.iam.url}/authorize/oauth2/token"
     }
   }
 }
@@ -53,9 +42,9 @@ resource "hsdp_dicom_object_store" "store2" {
     * `service_account` - (Required) The IAM service account to use
       * `service_id` - (Required) The IAM service id
       * `private_key` - (Required) The IAM service private key
+      * `access_token_endpoint` - (Required) The IAM access token endpoint
+      * `token_endpoint` - (Required) The IAM token endpoint
       * `name` - (Optional) Name of the service
-      * `access_token_endpoint` - (Optional) The IAM access token endpoint
-      * `token_endpoint` - (Optional) The IAM token endpoint
 * `force_delete` - (Optional) By default object stores are not deleted by the provider (soft-delete). 
    By setting this value to `true` the provider removes object stores. We strongly sugges to enable this only for ephemeral deployments.
   
