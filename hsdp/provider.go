@@ -39,6 +39,11 @@ func Provider(build string) *schema.Provider {
 				Optional:    true,
 				Description: descriptions["s3creds_url"],
 			},
+			"notification_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: descriptions["notification_url"],
+			},
 			"service_id": {
 				Type:          schema.TypeString,
 				Optional:      true,
@@ -165,33 +170,37 @@ func Provider(build string) *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"hsdp_iam_org":             resourceIAMOrg(),
-			"hsdp_iam_group":           resourceIAMGroup(),
-			"hsdp_iam_role":            resourceIAMRole(),
-			"hsdp_iam_proposition":     resourceIAMProposition(),
-			"hsdp_iam_application":     resourceIAMApplication(),
-			"hsdp_iam_user":            resourceIAMUser(),
-			"hsdp_iam_client":          resourceIAMClient(),
-			"hsdp_iam_service":         resourceIAMService(),
-			"hsdp_iam_mfa_policy":      resourceIAMMFAPolicy(),
-			"hsdp_iam_password_policy": resourceIAMPasswordPolicy(),
-			"hsdp_iam_email_template":  resourceIAMEmailTemplate(),
-			"hsdp_s3creds_policy":      resourceS3CredsPolicy(),
-			"hsdp_container_host":      resourceContainerHost(),
-			"hsdp_container_host_exec": resourceContainerHostExec(),
-			"hsdp_metrics_autoscaler":  resourceMetricsAutoscaler(),
-			"hsdp_cdr_org":             resourceCDROrg(),
-			"hsdp_cdr_subscription":    resourceCDRSubscription(),
-			"hsdp_dicom_store_config":  resourceDICOMStoreConfig(),
-			"hsdp_dicom_object_store":  resourceDICOMObjectStore(),
-			"hsdp_dicom_repository":    resourceDICOMRepository(),
-			"hsdp_pki_tenant":          resourcePKITenant(),
-			"hsdp_pki_cert":            resourcePKICert(),
-			"hsdp_stl_app":             resourceSTLApp(),
-			"hsdp_stl_config":          resourceSTLConfig(),
-			"hsdp_stl_custom_cert":     resourceSTLCustomCert(),
-			"hsdp_stl_sync":            resourceSTLSync(),
-			"hsdp_function":            resourceFunction(),
+			"hsdp_iam_org":                   resourceIAMOrg(),
+			"hsdp_iam_group":                 resourceIAMGroup(),
+			"hsdp_iam_role":                  resourceIAMRole(),
+			"hsdp_iam_proposition":           resourceIAMProposition(),
+			"hsdp_iam_application":           resourceIAMApplication(),
+			"hsdp_iam_user":                  resourceIAMUser(),
+			"hsdp_iam_client":                resourceIAMClient(),
+			"hsdp_iam_service":               resourceIAMService(),
+			"hsdp_iam_mfa_policy":            resourceIAMMFAPolicy(),
+			"hsdp_iam_password_policy":       resourceIAMPasswordPolicy(),
+			"hsdp_iam_email_template":        resourceIAMEmailTemplate(),
+			"hsdp_s3creds_policy":            resourceS3CredsPolicy(),
+			"hsdp_container_host":            resourceContainerHost(),
+			"hsdp_container_host_exec":       resourceContainerHostExec(),
+			"hsdp_metrics_autoscaler":        resourceMetricsAutoscaler(),
+			"hsdp_cdr_org":                   resourceCDROrg(),
+			"hsdp_cdr_subscription":          resourceCDRSubscription(),
+			"hsdp_dicom_store_config":        resourceDICOMStoreConfig(),
+			"hsdp_dicom_object_store":        resourceDICOMObjectStore(),
+			"hsdp_dicom_repository":          resourceDICOMRepository(),
+			"hsdp_pki_tenant":                resourcePKITenant(),
+			"hsdp_pki_cert":                  resourcePKICert(),
+			"hsdp_stl_app":                   resourceSTLApp(),
+			"hsdp_stl_config":                resourceSTLConfig(),
+			"hsdp_stl_custom_cert":           resourceSTLCustomCert(),
+			"hsdp_stl_sync":                  resourceSTLSync(),
+			"hsdp_function":                  resourceFunction(),
+			"hsdp_notification_producer":     resourceNotificationProducer(),
+			"hsdp_notification_subscriber":   resourceNotificationSubscriber(),
+			"hsdp_notification_topic":        resourceNotificationTopic(),
+			"hsdp_notification_subscription": resourceNotificationSubscription(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":              dataSourceIAMIntrospect(),
@@ -209,6 +218,12 @@ func Provider(build string) *schema.Provider {
 			"hsdp_pki_root":                    dataSourcePKIRoot(),
 			"hsdp_pki_policy":                  dataSourcePKIPolicy(),
 			"hsdp_stl_device":                  dataSourceSTLDevice(),
+			"hsdp_notification_producers":      dataSourceNotificationProducers(),
+			"hsdp_notification_producer":       dataSourceNotificationProducer(),
+			"hsdp_notification_topics":         dataSourceNotificationTopics(),
+			"hsdp_notification_topic":          dataSourceNotificationTopic(),
+			"hsdp_notification_subscription":   dataSourceNotificationSubscription(),
+			"hsdp_notification_subscriber":     dataSourceNotificationSubscriber(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
@@ -223,6 +238,7 @@ func init() {
 		"iam_url":             "The HSDP IAM instance URL",
 		"idm_url":             "The HSDP IDM instance URL",
 		"s3creds_url":         "The HSDP S3 Credentials instance URL",
+		"notification_url":    "The HSDP Notification service base URL to use",
 		"oauth2_client_id":    "The OAuth2 client id",
 		"oauth2_password":     "The OAuth2 password",
 		"service_id":          "The service ID to use as Organization Admin",
@@ -277,6 +293,7 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		config.UAAUsername = d.Get("uaa_username").(string)
 		config.UAAPassword = d.Get("uaa_password").(string)
 		config.UAAURL = d.Get("uaa_url").(string)
+		config.NotificationURL = d.Get("notification_url").(string)
 		config.TimeZone = "UTC"
 
 		config.setupIAMClient()
@@ -285,6 +302,7 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		config.setupConsoleClient()
 		config.setupPKIClient()
 		config.setupSTLClient()
+		config.setupNotificationClient()
 
 		if config.DebugLog != "" {
 			debugFile, err := os.OpenFile(config.DebugLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)

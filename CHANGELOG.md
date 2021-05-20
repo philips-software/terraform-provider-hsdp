@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.16.0
+- Support for the HSDP Notification service
+
 ## v0.15.3
 - The IAM service private_key field is now generated. This fixes some inconsistency issues
 
