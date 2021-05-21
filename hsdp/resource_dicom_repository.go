@@ -86,7 +86,9 @@ func resourceDICOMRepositoryRead(_ context.Context, d *schema.ResourceData, m in
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	_ = d.Set("repository_organization_id", repo.OrganizationID)
+	if repo.OrganizationID != orgID {
+		_ = d.Set("repository_organization_id", repo.OrganizationID)
+	}
 	_ = d.Set("object_store_id", repo.ActiveObjectStoreID)
 	return diags
 }
