@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/Microsoft/go-winio v0.5.0 // indirect
 	github.com/aws/aws-sdk-go v1.38.29 // indirect
-	github.com/cenkalti/backoff/v4 v4.1.0
+	github.com/cenkalti/backoff/v4 v4.1.1
 	github.com/docker/distribution v2.7.1+incompatible
 	github.com/google/fhir/go v0.0.0-20201203001644-a2580b6ea022
 	github.com/google/uuid v1.2.0
