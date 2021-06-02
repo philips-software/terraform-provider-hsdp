@@ -9,7 +9,7 @@ resource "hsdp_pki_cert" "cert" {
   role      = "ec384"
   
   common_name = "myapp.com"
-  alt_name    = "myapp.io"
+  alt_names    = "myapp.io,www.myapp.io"
   ip_sans     = []
   uri_sans    = []
   other_sans  = []
@@ -23,7 +23,7 @@ resource "hsdp_pki_cert" "cert" {
 * `tenant_id` - (Required) The tenant ID to create this certificate under
 * `role` - (Required) the Role to use as defined under a PKI Tenant resource
 * `common_name` - (Required) The common name to use
-* `alt_name` - (Optional) Alternative name to use
+* `alt_names` - (Optional) Alternative names to use, comma separated list.
 * `ip_sans` - (Optional, list(string)) A list of IP SANS to include
 * `uri_sans` - (Optional, list(string)) A list of URI SANS to include
 * `other_sans` - (Optional, list(string)) A list of other SANS to include

@@ -253,7 +253,7 @@ func resourceIAMGroupDelete(_ context.Context, d *schema.ResourceData, m interfa
 		}
 	}
 
-	// Remove all users first before attempting delete
+	// Remove all groups first before attempting delete
 	services := expandStringList(d.Get("services").(*schema.Set).List())
 	if len(services) > 0 {
 		_, _, err := client.Groups.RemoveServices(group, services...)

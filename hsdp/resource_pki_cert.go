@@ -13,6 +13,7 @@ import (
 
 func resourcePKICert() *schema.Resource {
 	return &schema.Resource{
+		SchemaVersion: 1,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -37,6 +38,12 @@ func resourcePKICert() *schema.Resource {
 				ForceNew: true,
 			},
 			"alt_name": {
+				Type:       schema.TypeString,
+				Optional:   true,
+				ForceNew:   true,
+				Deprecated: "Use alt_names, this field is ignored and will be removed in the next major release",
+			},
+			"alt_names": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
@@ -125,7 +132,7 @@ func resourcePKICertCreate(_ context.Context, d *schema.ResourceData, m interfac
 	uriSANS := expandStringList(d.Get("uri_sans").(*schema.Set).List())
 	otherSANS := expandStringList(d.Get("other_sans").(*schema.Set).List())
 	commonName := d.Get("common_name").(string)
-	altName := d.Get("alt_name").(string)
+	altNames := d.Get("alt_names").(string)
 	excludeCNFromSANS := d.Get("exclude_cn_from_sans").(bool)
 	role, ok := tenant.GetRoleOk(roleName)
 	if !ok {
@@ -133,7 +140,7 @@ func resourcePKICertCreate(_ context.Context, d *schema.ResourceData, m interfac
 	}
 	certRequest := pki.CertificateRequest{
 		CommonName:        commonName,
-		AltName:           altName,
+		AltNames:          altNames,
 		IPSANS:            strings.Join(ipSANS, ","),
 		URISANS:           strings.Join(uriSANS, ","),
 		OtherSANS:         strings.Join(otherSANS, ","),
