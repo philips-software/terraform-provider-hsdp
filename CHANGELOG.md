@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.16.3
+- Fix refresh for PKI certs
+- Fix PKI tenant update step  
+- Improve error messages for hsdp_pki_cert
+
 ## v0.16.2
 - Fix `alt_names` for PKI Certs
 
