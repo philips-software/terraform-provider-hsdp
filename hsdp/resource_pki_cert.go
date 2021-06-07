@@ -169,11 +169,21 @@ func certToSchema(cert *pki.IssueResponse, d *schema.ResourceData, _ interface{}
 	if cert.Data.PrivateKey != "" {
 		_ = d.Set("private_key_pem", cert.Data.PrivateKey)
 	}
-	_ = d.Set("serial_number", cert.Data.SerialNumber)
-	_ = d.Set("issuing_ca_pem", cert.Data.IssuingCa)
-	_ = d.Set("cert_pem", cert.Data.Certificate)
-	_ = d.Set("expiration", cert.Data.Expiration)
-	_ = d.Set("ca_chain_pem", strings.Join(cert.Data.CaChain, "\n"))
+	if len(cert.Data.SerialNumber) > 0 {
+		_ = d.Set("serial_number", cert.Data.SerialNumber)
+	}
+	if len(cert.Data.IssuingCa) > 0 {
+		_ = d.Set("issuing_ca_pem", cert.Data.IssuingCa)
+	}
+	if len(cert.Data.Certificate) > 0 {
+		_ = d.Set("cert_pem", cert.Data.Certificate)
+	}
+	if cert.Data.Expiration > 0 {
+		_ = d.Set("expiration", cert.Data.Expiration)
+	}
+	if len(cert.Data.CaChain) > 0 {
+		_ = d.Set("ca_chain_pem", strings.Join(cert.Data.CaChain, "\n"))
+	}
 	return nil
 }
 
