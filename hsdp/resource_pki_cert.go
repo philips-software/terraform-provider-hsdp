@@ -149,8 +149,11 @@ func resourcePKICertCreate(_ context.Context, d *schema.ResourceData, m interfac
 		PrivateKeyFormat:  "pem",
 		Format:            "pem",
 	}
-	cert, _, err := client.Services.IssueCertificate(logicalPath, role.Name, certRequest)
+	cert, resp, err := client.Services.IssueCertificate(logicalPath, role.Name, certRequest)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusForbidden {
+			return diag.FromErr(fmt.Errorf("you might be missing the 'PKI_CERT.ISSUE' permission for the tenant org: %w", err))
+		}
 		return diag.FromErr(fmt.Errorf("issue PKI cert: %w", err))
 	}
 	d.SetId(cert.Data.SerialNumber)
