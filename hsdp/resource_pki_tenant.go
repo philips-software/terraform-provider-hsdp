@@ -3,6 +3,7 @@ package hsdp
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/pki"
@@ -188,7 +189,13 @@ func resourcePKITenantUpdate(_ context.Context, d *schema.ResourceData, m interf
 	}
 	//logicalPath is already determined
 	tenant.ServiceParameters.LogicalPath = logicalPath
-	_, _, err = client.Tenants.Update(*tenant)
+	_, _, err = client.Tenants.Update(pki.UpdateTenantRequest{
+		ServiceParameters: pki.UpdateServiceParameters{
+			LogicalPath: logicalPath,
+			IAMOrgs:     tenant.ServiceParameters.IAMOrgs,
+			Roles:       tenant.ServiceParameters.Roles,
+		},
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
