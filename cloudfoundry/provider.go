@@ -2,8 +2,9 @@ package cloudfoundry
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/terraform-providers/terraform-provider-cloudfoundry/cloudfoundry/managers"
@@ -18,16 +19,19 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("CF_API_URL", ""),
+				Deprecated:  "This provider is now deprecated. Please switch to cloudfoundry-community/cloudfoundry",
 			},
 			"user": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("CF_USER", "admin"),
+				Deprecated:  "This provider is now deprecated. Please switch to cloudfoundry-community/cloudfoundry",
 			},
 			"password": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc("CF_PASSWORD", ""),
+				Deprecated:  "This provider is now deprecated. Please switch to cloudfoundry-community/cloudfoundry",
 			},
 			"sso_passcode": &schema.Schema{
 				Type:        schema.TypeString,
