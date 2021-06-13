@@ -107,12 +107,14 @@ func resourcePKITenant() *schema.Resource {
 			"ca": {
 				Type:     schema.TypeSet,
 				Required: true,
+				ForceNew: true, // Updates are not supported
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"common_name": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 					},
 				},
