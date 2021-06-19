@@ -1,8 +1,12 @@
 # HSDP Provider
 
-The HSDP provider can provision and manage a select set of HSDP resources. This includes amongst others many IAM entities, Container Host instances and even some Clinical Data Repository (CDR) resources.
+Use the HSDP provider to interact with the many resources supported by [HSDP](https://www.hsdp.io). This includes amongst others many IAM entities, Container Host instances, Edge devices and even some Clinical Data Repository (CDR) resources
 
-## Configuring the provider
+Use the navigation to the left to read about the available resources.
+
+To learn the basics of Terraform using this provider, follow the hands-on [get started tutorials](https://learn.hashicorp.com/tutorials/terraform/infrastructure-as-code) on HashiCorp's Learn platform.
+
+## Example usage
 
 ```hcl
 provider "hsdp" {
@@ -17,15 +21,13 @@ provider "hsdp" {
 
 ## Argument Reference
 
-The following arguments are supported:
-
-* `region` - (Optional) The HSDP region to use [us-east, eu-west, sa1, ...]
+* `region` - (Required) The HSDP region to use [us-east, eu-west, sa1, ...]
 
 * `environment` - (Optional) The HSDP environment to use within region [client-test, prod]
 
 * `iam_url` - (Optional) IAM API endpoint (e.g. https://iam-client-test.us-east.philips-healthsuite.com). Auto-discovered when region and environment are specified.
 
-* `idm_url` - (Optioanl) IDM API endpoint (e.g. https://idm-client-test.us-east.philips-healthsuite.com). Auto-discovered when region and environment are specified.
+* `idm_url` - (Optional) IDM API endpoint (e.g. https://idm-client-test.us-east.philips-healthsuite.com). Auto-discovered when region and environment are specified.
 
 * `s3creds_url` - (Optional) S3 Credentials API endpoint (e.g. https://s3creds-client-test.us-east.philips-healthsuite.com). Auto-discovered when region and environment are specified.
 

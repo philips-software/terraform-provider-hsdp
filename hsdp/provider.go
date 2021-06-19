@@ -15,14 +15,14 @@ func Provider(build string) *schema.Provider {
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				Description: descriptions["region"],
 			},
 			"environment": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Description:  descriptions["environment"],
-				RequiredWith: []string{"region"},
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "client-test",
+				Description: descriptions["environment"],
 			},
 			"iam_url": {
 				Type:        schema.TypeString,
@@ -69,13 +69,6 @@ func Provider(build string) *schema.Provider {
 				Optional:    true,
 				Sensitive:   true,
 				Description: descriptions["oauth2_password"],
-			},
-			"org_id": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Default:     "",
-				Description: descriptions["org_id"],
-				Deprecated:  "org_id is not used anywhere and should be removed",
 			},
 			"org_admin_username": {
 				Type:          schema.TypeString,
@@ -157,12 +150,6 @@ func Provider(build string) *schema.Provider {
 				Default:     0,
 				Description: descriptions["retry_max"],
 			},
-			"debug": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: descriptions["debug"],
-				Deprecated:  "no need to set debug boolean, setting debug_log is sufficient",
-			},
 			"debug_log": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -243,12 +230,10 @@ func init() {
 		"oauth2_password":     "The OAuth2 password",
 		"service_id":          "The service ID to use as Organization Admin",
 		"service_private_key": "The private key of the service ID",
-		"org_id":              "The (top level) Organization ID - UUID",
 		"org_admin_username":  "The username of the Organization Admin",
 		"org_admin_password":  "The password of the Organization Admin",
 		"shared_key":          "The shared key",
 		"secret_key":          "The secret key",
-		"debug":               "Enable debugging output",
 		"debug_log":           "The log file to write debugging output to",
 		"cartel_host":         "The Cartel host",
 		"cartel_token":        "The Cartel token key",
