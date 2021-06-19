@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.17.0
+- The `region` is now a required argument. Environment defaults to `client-test`
+- Updated documentation
+
 ## v0.16.3
 - Fix refresh for PKI certs
 - Fix PKI tenant update step  
