@@ -17,6 +17,12 @@ provider "hsdp" {
   org_admin_username = var.org_admin_username
   org_admin_password = var.org_admin_password
 }
+
+resource "hsdp_iam_org" "hospital_a" {
+  name          = "HOSPITAL_A"
+  description   = "HOSPITAL A"
+  parent_org_id = data.hsdp_iam_org.root.id
+}
 ```
 
 ## Argument Reference
