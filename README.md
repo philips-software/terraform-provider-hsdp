@@ -56,7 +56,7 @@ $ TF_REATTACH_PROVIDERS='...' terraform plan
 ...
 ```
 
-Terraform will now use the local running copy instead of the `philips-labs/hsdp` registry version. Happy debugging!
+Terraform will now use the local running copy instead of the `philips-software/hsdp` registry version. Happy debugging!
 
 ## Issues
 
