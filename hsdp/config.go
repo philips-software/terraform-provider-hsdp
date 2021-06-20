@@ -75,7 +75,7 @@ func (c *Config) ConsoleClient() (*console.Client, error) {
 	return c.consoleClient, c.consoleClientErr
 }
 
-func (c *Config) STLClient(endpoint ...string) (*stl.Client, error) {
+func (c *Config) STLClient(_ ...string) (*stl.Client, error) {
 	return c.stlClient, c.stlClientErr
 }
 
@@ -208,14 +208,14 @@ func (c *Config) setupNotificationClient() {
 		c.notificationClientErr = c.iamClientErr
 		return
 	}
-	if c.Region != "" {
+	if c.NotificationURL == "" {
 		env := c.Environment
 		if env == "" {
 			env = "prod"
 		}
 		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(env))
 		if err == nil {
-			if url := ac.Service("notification").URL; c.NotificationURL == "" {
+			if url := ac.Service("notification").URL; url != "" {
 				c.NotificationURL = url
 			}
 		}
@@ -234,6 +234,14 @@ func (c *Config) setupNotificationClient() {
 
 // setupCartelClient sets up an Cartel client
 func (c *Config) setupCartelClient() {
+	if c.CartelHost == "" {
+		ac, err := config.New(config.WithRegion(c.Region))
+		if err == nil {
+			if host := ac.Service("cartel").Host; host != "" {
+				c.CartelHost = host
+			}
+		}
+	}
 	client, err := cartel.NewClient(nil, &cartel.Config{
 		Region:     c.Region,
 		Host:       c.CartelHost,
