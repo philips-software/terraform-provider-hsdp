@@ -1,24 +1,22 @@
 # hsdp_dicom_gateway_config
-This resource manages DICOM gateway configuration of an HSDP provisioned DICOM Store.
+This resource manages DICOM Gateway configuration for Store and QueryRetrieve services using HSDP provisioned DICOM Store configuration service.
 
 # Example usage
-The following example demonstrates the basic configuration of a DICOM gateway
+The following example demonstrates the basic configuration of a DICOM Gateway
 
 ```hcl
-resource "hsdp_dicom_gateway_config" "dicom" {
-  config_url = var.dicom_base_url
-  organization_id = var.iam_org_id
+resource "hsdp_dicom_gateway_config" "dicom_gateway" {
+  config_url = var.config_url
+  site_organization_id = var.iam_org_id
   
   store_service {
+    is_secure = false
     port = 104
-    host_name = "foo.bar.com"
-    ip_address = "1.2.3.4"
-    disable_ipv6 = false
-    pdu_length = 10
-    artim_timeout = 20
-    association_idle_timeout = 600
-    network_timeout = 20
-    is_secure = true
+    advanced_settings {
+      pdu_length = 65535
+      artim_timeout = 3000
+      association_idle_timeout = 4500
+    }
     
     application_entity {
       allow_any = true
@@ -35,29 +33,25 @@ resource "hsdp_dicom_gateway_config" "dicom" {
     }
   }
 
-  query_service {
-    port = 105
-    host_name = "foo.bar.com"
-    ip_address = "1.2.3.4"
-    disable_ipv6 = false
-    pdu_length = 10
-    artim_timeout = 20
-    association_idle_timeout = 600
-    network_timeout = 20
-    is_secure = true
-
+  queryretrieve_service {
+    is_secure = false
+    port = 108
+    advanced_settings {
+      pdu_length = 65535
+      artim_timeout = 3000
+      association_idle_timeout = 4500
+    }
+    
     application_entity {
       allow_any = true
       ae_title = "Foo"
       organization_id = "aaa-bbb-ccc-ddd"
-      service_timeout = 0
     }
 
     application_entity {
       allow_any = true
       ae_title = "Bar"
       organization_id = "bbb-ccc-ddd-eee-bbb"
-      service_timeout = 0
     }
   }
 }
@@ -65,37 +59,31 @@ resource "hsdp_dicom_gateway_config" "dicom" {
 
 # Argument reference
 
-* `config_url` - (Required) The base config URL of the DICOM Store instance
-* `organization_id` - (Required) the IAM organization ID to use for authorization
-* `store_service` - (Optional) Details of the CDR service account
-  * `port` - Port
-  * `host_name` - Host name
-  * `ip_address` - IP Address
-  * `disable_ipv6` - Disable IPV6
-  * `pdu_length` - PDU length
-  * `artim_timeout` - Artim timeout
-  * `association_idle_timeout` - Association idle timeout
-  * `network_timeout` - Network timeout
-  * `is_secure` - Is secure
+* `config_url` - (Required) The base config URL of the DICOM Store
+* `organization_id` - (Required) The site organization ID
+* `title` - Store Device Title
+* `store_service` - (Optional) Details of the DICOM Store SCP
+  * `is_secure` - Is secure. Default `false`
+  * `port` - Port. Default `104` for Non-Secure and `105` for Secure. Don't change this.
+  * `advanced_settings`
+    * `pdu_length` - PDU length. Default `65535`
+    * `artim_timeout` - Time-out waiting for A-ASSOCIATE RQ PDU on open TCP/IP connection (Artim timeout). Default `3000 ms`
+    * `association_idle_timeout` - Association idle timeout. `4500 ms`
   * `application_entity` - Application entity
-    * `allow_any` - Allow any
-    * `ae_title` - AE title
-    * `organization_id` - Organization ID
-    * `service_timeout` - Service timeout
-* `query_service` - (Optional) the FHIR store configuration
-  * `port` - Port
-  * `host_name` - Host name
-  * `ip_address` - IP Address
-  * `disable_ipv6` - Disable IPV6
-  * `pdu_length` - PDU length
-  * `artim_timeout` - Artim timeout
-  * `association_idle_timeout` - Association idle timeout
-  * `network_timeout` - Network timeout
-  * `is_secure` - Is secure
+    * `allow_any` - Allow any. Value can be `true` or `false`
+    * `ae_title` - AE title. Allowed characters for aetitle are `A-Za-z0-9\\s/+=_-`. Eg. `DicomStoreScp`
+    * `site_organization_id` - Site Organization ID for which Gateway to be deployed
+
+* `queryretrieve_service` - (Optional) the FHIR store configuration
+  * `is_secure` - Is secure. Default `false`
+  * `port` - Port. Default `108` for Non-Secure and `109` for Secure. Don't change this.
+  * `advanced_settings`
+    * `pdu_length` - PDU length. Default `65535`
+    * `artim_timeout` - Time-out waiting for A-ASSOCIATE RQ PDU on open TCP/IP connection (Artim timeout). Default `3000 ms`
+    * `association_idle_timeout` - Association idle timeout. `4500 ms`
   * `application_entity` - Application entity
-    * `allow_any` - Allow any
-    * `ae_title` - AE title
-    * `organization_id` - Organization ID
-    * `service_timeout` - Service timeout  
+    * `allow_any` - Allow any. Value can be `true` or `false`
+    * `ae_title` - AE title. Allowed characters for aetitle are `A-Za-z0-9\\s/+=_-`. Eg. `DicomQueryRetrieveScp`
+    * `site_organization_id` - Site Organization ID for which Gateway to be deployed
 
 # Attribute reference
