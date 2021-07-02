@@ -87,7 +87,7 @@ The following arguments are supported:
 * `protect` - (Optional) Boolean when set will enable protection for container host.
 * `encrypt_volumes` - (Optional) When set encrypts volumes. Default is `true`
 * `volumes` - (Optional) Number of additional volumes to attach. Default `0`, Maximum `6`
-* `volume_size` - (Optional) Volume size in GB. Supported value range `1-1000` (1 TB max)
+* `volume_size` - (Optional) Volume size in GB. Supported value range `1-16000` (16 TB max)
 * `security_groups` - (Optional) list(string) of Security groups to attach. Default `[]`
 * `user_groups` - (Optional) list(string) of User groups to attach. Default `[]`
 * `subnet` - (Optional) This will cause a new instance to get deployed on a specific subnet. Conflicts with `subnet_type`. You should only use this option if you have very specific requirements that dictate all the instances you are creating need to reside in the same AZ. An example of this would be a cluster of systems that need to reside in the same datacenter. 
