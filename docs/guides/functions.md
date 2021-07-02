@@ -61,7 +61,7 @@ resource "hsdp_function" "cuda_test" {
 }
 ```
 
-When applied the provider will perform the following actions:
+When applied, the provider will perform the following actions:
 - Create an iron `code` based on the specified docker image
 - Create two (2) `schedules` in the Iron backend which use the `code`, one for sychronous calls and one for asychnronous calls
 
