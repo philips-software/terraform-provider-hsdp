@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.0
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/hcl/v2 v2.8.2 // indirect
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.6.1
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.7.0
 	github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/loafoe/easyssh-proxy/v2 v2.0.2
@@ -24,7 +24,6 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.7.0
-	golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b // indirect
 	golang.org/x/net v0.0.0-20210428140749-89ef3d95e781 // indirect
 	google.golang.org/api v0.34.0 // indirect
 	google.golang.org/genproto v0.0.0-20210429181445-86c259c2b4ab // indirect
