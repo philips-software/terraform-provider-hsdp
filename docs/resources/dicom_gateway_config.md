@@ -12,6 +12,7 @@ resource "hsdp_dicom_gateway_config" "dicom_gateway" {
   store_service {
     is_secure = false
     port = 104
+    
     advanced_settings {
       pdu_length = 65535
       artim_timeout = 3000
@@ -33,7 +34,7 @@ resource "hsdp_dicom_gateway_config" "dicom_gateway" {
     }
   }
 
-  queryretrieve_service {
+  query_retrieve_service {
     is_secure = false
     port = 108
     advanced_settings {

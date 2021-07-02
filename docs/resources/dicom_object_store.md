@@ -45,7 +45,7 @@ resource "hsdp_dicom_object_store" "store2" {
       * `access_token_endpoint` - (Required) The IAM access token endpoint
       * `token_endpoint` - (Required) The IAM token endpoint
       * `name` - (Optional) Name of the service
-* `force_delete` - (Optional) By default object stores are not deleted by the provider (soft-delete). 
+* `force_delete` - (Optional) By default object stores will not be deleted by the provider (soft-delete). 
    By setting this value to `true` the provider removes the object store. We strongly suggest enabling this only for ephemeral deployments.
   
 
