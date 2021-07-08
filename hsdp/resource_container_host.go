@@ -146,7 +146,7 @@ func resourceContainerHost() *schema.Resource {
 			},
 			"security_groups": {
 				Type:     schema.TypeSet,
-				MaxItems: 10,
+				MaxItems: 4,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
