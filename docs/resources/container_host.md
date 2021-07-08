@@ -97,6 +97,7 @@ The following arguments are supported:
 * `private_key` - (Optional) The SSH private key to use for provision activities
 * `file` - (Optional) Block specifying content to be written to the container host after creation
 * `bastion_host` - (Optional) The bastion host to use.  When not set, this will be deduced from the container host location
+* `keep_failed_instances` - (Optional) Keep instances around for post-mortem analysis on failure. Default is `false`.
 
 Each `file` block can contain the following fields. Use either `content` or `source`:
 

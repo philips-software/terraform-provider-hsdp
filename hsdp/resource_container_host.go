@@ -171,6 +171,11 @@ func resourceContainerHost() *schema.Resource {
 				Sensitive:    true,
 				RequiredWith: []string{"user"},
 			},
+			"keep_failed_instances": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 			commandsField: {
 				Type:     schema.TypeList,
 				MaxItems: 10,
@@ -295,6 +300,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	instanceRole := d.Get("instance_role").(string)
 	subnetType := d.Get("subnet_type").(string)
 	bastionHost := d.Get("bastion_host").(string)
+	keepFailedInstances := d.Get("keep_failed_instances").(bool)
 	if bastionHost == "" {
 		bastionHost = client.BastionHost()
 	}
@@ -372,7 +378,9 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 				return diag.FromErr(fmt.Errorf("create error (status=%d): %w", resp.StatusCode, err))
 			}
 		} else {
-			_, _, _ = client.Destroy(tagName)
+			if !keepFailedInstances {
+				_, _, _ = client.Destroy(tagName)
+			}
 			return diag.FromErr(fmt.Errorf("create error (description=[%s], code=[%d]): %w", ch.Description, resp.StatusCode, err))
 		}
 	} else {
@@ -642,17 +650,17 @@ func resourceContainerHostUpdate(_ context.Context, d *schema.ResourceData, m in
 		toAdd := difference(newEntries, old)
 		toRemove := difference(old, newEntries)
 
-		// Additions
-		if len(toAdd) > 0 {
-			_, _, err := client.AddUserGroups([]string{tagName}, toAdd)
+		// Removals
+		if len(toRemove) > 0 {
+			_, _, err := client.RemoveUserGroups([]string{tagName}, toRemove)
 			if err != nil {
 				return diag.FromErr(err)
 			}
 		}
 
-		// Removals
-		if len(toRemove) > 0 {
-			_, _, err := client.RemoveUserGroups([]string{tagName}, toRemove)
+		// Additions
+		if len(toAdd) > 0 {
+			_, _, err := client.AddUserGroups([]string{tagName}, toAdd)
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -666,17 +674,17 @@ func resourceContainerHostUpdate(_ context.Context, d *schema.ResourceData, m in
 		toAdd := difference(newEntries, old)
 		toRemove := difference(old, newEntries)
 
-		// Additions
-		if len(toAdd) > 0 {
-			_, _, err := client.AddSecurityGroups([]string{tagName}, toAdd)
+		// Removals
+		if len(toRemove) > 0 {
+			_, _, err := client.RemoveSecurityGroups([]string{tagName}, toRemove)
 			if err != nil {
 				return diag.FromErr(err)
 			}
 		}
 
-		// Removals
-		if len(toRemove) > 0 {
-			_, _, err := client.RemoveSecurityGroups([]string{tagName}, toRemove)
+		// Additions
+		if len(toAdd) > 0 {
+			_, _, err := client.AddSecurityGroups([]string{tagName}, toAdd)
 			if err != nil {
 				return diag.FromErr(err)
 			}
