@@ -2,8 +2,9 @@ package hsdp
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -118,6 +119,9 @@ func resourceIAMClientCreate(ctx context.Context, d *schema.ResourceData, m inte
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	if client.Token() == "" {
+		return diag.FromErr(ErrMissingIAMCredentials)
+	}
 
 	var cl iam.ApplicationClient
 	cl.Description = d.Get("description").(string)
@@ -153,6 +157,9 @@ func resourceIAMClientRead(ctx context.Context, d *schema.ResourceData, m interf
 	client, err := config.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
+	}
+	if client.Token() == "" {
+		return diag.FromErr(ErrMissingIAMCredentials)
 	}
 
 	id := d.Id()
@@ -191,6 +198,9 @@ func resourceIAMClientUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	client, err := config.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
+	}
+	if client.Token() == "" {
+		return diag.FromErr(ErrMissingIAMCredentials)
 	}
 
 	var cl iam.ApplicationClient
@@ -247,6 +257,9 @@ func resourceIAMClientDelete(ctx context.Context, d *schema.ResourceData, m inte
 	client, err := config.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
+	}
+	if client.Token() == "" {
+		return diag.FromErr(ErrMissingIAMCredentials)
 	}
 
 	var cl iam.ApplicationClient
