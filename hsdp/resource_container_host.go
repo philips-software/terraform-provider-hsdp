@@ -374,7 +374,9 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 				instanceID = details.InstanceID
 				ipAddress = details.PrivateAddress
 			} else {
-				_, _, _ = client.Destroy(tagName)
+				if !keepFailedInstances {
+					_, _, _ = client.Destroy(tagName)
+				}
 				return diag.FromErr(fmt.Errorf("create error (status=%d): %w", resp.StatusCode, err))
 			}
 		} else {
@@ -787,12 +789,19 @@ func resourceContainerHostDelete(_ context.Context, d *schema.ResourceData, m in
 	}
 
 	tagName := d.Get("name").(string)
+	keepFailedInstances := d.Get("keep_failed_instances").(bool)
+
 	ch, _, err := client.GetDetails(tagName)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	if ch.InstanceID != d.Id() {
 		return diag.FromErr(ErrInstanceIDMismatch)
+	}
+	state, _, err := client.GetDeploymentState(tagName)
+	if err == nil && state == "failed" && keepFailedInstances { // Keep
+		d.SetId("")
+		return diags
 	}
 	_, _, err = client.Destroy(tagName)
 	if err != nil {
