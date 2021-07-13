@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-labs/ferrite/server"
-	"github.com/philips-labs/siderite"
+	siderite "github.com/philips-labs/siderite/models"
 	"github.com/philips-software/go-hsdp-api/iron"
 	"github.com/robfig/cron/v3"
 )

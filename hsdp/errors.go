@@ -20,4 +20,5 @@ var (
 	ErrDeleteServiceFailed      = errors.New("delete service failed")
 	ErrDeleteSubscriptionFailed = errors.New("delete subscription failed")
 	ErrMissingOrganizationID    = errors.New("missing organization ID")
+	ErrMissingIAMCredentials    = errors.New("missing IAM credentials in the hsdp provider block. Add an IAM service identity or ORG admin with proper permissions")
 )

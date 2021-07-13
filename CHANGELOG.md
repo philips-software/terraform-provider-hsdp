@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.17.2
+- Upgrade go-hsdp-api
+- Better honor `keep_failed_instances` for Container Host
+
+## v0.17.1
+- Update siderite and other dependencies
+- Add `keep_failed_instances` attribute to Container Host resources
+- Fix limit on `security_groups` on Container Host 
+
 ## v0.17.0
 - The `region` is now a required argument. Environment defaults to `client-test`
 - Updated documentation
