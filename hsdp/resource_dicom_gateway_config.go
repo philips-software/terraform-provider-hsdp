@@ -182,7 +182,28 @@ func setSCPConfig(scpConfig dicom.SCPConfig, d *schema.ResourceData) error {
 }
 
 func setQueryConfig(queryConfig dicom.SCPConfig, d *schema.ResourceData) error {
-	// TODO
+	queryService := make(map[string]interface{})
+	secure := queryConfig.SecureNetworkConnection.IsSecure
+	if secure {
+		queryService["port"] = queryConfig.SecureNetworkConnection.Port
+
+	} else {
+		queryService["port"] = queryConfig.UnSecureNetworkConnection.Port
+	}
+	// Add applications
+	a := &schema.Set{F: resourceMetricsThresholdHash}
+	for _, app := range queryConfig.ApplicationEntities {
+		entry := make(map[string]interface{})
+		entry["allow_any"] = app.AllowAny
+		entry["ae_title"] = app.AeTitle
+		entry["organization_id"] = app.OrganizationID
+		a.Add(entry)
+	}
+	queryService["application_entity"] = a
+
+	s := &schema.Set{F: resourceMetricsThresholdHash} // TODO: look at the significance of this
+	s.Add(queryService)
+	_ = d.Set("query_retrieve_service", s)
 	return nil
 }
 
