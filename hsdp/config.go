@@ -273,7 +273,6 @@ func (c *Config) setupConsoleClient() {
 	c.consoleClient = client
 }
 
-// getFHIRClientFromEndpoint creates a HSDP CDR client form the given endpoint
 func (c *Config) getFHIRClientFromEndpoint(endpointURL string) (*cdr.Client, error) {
 	if c.iamClientErr != nil {
 		return nil, c.iamClientErr
@@ -283,6 +282,23 @@ func (c *Config) getFHIRClientFromEndpoint(endpointURL string) (*cdr.Client, err
 		RootOrgID: "",
 		TimeZone:  c.TimeZone,
 		DebugLog:  c.DebugLog,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if err = client.SetEndpointURL(endpointURL); err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+func (c *Config) getCDLClientFromEndpoint(endpointURL string) (*cdl.Client, error) {
+	if c.iamClientErr != nil {
+		return nil, c.iamClientErr
+	}
+	client, err := cdl.NewClient(c.iamClient, &cdl.Config{
+		CDLURL:   "https://localhost.domain",
+		DebugLog: c.DebugLog,
 	})
 	if err != nil {
 		return nil, err

@@ -13,9 +13,6 @@ resource "hsdp_cdl_study" "study_a" {
   ends_at = var.ends_at
   
   managers =        [var.managers]
-  monitors =        [var.monitors]
-  uploaders =       [var.uploaders]
-  data_scientists = [var.data_scientists]
 } 
 ```
 
@@ -27,10 +24,6 @@ The following arguments are supported:
 * `study_owner` - (Required, UUIDv4) The owner of the study
 * `description` - (Optional) The description of the application
 * `ends_at` - (Optional) The end date of the study
-* `managers` - (Optional, list(UUIDv4)) The list of study managers 
-* `monitors` - (Optional, list(UUIDv4)) The list of study monitors
-* `uploaders` - (Optional, list(UUIDv4)) The list of study uploaders
-* `data_scientists` - (Optional, list(UUIDv4)) The list of data scientists
 
 ## Attributes Reference
 
