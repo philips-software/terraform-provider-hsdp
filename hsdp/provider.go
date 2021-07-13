@@ -190,6 +190,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_notification_subscriber":   resourceNotificationSubscriber(),
 			"hsdp_notification_topic":        resourceNotificationTopic(),
 			"hsdp_notification_subscription": resourceNotificationSubscription(),
+			"hsdp_dicom_gateway_config":      resourceDICOMGatewayConfig(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":              dataSourceIAMIntrospect(),
