@@ -2,6 +2,9 @@ package hsdp
 
 import (
 	"context"
+	"fmt"
+	"strings"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -31,13 +34,17 @@ func dataSourceCDRFHIRStore() *schema.Resource {
 
 }
 
-func dataSourceCDRFHIRStoreRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceCDRFHIRStoreRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 
 	var diags diag.Diagnostics
 
 	baseURL := d.Get("base_url").(string)
 	fhirOrgID := d.Get("fhir_org_id").(string)
+
+	if strings.Contains(baseURL, "/store/fhir") {
+		return diag.FromErr(fmt.Errorf("the base_url argument should not have `/store/fhir/` at the end"))
+	}
 
 	client, err := config.getFHIRClient(baseURL, fhirOrgID)
 	if err != nil {
