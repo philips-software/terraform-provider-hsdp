@@ -215,6 +215,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_cdl_instance":                dataSourceCDLInstance(),
 			"hsdp_cdl_research_study":          dataSourceCDLResearchStudy(),
 			"hsdp_cdl_research_studies":        dataSourceCDLResearchStudies(),
+			"hsdp_container_host_instances":    dataSourceContainerHostInstances(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
