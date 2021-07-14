@@ -213,6 +213,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_notification_subscription":   dataSourceNotificationSubscription(),
 			"hsdp_notification_subscriber":     dataSourceNotificationSubscriber(),
 			"hsdp_cdl_instance":                dataSourceCDLInstance(),
+			"hsdp_cld_research_study":          dataSourceCDLResearchStudy(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}

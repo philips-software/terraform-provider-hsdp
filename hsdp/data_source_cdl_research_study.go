@@ -7,15 +7,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceCDLStudy() *schema.Resource {
+func dataSourceCDLResearchStudy() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceCDLStudyRead,
+		ReadContext: dataSourceCDLResearchStudyRead,
 		Schema: map[string]*schema.Schema{
 			"study_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"cdl_instance_endpoint": {
+			"cdl_endpoint": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -40,31 +40,30 @@ func dataSourceCDLStudy() *schema.Resource {
 
 }
 
-func dataSourceCDLStudyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*Config)
+func dataSourceCDLResearchStudyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	config := m.(*Config)
 
 	var diags diag.Diagnostics
 
-	client, err := config.IAMClient()
+	endpoint := d.Get("cdl_endpoint").(string)
+	studyID := d.Get("study_id").(string)
+
+	client, err := config.getCDLClientFromEndpoint(endpoint)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	orgId := d.Get("organization_id").(string)
+	defer client.Close()
 
-	org, _, err := client.Organizations.GetOrganizationByID(orgId) // Get all permissions
-
+	study, _, err := client.Study.GetStudyByID(studyID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(orgId)
-	_ = d.Set("name", org.Name)
-	_ = d.Set("description", org.Description)
-	_ = d.Set("active", org.Active)
-	_ = d.Set("type", org.Type)
-	_ = d.Set("external_id", org.ExternalID)
-	_ = d.Set("display_name", org.DisplayName)
-	_ = d.Set("parent_org_id", org.Parent.Value)
+	d.SetId(study.ID)
+	_ = d.Set("title", study.Title)
+	_ = d.Set("description", study.Description)
+	_ = d.Set("ends_at", study.Period.End)
+	_ = d.Set("study_owner", study.StudyOwner)
 
 	return diags
 }

@@ -25,6 +25,7 @@ resource "hsdp_cdl_research_study" "study_a" {
 
 The following arguments are supported:
 
+* `cdl_endpoint` - (Required) The CDL instance to query
 * `title` - (Required) The name of the application
 * `study_owner` - (Required, UUIDv4) The owner of the study
 * `description` - (Optional) The description of the application
