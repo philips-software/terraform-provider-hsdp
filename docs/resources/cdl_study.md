@@ -1,6 +1,9 @@
 # hsdp_cdl_study
 
-Provides a resource for managing HSDP Clinical Data Lake Research studies
+Provides a resource for managing HSDP Clinical Data Lake Research studies.
+A (Research) Study is a concept in CDL used to organize the data within Data Lake. 
+It acts as a container of your clinical trial. Data will be completely isolated,
+an authorization model can be enforced per Research Study.
 
 ## Example Usage
 

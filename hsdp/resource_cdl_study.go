@@ -38,8 +38,9 @@ func resourceCDLStudy() *schema.Resource {
 				Required: true,
 			},
 			"ends_at": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: suppressEqualTimeOrMissing,
 			},
 		},
 	}
@@ -58,7 +59,7 @@ func resourceCDLStudyCreate(ctx context.Context, d *schema.ResourceData, m inter
 	}
 	defer client.Close()
 
-	title := d.Get("name").(string)
+	title := d.Get("title").(string)
 	description := d.Get("description").(string)
 	endsAt := d.Get("ends_at").(string)
 	studyOwner := d.Get("study_owner").(string)
@@ -120,7 +121,7 @@ func resourceCDLStudyUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 
-	study.Title = d.Get("name").(string)
+	study.Title = d.Get("title").(string)
 	study.Description = d.Get("description").(string)
 	study.Period.End = d.Get("ends_at").(string)
 	study.StudyOwner = d.Get("study_owner").(string)

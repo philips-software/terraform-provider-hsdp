@@ -928,6 +928,16 @@ github.com/philips-software/go-hsdp-api v0.40.2-0.20210713191600-091d1d72ebe7 h1
 github.com/philips-software/go-hsdp-api v0.40.2-0.20210713191600-091d1d72ebe7/go.mod h1:MA5TQrePLrrG2JO/CTE99sMC5bhpTSFJKZswilZyx6A=
 github.com/philips-software/go-hsdp-api v0.40.2-0.20210713192828-b3f7784ce0c8 h1:mjw8aD+rwrn08Sah2OA05Zmpoo634Z8JI1kyYgkQX2k=
 github.com/philips-software/go-hsdp-api v0.40.2-0.20210713192828-b3f7784ce0c8/go.mod h1:MA5TQrePLrrG2JO/CTE99sMC5bhpTSFJKZswilZyx6A=
+github.com/philips-software/go-hsdp-api v0.40.2-0.20210713202401-d36585a6aad3 h1:qrQJDd4CoUtDlyVIVdb++9DBmN4HFOlKeoYT1TtAWzA=
+github.com/philips-software/go-hsdp-api v0.40.2-0.20210713202401-d36585a6aad3/go.mod h1:MA5TQrePLrrG2JO/CTE99sMC5bhpTSFJKZswilZyx6A=
+github.com/philips-software/go-hsdp-api v0.40.2-0.20210713203214-46b07661f783 h1:dL9i5ZlYwT75urCTfiGXT+NR9rmhih1MfKDd9Tjigak=
+github.com/philips-software/go-hsdp-api v0.40.2-0.20210713203214-46b07661f783/go.mod h1:MA5TQrePLrrG2JO/CTE99sMC5bhpTSFJKZswilZyx6A=
+github.com/philips-software/go-hsdp-api v0.40.2-0.20210713203519-0c878a3e2a71 h1:Knt/muIsgLMYWHShu2pQ6MSzRfq8vgIBBmSKNIZOW0c=
+github.com/philips-software/go-hsdp-api v0.40.2-0.20210713203519-0c878a3e2a71/go.mod h1:MA5TQrePLrrG2JO/CTE99sMC5bhpTSFJKZswilZyx6A=
+github.com/philips-software/go-hsdp-api v0.40.2-0.20210713203905-dfcc9749da79 h1:MiX+OSDV6Q0AX8GUIbqo1XlTeocaioTyhs1RkX50Wo0=
+github.com/philips-software/go-hsdp-api v0.40.2-0.20210713203905-dfcc9749da79/go.mod h1:MA5TQrePLrrG2JO/CTE99sMC5bhpTSFJKZswilZyx6A=
+github.com/philips-software/go-hsdp-api v0.40.2-0.20210713204220-717f07fc5426 h1:keC/hR2lYvT+ZYA2iVkcnTyiSWJdnfcnIRy/Hk9jHdg=
+github.com/philips-software/go-hsdp-api v0.40.2-0.20210713204220-717f07fc5426/go.mod h1:MA5TQrePLrrG2JO/CTE99sMC5bhpTSFJKZswilZyx6A=
 github.com/philips-software/go-hsdp-signer v1.3.0 h1:Si1voDE/GHzthmxpasPdntbu8aUW6EYJfI6gHVf7BCc=
 github.com/philips-software/go-hsdp-signer v1.3.0/go.mod h1:/QehZ/+Aks2t1TFpjhF/7ZSB8PJIIJHzLc03rOqwLw0=
 github.com/pierrec/lz4 v1.0.2-0.20190131084431-473cd7ce01a1/go.mod h1:3/3N9NVKO0jef7pBehbT1qWhCMrIgbYNnFAZCqQ5LRc=
