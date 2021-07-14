@@ -8,6 +8,10 @@ Retrieve research studies present in a HSDP Clinical Data Lake instance.
 data "hsdp_cdl_research_studies" "all" {
   cdl_endpoint = data.cdl_instance.cicd.endpoint
 } 
+
+output "all_study_titles" {
+  value = data.hsdp_cdl_research_studies.all.titles
+}
 ```
 
 ## Argument Reference
