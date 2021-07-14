@@ -8,6 +8,7 @@ import (
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/philips-software/go-hsdp-api/cartel"
+	"github.com/philips-software/go-hsdp-api/cdl"
 	"github.com/philips-software/go-hsdp-api/cdr"
 	"github.com/philips-software/go-hsdp-api/config"
 	"github.com/philips-software/go-hsdp-api/console"
@@ -272,7 +273,6 @@ func (c *Config) setupConsoleClient() {
 	c.consoleClient = client
 }
 
-// getFHIRClientFromEndpoint creates a HSDP CDR client form the given endpoint
 func (c *Config) getFHIRClientFromEndpoint(endpointURL string) (*cdr.Client, error) {
 	if c.iamClientErr != nil {
 		return nil, c.iamClientErr
@@ -288,6 +288,42 @@ func (c *Config) getFHIRClientFromEndpoint(endpointURL string) (*cdr.Client, err
 	}
 	if err = client.SetEndpointURL(endpointURL); err != nil {
 		return nil, err
+	}
+	return client, nil
+}
+
+func (c *Config) getCDLClientFromEndpoint(endpointURL string) (*cdl.Client, error) {
+	if c.iamClientErr != nil {
+		return nil, c.iamClientErr
+	}
+	client, err := cdl.NewClient(c.iamClient, &cdl.Config{
+		CDLURL:   "https://localhost.domain",
+		DebugLog: c.DebugLog,
+	})
+	if err != nil {
+		return nil, err
+	}
+	if err = client.SetEndpointURL(endpointURL); err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+// getCDLClient creates a HSDP CDL client
+func (c *Config) getCDLClient(baseURL, tenantID string) (*cdl.Client, error) {
+	if c.iamClientErr != nil {
+		return nil, fmt.Errorf("IAM client error in getCDLClient: %w", c.iamClientErr)
+	}
+	if tenantID == "" {
+		return nil, fmt.Errorf("getCDLClient: %w", ErrMissingOrganizationID)
+	}
+	client, err := cdl.NewClient(c.iamClient, &cdl.Config{
+		CDLURL:         baseURL,
+		OrganizationID: tenantID,
+		DebugLog:       c.DebugLog,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("getFHIRClient: %w", err)
 	}
 	return client, nil
 }
