@@ -16,8 +16,6 @@ resource "hsdp_cdl_research_study" "study_a" {
   study_owner = var.study_owner_id
           
   ends_at = var.ends_at
-  
-  managers =        [var.managers]
 } 
 ```
 

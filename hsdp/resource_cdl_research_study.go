@@ -2,6 +2,8 @@ package hsdp
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -49,8 +51,6 @@ func resourceCDLResearchStudy() *schema.Resource {
 func resourceCDLResearchStudyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
-	var diags diag.Diagnostics
-
 	endpoint := d.Get("cdl_endpoint").(string)
 
 	client, err := config.getCDLClientFromEndpoint(endpoint)
@@ -64,7 +64,7 @@ func resourceCDLResearchStudyCreate(ctx context.Context, d *schema.ResourceData,
 	endsAt := d.Get("ends_at").(string)
 	studyOwner := d.Get("study_owner").(string)
 
-	createdStudy, _, err := client.Study.CreateStudy(cdl.Study{
+	createdStudy, resp, err := client.Study.CreateStudy(cdl.Study{
 		Title:       title,
 		Description: description,
 		Period: cdl.Period{
@@ -73,10 +73,27 @@ func resourceCDLResearchStudyCreate(ctx context.Context, d *schema.ResourceData,
 		StudyOwner: studyOwner,
 	})
 	if err != nil {
+		if resp == nil {
+			return diag.FromErr(err)
+		}
+		if resp.StatusCode != http.StatusConflict {
+			return diag.FromErr(err)
+		}
+		// Search for existing study based on Title
+		studies, _, err2 := client.Study.GetStudies(nil)
+		if err2 != nil {
+			return diag.FromErr(fmt.Errorf("on match attempt during Create conflict: %w", err))
+		}
+		for _, study := range studies {
+			if study.Title == title && study.StudyOwner == studyOwner { // TODO: check if this is sufficient for a good match
+				d.SetId(study.ID)
+				return resourceCDLResearchStudyRead(ctx, d, m)
+			}
+		}
 		return diag.FromErr(err)
 	}
 	d.SetId(createdStudy.ID)
-	return diags
+	return resourceCDLResearchStudyRead(ctx, d, m)
 }
 
 func resourceCDLResearchStudyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
