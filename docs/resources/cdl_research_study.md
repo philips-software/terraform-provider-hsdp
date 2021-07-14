@@ -1,14 +1,16 @@
-# hsdp_cdl_study
+# hsdp_cdl_research_study
 
-Provides a resource for managing HSDP Clinical Data Lake Research studies.
-A (Research) Study is a concept in CDL used to organize the data within Data Lake. 
+Provides a resource for managing HSDP Clinical Data Lake research studies.
+A Research Study is a concept in CDL used to organize the data within Data Lake. 
 It acts as a container of your clinical trial. Data will be completely isolated,
 an authorization model can be enforced per Research Study.
 
 ## Example Usage
 
 ```hcl
-resource "hsdp_cdl_study" "study_a" {
+resource "hsdp_cdl_research_study" "study_a" {
+  cdl_endpoint = data.cdl_instance.cicd.endpoint
+  
   title = "Study A"
   description = "Example study A"
   study_owner = var.study_owner_id
@@ -36,9 +38,9 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-An existing study can be imported using `terraform import hsdp_cdl_study`, e.g.
+An existing research study can be imported using `terraform import hsdp_cdl_research_study`, e.g.
 
 ```shell
-> terraform import hsdp_cdl_study.mystudy a-guid
+> terraform import hsdp_cdl_research_study.mystudy a-guid
 ```
 

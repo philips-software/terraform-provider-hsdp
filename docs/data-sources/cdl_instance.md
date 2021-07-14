@@ -6,7 +6,7 @@ Retrieve details of an existing Clinical Data Lake instance (CDL.
 
 ```hcl
 data "hsdp_cdl_instance" "cdl" {
-   base_url       = "https://my-datalake.hsdp.io"
+  base_url        = "https://my-datalake.hsdp.io"
   organization_id = var.cdl_tenant_org
 }
 ```

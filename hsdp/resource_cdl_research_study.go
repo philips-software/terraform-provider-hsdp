@@ -8,19 +8,19 @@ import (
 	"github.com/philips-software/go-hsdp-api/cdl"
 )
 
-func resourceCDLStudy() *schema.Resource {
+func resourceCDLResearchStudy() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		CreateContext: resourceCDLStudyCreate,
-		ReadContext:   resourceCDLStudyRead,
-		UpdateContext: resourceCDLStudyUpdate,
-		DeleteContext: resourceCDLStudyDelete,
+		CreateContext: resourceCDLResearchStudyCreate,
+		ReadContext:   resourceCDLResearchStudyRead,
+		UpdateContext: resourceCDLResearchStudyUpdate,
+		DeleteContext: resourceCDLResearchStudyDelete,
 
 		Schema: map[string]*schema.Schema{
-			"cdl_instance": {
+			"cdl_endpoint": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -46,12 +46,12 @@ func resourceCDLStudy() *schema.Resource {
 	}
 }
 
-func resourceCDLStudyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceCDLResearchStudyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
 
-	endpoint := d.Get("cdl_instance").(string)
+	endpoint := d.Get("cdl_endpoint").(string)
 
 	client, err := config.getCDLClientFromEndpoint(endpoint)
 	if err != nil {
@@ -79,12 +79,12 @@ func resourceCDLStudyCreate(ctx context.Context, d *schema.ResourceData, m inter
 	return diags
 }
 
-func resourceCDLStudyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceCDLResearchStudyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
 
-	endpoint := d.Get("cdl_instance").(string)
+	endpoint := d.Get("cdl_endpoint").(string)
 
 	client, err := config.getCDLClientFromEndpoint(endpoint)
 	if err != nil {
@@ -104,11 +104,11 @@ func resourceCDLStudyRead(ctx context.Context, d *schema.ResourceData, m interfa
 	return diags
 }
 
-func resourceCDLStudyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceCDLResearchStudyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 
-	endpoint := d.Get("cdl_instance").(string)
+	endpoint := d.Get("cdl_endpoint").(string)
 
 	client, err := config.getCDLClientFromEndpoint(endpoint)
 	if err != nil {
@@ -133,7 +133,7 @@ func resourceCDLStudyUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	return diags
 }
 
-func resourceCDLStudyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceCDLResearchStudyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	d.SetId("") // This is by design currently
