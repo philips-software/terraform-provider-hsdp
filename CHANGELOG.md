@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.18.0
+- Initial Clinical Data Lake (CDL) support
+- NEW: Resource `hsdp_cdl_research_study`
+- NEW: Data source `hsdp_cdl_instance`
+- NEW: Data source `hsdp_cdl_research_study`
+- NEW: Data source `hsdp_cdl_research_studies` 
+- NEW: Data source `hsdp_container_host_instances`
+
 ## v0.17.2
 - Upgrade go-hsdp-api
 - Better honor `keep_failed_instances` for Container Host
