@@ -9,23 +9,19 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceCDRFHIRStore() *schema.Resource {
+func dataSourceCDLInstance() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceCDRFHIRStoreRead,
+		ReadContext: dataSourceCDLInstanceRead,
 		Schema: map[string]*schema.Schema{
 			"base_url": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"fhir_org_id": {
+			"organization_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
 			"endpoint": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"type": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -34,26 +30,25 @@ func dataSourceCDRFHIRStore() *schema.Resource {
 
 }
 
-func dataSourceCDRFHIRStoreRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceCDLInstanceRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 
 	var diags diag.Diagnostics
 
 	baseURL := d.Get("base_url").(string)
-	fhirOrgID := d.Get("fhir_org_id").(string)
+	cdlOrgID := d.Get("organization_id").(string)
 
-	if strings.Contains(baseURL, "/store/fhir") {
-		return diag.FromErr(fmt.Errorf("the base_url argument should not have `/store/fhir/` at the end"))
+	if strings.Contains(baseURL, "/store/cdl/") {
+		return diag.FromErr(fmt.Errorf("the base_url argument should not have `/store/cdl/` at the end"))
 	}
 
-	client, err := config.getFHIRClient(baseURL, fhirOrgID)
+	client, err := config.getCDLClient(baseURL, cdlOrgID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	defer client.Close()
 
-	d.SetId(baseURL)
+	d.SetId(baseURL + cdlOrgID)
 	_ = d.Set("endpoint", client.GetEndpointURL())
-	_ = d.Set("type", "EHR")
 	return diags
 }

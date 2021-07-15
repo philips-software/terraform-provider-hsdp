@@ -191,6 +191,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_notification_topic":        resourceNotificationTopic(),
 			"hsdp_notification_subscription": resourceNotificationSubscription(),
 			"hsdp_dicom_gateway_config":      resourceDICOMGatewayConfig(),
+			"hsdp_cdl_research_study":        resourceCDLResearchStudy(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":              dataSourceIAMIntrospect(),
@@ -214,6 +215,10 @@ func Provider(build string) *schema.Provider {
 			"hsdp_notification_topic":          dataSourceNotificationTopic(),
 			"hsdp_notification_subscription":   dataSourceNotificationSubscription(),
 			"hsdp_notification_subscriber":     dataSourceNotificationSubscriber(),
+			"hsdp_cdl_instance":                dataSourceCDLInstance(),
+			"hsdp_cdl_research_study":          dataSourceCDLResearchStudy(),
+			"hsdp_cdl_research_studies":        dataSourceCDLResearchStudies(),
+			"hsdp_container_host_instances":    dataSourceContainerHostInstances(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}

@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -15,6 +16,11 @@ func dataSourceUser() *schema.Resource {
 				Required: true,
 			},
 			"uuid": {
+				Type:       schema.TypeString,
+				Computed:   true,
+				Deprecated: "use the id field",
+			},
+			"email_address": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -23,7 +29,7 @@ func dataSourceUser() *schema.Resource {
 
 }
 
-func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 
 	var diags diag.Diagnostics
@@ -44,6 +50,11 @@ func dataSourceUserRead(ctx context.Context, d *schema.ResourceData, meta interf
 			return diag.FromErr(err)
 		}
 	}
+	user, _, err := client.Users.LegacyGetUserByUUID(uuid)
+	if err == nil {
+		_ = d.Set("email_address", user.Contact.EmailAddress)
+	}
+
 	d.SetId(uuid)
 	_ = d.Set("uuid", uuid)
 

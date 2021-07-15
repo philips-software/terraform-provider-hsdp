@@ -27,7 +27,9 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `uuid` - The UUID of the user
+* `id` - The UUID of the user
+* `email_address` - The email address of the user. This field is only populated if the IAM user/service used 
+has sufficient permissions to retrieve this value. It will be blank otherwise.
 
 ## Error conditions
 
