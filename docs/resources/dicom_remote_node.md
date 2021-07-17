@@ -36,10 +36,9 @@ resource "hsdp_dicom_remote_node" "remote_node_1" {
   * `host_name` - (Required) Remote Node Host name
   * `ip_address` - (Optional) Remote Nde IP Address
   * `disable_ipv6` - (Optional) Disable IPv6. Default `false`
-  * `advanced_settings - (optional) Advanced setting
-    * `pdu_length` - (optional) PDU length. Default `65535`
-    * `artim_timeout` - (optional) Time-out waiting for A-ASSOCIATE RQ PDU on open TCP/IP connection. Artim timeout. Default `3000 ms`
-    * `associationIdleTimeOut` - (Optional) Association Idle Timeout. Default `4500 ms`
+  * `pdu_length` - (optional) PDU length. Default `65535`
+  * `artim_timeout` - (optional) Time-out waiting for A-ASSOCIATE RQ PDU on open TCP/IP connection. Artim timeout. Default `3000 ms`
+  * `associationIdleTimeOut` - (Optional) Association Idle Timeout. Default `4500 ms`
   * `network_timeout` - (optional) Network timeout. Default `3000 ms`
   * `is_secure` - (Required) Secure connection. Boolean `true` or `false`. Default `false`
 * `force_delete` - (Optional) By default remote nodes are not deleted by the provider (soft-delete).
