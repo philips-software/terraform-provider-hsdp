@@ -200,6 +200,8 @@ func resourceCDLResearchStudyCreate(ctx context.Context, d *schema.ResourceData,
 		if !matchFound {
 			return diag.FromErr(err)
 		}
+		// Clear any existing permission so we start off with a known state
+		pruneAllPermissions(client, d.Id())
 	} else {
 		d.SetId(createdStudy.ID)
 	}
@@ -216,6 +218,30 @@ func resourceCDLResearchStudyCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	return resourceCDLResearchStudyRead(ctx, d, m)
+}
+
+func pruneAllPermissions(client *cdl.Client, studyID string) diag.Diagnostics {
+	var diags diag.Diagnostics
+	study := cdl.Study{ID: studyID}
+
+	permissions, _, err3 := client.Study.GetPermissions(study, nil)
+	if err3 != nil {
+		return diag.FromErr(err3)
+	}
+	var deleteRequests []cdl.RoleRequest
+	for _, p := range permissions {
+		for _, r := range p.Roles {
+			deleteRequests = append(deleteRequests, cdl.RoleRequest{
+				IAMUserUUID: p.IAMUserUUID,
+				Role:        r.Role,
+				Email:       "placholder@email.localhost", // Great, CDL does not validate this!
+			})
+		}
+	}
+	for _, r := range deleteRequests {
+		_, _, _ = client.Study.RevokePermission(study, r)
+	}
+	return diags
 }
 
 func resourceCDLResearchStudyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -325,6 +351,16 @@ func resourceCDLResearchStudyUpdate(ctx context.Context, d *schema.ResourceData,
 
 func resourceCDLResearchStudyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
+	config := m.(*Config)
+
+	endpoint := d.Get("cdl_endpoint").(string)
+
+	client, err := config.getCDLClientFromEndpoint(endpoint)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	defer client.Close()
+	pruneAllPermissions(client, d.Id())
 
 	d.SetId("") // This is by design currently
 	return diags
