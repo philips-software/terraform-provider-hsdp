@@ -129,12 +129,14 @@ func resourceIAMRoleRead(ctx context.Context, d *schema.ResourceData, meta inter
 	_ = d.Set("name", role.Name)
 	_ = d.Set("managing_organization", role.ManagingOrganization)
 
-	permissions, _, err := client.Roles.GetRolePermissions(*role)
+	permissions, resp, err := client.Roles.GetRolePermissions(*role)
 	if err != nil {
+		if resp.StatusCode == http.StatusForbidden { // IAM limitation
+			return diags // Use Terraform as source of truth
+		}
 		return diag.FromErr(err)
 	}
 	_ = d.Set("permissions", permissions)
-	d.SetId(role.ID)
 	return diags
 }
 
