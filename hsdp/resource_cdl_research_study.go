@@ -185,7 +185,7 @@ func resourceCDLResearchStudyCreate(ctx context.Context, d *schema.ResourceData,
 			return diag.FromErr(err)
 		}
 		// Search for existing study based on Title
-		studies, _, err2 := client.Study.GetStudies(nil)
+		studies, _, err2 := client.Study.GetStudies(nil) // Can be optimized if query supports title
 		if err2 != nil {
 			return diag.FromErr(fmt.Errorf("on match attempt during Create conflict: %w", err))
 		}
