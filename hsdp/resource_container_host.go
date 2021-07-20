@@ -367,7 +367,9 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		}
 		if resp == nil {
 			_, _, _ = client.Destroy(tagName)
-			return diag.FromErr(fmt.Errorf("create error (resp=nil): %w", err))
+			diags = append(diags, diag.FromErr(fmt.Errorf("'keep_failed_instances' is enabled so not removing '%s', remember to destroy it manually", tagName))...)
+			diags = append(diags, diag.FromErr(fmt.Errorf("create error (resp=nil): %w", err))...)
+			return diags
 		}
 		if ch == nil || resp.StatusCode >= 500 { // Possible 504, or other timeout, try to recover!
 			if details := findInstanceByName(client, tagName); details != nil {
@@ -376,14 +378,18 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 			} else {
 				if !keepFailedInstances {
 					_, _, _ = client.Destroy(tagName)
+					diags = append(diags, diag.FromErr(fmt.Errorf("'keep_failed_instances' is enabled so not removing '%s', remember to destroy it manually", tagName))...)
 				}
-				return diag.FromErr(fmt.Errorf("create error (status=%d): %w", resp.StatusCode, err))
+				diags = append(diags, diag.FromErr(fmt.Errorf("create error (status=%d): %w", resp.StatusCode, err))...)
+				return diags
 			}
 		} else {
 			if !keepFailedInstances {
 				_, _, _ = client.Destroy(tagName)
+				diags = append(diags, diag.FromErr(fmt.Errorf("'keep_failed_instances' is enabled so not removing '%s', remember to destroy it manually", tagName))...)
 			}
-			return diag.FromErr(fmt.Errorf("create error (description=[%s], code=[%d]): %w", ch.Description, resp.StatusCode, err))
+			diags = append(diags, diag.FromErr(fmt.Errorf("create error (description=[%s], code=[%d]): %w", ch.Description, resp.StatusCode, err))...)
+			return diags
 		}
 	} else {
 		instanceID = ch.InstanceID()
