@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.18.1
+- CDL: Support $grant / $revoke for data scientists, uploaders, monitors and study managers
+- IAM: Workaround for IAM permissions list limitation
+
+
 ## v0.18.0
 - Initial Clinical Data Lake (CDL) support
 - NEW: Resource `hsdp_cdl_research_study`

@@ -43,5 +43,5 @@ The following attributes are exported:
 An existing Organization can be imported using `terraform import hsdp_iam_org`, e.g.
 
 ```bash
-terraform import hsdp_iam_org.myorg a-guid
+terraform import hsdp_iam_org.myorg guid4-of-the-org-you-want-to-import-here
 ```

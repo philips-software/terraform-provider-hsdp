@@ -367,7 +367,9 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		}
 		if resp == nil {
 			_, _, _ = client.Destroy(tagName)
-			return diag.FromErr(fmt.Errorf("create error (resp=nil): %w", err))
+			diags = append(diags, diag.FromErr(fmt.Errorf("'keep_failed_instances' is enabled so not removing '%s', remember to destroy it manually", tagName))...)
+			diags = append(diags, diag.FromErr(fmt.Errorf("create error (resp=nil): %w", err))...)
+			return diags
 		}
 		if ch == nil || resp.StatusCode >= 500 { // Possible 504, or other timeout, try to recover!
 			if details := findInstanceByName(client, tagName); details != nil {
@@ -376,14 +378,18 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 			} else {
 				if !keepFailedInstances {
 					_, _, _ = client.Destroy(tagName)
+					diags = append(diags, diag.FromErr(fmt.Errorf("'keep_failed_instances' is enabled so not removing '%s', remember to destroy it manually", tagName))...)
 				}
-				return diag.FromErr(fmt.Errorf("create error (status=%d): %w", resp.StatusCode, err))
+				diags = append(diags, diag.FromErr(fmt.Errorf("create error (status=%d): %w", resp.StatusCode, err))...)
+				return diags
 			}
 		} else {
 			if !keepFailedInstances {
 				_, _, _ = client.Destroy(tagName)
+				diags = append(diags, diag.FromErr(fmt.Errorf("'keep_failed_instances' is enabled so not removing '%s', remember to destroy it manually", tagName))...)
 			}
-			return diag.FromErr(fmt.Errorf("create error (description=[%s], code=[%d]): %w", ch.Description, resp.StatusCode, err))
+			diags = append(diags, diag.FromErr(fmt.Errorf("create error (description=[%s], code=[%d]): %w", ch.Description, resp.StatusCode, err))...)
+			return diags
 		}
 	} else {
 		instanceID = ch.InstanceID()
@@ -402,7 +408,10 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
 		// Trigger a delete to prevent failed instances from lingering
-		_, _, _ = client.Destroy(tagName)
+		if !keepFailedInstances {
+			_, _, _ = client.Destroy(tagName)
+			d.SetId("")
+		}
 		return diag.FromErr(fmt.Errorf(
 			"error waiting for instance '%s' to become ready: %s",
 			instanceID, err))
@@ -789,7 +798,6 @@ func resourceContainerHostDelete(_ context.Context, d *schema.ResourceData, m in
 	}
 
 	tagName := d.Get("name").(string)
-	keepFailedInstances := d.Get("keep_failed_instances").(bool)
 
 	ch, _, err := client.GetDetails(tagName)
 	if err != nil {
@@ -797,11 +805,6 @@ func resourceContainerHostDelete(_ context.Context, d *schema.ResourceData, m in
 	}
 	if ch.InstanceID != d.Id() {
 		return diag.FromErr(ErrInstanceIDMismatch)
-	}
-	state, _, err := client.GetDeploymentState(tagName)
-	if err == nil && state == "failed" && keepFailedInstances { // Keep
-		d.SetId("")
-		return diags
 	}
 	_, _, err = client.Destroy(tagName)
 	if err != nil {
