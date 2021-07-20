@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.18.2
+- DICOM: Alpha quality Support for DICOM gateway configuration
+- CDL: Documentation fixes
+- Container Host: Fix for `keep_failed_instances` flag
+
 ## v0.18.1
 - CDL: Support $grant / $revoke for data scientists, uploaders, monitors and study managers
 - IAM: Workaround for IAM permissions list limitation

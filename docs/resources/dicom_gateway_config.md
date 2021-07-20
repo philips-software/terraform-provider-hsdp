@@ -13,11 +13,9 @@ resource "hsdp_dicom_gateway_config" "dicom_gateway" {
     is_secure = false
     port = 104
     
-    advanced_settings {
-      pdu_length = 65535
-      artim_timeout = 3000
-      association_idle_timeout = 4500
-    }
+    pdu_length = 65535
+    artim_timeout = 3000
+    association_idle_timeout = 4500
     
     application_entity {
       allow_any = true
@@ -37,11 +35,11 @@ resource "hsdp_dicom_gateway_config" "dicom_gateway" {
   query_retrieve_service {
     is_secure = false
     port = 108
-    advanced_settings {
-      pdu_length = 65535
-      artim_timeout = 3000
-      association_idle_timeout = 4500
-    }
+    
+    # advanced features
+    pdu_length = 65535
+    artim_timeout = 3000
+    association_idle_timeout = 4500
     
     application_entity {
       allow_any = true
@@ -66,10 +64,9 @@ resource "hsdp_dicom_gateway_config" "dicom_gateway" {
 * `store_service` - (Optional) Details of the DICOM Store SCP
   * `is_secure` - Is secure. Default `false`
   * `port` - Port. Default `104` for Non-Secure and `105` for Secure. Don't change this.
-  * `advanced_settings`
-    * `pdu_length` - PDU length. Default `65535`
-    * `artim_timeout` - Time-out waiting for A-ASSOCIATE RQ PDU on open TCP/IP connection (Artim timeout). Default `3000 ms`
-    * `association_idle_timeout` - Association idle timeout. `4500 ms`
+  * `pdu_length` - PDU length. Default `65535`
+  * `artim_timeout` - Time-out waiting for A-ASSOCIATE RQ PDU on open TCP/IP connection (Artim timeout). Default `3000 ms`
+  * `association_idle_timeout` - Association idle timeout. `4500 ms`
   * `application_entity` - Application entity
     * `allow_any` - Allow any. Value can be `true` or `false`
     * `ae_title` - AE title. Allowed characters for aetitle are `A-Za-z0-9\\s/+=_-`. Eg. `DicomStoreScp`
@@ -78,10 +75,9 @@ resource "hsdp_dicom_gateway_config" "dicom_gateway" {
 * `queryretrieve_service` - (Optional) the FHIR store configuration
   * `is_secure` - Is secure. Default `false`
   * `port` - Port. Default `108` for Non-Secure and `109` for Secure. Don't change this.
-  * `advanced_settings`
-    * `pdu_length` - PDU length. Default `65535`
-    * `artim_timeout` - Time-out waiting for A-ASSOCIATE RQ PDU on open TCP/IP connection (Artim timeout). Default `3000 ms`
-    * `association_idle_timeout` - Association idle timeout. `4500 ms`
+  * `pdu_length` - PDU length. Default `65535`
+  * `artim_timeout` - Time-out waiting for A-ASSOCIATE RQ PDU on open TCP/IP connection (Artim timeout). Default `3000 ms`
+  * `association_idle_timeout` - Association idle timeout. `4500 ms`
   * `application_entity` - Application entity
     * `allow_any` - Allow any. Value can be `true` or `false`
     * `ae_title` - AE title. Allowed characters for aetitle are `A-Za-z0-9\\s/+=_-`. Eg. `DicomQueryRetrieveScp`
