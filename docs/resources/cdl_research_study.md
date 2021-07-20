@@ -37,9 +37,9 @@ resource "hsdp_cdl_research_study" "study_a" {
     email   = data.hsdp_iam_user.monitor.email_address
   }
   
-  manager {
-    user_id = data.hsdp_iam_user.manager.id
-    email   = data.hsdp_iam_user.manager.email_address
+  study_manager {
+    user_id = data.hsdp_iam_user.study_manager.id
+    email   = data.hsdp_iam_user.study_manager.email_address
   }
 } 
 ```
