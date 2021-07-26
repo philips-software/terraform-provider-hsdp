@@ -20,7 +20,7 @@ require (
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/philips-labs/ferrite v0.1.2
 	github.com/philips-labs/siderite v0.9.0
-	github.com/philips-software/go-hsdp-api v0.40.2-0.20210716204220-33e2831aeab0
+	github.com/philips-software/go-hsdp-api v0.41.1-0.20210726123948-1363e6985f7d
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.7.0

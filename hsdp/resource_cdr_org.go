@@ -8,7 +8,9 @@ import (
 	"path"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/google/fhir/go/proto/google/fhir/proto/stu3/datatypes_go_proto"
+	"github.com/google/fhir/go/proto/google/fhir/proto/stu3/resources_go_proto"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -70,6 +72,7 @@ func resourceCDROrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	name := d.Get("name").(string)
+
 	org, err := stu3.NewOrganization(config.TimeZone, orgID, name)
 	if err != nil {
 		return diag.FromErr(err)
@@ -88,21 +91,29 @@ func resourceCDROrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 
 	// Check if already onboarded
-	onboardedOrg, _, err := client.TenantSTU3.GetOrganizationByID(orgID)
+	var onboardedOrg *resources_go_proto.Organization
+
+	onboardedOrg, _, err = client.TenantSTU3.GetOrganizationByID(orgID)
 	if err == nil && onboardedOrg != nil {
 		d.SetId(onboardedOrg.Id.Value)
 		return resourceCDROrgUpdate(ctx, d, m)
 	}
 	// Do initial boarding
-	onboardedOrg, _, err = client.TenantSTU3.Onboard(org)
+	operation := func() error {
+		var resp *cdr.Response
+		onboardedOrg, resp, err = client.TenantSTU3.Onboard(org)
+		return checkForIAMPermissionErrors(client, resp, err)
+	}
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	d.SetId(onboardedOrg.Id.Value)
 	return diags
 }
 
-func resourceCDROrgRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceCDROrgRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -138,7 +149,7 @@ func resourceCDROrgRead(ctx context.Context, d *schema.ResourceData, m interface
 	return diags
 }
 
-func resourceCDROrgUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceCDROrgUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 
@@ -293,4 +304,15 @@ func purgeStateRefreshFunc(client *cdr.Client, purgeStatusURL, id string) resour
 		}
 		return resp, "FAILED", fmt.Errorf("missing status parameter for GET %s", purgeStatusURL)
 	}
+}
+
+func checkForIAMPermissionErrors(client *cdr.Client, resp *cdr.Response, err error) error {
+	if resp == nil || resp.StatusCode > 500 {
+		return err
+	}
+	if resp.StatusCode == http.StatusForbidden {
+		_ = client.TokenRefresh()
+		return err
+	}
+	return backoff.Permanent(err)
 }
