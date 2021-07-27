@@ -136,6 +136,10 @@ func (c *Config) setupIAMClient() {
 		}
 	}
 	if c.OrgAdminUsername != "" && c.OrgAdminPassword != "" {
+		if c.OAuth2ClientID == "" {
+			c.iamClientErr = ErrMissingClientID
+			return
+		}
 		err = client.Login(c.OrgAdminUsername, c.OrgAdminPassword)
 		if err != nil {
 			c.iamClientErr = err

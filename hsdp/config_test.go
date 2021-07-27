@@ -14,6 +14,7 @@ func TestConfig(t *testing.T) {
 	c.Environment = "client-test"
 	c.OrgAdminUsername = "foo"
 	c.OrgAdminPassword = "bar"
+	c.OAuth2ClientID = "public"
 	c.UAAPassword = "foo"
 	c.UAAUsername = "bar"
 
