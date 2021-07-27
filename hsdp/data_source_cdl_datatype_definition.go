@@ -19,23 +19,23 @@ func dataSourceCDLDataTypeDefinition() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"jsonschema": {
+			"json_schema": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"createdby": {
+			"created_by": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"createdon": {
+			"created_on": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"updatedby": {
+			"updated_by": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"updatedon": {
+			"updated_on": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -69,11 +69,11 @@ func dataSourceCDLDataTypeDefinitionRead(ctx context.Context, d *schema.Resource
 	}
 
 	d.SetId((*dataTypeDefinition).ID)
-	_ = d.Set("jsonschema", string(b))
-	_ = d.Set("createdby", (*dataTypeDefinition).CreatedBy)
-	_ = d.Set("createdon", (*dataTypeDefinition).CreatedOn)
-	_ = d.Set("updatedby", (*dataTypeDefinition).UpdatedBy)
-	_ = d.Set("updatedon", (*dataTypeDefinition).UpdatedOn)
+	_ = d.Set("json_schema", string(b))
+	_ = d.Set("created_by", (*dataTypeDefinition).CreatedBy)
+	_ = d.Set("created_on", (*dataTypeDefinition).CreatedOn)
+	_ = d.Set("updated_by", (*dataTypeDefinition).UpdatedBy)
+	_ = d.Set("updated_on", (*dataTypeDefinition).UpdatedOn)
 
 	return diags
 }
