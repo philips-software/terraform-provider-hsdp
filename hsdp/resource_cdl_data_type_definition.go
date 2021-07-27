@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/cdl"
-	"net/http"
 )
 
 func resourceCDLDataTypeDefinition() *schema.Resource {
@@ -43,14 +44,14 @@ func resourceCDLDataTypeDefinition() *schema.Resource {
 	}
 }
 
-func resourceCDLDataTypeDefinitionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceCDLDataTypeDefinitionDelete(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	d.SetId("") // This is by design currently
 	return diags
 }
 
-func resourceCDLDataTypeDefinitionUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceCDLDataTypeDefinitionUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 
@@ -127,7 +128,7 @@ func resourceCDLDataTypeDefinitionCreate(ctx context.Context, d *schema.Resource
 	return resourceCDLDataTypeDefinitionRead(ctx, d, m)
 }
 
-func resourceCDLDataTypeDefinitionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceCDLDataTypeDefinitionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics

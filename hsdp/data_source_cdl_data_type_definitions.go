@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/cdl"
@@ -30,7 +31,7 @@ func dataSourceCDLDataTypeDefinitions() *schema.Resource {
 
 }
 
-func dataSourceCDLDataTypeDefinitionsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceCDLDataTypeDefinitionsRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
