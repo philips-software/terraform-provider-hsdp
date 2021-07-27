@@ -193,6 +193,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_dicom_gateway_config":      resourceDICOMGatewayConfig(),
 			"hsdp_cdl_research_study":        resourceCDLResearchStudy(),
 			"hsdp_dicom_remote_node":         resourceDICOMRemoteNode(),
+			"hsdp_cdl_datatypedefinition":	  resourceCDLDataTypeDefinition(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":              dataSourceIAMIntrospect(),
@@ -220,6 +221,8 @@ func Provider(build string) *schema.Provider {
 			"hsdp_cdl_research_study":          dataSourceCDLResearchStudy(),
 			"hsdp_cdl_research_studies":        dataSourceCDLResearchStudies(),
 			"hsdp_container_host_instances":    dataSourceContainerHostInstances(),
+			"hsdp_cdl_datatype_definitions":	dataSourceCDLDataTypeDefinitions(),
+			"hsdp_cdl_datatype_definition":		dataSourceCDLDataTypeDefinition(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
