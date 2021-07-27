@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.18.5
+- CDL: Add support for Data Type Definitons
+
 ## v0.18.4
 - IAM: Change variable checks. Fixes #93
 
