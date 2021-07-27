@@ -35,7 +35,7 @@ func resourceCDLDataTypeDefinition() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"jsonschema": {
+			"json_schema": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -67,7 +67,7 @@ func resourceCDLDataTypeDefinitionUpdate(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	err = json.Unmarshal([]byte(d.Get("jsonschema").(string)), &((*dataTypeDefinition).JsonSchema))
+	err = json.Unmarshal([]byte(d.Get("json_schema").(string)), &((*dataTypeDefinition).JsonSchema))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -97,7 +97,7 @@ func resourceCDLDataTypeDefinitionCreate(ctx context.Context, d *schema.Resource
 		Name:        dtdName,
 		Description: dtdDescription,
 	}
-	err = json.Unmarshal([]byte(d.Get("jsonschema").(string)), &dataTypeDefToCreate.JsonSchema)
+	err = json.Unmarshal([]byte(d.Get("json_schema").(string)), &dataTypeDefToCreate.JsonSchema)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -153,10 +153,10 @@ func resourceCDLDataTypeDefinitionRead(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	_ = d.Set("jsonschema", string(b))
-	_ = d.Set("createdBy", dataTypeDefinition.CreatedBy)
-	_ = d.Set("createdOn", dataTypeDefinition.CreatedOn)
-	_ = d.Set("updatedBy", dataTypeDefinition.UpdatedBy)
-	_ = d.Set("updatedOn", dataTypeDefinition.UpdatedOn)
+	_ = d.Set("json_schema", string(b))
+	_ = d.Set("created_by", dataTypeDefinition.CreatedBy)
+	_ = d.Set("created_on", dataTypeDefinition.CreatedOn)
+	_ = d.Set("updated_by", dataTypeDefinition.UpdatedBy)
+	_ = d.Set("updated_on", dataTypeDefinition.UpdatedOn)
 	return diags
 }
