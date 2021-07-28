@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.18.6
+- IAM: Add retry logic for IAM Group operations
+- IAM: Better handle drift in user/service assignments in groups
+- Overal improvements in error reporting (go-hsdp-api)
+
 ## v0.18.5
 - CDL: Add support for Data Type Definitons
 
