@@ -3,7 +3,6 @@ package hsdp
 import (
 	"testing"
 
-	"github.com/philips-software/go-hsdp-api/iam"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,5 +20,5 @@ func TestConfig(t *testing.T) {
 	c.setupIAMClient()
 	c.setupConsoleClient()
 
-	assert.IsType(t, &iam.ErrorResponse{}, c.iamClientErr)
+	assert.NotNil(t, c.iamClientErr)
 }
