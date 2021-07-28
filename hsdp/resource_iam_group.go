@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -98,7 +99,10 @@ func resourceIAMGroupCreate(_ context.Context, d *schema.ResourceData, m interfa
 	// Add users
 	users := expandStringList(d.Get("users").(*schema.Set).List())
 	if len(users) > 0 {
-		_, _, err = client.Groups.AddMembers(*createdGroup, users...)
+		err = tryIAMCall(func() (*iam.Response, error) {
+			_, resp, err := client.Groups.AddMembers(*createdGroup, users...)
+			return resp, err
+		}, []int{http.StatusUnprocessableEntity, http.StatusInternalServerError})
 		if err != nil {
 			diags = append(diags, diag.FromErr(err)...)
 		}
@@ -107,7 +111,10 @@ func resourceIAMGroupCreate(_ context.Context, d *schema.ResourceData, m interfa
 	// Add services
 	services := expandStringList(d.Get("services").(*schema.Set).List())
 	if len(services) > 0 {
-		_, _, err = client.Groups.AddServices(*createdGroup, services...)
+		err = tryIAMCall(func() (*iam.Response, error) {
+			_, resp, err := client.Groups.AddServices(*createdGroup, services...)
+			return resp, err
+		}, []int{http.StatusUnprocessableEntity, http.StatusInternalServerError})
 		if err != nil {
 			diags = append(diags, diag.FromErr(err)...)
 		}
@@ -247,22 +254,50 @@ func resourceIAMGroupDelete(_ context.Context, d *schema.ResourceData, m interfa
 	// Remove all users first before attempting delete
 	users := expandStringList(d.Get("users").(*schema.Set).List())
 	if len(users) > 0 {
-		_, _, err := client.Groups.RemoveMembers(group, users...)
-		if err != nil {
-			return diag.FromErr(err)
+		for _, u := range users {
+			err := tryIAMCall(func() (*iam.Response, error) {
+				_, resp, err := client.Groups.RemoveMembers(group, u)
+				if resp != nil && resp.StatusCode == http.StatusUnprocessableEntity {
+					return resp, nil // User is already gone
+				}
+				return resp, err
+			}, []int{http.StatusInternalServerError})
+			if err != nil {
+				diags = append(diags, diag.FromErr(err)...)
+			}
+		}
+		if len(diags) > 0 {
+			return diags
 		}
 	}
 
 	// Remove all groups first before attempting delete
 	services := expandStringList(d.Get("services").(*schema.Set).List())
 	if len(services) > 0 {
-		_, _, err := client.Groups.RemoveServices(group, services...)
-		if err != nil {
-			return diag.FromErr(err)
+		for _, s := range services {
+			err := tryIAMCall(func() (*iam.Response, error) {
+				_, resp, err := client.Groups.RemoveServices(group, s)
+				if resp != nil && resp.StatusCode == http.StatusUnprocessableEntity {
+					return resp, nil // Service is already gone
+				}
+				return resp, err
+			}, []int{http.StatusInternalServerError})
+			if err != nil {
+				diags = append(diags, diag.FromErr(err)...)
+			}
+		}
+		if len(diags) > 0 {
+			return diags
 		}
 	}
 
-	ok, _, err := client.Groups.DeleteGroup(group)
+	var ok bool
+	err = tryIAMCall(func() (*iam.Response, error) {
+		var resp *iam.Response
+		var err error
+		ok, resp, err = client.Groups.DeleteGroup(group)
+		return resp, err
+	}, []int{http.StatusInternalServerError})
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -271,4 +306,28 @@ func resourceIAMGroupDelete(_ context.Context, d *schema.ResourceData, m interfa
 	}
 	d.SetId("")
 	return diags
+}
+
+func tryIAMCall(operation func() (*iam.Response, error), retryOnCodes []int) error {
+	doOp := func() error {
+		resp, err := operation()
+		if err == nil {
+			return nil
+		}
+		if resp == nil {
+			return backoff.Permanent(err)
+		}
+		shouldRetry := false
+		for _, c := range retryOnCodes {
+			if c == resp.StatusCode {
+				shouldRetry = true
+				break
+			}
+		}
+		if shouldRetry {
+			return err
+		}
+		return backoff.Permanent(err)
+	}
+	return backoff.Retry(doOp, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 }

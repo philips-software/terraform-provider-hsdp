@@ -176,8 +176,5 @@ func checkForNotificationPermissionErrors(client *notification.Client, resp *not
 		_ = client.TokenRefresh()
 		return err
 	}
-	if err != nil && err == notification.ErrBadRequest {
-		return backoff.Permanent(err)
-	}
 	return backoff.Permanent(err)
 }
