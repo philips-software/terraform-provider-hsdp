@@ -74,7 +74,14 @@ func resourceIAMGroupCreate(_ context.Context, d *schema.ResourceData, m interfa
 	group.Name = d.Get("name").(string)
 	group.ManagingOrganization = d.Get("managing_organization").(string)
 
-	createdGroup, _, err := client.Groups.CreateGroup(group)
+	var createdGroup *iam.Group
+	err = tryIAMCall(func() (*iam.Response, error) {
+		var resp *iam.Response
+		var err error
+		createdGroup, resp, err = client.Groups.CreateGroup(group)
+		return resp, err
+	})
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -89,7 +96,10 @@ func resourceIAMGroupCreate(_ context.Context, d *schema.ResourceData, m interfa
 	for _, r := range roles {
 		role, _, _ := client.Roles.GetRoleByID(r)
 		if role != nil {
-			_, _, err = client.Groups.AssignRole(*createdGroup, *role)
+			err = tryIAMCall(func() (*iam.Response, error) {
+				_, resp, err := client.Groups.AssignRole(*createdGroup, *role)
+				return resp, err
+			})
 			if err != nil {
 				diags = append(diags, diag.FromErr(err)...)
 			}
@@ -102,7 +112,7 @@ func resourceIAMGroupCreate(_ context.Context, d *schema.ResourceData, m interfa
 		err = tryIAMCall(func() (*iam.Response, error) {
 			_, resp, err := client.Groups.AddMembers(*createdGroup, users...)
 			return resp, err
-		}, []int{http.StatusUnprocessableEntity, http.StatusInternalServerError})
+		})
 		if err != nil {
 			diags = append(diags, diag.FromErr(err)...)
 		}
@@ -114,7 +124,7 @@ func resourceIAMGroupCreate(_ context.Context, d *schema.ResourceData, m interfa
 		err = tryIAMCall(func() (*iam.Response, error) {
 			_, resp, err := client.Groups.AddServices(*createdGroup, services...)
 			return resp, err
-		}, []int{http.StatusUnprocessableEntity, http.StatusInternalServerError})
+		})
 		if err != nil {
 			diags = append(diags, diag.FromErr(err)...)
 		}
@@ -200,13 +210,29 @@ func resourceIAMGroupUpdate(_ context.Context, d *schema.ResourceData, m interfa
 		toRemove := difference(old, newList)
 
 		if len(toRemove) > 0 {
-			_, _, _ = client.Groups.RemoveServices(group, toRemove...)
+			err = tryIAMCall(func() (*iam.Response, error) {
+				_, resp, err := client.Groups.RemoveServices(group, toRemove...)
+				return resp, err
+			})
+			if err != nil {
+				diags = append(diags, diag.FromErr(err)...)
+			}
 		}
 		if len(toAdd) > 0 {
-			_, _, _ = client.Groups.AddServices(group, toAdd...)
+			err = tryIAMCall(func() (*iam.Response, error) {
+				_, resp, err := client.Groups.AddServices(group, toAdd...)
+				return resp, err
+			})
+			if err != nil {
+				diags = append(diags, diag.FromErr(err)...)
+			}
 		}
 	}
+	if len(diags) > 0 {
+		return diags
+	}
 
+	// Roles
 	if d.HasChange("roles") {
 		o, n := d.GetChange("roles")
 		old := expandStringList(o.(*schema.Set).List())
@@ -261,7 +287,7 @@ func resourceIAMGroupDelete(_ context.Context, d *schema.ResourceData, m interfa
 					return resp, nil // User is already gone
 				}
 				return resp, err
-			}, []int{http.StatusInternalServerError})
+			}, http.StatusInternalServerError)
 			if err != nil {
 				diags = append(diags, diag.FromErr(err)...)
 			}
@@ -281,7 +307,7 @@ func resourceIAMGroupDelete(_ context.Context, d *schema.ResourceData, m interfa
 					return resp, nil // Service is already gone
 				}
 				return resp, err
-			}, []int{http.StatusInternalServerError})
+			}, http.StatusInternalServerError)
 			if err != nil {
 				diags = append(diags, diag.FromErr(err)...)
 			}
@@ -297,7 +323,7 @@ func resourceIAMGroupDelete(_ context.Context, d *schema.ResourceData, m interfa
 		var err error
 		ok, resp, err = client.Groups.DeleteGroup(group)
 		return resp, err
-	}, []int{http.StatusInternalServerError})
+	}, http.StatusInternalServerError)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -308,7 +334,10 @@ func resourceIAMGroupDelete(_ context.Context, d *schema.ResourceData, m interfa
 	return diags
 }
 
-func tryIAMCall(operation func() (*iam.Response, error), retryOnCodes []int) error {
+func tryIAMCall(operation func() (*iam.Response, error), retryOnCodes ...int) error {
+	if len(retryOnCodes) == 0 {
+		retryOnCodes = []int{http.StatusUnprocessableEntity, http.StatusInternalServerError}
+	}
 	doOp := func() error {
 		resp, err := operation()
 		if err == nil {
