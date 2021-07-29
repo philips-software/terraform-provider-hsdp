@@ -118,13 +118,13 @@ func resourceDICOMGatewayConfig() *schema.Resource {
 	}
 }
 
-func resourceDICOMGatewayConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDICOMGatewayConfigDelete(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	d.SetId("") // Nothing to do for now
 	return diags
 }
 
-func resourceDICOMGatewayConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDICOMGatewayConfigRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
@@ -140,13 +140,13 @@ func resourceDICOMGatewayConfigRead(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	setSCPConfig(*storeConfig, d)
+	_ = setSCPConfig(*storeConfig, d)
 
 	queryConfig, _, err := client.Config.GetQueryService(nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	setQueryConfig(*queryConfig, d)
+	_ = setQueryConfig(*queryConfig, d)
 
 	return diags
 }
@@ -285,7 +285,7 @@ func getQueryConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 	return &queryConfig, nil
 }
 
-func resourceDICOMGatewayConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDICOMGatewayConfigCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
@@ -303,6 +303,9 @@ func resourceDICOMGatewayConfigCreate(ctx context.Context, d *schema.ResourceDat
 		return diag.FromErr(fmt.Errorf("getSCPConfig: %w", err))
 	}
 	queryConfig, err := getQueryConfig(d)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("getQueryConfig: %w", err))
+	}
 
 	createdSCPConfig, _, err := client.Config.SetStoreService(*scpConfig)
 	if err != nil {

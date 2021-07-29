@@ -130,29 +130,6 @@ func fieldToRole(field string) string {
 	return ""
 }
 
-func setPermissionList(field string, studyPermissions cdl.RoleAssignmentResult, d *schema.ResourceData) {
-	c := &schema.Set{F: resourceMetricsThresholdHash}
-	cL := c.List()
-	fRole := fieldToRole(field)
-	if fRole == "" {
-		return
-	}
-	// This function just prunes missing items
-	for _, role := range studyPermissions {
-		for _, vi := range cL {
-			mVi := vi.(map[string]interface{})
-			if role.IAMUserUUID == mVi["user_id"] {
-				for _, r := range role.Roles {
-					if r.Role == fRole {
-						c.Add(vi)
-					}
-				}
-			}
-		}
-	}
-	_ = d.Set(field, c)
-}
-
 func resourceCDLResearchStudyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
@@ -244,7 +221,7 @@ func pruneAllPermissions(client *cdl.Client, studyID string) diag.Diagnostics {
 	return diags
 }
 
-func resourceCDLResearchStudyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceCDLResearchStudyRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -271,7 +248,7 @@ func resourceCDLResearchStudyRead(ctx context.Context, d *schema.ResourceData, m
 	return diags
 }
 
-func resourceCDLResearchStudyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceCDLResearchStudyUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 
@@ -349,7 +326,7 @@ func resourceCDLResearchStudyUpdate(ctx context.Context, d *schema.ResourceData,
 	return diags
 }
 
-func resourceCDLResearchStudyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceCDLResearchStudyDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	config := m.(*Config)
 
