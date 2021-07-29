@@ -98,7 +98,7 @@ func resourceIAMEmailTemplateCreate(_ context.Context, d *schema.ResourceData, m
 	err = tryIAMCall(func() (*iam.Response, error) {
 		var resp *iam.Response
 		var err error
-		createdTemplate, _, err = client.EmailTemplates.CreateTemplate(template)
+		createdTemplate, resp, err = client.EmailTemplates.CreateTemplate(template)
 		return resp, err
 	}, http.StatusInternalServerError)
 
