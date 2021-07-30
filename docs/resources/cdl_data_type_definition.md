@@ -10,7 +10,22 @@ resource "hsdp_cdl_data_type_definition" "def_a" {
   name = "my CDL schema A"
   
   json_schema = <<EOF
-{}
+{
+ "required": [
+  "email"
+ ],
+ "properties": {
+  "name": {
+   "type": "string"
+  },
+  "email": {
+   "type": "string"
+  },
+  "birthdate": {
+   "type": "string"
+  }
+ }
+}
 EOF
 }
 ```
