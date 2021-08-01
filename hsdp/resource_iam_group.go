@@ -263,7 +263,7 @@ func resourceIAMGroupUpdate(_ context.Context, d *schema.ResourceData, m interfa
 	return diags
 }
 
-func resourceIAMGroupDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMGroupDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -296,7 +296,7 @@ func resourceIAMGroupDelete(_ context.Context, d *schema.ResourceData, m interfa
 		}
 	}
 
-	// Remove all groups first before attempting delete
+	// Remove all services first before attempting delete
 	services := expandStringList(d.Get("services").(*schema.Set).List())
 	if len(services) > 0 {
 		for _, s := range services {
@@ -315,6 +315,30 @@ func resourceIAMGroupDelete(_ context.Context, d *schema.ResourceData, m interfa
 			return diags
 		}
 	}
+
+	// Remove all associated roles
+	roles := expandStringList(d.Get("roles").(*schema.Set).List())
+	if len(roles) > 0 {
+		for _, r := range roles {
+			err := tryIAMCall(func() (*iam.Response, error) {
+				var role = iam.Role{ID: r}
+				_, resp, err := client.Groups.RemoveRole(group, role)
+				if resp != nil && resp.StatusCode == http.StatusUnprocessableEntity {
+					return resp, nil // Role is already gone
+				}
+				return resp, err
+			}, http.StatusInternalServerError)
+			if err != nil {
+				diags = append(diags, diag.FromErr(err)...)
+			}
+		}
+		if len(diags) > 0 {
+			return diags
+		}
+	}
+
+	// Query group to sync it up (to force IAM sync?)
+	_ = resourceIAMGroupRead(ctx, d, m)
 
 	var ok bool
 	err = tryIAMCall(func() (*iam.Response, error) {
