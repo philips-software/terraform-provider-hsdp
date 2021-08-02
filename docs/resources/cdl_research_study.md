@@ -41,6 +41,8 @@ resource "hsdp_cdl_research_study" "study_a" {
     user_id = data.hsdp_iam_user.study_manager.id
     email   = data.hsdp_iam_user.study_manager.email_address
   }
+
+  data_protected_from_deletion = false
 } 
 ```
 
@@ -69,6 +71,7 @@ The following arguments are supported:
     * `user_id` (Required) The IAM user ID of the study manager
     * `email` - (Required) The email address for this study manager (for display purposes)
     * `institute_id` - (Optional) The institute ID associated with this role
+* `data_protected_from_deletion` (Optional) Protects data from being deleted. Default is `false`
 
 
 ## Attributes Reference

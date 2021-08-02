@@ -71,6 +71,11 @@ func resourceCDLResearchStudy() *schema.Resource {
 			"data_scientist": permissionSchema(),
 			"monitor":        permissionSchema(),
 			"uploader":       permissionSchema(),
+			"data_protected_from_deletion": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		},
 	}
 }
@@ -145,6 +150,7 @@ func resourceCDLResearchStudyCreate(ctx context.Context, d *schema.ResourceData,
 	description := d.Get("description").(string)
 	endsAt := d.Get("ends_at").(string)
 	studyOwner := d.Get("study_owner").(string)
+	dataProtectedFromDeletion := d.Get("data_protected_from_deletion").(bool)
 
 	createdStudy, resp, err := client.Study.CreateStudy(cdl.Study{
 		Title:       title,
@@ -152,7 +158,8 @@ func resourceCDLResearchStudyCreate(ctx context.Context, d *schema.ResourceData,
 		Period: cdl.Period{
 			End: endsAt,
 		},
-		StudyOwner: studyOwner,
+		StudyOwner:                studyOwner,
+		DataProtectedFromDeletion: dataProtectedFromDeletion,
 	})
 	if err != nil {
 		if resp == nil {
@@ -169,6 +176,14 @@ func resourceCDLResearchStudyCreate(ctx context.Context, d *schema.ResourceData,
 		matchFound := false
 		for _, study := range studies {
 			if study.Title == title && study.StudyOwner == studyOwner { // TODO: check if this is sufficient for a good match
+				if study.DataProtectedFromDeletion != dataProtectedFromDeletion ||
+					study.Description != description ||
+					study.Period.End != endsAt { // Update if needed
+					study.DataProtectedFromDeletion = dataProtectedFromDeletion
+					study.Description = description
+					study.Period.End = endsAt
+					_, _, _ = client.Study.UpdateStudy(study)
+				}
 				d.SetId(study.ID)
 				matchFound = true
 				break
@@ -266,11 +281,12 @@ func resourceCDLResearchStudyUpdate(_ context.Context, d *schema.ResourceData, m
 	}
 
 	if d.HasChange("title") || d.HasChange("description") ||
-		d.HasChange("ends_at") || d.HasChange("study_owner") {
+		d.HasChange("ends_at") || d.HasChange("study_owner") || d.HasChange("data_protected_from_deletion") {
 		study.Title = d.Get("title").(string)
 		study.Description = d.Get("description").(string)
 		study.Period.End = d.Get("ends_at").(string)
 		study.StudyOwner = d.Get("study_owner").(string)
+		study.DataProtectedFromDeletion = d.Get("data_protected_from_deletion").(bool)
 
 		_, _, err = client.Study.UpdateStudy(*study)
 		if err != nil {

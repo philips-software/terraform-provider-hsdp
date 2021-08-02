@@ -58,6 +58,10 @@ func dataSourceCDLResearchStudy() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"data_protected_from_deletion": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 		},
 	}
 
@@ -125,6 +129,7 @@ func dataSourceCDLResearchStudyRead(_ context.Context, d *schema.ResourceData, m
 	_ = d.Set("data_scientists", dataScientists)
 	_ = d.Set("uploaders", uploaders)
 	_ = d.Set("study_managers", studyManagers)
+	_ = d.Set("data_protected_from_deletion", study.DataProtectedFromDeletion)
 
 	return diags
 }
