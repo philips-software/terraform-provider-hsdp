@@ -11,7 +11,7 @@ resource hsdp_cdl_label_definition "labeldef1" {
   label_def_name = "TF create Test4"
   description = "TF create desc"  
   label_scope = "DataObject.DICOM"
-  label = "videoQualityTF10"
+  label_name = "videoQualityTF10"
   type = "cdl/video-classification"
   labels = ["good", "bad", "acceptable", "something", "something1"]
 }
@@ -24,7 +24,7 @@ The following arguments are supported:
 
 * `cdl_endpoint` - (Required) The CDL instance endpoint to query
 * `study_id` - (Required) The research study id under which label definition has to be created
-* `label` -  The label name
+* `label_name` -  The label name
 * `label_scope` -	Use this parameter to specify for which CDL Data the LabelDefinition is applicable
 * `labels` - 	Use this parameter to specify your labels, or classes. Add one label for each class.
 * `label_def_name` - Name of the label definition

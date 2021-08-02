@@ -30,7 +30,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The GUID of the Label definitions
-* `label` -  The label name
+* `label_name` -  The label name
 * `label_scope` -	Use this parameter to specify for which CDL Data the LabelDefinition is applicable
 * `labels` - 	Use this parameter to specify your labels, or classes. Add one label for each class.
 * `label_def_name` - Name of the label definition

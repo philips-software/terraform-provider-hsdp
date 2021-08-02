@@ -35,7 +35,7 @@ func dataSourceCDLLabelDefinition() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"label": {
+			"label_name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -94,7 +94,7 @@ func dataSourceCDLLabelDefinitionRead(_ context.Context, d *schema.ResourceData,
 	_ = d.Set("label_def_name", (*labelDefinition).LabelDefName)
 	_ = d.Set("description", (*labelDefinition).Description)
 	_ = d.Set("label_scope", string(labelScopeBytes))
-	_ = d.Set("label", (*labelDefinition).Label)
+	_ = d.Set("label_name", (*labelDefinition).Label)
 	_ = d.Set("type", (*labelDefinition).Type)
 	_ = d.Set("labels", string(labelsBytes))
 	_ = d.Set("created_by", (*labelDefinition).CreatedBy)

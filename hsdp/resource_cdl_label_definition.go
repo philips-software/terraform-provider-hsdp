@@ -44,7 +44,7 @@ func resourceCDLLabelDefinition() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"label": {
+			"label_name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -114,7 +114,7 @@ func resourceCDLLabelDefinitionCreate(ctx context.Context, d *schema.ResourceDat
 
 	labelDefName := d.Get("label_def_name").(string)
 	labelDefDescription := d.Get("description").(string)
-	label := d.Get("label").(string)
+	label := d.Get("label_name").(string)
 	labelType := d.Get("type").(string)
 
 	labelDefToCreate := cdl.LabelDefinition{
@@ -188,7 +188,7 @@ func resourceCDLLabelDefinitionRead(_ context.Context, d *schema.ResourceData, m
 	}
 	_ = d.Set("label_scope", string(labelScopeBytes))
 
-	_ = d.Set("label", labelDefinition.Label)
+	_ = d.Set("label_name", labelDefinition.Label)
 	_ = d.Set("type", labelDefinition.Type)
 
 	var labelsArray []string
