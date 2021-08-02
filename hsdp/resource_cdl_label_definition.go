@@ -52,9 +52,11 @@ func resourceCDLLabelDefinition() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"labels": {
-				Type:     schema.TypeString,
+			"labels": &schema.Schema{
+				Type:     schema.TypeSet,
+				MaxItems: 100,
 				Required: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 			"created_by": {
 				Type:     schema.TypeString,
@@ -68,10 +70,8 @@ func resourceCDLLabelDefinition() *schema.Resource {
 	}
 }
 
-func resourceCDLLabelDefinitionUpdate(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+func resourceCDLLabelDefinitionUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-
-	d.SetId("") // This is by design currently
 	return diags
 }
 
@@ -122,16 +122,17 @@ func resourceCDLLabelDefinitionCreate(ctx context.Context, d *schema.ResourceDat
 		Description:  labelDefDescription,
 		Label:        label,
 		Type:         labelType,
+		LabelScope: cdl.LabelScope{
+			Type: d.Get("label_scope").(string),
+		},
 	}
 
-	err = json.Unmarshal([]byte(d.Get("label_scope").(string)), &labelDefToCreate.LabelScope)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	err = json.Unmarshal([]byte(d.Get("labels").(string)), &labelDefToCreate.Labels)
-	if err != nil {
-		return diag.FromErr(err)
+	labelsArray := expandStringList(d.Get("labels").(*schema.Set).List())
+	for _, l := range labelsArray {
+		labelArrayElem := cdl.LabelsArrayElem{
+			Label: l,
+		}
+		labelDefToCreate.Labels = append(labelDefToCreate.Labels, labelArrayElem)
 	}
 
 	createdLabelDef, resp, err := client.LabelDefinition.CreateLabelDefinition(study_id, labelDefToCreate)
@@ -142,7 +143,7 @@ func resourceCDLLabelDefinitionCreate(ctx context.Context, d *schema.ResourceDat
 		if resp.StatusCode != http.StatusConflict {
 			return diag.FromErr(err)
 		}
-		// Search for existing DTD
+		// Search for existing Label def
 		createdLabelDefs, _, err2 := client.LabelDefinition.GetLabelDefinitions(study_id, &cdl.GetOptions{})
 		if err2 != nil {
 			return diag.FromErr(fmt.Errorf("on match attempt during Create conflict: %w", err))
@@ -190,12 +191,11 @@ func resourceCDLLabelDefinitionRead(_ context.Context, d *schema.ResourceData, m
 	_ = d.Set("label", labelDefinition.Label)
 	_ = d.Set("type", labelDefinition.Type)
 
-	labelsBytes, err := json.Marshal(labelDefinition.Labels)
-	if err != nil {
-		return diag.FromErr(err)
+	var labelsArray []string
+	for _, l := range labelDefinition.Labels {
+		labelsArray = append(labelsArray, l.Label)
 	}
-	_ = d.Set("labels", string(labelsBytes))
-
+	_ = d.Set("labels", labelsArray)
 	_ = d.Set("created_by", labelDefinition.CreatedBy)
 	_ = d.Set("created_on", labelDefinition.CreatedOn)
 	return diags
