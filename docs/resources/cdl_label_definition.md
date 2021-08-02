@@ -10,33 +10,10 @@ resource hsdp_cdl_label_definition "labeldef1" {
   study_id        = "a1467792-ef81-11eb-8ac2-477a9e3b09aa"
   label_def_name = "TF create Test4"
   description = "TF create desc"  
-  label_scope = <<labelScope
-  {
-        "type": "DataObject.DICOM"
-    }
-  labelScope
+  label_scope = "DataObject.DICOM"
   label = "videoQualityTF10"
   type = "cdl/video-classification"
-  labels = <<labels
-  [
-        {
-            "label": "good"
-        },
-        {
-            "label": "bad"
-        },
-        {
-            "label": "acceptable"
-        },
-        {
-            "label": "something"
-        },
-        {
-            "label": "something1"
-        }
-    ]
-  labels
-
+  labels = ["good", "bad", "acceptable", "something", "something1"]
 }
 ```
 
