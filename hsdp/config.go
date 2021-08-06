@@ -275,12 +275,15 @@ func (c *Config) setupConsoleClient() {
 		c.consoleClientErr = err
 		return
 	}
-	if c.UAAUsername != "" && c.UAAPassword != "" {
-		err = client.Login(c.UAAUsername, c.UAAPassword)
-		if err != nil {
-			c.consoleClientErr = err
-			return
-		}
+	if c.UAAUsername == "" || c.UAAPassword == "" {
+		c.consoleClientErr = ErrMissingUAACredentials
+		c.consoleClient = nil
+		return
+	}
+	err = client.Login(c.UAAUsername, c.UAAPassword)
+	if err != nil {
+		c.consoleClientErr = err
+		return
 	}
 	c.consoleClient = client
 }

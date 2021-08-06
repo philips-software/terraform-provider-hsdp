@@ -16,22 +16,22 @@ resource "hsdp_pki_tenant" "tenant" {
   ]
   
   ca {
-    common_name = "Common Name Here"
+    common_name = "common.name"
   }
   
   role {
     name = "ec384"
-    allow_any_name = true
-    allow_ip_sans = true
-    allow_subdomains = true
-    allowed_domains = []
-    allowed_other_sans = []
-    allowed_uri_sans = []
-    client_flag = true
-    server_flag = true
-    enforce_hostnames = false
-    key_bits = 384
-    key_type = "ec"
+    allow_any_name     = true
+    allow_ip_sans      = true
+    allow_subdomains   = true
+    allowed_domains    = []
+    allowed_other_sans = ["*"]
+    allowed_uri_sans   = ["*"]
+    client_flag        = true
+    server_flag        = true
+    enforce_hostnames  = false
+    key_bits           = 384
+    key_type           = "ec"
   }
 }
 ```
@@ -55,9 +55,9 @@ Each `role` definition takes the following arguments:
 * `allow_ip_sans` - (Required, bool) Allow IP Subject Alternative Names (SAN)
 * `allow_subdomains` - (Required, bool) Allow subdomains to be created
 * `allow_any_name` - (Required, bool) Allow any name to be used
+* `allowed_other_sans` - (Required, list(string)) List of allowed other SANs. Specifying a single '*' entry will allow any other sans
+* `allowed_uri_sans` - (Required, list(string)) List of allowed URI SANs. Values can contain glob patterns (e.g. `spiffe://hostname/*`)
 * `allowed_domains` - (Optional, list(string)) List of allowed domains
-* `allowed_other_sans` - (Optional, list(string)) List of allowed other SANs
-* `allowed_uri_sans` - (Optional, list(string)) List of allowed URI SANs
 * `enforce_hostnames` - (Optional, bool) Enforce hostnames. Default: `false`
 
 ## Attribute reference
