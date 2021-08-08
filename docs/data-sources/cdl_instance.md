@@ -1,6 +1,6 @@
 # hsdp_cdl_instance
 
-Retrieve details of an existing Clinical Data Lake instance (CDL.
+Retrieve details of an existing Clinical Data Lake instance (CDL).
 
 ## Example Usage
 
