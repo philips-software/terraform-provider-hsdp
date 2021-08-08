@@ -12,14 +12,14 @@ resource hsdp_cdl_export_route "expRoute1" {
   display_name = "display name1"
   source_research_study {
     source_cdl_endpoint = "https://ROUTE_PREFIX-datalake.cloud.pcftest.com/store/cdl/XXXXXX-f896-4883-80fa-5593cd69556d/Study/a1467792-ef81-11eb-8ac2-477a9e3b09aa"
-    allowed_dataobjects {
+    allowed_data_objects {
       resource_type = "DataObject.customDataTest123"
       associated_labels{
         label_name = "videoQualityTF7"
         approval_required = true
       } 
     }
-    allowed_dataobjects {
+    allowed_data_objects {
       resource_type = "DataObject.customDataTest123"
       associated_labels{
         label_name = "videoQualityTF8"
@@ -53,7 +53,7 @@ The following arguments are supported:
 * `display_name` -	(Required) Display Name of the ExportRoute
 * `source_research_study` - (Required) Use this block to specify the details of the source Research Study
   * `source_research_study_endpoint` - (Required) "The research study endpoint of the source, for eg. https://ROUTE_PREFIX-datalake.cloud.pcftest.com/store/cdl/XXXXXX-f896-4883-80fa-5593cd69556d/Study/a1467792-ef81-11eb-8ac2-477a9e3b09aa"
-  * `allowed_dataobjects` - "The DataObject details (multiple blocks of allowed_dataobjects are supported) containing resource type and the labels associated to the dataobjects" 
+  * `allowed_data_objects` - "The DataObject details (multiple blocks of allowed_data_objects are supported) containing resource type and the labels associated to the dataobjects" 
     * `resource_type` - (Required) "The resource type of the DataObject" 
     * `associated_labels` 
       * `label_name` - "Name of the label that is associated with the data object"
