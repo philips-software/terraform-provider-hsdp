@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.18.8
+- CDL: Add exxport route support
+
 ## v0.18.7
 - CDL: Add Label definition support
 - CDL: Add 'data_protected_from_deletion' to Research Study (#97)
