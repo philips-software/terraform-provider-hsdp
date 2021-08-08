@@ -20,10 +20,12 @@ func exportRouteLabelSchema() *schema.Schema {
 				"label_name": {
 					Type:     schema.TypeString,
 					Required: true,
+					ForceNew: true,
 				},
 				"approval_required": {
 					Type:     schema.TypeBool,
 					Required: true,
+					ForceNew: true,
 				},
 			},
 		},
@@ -39,6 +41,7 @@ func exportRouteDataObjectDetailsSchema() *schema.Schema {
 				"resource_type": {
 					Type:     schema.TypeString,
 					Required: true,
+					ForceNew: true,
 				},
 				"associated_labels": exportRouteLabelSchema(),
 			},
@@ -50,13 +53,15 @@ func sourceResearchStudyDetailsSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeSet,
 		Required: true,
+		ForceNew: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"source_research_study_endpoint": {
 					Type:     schema.TypeString,
 					Required: true,
+					ForceNew: true,
 				},
-				"allowed_dataobjects": exportRouteDataObjectDetailsSchema(),
+				"allowed_data_objects": exportRouteDataObjectDetailsSchema(),
 			},
 		},
 	}
@@ -66,23 +71,28 @@ func serviceAccountDetailsSchema() *schema.Schema {
 	return &schema.Schema{
 		Type:     schema.TypeSet,
 		Required: true,
+		ForceNew: true,
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"service_id": {
 					Type:     schema.TypeString,
 					Required: true,
+					ForceNew: true,
 				},
 				"private_key": {
 					Type:     schema.TypeString,
 					Required: true,
+					ForceNew: true,
 				},
 				"access_token_endpoint": {
 					Type:     schema.TypeString,
 					Required: true,
+					ForceNew: true,
 				},
 				"token_endpoint": {
 					Type:     schema.TypeString,
 					Required: true,
+					ForceNew: true,
 				},
 			},
 		},
@@ -97,7 +107,6 @@ func resourceCDLExportRoute() *schema.Resource {
 
 		CreateContext: resourceCDLExportRouteCreate,
 		ReadContext:   resourceCDLExportRouteRead,
-		UpdateContext: resourceCDLExportRouteUpdate,
 		DeleteContext: resourceCDLExportRouteDelete,
 
 		Schema: map[string]*schema.Schema{
@@ -109,48 +118,52 @@ func resourceCDLExportRoute() *schema.Resource {
 			"export_route_name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 			"display_name": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"source_research_study": sourceResearchStudyDetailsSchema(),
 			"auto_export": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				ForceNew: true,
 			},
 			"destination_research_study_endpoint": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"service_account_details": serviceAccountDetailsSchema(),
 			"created_by": {
 				Type:     schema.TypeString,
 				Computed: true,
+				ForceNew: true,
 			},
 			"created_on": {
 				Type:     schema.TypeString,
 				Computed: true,
+				ForceNew: true,
 			},
 			"updated_by": {
 				Type:     schema.TypeString,
 				Computed: true,
+				ForceNew: true,
 			},
 			"updated_on": {
 				Type:     schema.TypeString,
 				Computed: true,
+				ForceNew: true,
 			},
 		},
 	}
-}
-
-func resourceCDLExportRouteUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
-	return diags
 }
 
 func resourceCDLExportRouteDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -183,10 +196,10 @@ func getSourceResearchStudyDetails(d *schema.ResourceData) cdl.ExportResearchStu
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
 			sourceResearchStudyField := vi.(map[string]interface{})
-			sourceCdlEndpoint := sourceResearchStudyField["source_research_study_endpoint"].(string) // sourceResearchStudyField["allowed_dataobjects"][0].(map[string]interface{})
+			sourceCdlEndpoint := sourceResearchStudyField["source_research_study_endpoint"].(string)
 			exportResearchStudySource.Endpoint = sourceCdlEndpoint
 
-			allowedDataObjectsArray := sourceResearchStudyField["allowed_dataobjects"].([]interface{})
+			allowedDataObjectsArray := sourceResearchStudyField["allowed_data_objects"].([]interface{})
 			var exportDataObjectArray []cdl.ExportDataObject
 
 			for _, i := range allowedDataObjectsArray {
@@ -225,7 +238,7 @@ func getServiceAccountDetails(d *schema.ResourceData) cdl.ExportServiceAccount {
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
 			serviceAccountField := vi.(map[string]interface{})
-			serviceId = serviceAccountField["service_id"].(string) // serviceAccountField["allowed_dataobjects"][0].(map[string]interface{})
+			serviceId = serviceAccountField["service_id"].(string)
 			privateKey = serviceAccountField["private_key"].(string)
 			accessTokenEndpoint = serviceAccountField["access_token_endpoint"].(string)
 			tokenEndpoint = serviceAccountField["token_endpoint"].(string)
