@@ -14,6 +14,7 @@ import (
 	"github.com/philips-software/go-hsdp-api/console"
 	"github.com/philips-software/go-hsdp-api/dicom"
 	"github.com/philips-software/go-hsdp-api/iam"
+	"github.com/philips-software/go-hsdp-api/inference"
 	"github.com/philips-software/go-hsdp-api/notification"
 	"github.com/philips-software/go-hsdp-api/pki"
 	"github.com/philips-software/go-hsdp-api/s3creds"
@@ -338,7 +339,26 @@ func (c *Config) getCDLClient(baseURL, tenantID string) (*cdl.Client, error) {
 		DebugLog:       c.DebugLog,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("getFHIRClient: %w", err)
+		return nil, fmt.Errorf("getCDLClient: %w", err)
+	}
+	return client, nil
+}
+
+// getInferenceClient creates a HSDP CDL client
+func (c *Config) getInferenceClient(baseURL, tenantID string) (*inference.Client, error) {
+	if c.iamClientErr != nil {
+		return nil, fmt.Errorf("IAM client error in getInferenceClient: %w", c.iamClientErr)
+	}
+	if tenantID == "" {
+		return nil, fmt.Errorf("getInferenceClient: %w", ErrMissingOrganizationID)
+	}
+	client, err := inference.NewClient(c.iamClient, &inference.Config{
+		InferenceURL:   baseURL,
+		OrganizationID: tenantID,
+		DebugLog:       c.DebugLog,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("getInferenceClient: %w", err)
 	}
 	return client, nil
 }
