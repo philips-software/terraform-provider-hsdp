@@ -17,6 +17,7 @@ import (
 	jsonpatch "github.com/herkyl/patchwerk"
 	"github.com/philips-software/go-hsdp-api/cdr"
 	"github.com/philips-software/go-hsdp-api/cdr/helper/fhir/stu3"
+	"github.com/philips-software/go-hsdp-api/iam"
 )
 
 func resourceCDROrg() *schema.Resource {
@@ -102,7 +103,7 @@ func resourceCDROrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	operation := func() error {
 		var resp *cdr.Response
 		onboardedOrg, resp, err = client.TenantSTU3.Onboard(org)
-		return checkForIAMPermissionErrors(client, resp, err)
+		return checkForIAMPermissionErrors(client, resp.Response, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
@@ -306,7 +307,7 @@ func purgeStateRefreshFunc(client *cdr.Client, purgeStatusURL, id string) resour
 	}
 }
 
-func checkForIAMPermissionErrors(client *cdr.Client, resp *cdr.Response, err error) error {
+func checkForIAMPermissionErrors(client iam.TokenRefresher, resp *http.Response, err error) error {
 	if resp == nil || resp.StatusCode > 500 {
 		return err
 	}

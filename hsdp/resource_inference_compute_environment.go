@@ -3,6 +3,7 @@ package hsdp
 import (
 	"context"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/inference"
@@ -68,11 +69,26 @@ func resourceInferenceComputeEnvironmentCreate(ctx context.Context, d *schema.Re
 	description := d.Get("description").(string)
 	image := d.Get("image").(string)
 
-	createdEnv, _, err := client.ComputeEnvironment.CreateComputeEnvironment(inference.ComputeEnvironment{
-		Name:        name,
-		Description: description,
-		Image:       image,
-	})
+	var createdEnv *inference.ComputeEnvironment
+	// Do initial boarding
+	operation := func() error {
+		var resp *inference.Response
+		createdEnv, resp, err = client.ComputeEnvironment.CreateComputeEnvironment(inference.ComputeEnvironment{
+			ResourceType: "ComputeEnvironment",
+			Name:         name,
+			Description:  description,
+			Image:        image,
+		})
+		if resp == nil {
+			resp = &inference.Response{}
+		}
+		return checkForIAMPermissionErrors(client, resp.Response, err)
+	}
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
