@@ -194,6 +194,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_dicom_remote_node":             resourceDICOMRemoteNode(),
 			"hsdp_cdl_data_type_definition":      resourceCDLDataTypeDefinition(),
 			"hsdp_cdl_label_definition":          resourceCDLLabelDefinition(),
+			"hsdp_cdl_export_route":              resourceCDLExportRoute(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":              dataSourceIAMIntrospect(),
@@ -225,6 +226,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_cdl_data_type_definitions":   dataSourceCDLDataTypeDefinitions(),
 			"hsdp_cdl_data_type_definition":    dataSourceCDLDataTypeDefinition(),
 			"hsdp_cdl_label_definition":        dataSourceCDLLabelDefinition(),
+			"hsdp_cdl_export_route":            dataSourceCDLExportRoute(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
