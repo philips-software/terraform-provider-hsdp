@@ -344,7 +344,6 @@ func (c *Config) getCDLClient(baseURL, tenantID string) (*cdl.Client, error) {
 	return client, nil
 }
 
-// getInferenceClient creates a HSDP CDL client
 func (c *Config) getInferenceClient(baseURL, tenantID string) (*inference.Client, error) {
 	if c.iamClientErr != nil {
 		return nil, fmt.Errorf("IAM client error in getInferenceClient: %w", c.iamClientErr)
@@ -359,6 +358,24 @@ func (c *Config) getInferenceClient(baseURL, tenantID string) (*inference.Client
 	})
 	if err != nil {
 		return nil, fmt.Errorf("getInferenceClient: %w", err)
+	}
+	return client, nil
+}
+
+func (c *Config) getInferenceClientFromEndpoint(endpointURL string) (*inference.Client, error) {
+	if c.iamClientErr != nil {
+		return nil, c.iamClientErr
+	}
+	client, err := inference.NewClient(c.iamClient, &inference.Config{
+		InferenceURL:   "http://localhost",
+		OrganizationID: "not-set",
+		DebugLog:       c.DebugLog,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("getInferenceClientFromEndpoint: %w", err)
+	}
+	if err = client.SetEndpointURL(endpointURL); err != nil {
+		return nil, err
 	}
 	return client, nil
 }
