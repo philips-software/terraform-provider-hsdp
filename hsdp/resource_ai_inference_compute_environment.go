@@ -154,6 +154,7 @@ func resourceAIInferenceComputeEnvironmentDelete(_ context.Context, d *schema.Re
 			d.SetId("")
 			return diags
 		}
+		return diag.FromErr(err)
 	}
 	d.SetId("")
 	return diags

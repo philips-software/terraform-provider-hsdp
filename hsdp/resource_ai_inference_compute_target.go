@@ -162,6 +162,7 @@ func resourceAIInferenceComputeTargetDelete(_ context.Context, d *schema.Resourc
 			d.SetId("")
 			return diags
 		}
+		return diag.FromErr(err)
 	}
 	d.SetId("")
 	return diags

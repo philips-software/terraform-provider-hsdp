@@ -11,15 +11,15 @@ import (
 	"github.com/philips-software/go-hsdp-api/ai/inference"
 )
 
-func resourceAIInferenceModel() *schema.Resource {
+func resourceAIInferenceJob() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		CreateContext: resourceAIInferenceModelCreate,
-		ReadContext:   resourceAIInferenceModelRead,
-		DeleteContext: resourceAIInferenceModelDelete,
+		CreateContext: resourceAIInferenceJobCreate,
+		ReadContext:   resourceAIInferenceJobRead,
+		DeleteContext: resourceAIInferenceJobDelete,
 
 		Schema: map[string]*schema.Schema{
 			"endpoint": {
@@ -32,19 +32,15 @@ func resourceAIInferenceModel() *schema.Resource {
 				ForceNew: true,
 				Required: true,
 			},
-			"version": {
-				Type:     schema.TypeString,
-				ForceNew: true,
-				Required: true,
-			},
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-			"artifact_path": {
-				Type:     schema.TypeString,
+			"timeout": {
+				Type:     schema.TypeInt,
 				Optional: true,
+				Default:  86400,
 				ForceNew: true,
 			},
 			"environment": {
@@ -52,7 +48,7 @@ func resourceAIInferenceModel() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"entry_commands": {
+			"command_args": {
 				Type:     schema.TypeList,
 				MaxItems: 10,
 				MinItems: 1,
@@ -67,7 +63,7 @@ func resourceAIInferenceModel() *schema.Resource {
 				ForceNew: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"compute_environment": {
+			"model": {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
 				MinItems: 1,
@@ -86,9 +82,28 @@ func resourceAIInferenceModel() *schema.Resource {
 					},
 				},
 			},
-			"source_code": {
+			"compute_target": {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
+				MinItems: 1,
+				Optional: true,
+				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"reference": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"identifier": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"input": {
+				Type:     schema.TypeSet,
+				MaxItems: 100,
 				MinItems: 0,
 				Optional: true,
 				ForceNew: true,
@@ -98,25 +113,39 @@ func resourceAIInferenceModel() *schema.Resource {
 							Type:     schema.TypeString,
 							Required: true,
 						},
-						"branch": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"commit_id": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"ssh_key": {
+						"name": {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
 					},
 				},
 			},
-			"additional_configuration": {
-				Type:     schema.TypeString,
+			"output": {
+				Type:     schema.TypeSet,
+				MaxItems: 100,
+				MinItems: 0,
 				Optional: true,
 				ForceNew: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"url": {
+							Type:     schema.TypeString,
+							Required: true,
+						},
+						"name": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+					},
+				},
+			},
+			"completed": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"created": {
 				Type:     schema.TypeString,
@@ -134,7 +163,7 @@ func resourceAIInferenceModel() *schema.Resource {
 	}
 }
 
-func resourceAIInferenceModelCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAIInferenceJobCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	endpoint := d.Get("endpoint").(string)
 	client, err := config.getAIInferenceClientFromEndpoint(endpoint)
@@ -145,42 +174,42 @@ func resourceAIInferenceModelCreate(ctx context.Context, d *schema.ResourceData,
 
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
-	version := d.Get("version").(string)
-	artifactPath := d.Get("artifact_path").(string)
-	entryCommands, _ := collectList("entry_commands", d)
+	commandArgs, _ := collectList("command_args", d)
 	labels, _ := collectList("labels", d)
-	computeEnvironment, _ := collectComputeEnvironment(d)
-	sourceCode, _ := collectSourceCode(d)
-	additionalConfiguration := d.Get("additional_configuration").(string)
+	computeTarget, _ := collectComputeTarget(d)
+	computeModel, _ := collectComputeModel(d)
+	inputs, _ := collectInputs(d)
+	outputs, _ := collectOutputs(d)
+	timeout := d.Get("timeout").(int)
 
-	model := inference.Model{
-		ResourceType:            "Model",
-		Name:                    name,
-		Version:                 version,
-		Description:             description,
-		ArtifactPath:            artifactPath,
-		EntryCommands:           entryCommands,
-		ComputeEnvironment:      computeEnvironment,
-		SourceCode:              sourceCode,
-		AdditionalConfiguration: additionalConfiguration,
-		Labels:                  labels,
-		Type:                    "sagemaker",
+	job := inference.Job{
+		ResourceType:  "InferenceJob",
+		Name:          name,
+		Description:   description,
+		CommandArgs:   commandArgs,
+		ComputeTarget: computeTarget,
+		Model:         computeModel,
+		Input:         inputs,
+		Output:        outputs,
+		Timeout:       timeout,
+		Labels:        labels,
+		Type:          "sagemaker",
 	}
 	if v, ok := d.GetOk("environment"); ok {
 		vv := v.(map[string]interface{})
 		for k, v := range vv {
-			model.EnvVars = append(model.EnvVars, inference.EnvironmentVariable{
+			job.EnvVars = append(job.EnvVars, inference.EnvironmentVariable{
 				Name:  k,
 				Value: fmt.Sprint(v),
 			})
 		}
 	}
 
-	var createdModel *inference.Model
+	var createdJob *inference.Job
 	var resp *inference.Response
 	// Do initial boarding
 	operation := func() error {
-		createdModel, resp, err = client.Model.CreateModel(model)
+		createdJob, resp, err = client.Job.CreateJob(job)
 		if resp == nil {
 			resp = &inference.Response{}
 		}
@@ -194,45 +223,77 @@ func resourceAIInferenceModelCreate(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(createdModel.ID)
-	return resourceAIInferenceModelRead(ctx, d, m)
+	d.SetId(createdJob.ID)
+	return resourceAIInferenceJobRead(ctx, d, m)
 }
 
-func collectComputeEnvironment(d *schema.ResourceData) (inference.ReferenceComputeEnvironment, diag.Diagnostics) {
+func collectComputeTarget(d *schema.ResourceData) (inference.ReferenceComputeTarget, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var rce inference.ReferenceComputeEnvironment
-	if v, ok := d.GetOk("compute_environment"); ok {
+	var target inference.ReferenceComputeTarget
+	if v, ok := d.GetOk("compute_target"); ok {
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})
-			rce = inference.ReferenceComputeEnvironment{
+			target = inference.ReferenceComputeTarget{
 				Reference:  mVi["reference"].(string),
 				Identifier: mVi["identifier"].(string),
 			}
 		}
 	}
-	return rce, diags
+	return target, diags
 }
 
-func collectSourceCode(d *schema.ResourceData) (inference.SourceCode, diag.Diagnostics) {
+func collectComputeModel(d *schema.ResourceData) (inference.ReferenceComputeModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var rce inference.SourceCode
-	if v, ok := d.GetOk("source_code"); ok {
+	var model inference.ReferenceComputeModel
+	if v, ok := d.GetOk("model"); ok {
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})
-			rce = inference.SourceCode{
-				URL:      mVi["url"].(string),
-				Branch:   mVi["branch"].(string),
-				CommitID: mVi["commit_id"].(string),
-				SSHKey:   mVi["ssh_key"].(string),
+			model = inference.ReferenceComputeModel{
+				Reference:  mVi["reference"].(string),
+				Identifier: mVi["identifier"].(string),
 			}
 		}
 	}
-	return rce, diags
+	return model, diags
 }
 
-func resourceAIInferenceModelRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func collectInputs(d *schema.ResourceData) ([]inference.InputEntry, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	var inputs []inference.InputEntry
+	if v, ok := d.GetOk("input"); ok {
+		vL := v.(*schema.Set).List()
+		for _, vi := range vL {
+			mVi := vi.(map[string]interface{})
+			input := inference.InputEntry{
+				URL:  mVi["url"].(string),
+				Name: mVi["name"].(string),
+			}
+			inputs = append(inputs, input)
+		}
+	}
+	return inputs, diags
+}
+
+func collectOutputs(d *schema.ResourceData) ([]inference.OutputEntry, diag.Diagnostics) {
+	var diags diag.Diagnostics
+	var outputs []inference.OutputEntry
+	if v, ok := d.GetOk("output"); ok {
+		vL := v.(*schema.Set).List()
+		for _, vi := range vL {
+			mVi := vi.(map[string]interface{})
+			input := inference.OutputEntry{
+				URL:  mVi["url"].(string),
+				Name: mVi["name"].(string),
+			}
+			outputs = append(outputs, input)
+		}
+	}
+	return outputs, diags
+}
+
+func resourceAIInferenceJobRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	config := m.(*Config)
@@ -245,22 +306,25 @@ func resourceAIInferenceModelRead(_ context.Context, d *schema.ResourceData, m i
 
 	id := d.Id()
 
-	model, _, err := client.Model.GetModelByID(id)
+	job, _, err := client.Job.GetJobByID(id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	_ = d.Set("name", model.Name)
-	_ = d.Set("description", model.Description)
-	_ = d.Set("version", model.Version)
-	_ = d.Set("artifact_path", model.ArtifactPath)
-	_ = d.Set("created", model.Created)
-	_ = d.Set("created_by", model.CreatedBy)
-	_ = d.Set("reference", fmt.Sprintf("%s/%s", model.ResourceType, model.ID))
+	_ = d.Set("name", job.Name)
+	_ = d.Set("description", job.Description)
+	_ = d.Set("timeout", job.Timeout)
+	_ = d.Set("duration", job.Duration)
+	_ = d.Set("completed", job.ComputeTarget)
+	_ = d.Set("status", job.Status)
+	_ = d.Set("command_args", job.CommandArgs)
+	_ = d.Set("created", job.Created)
+	_ = d.Set("created_by", job.CreatedBy)
+	_ = d.Set("reference", fmt.Sprintf("%s/%s", job.ResourceType, job.ID))
 
 	return diags
 }
 
-func resourceAIInferenceModelDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAIInferenceJobDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	config := m.(*Config)
@@ -273,9 +337,13 @@ func resourceAIInferenceModelDelete(_ context.Context, d *schema.ResourceData, m
 
 	id := d.Id()
 
-	resp, err := client.Model.DeleteModel(inference.Model{
+	job := inference.Job{
 		ID: id,
-	})
+	}
+
+	_, _ = client.Job.TerminateJob(job) // Just to be sure
+
+	resp, err := client.Job.DeleteJob(job)
 	if err != nil {
 		if resp == nil {
 			return diag.FromErr(err)

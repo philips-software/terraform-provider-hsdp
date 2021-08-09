@@ -51,7 +51,7 @@ resource "hsdp_ai_inference_model" "model" {
 The following arguments are supported:
 
 * `endpoint` - (Required) The AI Inference instance endpoint
-* `name` - (Required) The name of Compute Environment
+* `name` - (Required) The name of the Model
 * `compute_environment` - (Required)
 * `source_code` - (Required)
 * `entry_commands` - (Required, list(string)) Commands to execute
@@ -65,7 +65,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 attributes are exported:
 
-* `id` - The GUID of the Compute Target
-* `is_factory` - Weather this Compute Environment is factory one
-* `created` - The date this Compute Environment was created
-* `created_by` - Who created the environment
+* `id` - The GUID of the Model
+* `reference` - The reference of this Model 
+* `created` - The date this Model  was created
+* `created_by` - Who created the Model
