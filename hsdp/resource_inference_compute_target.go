@@ -80,7 +80,7 @@ func resourceInferenceComputeTargetCreate(ctx context.Context, d *schema.Resourc
 	operation := func() error {
 		var resp *inference.Response
 		createdTarget, resp, err = client.ComputeTarget.CreateComputeTarget(inference.ComputeTarget{
-			ResourceType: "ComputeEnvironment",
+			ResourceType: "ComputeTarget",
 			Name:         name,
 			Description:  description,
 			InstanceType: instanceType,
