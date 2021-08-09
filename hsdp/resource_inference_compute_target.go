@@ -44,7 +44,6 @@ func resourceInferenceComputeTarget() *schema.Resource {
 				Type:     schema.TypeInt,
 				Required: true,
 				ForceNew: true,
-				Default:  1,
 			},
 			"is_factory": {
 				Type:     schema.TypeBool,
