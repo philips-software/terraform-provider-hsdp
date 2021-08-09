@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -76,9 +77,9 @@ func resourceInferenceComputeTargetCreate(ctx context.Context, d *schema.Resourc
 	storage := d.Get("storage").(int)
 
 	var createdTarget *inference.ComputeTarget
+	var resp *inference.Response
 	// Do initial boarding
 	operation := func() error {
-		var resp *inference.Response
 		createdTarget, resp, err = client.ComputeTarget.CreateComputeTarget(inference.ComputeTarget{
 			ResourceType: "ComputeTarget",
 			Name:         name,
@@ -144,11 +145,17 @@ func resourceInferenceComputeTargetDelete(_ context.Context, d *schema.ResourceD
 
 	id := d.Id()
 
-	_, err = client.ComputeTarget.DeleteComputeTarget(inference.ComputeTarget{
+	resp, err := client.ComputeTarget.DeleteComputeTarget(inference.ComputeTarget{
 		ID: id,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		if resp == nil {
+			return diag.FromErr(err)
+		}
+		if resp.StatusCode == http.StatusNotFound { // Already deleted
+			d.SetId("")
+			return diags
+		}
 	}
 	d.SetId("")
 	return diags

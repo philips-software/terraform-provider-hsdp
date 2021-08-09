@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -136,11 +137,17 @@ func resourceInferenceComputeEnvironmentDelete(_ context.Context, d *schema.Reso
 
 	id := d.Id()
 
-	_, err = client.ComputeEnvironment.DeleteComputeEnvironment(inference.ComputeEnvironment{
+	resp, err := client.ComputeEnvironment.DeleteComputeEnvironment(inference.ComputeEnvironment{
 		ID: id,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		if resp == nil {
+			return diag.FromErr(err)
+		}
+		if resp.StatusCode == http.StatusNotFound { // Already deleted
+			d.SetId("")
+			return diags
+		}
 	}
 	d.SetId("")
 	return diags
