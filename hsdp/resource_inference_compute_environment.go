@@ -7,7 +7,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/philips-software/go-hsdp-api/inference"
+	"github.com/philips-software/go-hsdp-api/ai/inference"
 )
 
 func resourceInferenceComputeEnvironment() *schema.Resource {

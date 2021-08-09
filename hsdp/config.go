@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/go-retryablehttp"
+	"github.com/philips-software/go-hsdp-api/ai/inference"
 	"github.com/philips-software/go-hsdp-api/cartel"
 	"github.com/philips-software/go-hsdp-api/cdl"
 	"github.com/philips-software/go-hsdp-api/cdr"
@@ -14,7 +15,6 @@ import (
 	"github.com/philips-software/go-hsdp-api/console"
 	"github.com/philips-software/go-hsdp-api/dicom"
 	"github.com/philips-software/go-hsdp-api/iam"
-	"github.com/philips-software/go-hsdp-api/inference"
 	"github.com/philips-software/go-hsdp-api/notification"
 	"github.com/philips-software/go-hsdp-api/pki"
 	"github.com/philips-software/go-hsdp-api/s3creds"
