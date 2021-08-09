@@ -189,6 +189,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_notification_topic":            resourceNotificationTopic(),
 			"hsdp_notification_subscription":     resourceNotificationSubscription(),
 			"hsdp_inference_compute_environment": resourceInferenceComputeEnvironment(),
+			"hsdp_inference_compute_target":      resourceInferenceComputeTarget(),
 			"hsdp_dicom_gateway_config":          resourceDICOMGatewayConfig(),
 			"hsdp_cdl_research_study":            resourceCDLResearchStudy(),
 			"hsdp_dicom_remote_node":             resourceDICOMRemoteNode(),

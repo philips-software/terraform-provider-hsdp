@@ -15,7 +15,7 @@ data "hsdp_inference_instance" "inference" {
 }
 
 resource "hsdp_inference_compute_environment" "compute" {
-  endpoint = data.hsdp_inference_instance.inference
+  endpoint = data.hsdp_inference_instance.inference.endpoint
   
   name  = "python3.8_keras_gpu"
   image = "arn:aws:ecr:us-west-2:012345678910:repository/test"
@@ -30,7 +30,7 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
 * `id` - The GUID of the Compute Environment
 * `is_factory` - Weather this Compute Environment is factory one
