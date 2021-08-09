@@ -344,12 +344,12 @@ func (c *Config) getCDLClient(baseURL, tenantID string) (*cdl.Client, error) {
 	return client, nil
 }
 
-func (c *Config) getInferenceClient(baseURL, tenantID string) (*inference.Client, error) {
+func (c *Config) getAIInferenceClient(baseURL, tenantID string) (*inference.Client, error) {
 	if c.iamClientErr != nil {
-		return nil, fmt.Errorf("IAM client error in getInferenceClient: %w", c.iamClientErr)
+		return nil, fmt.Errorf("IAM client error in getAIInferenceClient: %w", c.iamClientErr)
 	}
 	if tenantID == "" {
-		return nil, fmt.Errorf("getInferenceClient: %w", ErrMissingOrganizationID)
+		return nil, fmt.Errorf("getAIInferenceClient: %w", ErrMissingOrganizationID)
 	}
 	client, err := inference.NewClient(c.iamClient, &inference.Config{
 		InferenceURL:   baseURL,
@@ -357,12 +357,12 @@ func (c *Config) getInferenceClient(baseURL, tenantID string) (*inference.Client
 		DebugLog:       c.DebugLog,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("getInferenceClient: %w", err)
+		return nil, fmt.Errorf("getAIInferenceClient: %w", err)
 	}
 	return client, nil
 }
 
-func (c *Config) getInferenceClientFromEndpoint(endpointURL string) (*inference.Client, error) {
+func (c *Config) getAIInferenceClientFromEndpoint(endpointURL string) (*inference.Client, error) {
 	if c.iamClientErr != nil {
 		return nil, c.iamClientErr
 	}
@@ -372,7 +372,7 @@ func (c *Config) getInferenceClientFromEndpoint(endpointURL string) (*inference.
 		DebugLog:       c.DebugLog,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("getInferenceClientFromEndpoint: %w", err)
+		return nil, fmt.Errorf("getAIInferenceClientFromEndpoint: %w", err)
 	}
 	if err = client.SetEndpointURL(endpointURL); err != nil {
 		return nil, err

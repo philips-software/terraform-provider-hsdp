@@ -10,15 +10,15 @@ import (
 	"github.com/philips-software/go-hsdp-api/ai/inference"
 )
 
-func resourceInferenceComputeEnvironment() *schema.Resource {
+func resourceAIInferenceComputeEnvironment() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		CreateContext: resourceInferenceComputeEnvironmentCreate,
-		ReadContext:   resourceInferenceComputeEnvironmentRead,
-		DeleteContext: resourceInferenceComputeEnvironmentDelete,
+		CreateContext: resourceAIInferenceComputeEnvironmentCreate,
+		ReadContext:   resourceAIInferenceComputeEnvironmentRead,
+		DeleteContext: resourceAIInferenceComputeEnvironmentDelete,
 
 		Schema: map[string]*schema.Schema{
 			"endpoint": {
@@ -57,10 +57,10 @@ func resourceInferenceComputeEnvironment() *schema.Resource {
 	}
 }
 
-func resourceInferenceComputeEnvironmentCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAIInferenceComputeEnvironmentCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	endpoint := d.Get("endpoint").(string)
-	client, err := config.getInferenceClientFromEndpoint(endpoint)
+	client, err := config.getAIInferenceClientFromEndpoint(endpoint)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -94,15 +94,15 @@ func resourceInferenceComputeEnvironmentCreate(ctx context.Context, d *schema.Re
 		return diag.FromErr(err)
 	}
 	d.SetId(createdEnv.ID)
-	return resourceInferenceComputeEnvironmentRead(ctx, d, m)
+	return resourceAIInferenceComputeEnvironmentRead(ctx, d, m)
 }
 
-func resourceInferenceComputeEnvironmentRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAIInferenceComputeEnvironmentRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	config := m.(*Config)
 	endpoint := d.Get("endpoint").(string)
-	client, err := config.getInferenceClientFromEndpoint(endpoint)
+	client, err := config.getAIInferenceClientFromEndpoint(endpoint)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -124,12 +124,12 @@ func resourceInferenceComputeEnvironmentRead(_ context.Context, d *schema.Resour
 	return diags
 }
 
-func resourceInferenceComputeEnvironmentDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAIInferenceComputeEnvironmentDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	config := m.(*Config)
 	endpoint := d.Get("endpoint").(string)
-	client, err := config.getInferenceClientFromEndpoint(endpoint)
+	client, err := config.getAIInferenceClientFromEndpoint(endpoint)
 	if err != nil {
 		return diag.FromErr(err)
 	}

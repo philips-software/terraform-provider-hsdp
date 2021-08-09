@@ -1,4 +1,4 @@
-# hsdp_inference_compute_target
+# hsdp_ai_inference_compute_target
 
 Manages HSDP AI Inference Compute Targets
 
@@ -9,13 +9,13 @@ data "hsdp_config" "inference" {
   service = "inference"
 }
 
-data "hsdp_inference_instance" "inference" {
+data "hsdp_ai_inference_instance" "inference" {
   base_url        = data.hsdp_config.inference.url
   organization_id = var.inference_tenant_org_id
 }
 
-resource "hsdp_inference_compute_target" "target" {
-  endpoint = data.hsdp_inference_instance.inference.endpoint
+resource "hsdp_ai_inference_compute_target" "target" {
+  endpoint = data.hsdp_ai_inference_instance.inference.endpoint
   
   name          = "gpu1"
   description   = "Tesla v100 GPU based environment with 128MB GPU memory"
@@ -43,7 +43,7 @@ attributes are exported:
 
 ## Import
 
-An existing Compute Environment can be imported using `terraform import hsdp_inference_compute_target`, e.g.
+An existing Compute Environment can be imported using `terraform import hsdp_ai_inference_compute_target`, e.g.
 
 ```bash
-terraform import hsdp_inference_compute_target.target a-guid
+terraform import hsdp_ai_inference_compute_target.target a-guid

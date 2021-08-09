@@ -7,9 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceInferenceInstance() *schema.Resource {
+func dataSourceAIInferenceInstance() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceInferenceInstanceRead,
+		ReadContext: dataSourceAIInferenceInstanceRead,
 		Schema: map[string]*schema.Schema{
 			"base_url": {
 				Type:     schema.TypeString,
@@ -28,7 +28,7 @@ func dataSourceInferenceInstance() *schema.Resource {
 
 }
 
-func dataSourceInferenceInstanceRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceAIInferenceInstanceRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 
 	var diags diag.Diagnostics
@@ -36,7 +36,7 @@ func dataSourceInferenceInstanceRead(_ context.Context, d *schema.ResourceData, 
 	baseURL := d.Get("base_url").(string)
 	InferenceOrgID := d.Get("organization_id").(string)
 
-	client, err := config.getInferenceClient(baseURL, InferenceOrgID)
+	client, err := config.getAIInferenceClient(baseURL, InferenceOrgID)
 	if err != nil {
 		return diag.FromErr(err)
 	}

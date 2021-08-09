@@ -1,4 +1,4 @@
-# hsdp_inference_compute_environment
+# hsdp_ai_inference_compute_environment
 
 Manages HSDP AI Inference Compute Environments
 
@@ -9,13 +9,13 @@ data "hsdp_config" "inference" {
   service = "inference"
 }
 
-data "hsdp_inference_instance" "inference" {
+data "hsdp_ai_inference_instance" "inference" {
   base_url        = data.hsdp_config.inference.url
   organization_id = var.inference_tenant_org_id
 }
 
-resource "hsdp_inference_compute_environment" "compute" {
-  endpoint = data.hsdp_inference_instance.inference.endpoint
+resource "hsdp_ai_inference_compute_environment" "compute" {
+  endpoint = data.hsdp_ai_inference_instance.inference.endpoint
   
   name  = "python3.8_keras_gpu"
   image = "arn:aws:ecr:us-west-2:012345678910:repository/test"
@@ -39,7 +39,7 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-An existing Compute Environment can be imported using `terraform import hsdp_inference_compute_environment`, e.g.
+An existing Compute Environment can be imported using `terraform import hsdp_ai_inference_compute_environment`, e.g.
 
 ```bash
-terraform import hsdp_inference_compute_environment.env a-guid
+terraform import hsdp_ai_inference_compute_environment.env a-guid
