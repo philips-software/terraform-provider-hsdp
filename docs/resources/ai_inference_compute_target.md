@@ -24,6 +24,7 @@ resource "hsdp_ai_inference_compute_target" "target" {
 }
 ```
 
+## Argument reference
 The following arguments are supported:
 
 * `endpoint` - (Required) The AI Inference instance endpoint
@@ -31,12 +32,13 @@ The following arguments are supported:
 * `instance_type` - (Required) The instance type to use. Available instance types for Inference, see https://aws.amazon.com/sagemaker/pricing/
 * `storage` - (Required) Additional storage to allocate (in GB). Default: `1`
 * `description` - (Optional) Description of the Compute Target
-## Attributes Reference
 
+## Attributes reference
 In addition to all arguments above, the following attributes are exported:
 attributes are exported:
 
 * `id` - The GUID of the Compute Target
+* `reference` - The reference of this Compute Target 
 * `is_factory` - Weather this Compute Environment is factory one
 * `created` - The date this Compute Environment was created
 * `created_by` - Who created the environment

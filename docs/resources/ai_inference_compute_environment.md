@@ -33,6 +33,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The GUID of the Compute Environment
+* `reference` - The reference of this Compute Environment
 * `is_factory` - Weather this Compute Environment is factory one
 * `created` - The date this Compute Environment was created
 * `created_by` - Who created the environment

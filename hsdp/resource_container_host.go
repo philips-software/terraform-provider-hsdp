@@ -330,7 +330,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		return diags
 	}
 	// And commands
-	commands, diags := collectCommands(d)
+	commands, diags := collectList(commandsField, d)
 	if len(diags) > 0 {
 		return diags
 	}
@@ -542,9 +542,9 @@ func copyFiles(ssh *easyssh.MakeConfig, config *Config, createFiles []provisionF
 	return nil
 }
 
-func collectCommands(d *schema.ResourceData) ([]string, diag.Diagnostics) {
+func collectList(fieldName string, d *schema.ResourceData) ([]string, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	list := d.Get(commandsField).([]interface{})
+	list := d.Get(fieldName).([]interface{})
 	commands := make([]string, 0)
 	for i := 0; i < len(list); i++ {
 		commands = append(commands, list[i].(string))

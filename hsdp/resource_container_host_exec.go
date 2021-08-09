@@ -119,7 +119,7 @@ func resourceContainerHostExecCreate(_ context.Context, d *schema.ResourceData, 
 		return diags
 	}
 	// And commands
-	commands, diags := collectCommands(d)
+	commands, diags := collectList(commandsField, d)
 	if len(diags) > 0 {
 		return diags
 	}

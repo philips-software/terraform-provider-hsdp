@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/cenkalti/backoff/v4"
@@ -55,6 +56,10 @@ func resourceAIInferenceComputeTarget() *schema.Resource {
 				Computed: true,
 			},
 			"created_by": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"reference": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -128,6 +133,7 @@ func resourceAIInferenceComputeTargetRead(_ context.Context, d *schema.ResourceD
 	_ = d.Set("is_factory", target.IsFactory)
 	_ = d.Set("created", target.Created)
 	_ = d.Set("created_by", target.CreatedBy)
+	_ = d.Set("reference", fmt.Sprintf("%s/%s", target.ResourceType, target.ID))
 
 	return diags
 }
