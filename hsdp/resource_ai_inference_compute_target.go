@@ -8,7 +8,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/philips-software/go-hsdp-api/ai/inference"
+	"github.com/philips-software/go-hsdp-api/ai"
 )
 
 func resourceAIInferenceComputeTarget() *schema.Resource {
@@ -81,11 +81,11 @@ func resourceAIInferenceComputeTargetCreate(ctx context.Context, d *schema.Resou
 	instanceType := d.Get("instance_type").(string)
 	storage := d.Get("storage").(int)
 
-	var createdTarget *inference.ComputeTarget
-	var resp *inference.Response
+	var createdTarget *ai.ComputeTarget
+	var resp *ai.Response
 	// Do initial boarding
 	operation := func() error {
-		createdTarget, resp, err = client.ComputeTarget.CreateComputeTarget(inference.ComputeTarget{
+		createdTarget, resp, err = client.ComputeTarget.CreateComputeTarget(ai.ComputeTarget{
 			ResourceType: "ComputeTarget",
 			Name:         name,
 			Description:  description,
@@ -93,7 +93,7 @@ func resourceAIInferenceComputeTargetCreate(ctx context.Context, d *schema.Resou
 			Storage:      storage,
 		})
 		if resp == nil {
-			resp = &inference.Response{}
+			resp = &ai.Response{}
 		}
 		return checkForIAMPermissionErrors(client, resp.Response, err)
 	}
@@ -151,7 +151,7 @@ func resourceAIInferenceComputeTargetDelete(_ context.Context, d *schema.Resourc
 
 	id := d.Id()
 
-	resp, err := client.ComputeTarget.DeleteComputeTarget(inference.ComputeTarget{
+	resp, err := client.ComputeTarget.DeleteComputeTarget(ai.ComputeTarget{
 		ID: id,
 	})
 	if err != nil {

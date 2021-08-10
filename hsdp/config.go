@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/go-retryablehttp"
+	"github.com/philips-software/go-hsdp-api/ai"
 	"github.com/philips-software/go-hsdp-api/ai/inference"
 	"github.com/philips-software/go-hsdp-api/cartel"
 	"github.com/philips-software/go-hsdp-api/cdl"
@@ -24,21 +25,22 @@ import (
 // Config contains configuration for the client
 type Config struct {
 	iam.Config
-	BuildVersion      string
-	ServiceID         string
-	ServicePrivateKey string
-	S3CredsURL        string
-	NotificationURL   string
-	STLURL            string
-	CartelHost        string
-	CartelToken       string
-	CartelSecret      string
-	CartelNoTLS       bool
-	CartelSkipVerify  bool
-	RetryMax          int
-	UAAUsername       string
-	UAAPassword       string
-	UAAURL            string
+	BuildVersion        string
+	ServiceID           string
+	ServicePrivateKey   string
+	S3CredsURL          string
+	NotificationURL     string
+	STLURL              string
+	CartelHost          string
+	CartelToken         string
+	CartelSecret        string
+	CartelNoTLS         bool
+	CartelSkipVerify    bool
+	RetryMax            int
+	UAAUsername         string
+	UAAPassword         string
+	UAAURL              string
+	AIInferenceEndpoint string
 
 	iamClient             *iam.Client
 	cartelClient          *cartel.Client
@@ -351,8 +353,8 @@ func (c *Config) getAIInferenceClient(baseURL, tenantID string) (*inference.Clie
 	if tenantID == "" {
 		return nil, fmt.Errorf("getAIInferenceClient: %w", ErrMissingOrganizationID)
 	}
-	client, err := inference.NewClient(c.iamClient, &inference.Config{
-		InferenceURL:   baseURL,
+	client, err := inference.NewClient(c.iamClient, &ai.Config{
+		AnalyzeURL:     baseURL,
 		OrganizationID: tenantID,
 		DebugLog:       c.DebugLog,
 	})
@@ -366,8 +368,11 @@ func (c *Config) getAIInferenceClientFromEndpoint(endpointURL string) (*inferenc
 	if c.iamClientErr != nil {
 		return nil, c.iamClientErr
 	}
-	client, err := inference.NewClient(c.iamClient, &inference.Config{
-		InferenceURL:   "http://localhost",
+	if endpointURL == "" {
+		endpointURL = c.AIInferenceEndpoint
+	}
+	client, err := inference.NewClient(c.iamClient, &ai.Config{
+		AnalyzeURL:     "http://localhost",
 		OrganizationID: "not-set",
 		DebugLog:       c.DebugLog,
 	})

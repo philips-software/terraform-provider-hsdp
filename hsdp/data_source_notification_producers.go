@@ -18,10 +18,9 @@ func dataSourceNotificationProducers() *schema.Resource {
 				Required: true,
 			},
 			"producer_ids": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 		},
 	}

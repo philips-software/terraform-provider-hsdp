@@ -8,7 +8,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/philips-software/go-hsdp-api/ai/inference"
+	"github.com/philips-software/go-hsdp-api/ai"
 )
 
 func resourceAIInferenceJob() *schema.Resource {
@@ -182,7 +182,7 @@ func resourceAIInferenceJobCreate(ctx context.Context, d *schema.ResourceData, m
 	outputs, _ := collectOutputs(d)
 	timeout := d.Get("timeout").(int)
 
-	job := inference.Job{
+	job := ai.Job{
 		ResourceType:  "InferenceJob",
 		Name:          name,
 		Description:   description,
@@ -198,20 +198,20 @@ func resourceAIInferenceJobCreate(ctx context.Context, d *schema.ResourceData, m
 	if v, ok := d.GetOk("environment"); ok {
 		vv := v.(map[string]interface{})
 		for k, v := range vv {
-			job.EnvVars = append(job.EnvVars, inference.EnvironmentVariable{
+			job.EnvVars = append(job.EnvVars, ai.EnvironmentVariable{
 				Name:  k,
 				Value: fmt.Sprint(v),
 			})
 		}
 	}
 
-	var createdJob *inference.Job
-	var resp *inference.Response
+	var createdJob *ai.Job
+	var resp *ai.Response
 	// Do initial boarding
 	operation := func() error {
 		createdJob, resp, err = client.Job.CreateJob(job)
 		if resp == nil {
-			resp = &inference.Response{}
+			resp = &ai.Response{}
 		}
 		return checkForIAMPermissionErrors(client, resp.Response, err)
 	}
@@ -227,14 +227,14 @@ func resourceAIInferenceJobCreate(ctx context.Context, d *schema.ResourceData, m
 	return resourceAIInferenceJobRead(ctx, d, m)
 }
 
-func collectComputeTarget(d *schema.ResourceData) (inference.ReferenceComputeTarget, diag.Diagnostics) {
+func collectComputeTarget(d *schema.ResourceData) (ai.ReferenceComputeTarget, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var target inference.ReferenceComputeTarget
+	var target ai.ReferenceComputeTarget
 	if v, ok := d.GetOk("compute_target"); ok {
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})
-			target = inference.ReferenceComputeTarget{
+			target = ai.ReferenceComputeTarget{
 				Reference:  mVi["reference"].(string),
 				Identifier: mVi["identifier"].(string),
 			}
@@ -243,14 +243,14 @@ func collectComputeTarget(d *schema.ResourceData) (inference.ReferenceComputeTar
 	return target, diags
 }
 
-func collectComputeModel(d *schema.ResourceData) (inference.ReferenceComputeModel, diag.Diagnostics) {
+func collectComputeModel(d *schema.ResourceData) (ai.ReferenceComputeModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var model inference.ReferenceComputeModel
+	var model ai.ReferenceComputeModel
 	if v, ok := d.GetOk("model"); ok {
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})
-			model = inference.ReferenceComputeModel{
+			model = ai.ReferenceComputeModel{
 				Reference:  mVi["reference"].(string),
 				Identifier: mVi["identifier"].(string),
 			}
@@ -259,14 +259,14 @@ func collectComputeModel(d *schema.ResourceData) (inference.ReferenceComputeMode
 	return model, diags
 }
 
-func collectInputs(d *schema.ResourceData) ([]inference.InputEntry, diag.Diagnostics) {
+func collectInputs(d *schema.ResourceData) ([]ai.InputEntry, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var inputs []inference.InputEntry
+	var inputs []ai.InputEntry
 	if v, ok := d.GetOk("input"); ok {
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})
-			input := inference.InputEntry{
+			input := ai.InputEntry{
 				URL:  mVi["url"].(string),
 				Name: mVi["name"].(string),
 			}
@@ -276,14 +276,14 @@ func collectInputs(d *schema.ResourceData) ([]inference.InputEntry, diag.Diagnos
 	return inputs, diags
 }
 
-func collectOutputs(d *schema.ResourceData) ([]inference.OutputEntry, diag.Diagnostics) {
+func collectOutputs(d *schema.ResourceData) ([]ai.OutputEntry, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var outputs []inference.OutputEntry
+	var outputs []ai.OutputEntry
 	if v, ok := d.GetOk("output"); ok {
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})
-			input := inference.OutputEntry{
+			input := ai.OutputEntry{
 				URL:  mVi["url"].(string),
 				Name: mVi["name"].(string),
 			}
@@ -337,7 +337,7 @@ func resourceAIInferenceJobDelete(_ context.Context, d *schema.ResourceData, m i
 
 	id := d.Id()
 
-	job := inference.Job{
+	job := ai.Job{
 		ID: id,
 	}
 

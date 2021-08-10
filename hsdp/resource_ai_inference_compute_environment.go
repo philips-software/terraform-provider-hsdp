@@ -8,7 +8,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/philips-software/go-hsdp-api/ai/inference"
+	"github.com/philips-software/go-hsdp-api/ai"
 )
 
 func resourceAIInferenceComputeEnvironment() *schema.Resource {
@@ -75,18 +75,18 @@ func resourceAIInferenceComputeEnvironmentCreate(ctx context.Context, d *schema.
 	description := d.Get("description").(string)
 	image := d.Get("image").(string)
 
-	var createdEnv *inference.ComputeEnvironment
+	var createdEnv *ai.ComputeEnvironment
 	// Do initial boarding
 	operation := func() error {
-		var resp *inference.Response
-		createdEnv, resp, err = client.ComputeEnvironment.CreateComputeEnvironment(inference.ComputeEnvironment{
+		var resp *ai.Response
+		createdEnv, resp, err = client.ComputeEnvironment.CreateComputeEnvironment(ai.ComputeEnvironment{
 			ResourceType: "ComputeEnvironment",
 			Name:         name,
 			Description:  description,
 			Image:        image,
 		})
 		if resp == nil {
-			resp = &inference.Response{}
+			resp = &ai.Response{}
 		}
 		return checkForIAMPermissionErrors(client, resp.Response, err)
 	}
@@ -109,7 +109,7 @@ func resourceAIInferenceComputeEnvironmentRead(_ context.Context, d *schema.Reso
 	endpoint := d.Get("endpoint").(string)
 	client, err := config.getAIInferenceClientFromEndpoint(endpoint)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("AIInferenceComputeEnvironmentRead: %w", err))
 	}
 	defer client.Close()
 
@@ -143,7 +143,7 @@ func resourceAIInferenceComputeEnvironmentDelete(_ context.Context, d *schema.Re
 
 	id := d.Id()
 
-	resp, err := client.ComputeEnvironment.DeleteComputeEnvironment(inference.ComputeEnvironment{
+	resp, err := client.ComputeEnvironment.DeleteComputeEnvironment(ai.ComputeEnvironment{
 		ID: id,
 	})
 	if err != nil {

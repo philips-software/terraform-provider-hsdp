@@ -8,6 +8,7 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/philips-software/go-hsdp-api/ai"
 	"github.com/philips-software/go-hsdp-api/ai/inference"
 )
 
@@ -169,7 +170,7 @@ func resourceAIInferenceModelCreate(ctx context.Context, d *schema.ResourceData,
 	if v, ok := d.GetOk("environment"); ok {
 		vv := v.(map[string]interface{})
 		for k, v := range vv {
-			model.EnvVars = append(model.EnvVars, inference.EnvironmentVariable{
+			model.EnvVars = append(model.EnvVars, ai.EnvironmentVariable{
 				Name:  k,
 				Value: fmt.Sprint(v),
 			})
@@ -177,12 +178,12 @@ func resourceAIInferenceModelCreate(ctx context.Context, d *schema.ResourceData,
 	}
 
 	var createdModel *inference.Model
-	var resp *inference.Response
+	var resp *ai.Response
 	// Do initial boarding
 	operation := func() error {
 		createdModel, resp, err = client.Model.CreateModel(model)
 		if resp == nil {
-			resp = &inference.Response{}
+			resp = &ai.Response{}
 		}
 		return checkForIAMPermissionErrors(client, resp.Response, err)
 	}
@@ -198,14 +199,14 @@ func resourceAIInferenceModelCreate(ctx context.Context, d *schema.ResourceData,
 	return resourceAIInferenceModelRead(ctx, d, m)
 }
 
-func collectComputeEnvironment(d *schema.ResourceData) (inference.ReferenceComputeEnvironment, diag.Diagnostics) {
+func collectComputeEnvironment(d *schema.ResourceData) (ai.ReferenceComputeEnvironment, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var rce inference.ReferenceComputeEnvironment
+	var rce ai.ReferenceComputeEnvironment
 	if v, ok := d.GetOk("compute_environment"); ok {
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})
-			rce = inference.ReferenceComputeEnvironment{
+			rce = ai.ReferenceComputeEnvironment{
 				Reference:  mVi["reference"].(string),
 				Identifier: mVi["identifier"].(string),
 			}
@@ -214,14 +215,14 @@ func collectComputeEnvironment(d *schema.ResourceData) (inference.ReferenceCompu
 	return rce, diags
 }
 
-func collectSourceCode(d *schema.ResourceData) (inference.SourceCode, diag.Diagnostics) {
+func collectSourceCode(d *schema.ResourceData) (ai.SourceCode, diag.Diagnostics) {
 	var diags diag.Diagnostics
-	var rce inference.SourceCode
+	var rce ai.SourceCode
 	if v, ok := d.GetOk("source_code"); ok {
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})
-			rce = inference.SourceCode{
+			rce = ai.SourceCode{
 				URL:      mVi["url"].(string),
 				Branch:   mVi["branch"].(string),
 				CommitID: mVi["commit_id"].(string),
