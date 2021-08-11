@@ -66,13 +66,14 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 attributes are exported:
 
-* `id` - The GUID of the Compute Target
-* `reference` - The reference of this Compute Target
-* `is_factory` - Weather this Compute Environment is factory one
-* `created` - The date this Compute Environment was created
+* `id` - The GUID of the job
+* `reference` - The reference of this job
+* `created` - The date this job was created
 * `created_by` - Who created the environment
 * `completed` - When the job was completed
 * `duration` - How long (seconds) the job ran for
+* `status` - The status of the job
+* `status_message` - The status message, if available
 
 ## Import
 

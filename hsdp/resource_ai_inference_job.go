@@ -147,6 +147,14 @@ func resourceAIInferenceJob() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"status_message": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"duration": {
+				Type:     schema.TypeInt,
+				Computed: true,
+			},
 			"created": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -314,8 +322,9 @@ func resourceAIInferenceJobRead(_ context.Context, d *schema.ResourceData, m int
 	_ = d.Set("description", job.Description)
 	_ = d.Set("timeout", job.Timeout)
 	_ = d.Set("duration", job.Duration)
-	_ = d.Set("completed", job.ComputeTarget)
+	_ = d.Set("completed", job.Completed)
 	_ = d.Set("status", job.Status)
+	_ = d.Set("status_message", job.StatusMessage)
 	_ = d.Set("command_args", job.CommandArgs)
 	_ = d.Set("created", job.Created)
 	_ = d.Set("created_by", job.CreatedBy)
