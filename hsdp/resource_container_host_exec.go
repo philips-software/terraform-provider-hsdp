@@ -152,13 +152,17 @@ func resourceContainerHostExecCreate(_ context.Context, d *schema.ResourceData, 
 		return diag.FromErr(fmt.Errorf("copying files to remote: %w", err))
 	}
 
+	// Ensure ready-ness
+	if err := ensureContainerHostReady(ssh, config); err != nil {
+		return diag.FromErr(fmt.Errorf("container host ready-ness check failed: %w", err))
+	}
+
 	// Run commands
 	for i := 0; i < len(commands); i++ {
 		stdout, stderr, done, err := ssh.Run(commands[i], 5*time.Minute)
+		_, _ = config.Debug("command: %s\ndone: %t\nstdout:\n%s\nstderr:\n%s\n", commands[i], done, stdout, stderr)
 		if err != nil {
 			return append(diags, diag.FromErr(fmt.Errorf("command [%s]: %w", commands[i], err))...)
-		} else {
-			_, _ = config.Debug("command: %s\ndone: %t\nstdout:\n%s\nstderr:\n%s\n", commands[i], done, stdout, stderr)
 		}
 	}
 
