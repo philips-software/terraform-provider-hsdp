@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -413,7 +414,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 			d.SetId("")
 		}
 		return diag.FromErr(fmt.Errorf(
-			"error waiting for instance '%s' to become ready: %s",
+			"error waiting for instance '%s' to become ready: %v",
 			instanceID, err))
 	}
 	d.SetConnInfo(map[string]string{
@@ -444,6 +445,18 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 			Detail:   fmt.Sprintf("One or more files failed to copy: %v", err),
 		})
 	}
+	// Check health of Docker daemon in case of 'container-host' role
+	if instanceRole == "container-host" && user != "" {
+		if err := ensureContainerHostReady(ssh, config); err != nil {
+			if !keepFailedInstances {
+				_, _, _ = client.Destroy(tagName)
+				d.SetId("")
+			}
+			return diag.FromErr(fmt.Errorf(
+				"container host instance '%s' was not deemed healthy: %v",
+				instanceID, err))
+		}
+	}
 
 	// Run commands
 	for i := 0; i < len(commands); i++ {
@@ -457,6 +470,25 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 	readDiags := resourceContainerHostRead(ctx, d, m)
 	return append(diags, readDiags...)
+}
+
+func ensureContainerHostReady(ssh *easyssh.MakeConfig, config *Config) error {
+	operation := func() error {
+		outStr, errStr, done, err := ssh.Run("docker volume ls") // This command should succeed
+		_, _ = config.Debug("ensureContainerHostReady: %t\nstdout:\n%s\nstderr:\n%s\n", done, outStr, errStr)
+		if err != nil {
+			if err.Error() == "Process exited with status 1" { // Currently, the only known value to retry on
+				return err
+			}
+			return backoff.Permanent(err)
+		}
+		return nil
+	}
+	err := backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func validateContainerHostSchema(d *schema.ResourceData) diag.Diagnostics {
@@ -520,9 +552,9 @@ func copyFiles(ssh *easyssh.MakeConfig, config *Config, createFiles []provisionF
 			_, _ = config.Debug("Permissions file %s:%s: %v %v\n", f.Destination, f.Permissions, outStr, errStr)
 			if err != nil {
 				return err
+				// Owner
 			}
 		}
-		// Owner
 		if f.Owner != "" {
 			outStr, errStr, _, err := ssh.Run(fmt.Sprintf("chown %s \"%s\"", f.Owner, f.Destination))
 			_, _ = config.Debug("Owner file %s:%s: %v %v\n", f.Destination, f.Owner, outStr, errStr)
