@@ -32,3 +32,4 @@ The following attributes are exported:
 * `url` - (string) The (base / API) URL of the service
 * `host` - (string) The host of the service
 * `domain` - (string) The domain associated with the service
+* `services` - (list(string)) The list of available services in the region/environment

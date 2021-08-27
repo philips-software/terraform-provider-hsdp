@@ -7,7 +7,6 @@ The following example demonstrates the basic configuration of a DICOM Gateway
 ```hcl
 resource "hsdp_dicom_gateway_config" "dicom_gateway" {
   config_url = var.config_url
-  site_organization_id = var.iam_org_id
   
   store_service {
     is_secure = false
@@ -36,21 +35,18 @@ resource "hsdp_dicom_gateway_config" "dicom_gateway" {
     is_secure = false
     port = 108
     
-    # advanced features
-    pdu_length = 65535
-    artim_timeout = 3000
-    association_idle_timeout = 4500
-    
     application_entity {
       allow_any = true
       ae_title = "Foo"
       organization_id = "aaa-bbb-ccc-ddd"
+      service_timeout = 0
     }
 
     application_entity {
       allow_any = true
       ae_title = "Bar"
       organization_id = "bbb-ccc-ddd-eee-bbb"
+      service_timeout = 0
     }
   }
 }

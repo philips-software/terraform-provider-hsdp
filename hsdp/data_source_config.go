@@ -42,6 +42,11 @@ func dataSourceConfig() *schema.Resource {
 				Computed:    true,
 				Description: "The domain associated with the service",
 			},
+			"services": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 
@@ -76,5 +81,7 @@ func dataSourceConfigRead(_ context.Context, d *schema.ResourceData, meta interf
 	if domain := c.Service(service).Domain; domain != "" {
 		_ = d.Set("domain", domain)
 	}
+	_ = d.Set("services", c.Services())
+
 	return diags
 }
