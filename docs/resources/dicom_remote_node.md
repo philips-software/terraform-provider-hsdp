@@ -6,14 +6,14 @@ This resource manages DICOM Remote nodes using HSDP provisioned DICOM Store conf
 ```hcl
 resource "hsdp_dicom_remote_node" "remote_node_1" {
   config_url = var.dicom_base_url
-  site_organization_id = var.site_org
+  organization_id = var.site_org
  
   title = "Node 1"
-  ae_tile = "AeTitelNode1" 
+  ae_title = "AeTitelNode1" 
   
   network_connection {
     port = 1000
-    host_name = "foo.bar.com"
+    hostname = "foo.bar.com"
     ip_address = "1.2.3.4"
     disable_ipv6 = false
     pdu_length = 10
@@ -33,7 +33,7 @@ resource "hsdp_dicom_remote_node" "remote_node_1" {
 * `ae_title` - (Required) Remote Node AETtile. Allowed characters for aetitle are `A-Za-z0-9\\s/+=_-`
 * `network_connection` - (Required) Details of the remote not network connection
   * `port` - (Required) Remte Node Port
-  * `host_name` - (Required) Remote Node Host name
+  * `hostname` - (Required) Remote Node Host name
   * `ip_address` - (Optional) Remote Nde IP Address
   * `disable_ipv6` - (Optional) Disable IPv6. Default `false`
   * `pdu_length` - (optional) PDU length. Default `65535`
