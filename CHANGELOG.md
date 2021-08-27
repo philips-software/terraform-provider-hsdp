@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.18.9
+- Container Host: add readiness check
+
 ## v0.18.8
 - CDL: Add exxport route support
 
