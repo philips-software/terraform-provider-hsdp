@@ -1,15 +1,15 @@
-# hsdp_stl_device
-Represents a STL device
+# hsdp_edge_device
+Represents an Edge device
 
 ## Example usage
 
 ```hcl
-data "hsdp_stl_device" "sme100" {
+data "hsdp_edge_device" "sme100" {
   serial_number = "S4439394855830303"
 }
 
 output "sme100_status" {
-  value = data.hsdp_stl_device.sme100.status
+  value = data.hsdp_edge_device.sme100.status
 }
 ```
 

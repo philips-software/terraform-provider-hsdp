@@ -1,15 +1,15 @@
-# hsdp_stl_config
-Manage configuration of a STL device. Set `sync` to true to immediately sync the config to the device, otherwise
-you should create a dependency on a `hsdp_stl_sync` resource to batch sync changes.
+# hsdp_edge_config
+Manage configuration of an Edge device. Set `sync` to true to immediately sync the config to the device, otherwise
+you should create a dependency on a `hsdp_edge_sync` resource to batch sync changes.
 
 ## Example usage
 ```hcl
-data "hsdp_stl_device" "sme100" {
+data "hsdp_edge_device" "sme100" {
   serial_number = "S4439394855830303"
 }
 
-resource "hsdp_stl_config" "sme100" {
-  serial_number = data.hsdp_stl_device.sme100.serial_number
+resource "hsdp_edge_config" "sme100" {
+  serial_number = data.hsdp_edge_device.sme100.serial_number
   
   firewall_exceptions {
     ensure_tcp = [2575]
@@ -45,4 +45,4 @@ resource "hsdp_stl_config" "sme100" {
   * `hsdp_secret_key` - (Optional) the HSDP logging secret key
   * `hsdp_ingestor_host` - (Optional) The HSDP logging endpoint
 * `sync` (Optional, boolean) - When set to true syncs the config after mutations. Default is true. 
-  Set this to false if you want to batch sync to your device using `hsdp_stl_sync`
+  Set this to false if you want to batch sync to your device using `hsdp_edge_sync`

@@ -1,9 +1,9 @@
-# hsdp_stl_app
-Manages an app resource on a STL device. At this time resources are synced immediately to the device after create or update.
+# hsdp_edge_app
+Manages an app resource on an Edge device. At this time resources are synced immediately to the device after create or update.
 
 ## Example usage
 ```hcl
-resource "hsdp_stl_app" "myapp" {
+resource "hsdp_edge_app" "myapp" {
   serial_number = var.serial_number
   
   name = "app.yml"
@@ -22,8 +22,8 @@ resource "hsdp_stl_app" "myapp" {
 
 ## Importing
 
-An existing app resource can be imported using `terraform import hsdp_stl_app`, e.g.
+An existing app resource can be imported using `terraform import hsdp_edge_app`, e.g.
 
 ```shell
-> terraform import hsdp_stl_app.myapp 234
+> terraform import hsdp_edge_app.myapp 234
 ```
