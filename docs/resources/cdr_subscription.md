@@ -1,5 +1,6 @@
 # hsdp_cdr_subscription
-Provides a resource for managing [FHIR Subscriptions](https://www.hl7.org/fhir/stu3/subscription.html) in a CDR. 
+
+Provides a resource for managing [FHIR Subscriptions](https://www.hl7.org/fhir/stu3/subscription.html) in a CDR.
 The only supported channel type is `rest-webhook` therefore the `endpoint` and `headers` are top-level arguments.
 
 ## Example Usage
@@ -59,5 +60,5 @@ The following attributes are exported:
 An existing Subscription can be imported using `terraform import hsdp_cdr_subscription`, e.g.
 
 ```bash
-> terraform import hsdp_cdr_subscription.myorg a-guid
+terraform import hsdp_cdr_subscription.myorg a-guid
 ```

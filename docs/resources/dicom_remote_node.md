@@ -1,7 +1,8 @@
 # hsdp_dicom_remote_node
+
 This resource manages DICOM Remote nodes using HSDP provisioned DICOM Store configuration service.
 
-# Example Usage
+## Example Usage
 
 ```hcl
 resource "hsdp_dicom_remote_node" "remote_node_1" {
@@ -25,7 +26,7 @@ resource "hsdp_dicom_remote_node" "remote_node_1" {
 }
 ```
 
-# Argument reference
+## Argument reference
 
 * `config_url` - (Required) The base config URL of the DICOM Store
 * `site_organization_id` - (Required) Site Organization ID for which Gateway to be deployed
@@ -44,6 +45,6 @@ resource "hsdp_dicom_remote_node" "remote_node_1" {
 * `force_delete` - (Optional) By default remote nodes are not deleted by the provider (soft-delete).
   By setting this value to `true` the provider removes the remote node. We strongly suggest enabling this only for ephemeral deployments.
   
-# Attribute reference
-* `id` - The remote node ID
+## Attribute reference
 
+* `id` - The remote node ID

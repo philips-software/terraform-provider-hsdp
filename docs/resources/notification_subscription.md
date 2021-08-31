@@ -1,4 +1,5 @@
 # hsdp_notification_subscription
+
 Create and manage HSDP Notification subscription resources
 
 ## Example usage
@@ -12,12 +13,15 @@ resource "hsdp_notification_subscription" "subscription" {
 ```
 
 ## Argument reference
+
 * `topic_id` - (Required) The UUID of the topic
 * `subscriber_id` - (Required) The UUID of the subscriber
 * `subscription_endpoint` - (Required) The subscription endpoint. Only https protocol is allowed
 
 ## Attribute reference
-* `id` - The subscription ID
+
+*`id` - The subscription ID
 
 ## Importing
+
 Importing a HSDP Notification subscription is supported.

@@ -1,5 +1,6 @@
 # hsdp_iam_user
-Provides details of a given HSDP IAM user. 
+
+Provides details of a given HSDP IAM user.
 
 >Typically, this resource is used to only test account. We highly recommend using the IAM Self serviceUI which HSDP provides for day to day user management tasks
 
@@ -28,7 +29,7 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The UUID of the user
-* `email_address` - The email address of the user. This field is only populated if the IAM user/service used 
+* `email_address` - The email address of the user. This field is only populated if the IAM user/service used
 has sufficient permissions to retrieve this value. It will be blank otherwise.
 
 ## Error conditions

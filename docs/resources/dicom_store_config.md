@@ -1,7 +1,9 @@
 # hsdp_dicom_store_config
+
 This resource manages DICOM store configuration of an HSDP provisioned DICOM Store.
 
-# Example usage
+## Example usage
+
 The following example demonstrates the basic configuration of a DICOM store
 
 ```hcl
@@ -20,7 +22,7 @@ resource "hsdp_dicom_store_config" "dicom" {
 }
 ```
 
-# Argument reference
+## Argument reference
 
 * `config_url` - (Required) The base config URL of the DICOM Store instance
 * `organization_id` - (Required) the IAM organization ID to use for authorization
@@ -30,7 +32,8 @@ resource "hsdp_dicom_store_config" "dicom" {
 * `fhir_store` - (Optional) the FHIR store configuration
   * `mpi_endpoint` - the FHIR mpi endpoint
   
-# Attribute reference
+## Attribute reference
+
 * `qido_url` - QIDO API endpoint URL
 * `stow_url` - STOW API endpoint URL
 * `wado_url` - WADO API endpoint URL

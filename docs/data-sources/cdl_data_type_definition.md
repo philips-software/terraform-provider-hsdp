@@ -15,7 +15,6 @@ output "schema" {
 }
 ```
 
-
 ## Argument Reference
 
 The following arguments are supported:

@@ -17,19 +17,18 @@ resource hsdp_cdl_label_definition "labeldef1" {
 }
 ```
 
-
 ## Argument Reference
 
 The following arguments are supported:
 
 * `cdl_endpoint` - (Required) The CDL instance endpoint to query
 * `study_id` - (Required) The research study id under which label definition has to be created
-* `label_name` -  The label name
-* `label_scope` -	Use this parameter to specify for which CDL Data the LabelDefinition is applicable
-* `labels` - 	Use this parameter to specify your labels, or classes. Add one label for each class.
+* `label_name` - The label name
+* `label_scope` - Use this parameter to specify for which CDL Data the LabelDefinition is applicable
+* `labels` - Use this parameter to specify your labels, or classes. Add one label for each class.
 * `label_def_name` - Name of the label definition
-* `type` - 	Use this parameter to define the label type. Supported Values : cdl/video-classification
-* `description` - Desciption of label definition
+* `type` - Use this parameter to define the label type. Supported Values : cdl/video-classification
+* `description` - Description of label definition
 
 ## Attributes Reference
 

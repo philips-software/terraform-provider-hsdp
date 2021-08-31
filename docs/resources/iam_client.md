@@ -37,7 +37,7 @@ The following arguments are supported:
 * `name` - (Required) The name of the client
 * `description` - (Required) The description of the client
 * `type` - (Required) Either `Public` or `Confidential`
-* `client_id` - (Required) The client id 
+* `client_id` - (Required) The client id
 * `password` - (Required) The password to use (8-16 chars, at least one capital, number, special char)
 * `application_id` - (Required) the application ID (GUID) to attach this client to
 * `global_reference_id` - (Required) Reference identifier defined by the provisioning user. This reference Identifier will be carried over to identify the provisioned resource across deployment instances (ClientTest, Production). Invalid Characters:- "[&+’";=?()\[\]<>]
@@ -57,11 +57,10 @@ The following attributes are exported:
 * `id` - The GUID of the client
 * `disabled` - True if the client is disabled e.g. because the Org is disabled
 
-
 ## Import
 
 An existing client can be imported using `terraform import hsdp_iam_client`, e.g.
 
 ```shell
-> terraform import hsdp_iam_client.myclient a-guid
+terraform import hsdp_iam_client.myclient a-guid
 ```

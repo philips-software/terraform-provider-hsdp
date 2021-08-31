@@ -1,4 +1,5 @@
 # hsdp_iam_proposition
+
 Provides a resource for managing HSDP IAM proposition belonging to an Organization.
 
 ## Example Usage
@@ -33,6 +34,5 @@ The following attributes are exported:
 An existing proposition can be imported using `terraform import hsdp_iam_proposition`, e.g.
 
 ```shell
-$ terraform import hsdp_iam_proposition.myprop a-guid
+terraform import hsdp_iam_proposition.myprop a-guid
 ```
-

@@ -16,7 +16,6 @@ output hsdp_cdl_label_definition{
 }
 ```
 
-
 ## Argument Reference
 
 The following arguments are supported:
@@ -31,11 +30,10 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The GUID of the Label definitions
 * `label_name` -  The label name
-* `label_scope` -	Use this parameter to specify for which CDL Data the LabelDefinition is applicable
-* `labels` - 	Use this parameter to specify your labels, or classes. Add one label for each class.
+* `label_scope` - Use this parameter to specify for which CDL Data the LabelDefinition is applicable
+* `labels` - Use this parameter to specify your labels, or classes. Add one label for each class.
 * `label_def_name` - Name of the label definition
-* `type` - 	Use this parameter to define the label type. Supported Values : cdl/video-classification
-* `description` - Desciption of label definition
+* `type` - Use this parameter to define the label type. Supported Values : cdl/video-classification
+* `description` - Description of label definition
 * `created_by` - User who created this label definition
 * `created_on` - Timestamp when label definition was created
-

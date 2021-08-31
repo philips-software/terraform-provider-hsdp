@@ -1,4 +1,5 @@
 # hsdp_edge_device
+
 Represents an Edge device
 
 ## Example usage
@@ -13,11 +14,12 @@ output "sme100_status" {
 }
 ```
 
-
 ## Argument reference
+
 * `serial_number` - (Required) the serial number of the device
 
 ## Attribute reference
+
 * `id` - The device ID
 * `region` - The region to which this device is connected to
 * `state` - State of the device

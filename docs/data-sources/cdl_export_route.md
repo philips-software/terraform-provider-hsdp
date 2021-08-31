@@ -14,7 +14,6 @@ output hsdp_cdl_export_route {
 }
 ```
 
-
 ## Argument Reference
 
 The following arguments are supported:
@@ -28,13 +27,12 @@ In addition to all arguments above, the following attributes are exported:
 
 * `auto_export` - Boolean variable which indicates whether autoExport is enabled or not
 * `created_by` -  The email ID of the user who created this ExportRoute
-* `created_on` -	Creation-Datetime of this ExportRoute
-* `description` - 	Description string of the ExportRotue
+* `created_on` - Creation-Datetime of this ExportRoute
+* `description` - Description string of the ExportRotue
 * `destination` - Destination details of the ExportRoute (Appears as a JSON string)
-* `display_name` - 	Display name of the ExportRoute
+* `display_name` - Display name of the ExportRoute
 * `export_route_id` - The UUID of the ExportRoute
 * `export_route_name` - Name given to the ExportRoute
 * `source` - Source Clinical Datalake details of the ExportRoute (Appears as a JSON string)
 * `updated_by` - Email ID of the user who updated the ExportRoute
 * `updated_on` - Datetime when the ExportRoute was updated
-

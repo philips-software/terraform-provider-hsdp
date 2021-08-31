@@ -1,4 +1,5 @@
 # hsdp_notification_subscriber
+
 Looks up HSDP Notification subscriber resources
 
 ## Example usage
@@ -10,9 +11,11 @@ data "hsdp_notification_subscriber" "subscriber" {
 ```
 
 ## Argument reference
+
 * `subscriber_id` - The subscriber ID
 
 ## Attribute reference
+
 * `managing_organization_id` - (Required) The UUID of the IAM organization or tenant
 * `managing_organization` - (Required) The name of IAM organization or tenant
 * `subscriber_product_name` - (Required) The name of the product

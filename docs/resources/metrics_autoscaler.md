@@ -1,4 +1,5 @@
 # hsdp_metrics_autoscaler
+
 Manages HSDP Metrics Autoscaler settings for Cloudfoundry applications hosted in an HSDP CF space.
 
 ~> **NOTE:** This resource is only available when the `region` and `uaa_*` keys are set in the provider config
@@ -6,6 +7,7 @@ Manages HSDP Metrics Autoscaler settings for Cloudfoundry applications hosted in
 [Metrics Service Broker](https://www.hsdp.io/documentation/metrics-service-broker)
 
 ## Example Usage
+
 The following resource enables autoscaling of the HSDP CF hosted `myapp`, scaling up to 10 instances maximum.
 The app upscales at 90% CPU utilization and downscales again when CPU usage falls below 5%.
 

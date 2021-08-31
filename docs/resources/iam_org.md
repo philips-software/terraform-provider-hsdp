@@ -1,9 +1,10 @@
 # hsdp_iam_org
-Provides a resource for managing HSDP IAM [organizations](https://www.hsdp.io/documentation/identity-and-access-management-iam/concepts/iam-resource-model). 
+
+Provides a resource for managing HSDP IAM [organizations](https://www.hsdp.io/documentation/identity-and-access-management-iam/concepts/iam-resource-model).
 
 ## Example Usage
 
-The following example creates an org 
+The following example creates an org
 
 ```hcl
 resource "hsdp_iam_org" "testorg" {

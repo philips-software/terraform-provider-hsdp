@@ -2,7 +2,8 @@
 page_title: "Working with hsdp_function"
 ---
 # Working with hsdp_function
-The `hsdp_function` resource is a higher level abstraction of the [HSDP Iron](https://www.hsdp.io/documentation/ironio-service-broker) 
+
+The `hsdp_function` resource is a higher level abstraction of the [HSDP Iron](https://www.hsdp.io/documentation/ironio-service-broker)
 service. It uses an Iron service broker instance together with an (optional) function Gateway running in Cloud foundry. This combination
 unlocks capabilities beyond the standard Iron services:
 
@@ -10,7 +11,7 @@ unlocks capabilities beyond the standard Iron services:
 - Manage Iron codes fully via Terraform
 - **CRON** compatible scheduling of Docker workloads using Terraform, leapfrogging Iron.io scheduling capabilities
 - Full control over the Docker container **ENVIRONMENT** variables, allowing easy workload configuration
-- Automatic encryption of workload payloads 
+- Automatic encryption of workload payloads
 - Synchronously call a Docker workload running on an Iron Worker, with **streaming support**
 - Asynchronously schedule a Docker workload with HTTP Callback support (POST output of workload)
 - Function Gateway can be configured with Token auth (default)
@@ -18,7 +19,7 @@ unlocks capabilities beyond the standard Iron services:
 - Asynchronous jobs are scheduled and can take advantage of Iron autoscaling
 - Designed to be **Iron agnostic**
 
-# Configuring the backend
+## Configuring the backend
 
 The execution plane is pluggable but at this time we only support  the `siderite` backend type which utilizes the HSDP Iron services.
 The `siderite` backend should be provisioned using the [siderite-backend](https://registry.terraform.io/modules/philips-labs/siderite-backend/cloudfoundry/latest) terraform module.
@@ -45,7 +46,7 @@ Cloud foundry space. If no space is specified one will be created automatically.
 
 > The (optional) Gateway app is very lean and is set up to use no more than 64MB RAM
 
-# Defining your first function
+## Defining your first function
 
 With the above module in place you can continue defining a function:
 
@@ -62,6 +63,7 @@ resource "hsdp_function" "cuda_test" {
 ```
 
 When applied, the provider will perform the following actions:
+
 - Create an iron `code` based on the specified docker image
 - Create two (2) `schedules` in the Iron backend which use the `code`, one for sychronous calls and one for asychnronous calls
 
@@ -74,19 +76,22 @@ The `hsdp_function` resource will export a number of attributes:
 | `auth_type` |  The auth type conifguration of the API gateway |
 | `token` | The security token to use for authenticating against the endpoints |
 
-# Creating your own Docker function image
+## Creating your own Docker function image
+
 A `hsdp_function` compatible Docker image needs to adhere to a number of criteria. We use
-a helper application called `siderite`. Siderite started as a convenience tool to ease Iron Worker usage. It now has a 
-`function` mode where it will look for an `/app/server` (configurable) and execute it. The server should start up and 
+a helper application called `siderite`. Siderite started as a convenience tool to ease Iron Worker usage. It now has a
+`function` mode where it will look for an `/app/server` (configurable) and execute it. The server should start up and
 listen on port `8080` for regular HTTP requests. The siderite binary will establish a connection to the gateway and wait
-for synchronous requests to come in. 
+for synchronous requests to come in.
 
 ## Asynchronous function
-In asychronous mode the Siderite helper will pull the payload from the Gateway and execute the request
+
+In asynchronous mode the Siderite helper will pull the payload from the Gateway and execute the request
 (again by spawning `/app/server`). It will `POST` the response back to a URL specified in the original request Header called
 `X-Callback-URL` header.
 
 ## Example Docker file
+
 ```dockerfile
 FROM golang:1.16.5-alpine3.14 as builder
 RUN apk add --no-cache git openssh gcc musl-dev
@@ -111,16 +116,19 @@ COPY --from=builder /src/server /app
 
 CMD ["/app/siderite","function"]
 ```
+
 Notes:
+
 - The above docker image builds a Go binary from source and copies it as `/app/server` in the final image
 - You can use ANY programming language (even COBOL), as long as you produce an executable binary or script which spawns
   listens on port `8080` after startup.
 - We pull the `siderite` binary from the official `philipslabs/siderite` registry. Use a version tag for stability.
 - The `CMD` statement should execute `/app/siderite function` as the main command
-- If your function is always scheduled use `/app/siderite task` instead. This will automatically exit after a single run. 
+- If your function is always scheduled use `/app/siderite task` instead. This will automatically exit after a single run.
 - Include any additional tools in your final image
 
-## Example using curl:
+## Example using curl
+
 ```text
 curl -v \
     -X POST \
@@ -128,10 +136,12 @@ curl -v \
     -H "X-Callback-URL: https://hook.bin/XYZ" \
     https://hsdp-func-gateway-yyy.eu-west.philips-healthsuite.com/function/zzz
 ```
+
 This would schedule the function to run. The result of the request will then be posted to `https://hook.bin/XYZ`. Calls
 will be queued up and picked up by workers.
 
-# Scheduling a function to run periodically (Task)
+## Scheduling a function to run periodically (Task)
+
 Enabling the gateway in the `siderite` backend unlocks full **CRON** compatible scheduling of `hsdp_function` resources.
 It provides much finer control over scheduling behaviour compared to the standard Iron.io `run_every`
 option. To achieve this the gateway runs an internal CRON scheduler which is driven by the provider managed schedule entries
@@ -151,6 +161,7 @@ resource "hsdp_function" "cuda_test" {
   }
 }
 ```
+
 The above example would queue your `hsdp_function` every day at exactly 3.14pm.
 The following one would queue your function every Sunday morning at 5am:
 
@@ -189,6 +200,7 @@ resource "hsdp_function" "cuda_test" {
   }
 }
 ```
+
 This will run your function every 20 minutes.
 
 -> Always set a timeout value for your scheduled function. This sets a limit on the runtime for each invocation.
@@ -206,7 +218,8 @@ all x min = */x
 ```
 
 ## Function vs Task
-The `hsdp_function` resource supports defining functions which are automatically executed 
+
+The `hsdp_function` resource supports defining functions which are automatically executed
 periodically i.e. `Tasks`. A Docker image which defines a task should use the following `CMD`:
 
 ```dockerfile
@@ -216,11 +229,13 @@ CMD ["/app/siderite","task"]
 This ensures that after a single run the container exits gracefully instead of waiting to timeout.
 
 ## Naming convention
-Please name and publish your `hsdp_function` compatible Docker images using a repository name starting with `hsdp-function-...`. 
-This will help others identify the primary usage pattern for your image. 
+
+Please name and publish your `hsdp_function` compatible Docker images using a repository name starting with `hsdp-function-...`.
+This will help others identify the primary usage pattern for your image.
 If your image represents a task, please use the prefix `hsdp-task-...`
 
-# Gateway authentication
+## Gateway authentication
+
 The gateway supports a number of authentication methods which you can configure via the `auth_type` argument.
 
 | Name | Description |
@@ -229,8 +244,8 @@ The gateway supports a number of authentication methods which you can configure 
 | `token` | The default. Token based authentication |
 | `iam`  | [HSDP IAM](https://www.hsdp.io/documentation/identity-and-access-management-iam) based authentication |
 
-
 ## Token based authentication
+
 The default authentication method is token based. The endpoint check the following HTTP header for the token
 
 ```http
@@ -240,6 +255,7 @@ Authorization: Token TOKENHERE
 if the token matches up the request is allowed.
 
 ## IAM integration
+
 The gateway also supports Role Based Access Control (RBAC) using HSDP IAM. The following values should be added to the
 siderite backend module block:
 
@@ -253,5 +269,6 @@ environment = {
   AUTH_IAM_ROLES         = "HSDP_FUNCTION"
 }
 ```
+
 With the above configuration the gateway will do a introspect call on the Bearer token and if the user/service has the
 `HSDP_FUNCTION` role in either of the ORGs specified will be allowed to execute the function.

@@ -1,7 +1,9 @@
 # hsdp_dicom_gateway_config
+
 This resource manages DICOM Gateway configuration for Store and QueryRetrieve services using HSDP provisioned DICOM Store configuration service.
 
-# Example usage
+## Example usage
+
 The following example demonstrates the basic configuration of a DICOM Gateway
 
 ```hcl
@@ -52,7 +54,7 @@ resource "hsdp_dicom_gateway_config" "dicom_gateway" {
 }
 ```
 
-# Argument reference
+## Argument reference
 
 * `config_url` - (Required) The base config URL of the DICOM Store
 * `organization_id` - (Required) The site organization ID
@@ -78,5 +80,3 @@ resource "hsdp_dicom_gateway_config" "dicom_gateway" {
     * `allow_any` - Allow any. Value can be `true` or `false`
     * `ae_title` - AE title. Allowed characters for aetitle are `A-Za-z0-9\\s/+=_-`. Eg. `DicomQueryRetrieveScp`
     * `site_organization_id` - Site Organization ID for which Gateway to be deployed
-
-# Attribute reference

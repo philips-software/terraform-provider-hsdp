@@ -1,4 +1,5 @@
 # hsdp_notification_producers
+
 Search for Notification producers
 
 ## Example usage
@@ -10,9 +11,11 @@ data "hsdp_notification_producer" "producer" {
 ```
 
 ## Argument reference
+
 * `managing_organization_id` - (Required) The UUID of the managing IAM organization for the producers
 
 ## Attribute reference
+
 * `managing_organization` - The name of IAM organization or tenant
 * `producer_product_name` -  TThe name of the product
 * `producer_service_name` - The name of the service within the product

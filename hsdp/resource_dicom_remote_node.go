@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -67,6 +68,10 @@ func resourceDICOMRemoteNode() *schema.Resource {
 							Optional: true,
 							Default:  104,
 						},
+						"network_timeout": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
 						// ---Advanced features start
 						"pdu_length": {
 							Type:     schema.TypeInt,
@@ -77,10 +82,6 @@ func resourceDICOMRemoteNode() *schema.Resource {
 							Optional: true,
 						},
 						"association_idle_timeout": {
-							Type:     schema.TypeInt,
-							Optional: true,
-						},
-						"network_timeout": {
 							Type:     schema.TypeInt,
 							Optional: true,
 						},
@@ -128,13 +129,12 @@ func resourceDICOMRemoteNodeRead(_ context.Context, d *schema.ResourceData, m in
 		node, resp, err = client.Config.GetRemoteNode(d.Id(), nil)
 		return checkForPermissionErrors(client, resp, err)
 	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	_ = d.Set("title", node.Title)
 	_ = d.Set("ae_title", node.AETitle)
-	// TODO: set other field
 	return diags
 }
 
@@ -150,15 +150,36 @@ func resourceDICOMRemoteNodeCreate(ctx context.Context, d *schema.ResourceData, 
 		Title:   d.Get("title").(string),
 		AETitle: d.Get("ae_title").(string),
 	}
+	if v, ok := d.GetOk("network_connection"); ok {
+		vL := v.(*schema.Set).List()
+		networkConnection := dicom.NetworkConnection{}
+		for _, vi := range vL {
+			mVi := vi.(map[string]interface{})
+			networkConnection.IsSecure = mVi["is_secure"].(bool)
+			networkConnection.HostName = mVi["hostname"].(string)
+			networkConnection.IPAddress = mVi["ip_address"].(string)
+			networkConnection.DisableIPv6 = mVi["disable_ipv6"].(bool)
+
+			networkConnection.Port = mVi["port"].(int)
+			networkConnection.NetworkTimeout = mVi["network_timeout"].(int)
+			networkConnection.AdvancedSettings.PDULength = mVi["pdu_length"].(int)
+			networkConnection.AdvancedSettings.ArtimTimeOut = mVi["association_idle_timeout"].(int)
+		}
+		node.NetworkConnection = networkConnection
+	}
+
 	var created *dicom.RemoteNode
 	operation := func() error {
 		var resp *dicom.Response
 		created, resp, err = client.Config.CreateRemoteNode(node)
 		return checkForPermissionErrors(client, resp, err)
 	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
 		return diag.FromErr(err)
+	}
+	if created == nil || created.ID == "" {
+		return diag.FromErr(fmt.Errorf("failed to create remote node, even though no error was reported"))
 	}
 	d.SetId(created.ID)
 	return resourceDICOMRemoteNodeRead(ctx, d, m)

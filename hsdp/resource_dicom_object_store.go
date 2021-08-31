@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -157,7 +158,7 @@ func resourceDICOMObjectStoreDelete(_ context.Context, d *schema.ResourceData, m
 		})
 		return checkForPermissionErrors(client, resp, err)
 	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -184,7 +185,7 @@ func resourceDICOMObjectStoreRead(_ context.Context, d *schema.ResourceData, m i
 		})
 		return checkForPermissionErrors(client, resp, err)
 	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -282,9 +283,12 @@ func resourceDICOMObjectStoreCreate(ctx context.Context, d *schema.ResourceData,
 		})
 		return checkForPermissionErrors(client, resp, err)
 	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
 		return diag.FromErr(err)
+	}
+	if created == nil || created.ID == "" {
+		return diag.FromErr(fmt.Errorf("failed to create object store, even though no error was reported"))
 	}
 	d.SetId(created.ID)
 	return resourceDICOMObjectStoreRead(ctx, d, m)

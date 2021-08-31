@@ -1,4 +1,5 @@
 # hsdp_notification_subscription
+
 Looks up  HSDP Notification subscription resources
 
 ## Example usage
@@ -10,9 +11,11 @@ data "hsdp_notification_subscription" "subscription" {
 ```
 
 ## Argument reference
+
 * `id` = (Optional) The UUID of the subscription
 
 ## Attribute reference
+
 * `managed_organization_id` - (Optional) The managed organization id
 * `managed_organization` - (Optional) The managed organization name
 * `topic_id` - (Optional) The UUID of the topic

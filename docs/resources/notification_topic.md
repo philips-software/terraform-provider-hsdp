@@ -1,4 +1,5 @@
 # hsdp_notification_topic
+
 Create and manage HSDP Notification Topic resources
 
 ## Example usage
@@ -17,6 +18,7 @@ resource "hsdp_notification_topic" "topic" {
 ```
 
 ## Argument reference
+
 * `name` - (Required) The name of a topic. The topic name length is restricted to a maximum of 256 characters. The special characters allowed are `-` and `_`.
 * `producer_id` - (Required) The UUID of the producer
 * `scope` - (Required) The intended scope of this topic. Can be either `public` or `private`
@@ -42,7 +44,9 @@ Private topics will not allow * for the organization value.
 * `description` - (Optional) The intended usage of this topic
 
 ## Attribute reference
+
 * `id` - The topic ID
 
 ## Importing
+
 Importing a HSDP Notification topic is supported.
