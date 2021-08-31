@@ -1,4 +1,5 @@
 # hsdp_iam_user
+
 Provides a resource for managing an HSDP IAM user. 
 When a new user is created an invitation email is triggered with a validity of 72 hours. 
 If not activated within this period IAM will purge the account.

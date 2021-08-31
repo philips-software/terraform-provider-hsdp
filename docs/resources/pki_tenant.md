@@ -36,7 +36,8 @@ resource "hsdp_pki_tenant" "tenant" {
 }
 ```
 
-## Argument reference 
+## Argument reference
+
 The following arguments are supported:
 
 * `organization_name` - (Required) The CF organization name to use
@@ -44,25 +45,30 @@ The following arguments are supported:
 * `role` - (Required) A role definition. Muliple roles are supported
 * `ca` - (Required) The Certificate Authority information to use.
   * `common_name` - (Required) The common name to use
-    
+
 Each `role` definition takes the following arguments:
+
 * `name` - (Required) The role name. This is used for lookup
 * `key_type` - (Required) The key type. Values [`ec`, `rsa`]
-* `key_bits` - (Required, int) Key length. Typically `384` for `ec` key types. 
+* `key_bits` - (Required, int) Key length. Typically `384` for `ec` key types.
 * `client_flags` - (Required, bool) Allow use on clients
 * `server_flags` - (Required, bool) Allow use on servers
 * `allow_any_name` - (Required, bool) Allow any name
 * `allow_ip_sans` - (Required, bool) Allow IP Subject Alternative Names (SAN)
 * `allow_subdomains` - (Required, bool) Allow subdomains to be created
 * `allow_any_name` - (Required, bool) Allow any name to be used
-* `allowed_other_sans` - (Required, list(string)) List of allowed other SANs. Specifying a single '*' entry will allow any other sans
-* `allowed_uri_sans` - (Required, list(string)) List of allowed URI SANs. Values can contain glob patterns (e.g. `spiffe://hostname/*`)
+* `allowed_other_sans` - (Required, list(string)) List of
+  allowed other SANs. Specifying a single '*' entry will allow any other sans
+* `allowed_uri_sans` - (Required, list(string)) List of allowed
+  URI SANs. Values can contain glob patterns (e.g. `spiffe://hostname/*`)
 * `allowed_domains` - (Optional, list(string)) List of allowed domains
 * `enforce_hostnames` - (Optional, bool) Enforce hostnames. Default: `false`
 
 ## Attribute reference
+
 The following attributes are exported:
 
-* `id` - The HSDP PKI `logical_path` of the tenant. The Terraform provider uses this as the Tenant ID
+* `id` - The HSDP PKI `logical_path` of the tenant.
+  The Terraform provider uses this as the Tenant ID
 * `logical_path` - Same as `id`. This is for consistency.
 * `private_key_pem` - The private key in PEM format

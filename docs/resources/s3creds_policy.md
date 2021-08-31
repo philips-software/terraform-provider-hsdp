@@ -1,4 +1,5 @@
 # hsdp_s3creds_policy
+
 Provides a resource for managing HSDP S3 Credentials policies
 
 > This resource is only available when `credentials_url` is set in the provider config
@@ -35,9 +36,10 @@ POLICY
 
 The following arguments are supported:
 
-* `product_key` - (Required) The product key (tenant) for which this policy should apply to
-* `policy` - (Required) The policy definition. This is a JSON string as per HSDP S3 Credentials documentation
-
+* `product_key` - (Required) The product key (tenant) for which this
+   policy should apply to
+* `policy` - (Required) The policy definition. This is a JSON string as per
+   HSDP S3 Credentials documentation
 
 ## Attributes Reference
 
