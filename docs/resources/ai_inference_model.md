@@ -3,6 +3,7 @@
 Manages HSDP AI Inference models.
 
 ## Example usage
+
 ```hcl
 data "hsdp_config" "inference" {
   service = "inference"
@@ -48,6 +49,7 @@ resource "hsdp_ai_inference_model" "model" {
 ```
 
 ## Argument reference
+
 The following arguments are supported:
 
 * `endpoint` - (Required) The AI Inference instance endpoint
@@ -62,10 +64,11 @@ The following arguments are supported:
 * `additional_configuration` - (Optional)
 
 ## Attribute reference
+
 In addition to all arguments above, the following attributes are exported:
 attributes are exported:
 
 * `id` - The GUID of the Model
-* `reference` - The reference of this Model 
+* `reference` - The reference of this Model
 * `created` - The date this Model  was created
 * `created_by` - Who created the Model

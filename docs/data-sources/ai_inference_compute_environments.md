@@ -3,6 +3,7 @@
 Retrieves AI Inference Compute Environments
 
 ## Example usage
+
 ```hcl
 data "hsdp_config" "inference" {
   service = "inference"
@@ -18,13 +19,13 @@ data "hsdp_ai_inference_compute_environments" "envs" {
 }
 ```
 
-
 ## Argument reference
-* `endpoint`- (Required) the AI Infernece endpoint
+
+* `endpoint`- (Required) the AI Inference endpoint
 
 ## Attribute reference
 
 The following attributes are exported:
 
 * `ids` -  The list of container host IDs
-* `names` - The list of container host names. This matches up with the `ids` list index.
+* `names` - The list of container host names. This matches up with the `ids` list index

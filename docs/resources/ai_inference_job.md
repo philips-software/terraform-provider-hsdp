@@ -43,26 +43,28 @@ resource "hsdp_ai_inference_job" "job" {
 ```
 
 ## Argument reference
+
 The following arguments are supported:
 
 * `endpoint` - (Required) The AI Inference instance endpoint
 * `name` - (Required) The name of Compute Environment
 * `compute_target` - (Required) The compute Target to use
-  * `reference` - (Required) The reference of the Compute Target 
+  * `reference` - (Required) The reference of the Compute Target
 * `model` - (Optional) The model to use
-  * `reference` - (Required) The reference of the Inference module 
+  * `reference` - (Required) The reference of the Inference module
 * `description` - (Optional) Description of the Compute Target
 * `timeout` - (Optional) How long the job should run max.
 * `input` - (Optional) Input data. Can have mulitple
   * `name` - (Required) Name of the input
   * `url` - (Required) URL pointing to the input
 * `output` - (Optional) Output data. Can have mulitple
-    * `name` - (Required) Name of the output
-    * `url` - (Required) URL pointing to the output
+  * `name` - (Required) Name of the output
+  * `url` - (Required) URL pointing to the output
 * `environment` - (Optional, Map) Environment to set for Job
 * `command_args` - (Optional, list(string)) Arguments to use for job
 
 ## Attributes reference
+
 In addition to all arguments above, the following attributes are exported:
 attributes are exported:
 
@@ -81,5 +83,4 @@ An existing Compute Environment can be imported using `terraform import hsdp_ai_
 
 ```bash
 terraform import hsdp_ai_inference_compute_target.target a-guid
-
-
+```

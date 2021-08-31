@@ -1,7 +1,9 @@
 # hsdp_ai_inference_compute_targets
+
 Retrieves AI Inference Compute Targets
 
 ## Example usage
+
 ```hcl
 data "hsdp_config" "inference" {
   service = "inference"
@@ -18,6 +20,7 @@ data "hsdp_ai_inference_compute_targets" "targets" {
 ```
 
 ## Argument reference
+
 * `endpoint`- (Required) the AI Infernece endpoint
 
 ## Attribute reference
