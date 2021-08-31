@@ -9,15 +9,15 @@ import (
 	"github.com/philips-software/go-hsdp-api/stl"
 )
 
-func resourceSTLCustomCert() *schema.Resource {
+func resourceEdgeCustomCert() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		CreateContext: resourceSTLCustomCertCreate,
-		ReadContext:   resourceSTLCustomCertRead,
-		UpdateContext: resourceSTLCustomCertUpdate,
-		DeleteContext: resourceSTLCustomCertDelete,
+		CreateContext: resourceEdgeCustomCertCreate,
+		ReadContext:   resourceEdgeCustomCertRead,
+		UpdateContext: resourceEdgeCustomCertUpdate,
+		DeleteContext: resourceEdgeCustomCertDelete,
 
 		Schema: map[string]*schema.Schema{
 			"serial_number": {
@@ -46,7 +46,7 @@ func resourceSTLCustomCert() *schema.Resource {
 	}
 }
 
-func resourceSTLCustomCertDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceEdgeCustomCertDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
@@ -71,7 +71,7 @@ func resourceSTLCustomCertDelete(ctx context.Context, d *schema.ResourceData, m 
 	return diags
 }
 
-func resourceSTLCustomCertUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceEdgeCustomCertUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
@@ -100,7 +100,7 @@ func resourceSTLCustomCertUpdate(ctx context.Context, d *schema.ResourceData, m 
 	return diags
 }
 
-func resourceSTLCustomCertRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceEdgeCustomCertRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
@@ -126,7 +126,7 @@ func resourceSTLCustomCertRead(ctx context.Context, d *schema.ResourceData, m in
 	return diags
 }
 
-func resourceSTLCustomCertCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceEdgeCustomCertCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 	var client *stl.Client

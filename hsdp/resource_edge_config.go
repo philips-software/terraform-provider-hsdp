@@ -16,16 +16,16 @@ const (
 	clearOnDestroyDefault = true
 )
 
-func resourceSTLConfig() *schema.Resource {
+func resourceEdgeConfig() *schema.Resource {
 	return &schema.Resource{
 		SchemaVersion: 1,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		CreateContext: resourceSTLConfigCreate,
-		ReadContext:   resourceSTLConfigRead,
-		UpdateContext: resourceSTLConfigUpdate,
-		DeleteContext: resourceSTLConfigDelete,
+		CreateContext: resourceEdgeConfigCreate,
+		ReadContext:   resourceEdgeConfigRead,
+		UpdateContext: resourceEdgeConfigUpdate,
+		DeleteContext: resourceEdgeConfigDelete,
 
 		Schema: map[string]*schema.Schema{
 			"serial_number": {
@@ -138,7 +138,7 @@ func containsString(haystack []string, needle string) bool {
 	return false
 }
 
-func resourceSTLConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceEdgeConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
@@ -163,13 +163,13 @@ func resourceSTLConfigDelete(ctx context.Context, d *schema.ResourceData, m inte
 	if _, ok := d.GetOk("logging"); ok {
 		_, err = client.Config.UpdateAppLogging(ctx, loggingRef)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppLogging: %w", err))
+			return diag.FromErr(fmt.Errorf("hsdp_edge_config: UpdateAppLogging: %w", err))
 		}
 	}
 	if _, ok := d.GetOk("firewall_exceptions"); ok && clearFirewallExceptionsOnDestroy(d) {
 		currentSettings, err := client.Config.GetFirewallExceptionsBySerial(ctx, serialNumber)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("delete STL config: %w", err))
+			return diag.FromErr(fmt.Errorf("delete Edge config: %w", err))
 		}
 		fwExceptionRef.TCP = currentSettings.TCP
 		fwExceptionRef.UDP = currentSettings.UDP
@@ -189,7 +189,7 @@ func resourceSTLConfigDelete(ctx context.Context, d *schema.ResourceData, m inte
 		}
 		_, err = client.Config.UpdateAppFirewallExceptions(ctx, fwExceptionRef)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppFirewallExceptions: %w", err))
+			return diag.FromErr(fmt.Errorf("hsdp_edge_config: UpdateAppFirewallExceptions: %w", err))
 		}
 	}
 	syncSTLIfNeeded(ctx, client, d, m)
@@ -197,8 +197,8 @@ func resourceSTLConfigDelete(ctx context.Context, d *schema.ResourceData, m inte
 	return diags
 }
 
-func resourceSTLConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	return resourceSTLConfigCreate(ctx, d, m)
+func resourceEdgeConfigUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	return resourceEdgeConfigCreate(ctx, d, m)
 }
 
 func resourceDataToInput(ctx context.Context, client *stl.Client, fwExceptions *stl.UpdateAppFirewallExceptionInput, appLogging *stl.UpdateAppLoggingInput, d *schema.ResourceData, m interface{}) error {
@@ -356,7 +356,7 @@ func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.
 	return nil
 }
 
-func resourceSTLConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceEdgeConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
@@ -386,7 +386,7 @@ func resourceSTLConfigRead(ctx context.Context, d *schema.ResourceData, m interf
 	return diags
 }
 
-func resourceSTLConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceEdgeConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var client *stl.Client
 	var err error
@@ -408,20 +408,20 @@ func resourceSTLConfigCreate(ctx context.Context, d *schema.ResourceData, m inte
 	if _, ok := d.GetOk("logging"); ok {
 		_, err = client.Config.UpdateAppLogging(ctx, loggingRef)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppLogging: %w", err))
+			return diag.FromErr(fmt.Errorf("hsdp_edge_config: UpdateAppLogging: %w", err))
 		}
 	}
 	if _, ok := d.GetOk("firewall_exceptions"); ok {
 		_, err = client.Config.UpdateAppFirewallExceptions(ctx, fwExceptionRef)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("hsdp_stl_config: UpdateAppFirewallExceptions: %w", err))
+			return diag.FromErr(fmt.Errorf("hsdp_edge_config: UpdateAppFirewallExceptions: %w", err))
 		}
 	}
 	if d.IsNewResource() {
 		d.SetId(loggingRef.SerialNumber)
 	}
 	syncSTLIfNeeded(ctx, client, d, m)
-	return resourceSTLConfigRead(ctx, d, m)
+	return resourceEdgeConfigRead(ctx, d, m)
 }
 
 func clearFirewallExceptionsOnDestroy(d *schema.ResourceData) bool {

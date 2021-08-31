@@ -8,16 +8,16 @@ import (
 	"github.com/philips-software/go-hsdp-api/stl"
 )
 
-func resourceSTLSync() *schema.Resource {
+func resourceEdgeSync() *schema.Resource {
 	return &schema.Resource{
-		Description:   `The ` + "`hsdp_stl_sync`" + ` resource syncs device config to the actual device.`,
-		CreateContext: resourceSTLSyncCreate,
-		ReadContext:   resourceSTLSyncRead,
-		DeleteContext: resourceSTLSyncDelete,
+		Description:   `The ` + "`hsdp_edge_sync`" + ` resource syncs device config to the actual device.`,
+		CreateContext: resourceEdgeSyncCreate,
+		ReadContext:   resourceEdgeSyncRead,
+		DeleteContext: resourceEdgeSyncDelete,
 
 		Schema: map[string]*schema.Schema{
 			"triggers": {
-				Description: "A map of arbitrary strings that, when changed, will force the 'hsdp_stl_sync' resource to be replaced, re-sync conifg with the device.",
+				Description: "A map of arbitrary strings that, when changed, will force the 'hsdp_edge_sync' resource to be replaced, re-sync conifg with the device.",
 				Type:        schema.TypeMap,
 				Required:    true,
 				ForceNew:    true,
@@ -31,16 +31,16 @@ func resourceSTLSync() *schema.Resource {
 	}
 }
 
-func resourceSTLSyncDelete(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+func resourceEdgeSyncDelete(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	d.SetId("")
 	return diag.Diagnostics{}
 }
 
-func resourceSTLSyncRead(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
+func resourceEdgeSyncRead(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	return diag.Diagnostics{}
 }
 
-func resourceSTLSyncCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceEdgeSyncCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
@@ -57,7 +57,7 @@ func resourceSTLSyncCreate(ctx context.Context, d *schema.ResourceData, m interf
 	serialNumber := d.Get("serial_number").(string)
 	err = client.Devices.SyncDeviceConfig(ctx, serialNumber)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("hsdp_stl_sync: %w", err))
+		return diag.FromErr(fmt.Errorf("hsdp_edge_sync: %w", err))
 	}
 	d.SetId(serialNumber)
 	return diags

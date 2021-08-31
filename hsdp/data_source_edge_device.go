@@ -8,9 +8,9 @@ import (
 	"github.com/philips-software/go-hsdp-api/stl"
 )
 
-func dataSourceSTLDevice() *schema.Resource {
+func dataSourceEdgeDevice() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceSTLDeviceRead,
+		ReadContext: dataSourceEdgeDeviceRead,
 		Schema: map[string]*schema.Schema{
 			"endpoint": {
 				Type:     schema.TypeString,
@@ -49,7 +49,7 @@ func dataSourceSTLDevice() *schema.Resource {
 
 }
 
-func dataSourceSTLDeviceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceEdgeDeviceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
@@ -67,7 +67,7 @@ func dataSourceSTLDeviceRead(ctx context.Context, d *schema.ResourceData, m inte
 	serialNumber := d.Get("serial_number").(string)
 	device, err := client.Devices.GetDeviceBySerial(ctx, serialNumber)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("read STL device: %w", err))
+		return diag.FromErr(fmt.Errorf("read Edge device: %w", err))
 	}
 	_ = d.Set("region", device.Region)
 	_ = d.Set("name", device.Name)

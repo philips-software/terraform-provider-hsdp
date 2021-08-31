@@ -23,7 +23,7 @@ The following arguments are supported:
 
 * `service` - (Required) The HSDP service to lookup
 * `region` - (Optional) The HSDP region. If not set, defaults to provider level config
-* `environment` - (Optional) The HSDP environent. If not set, defaults to provider level config
+* `environment` - (Optional) The HSDP environment. If not set, defaults to provider level config
 
 ## Attributes Reference
 
