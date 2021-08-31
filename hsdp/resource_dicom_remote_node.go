@@ -67,6 +67,10 @@ func resourceDICOMRemoteNode() *schema.Resource {
 							Optional: true,
 							Default:  104,
 						},
+						"network_timeout": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
 						// ---Advanced features start
 						"pdu_length": {
 							Type:     schema.TypeInt,
@@ -77,10 +81,6 @@ func resourceDICOMRemoteNode() *schema.Resource {
 							Optional: true,
 						},
 						"association_idle_timeout": {
-							Type:     schema.TypeInt,
-							Optional: true,
-						},
-						"network_timeout": {
 							Type:     schema.TypeInt,
 							Optional: true,
 						},
@@ -150,6 +150,24 @@ func resourceDICOMRemoteNodeCreate(ctx context.Context, d *schema.ResourceData, 
 		Title:   d.Get("title").(string),
 		AETitle: d.Get("ae_title").(string),
 	}
+	if v, ok := d.GetOk("network_connection"); ok {
+		vL := v.(*schema.Set).List()
+		networkConnection := dicom.NetworkConnection{}
+		for _, vi := range vL {
+			mVi := vi.(map[string]interface{})
+			networkConnection.IsSecure = mVi["is_secure"].(bool)
+			networkConnection.HostName = mVi["hostname"].(string)
+			networkConnection.IPAddress = mVi["ip_address"].(string)
+			networkConnection.DisableIPv6 = mVi["disable_ipv6"].(bool)
+
+			networkConnection.Port = mVi["port"].(int)
+			networkConnection.NetworkTimeout = mVi["network_timeout"].(int)
+			networkConnection.AdvancedSettings.PDULength = mVi["pdu_length"].(int)
+			networkConnection.AdvancedSettings.ArtimTimeOut = mVi["association_idle_timeout"].(int)
+		}
+		node.NetworkConnection = networkConnection
+	}
+
 	var created *dicom.RemoteNode
 	operation := func() error {
 		var resp *dicom.Response
