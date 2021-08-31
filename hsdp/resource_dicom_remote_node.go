@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -128,13 +129,12 @@ func resourceDICOMRemoteNodeRead(_ context.Context, d *schema.ResourceData, m in
 		node, resp, err = client.Config.GetRemoteNode(d.Id(), nil)
 		return checkForPermissionErrors(client, resp, err)
 	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	_ = d.Set("title", node.Title)
 	_ = d.Set("ae_title", node.AETitle)
-	// TODO: set other field
 	return diags
 }
 
@@ -174,9 +174,12 @@ func resourceDICOMRemoteNodeCreate(ctx context.Context, d *schema.ResourceData, 
 		created, resp, err = client.Config.CreateRemoteNode(node)
 		return checkForPermissionErrors(client, resp, err)
 	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
 		return diag.FromErr(err)
+	}
+	if created == nil || created.ID == "" {
+		return diag.FromErr(fmt.Errorf("failed to create remote node, even though no error was reported"))
 	}
 	d.SetId(created.ID)
 	return resourceDICOMRemoteNodeRead(ctx, d, m)
