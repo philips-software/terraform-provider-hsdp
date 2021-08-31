@@ -1,4 +1,5 @@
 # hsdp_notification_subscriber
+
 Create and manage HSDP Notification subscriber resources
 
 ## Example usage
@@ -17,6 +18,7 @@ resource "hsdp_notification_subscriber" "subscriber" {
 ```
 
 ## Argument reference
+
 * `managing_organization_id` - (Required) The UUID of the IAM organization or tenant
 * `managing_organization` - (Required) The name of IAM organization or tenant
 * `subscriber_product_name` - (Required) The name of the product
@@ -27,7 +29,9 @@ resource "hsdp_notification_subscriber" "subscriber" {
 * `description` - (Optional) Description of the subscriber application
 
 ## Attribute reference
+
 * `id` - The subscriber ID
 
 ## Importing
+
 Importing a HSDP Notification producer is supported.

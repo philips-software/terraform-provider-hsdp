@@ -33,4 +33,3 @@ The following attributes are exported:
 * `type` - The organization type e.g. `hospital`
 * `parent_id` - Unique ID of the parent organization. If the current organization itself is a domain organization, then the parent value will be returned as `root`.
 * `external_id` - External ID defined by client that identifies the organization at client side.
-

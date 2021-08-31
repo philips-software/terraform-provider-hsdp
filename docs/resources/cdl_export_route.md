@@ -42,7 +42,6 @@ resource hsdp_cdl_export_route "expRoute1" {
 }
 ```
 
-
 ## Argument Reference
 
 The following arguments are supported:
@@ -50,21 +49,21 @@ The following arguments are supported:
 * `cdl_endpoint` - (Required) The CDL instance endpoint to query
 * `export_route_name` - (Required) The name of the ExportRoute
 * `description` -  Description of the ExportRoute
-* `display_name` -	(Required) Display Name of the ExportRoute
+* `display_name` - (Required) Display Name of the ExportRoute
 * `source_research_study` - (Required) Use this block to specify the details of the source Research Study
-  * `source_research_study_endpoint` - (Required) "The research study endpoint of the source, for eg. https://ROUTE_PREFIX-datalake.cloud.pcftest.com/store/cdl/XXXXXX-f896-4883-80fa-5593cd69556d/Study/a1467792-ef81-11eb-8ac2-477a9e3b09aa"
-  * `allowed_data_objects` - "The DataObject details (multiple blocks of allowed_data_objects are supported) containing resource type and the labels associated to the dataobjects" 
-    * `resource_type` - (Required) "The resource type of the DataObject" 
-    * `associated_labels` 
+  * `source_research_study_endpoint` - (Required) The research study endpoint of the source
+  * `allowed_data_objects` - "The DataObject details (multiple blocks of allowed_data_objects are supported) containing resource type and the labels associated to the dataobjects"
+    * `resource_type` - (Required) "The resource type of the DataObject"
+    * `associated_labels`
       * `label_name` - "Name of the label that is associated with the data object"
       * `approval_required` - "Boolean argument that triggers export automatically when the label is approved"
 * `auto_export` - Boolean argument which shows the status of auto_export
-* `destination_research_study_endpoint` - (Required) This argument represents the destination CDL endpoint 	
+* `destination_research_study_endpoint` - (Required) This argument represents the destination CDL endpoint
 * `service_account_details` - (Required) This block represents the service account details
-    * `service_id` - (Required) This is service_id of the service account used for the export route
-    * `private_key` - (Required) The private key corresponding to the service acccount
-    * `access_token_endpoint` - (Required) The access token endpoint - For ex:- "https://IAM_HOST/oauth2/access_token"
-    * `token_endpoint` - (Required) The token endpoint - For ex:- "https://IAM_HOST/authorize/oauth2/token"
+  * `service_id` - (Required) This is service_id of the service account used for the export route
+  * `private_key` - (Required) The private key corresponding to the service acccount
+  * `access_token_endpoint` - (Required) The access token endpoint - For ex:- "https://IAM_HOST/oauth2/access_token"
+  * `token_endpoint` - (Required) The token endpoint - For ex:- "https://IAM_HOST/authorize/oauth2/token"
 
 ## Attributes Reference
 

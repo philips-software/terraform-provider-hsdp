@@ -1,4 +1,5 @@
 # hsdp_notification_producer
+
 Create and manage HSDP Notification producer resources
 
 ## Example usage
@@ -17,6 +18,7 @@ resource "hsdp_notification_producer" "producer" {
 ```
 
 ## Argument reference
+
 * `managing_organization_id` - (Required) The UUID of the IAM organization or tenant
 * `managing_organization_id` - (Required) The name of IAM organization or tenant
 * `producer_product_name` - (Required) TThe name of the product
@@ -27,7 +29,9 @@ resource "hsdp_notification_producer" "producer" {
 * `description` - (Optional) Description of the producer application
 
 ## Attribute reference
+
 * `id` - The producer ID
 
 ## Importing
+
 Importing a HSDP Notification producer is supported.

@@ -1,4 +1,5 @@
 # hsdp_iam_group
+
 Provides a resource for managing HSDP IAM groups
 
 ## Example Usage
@@ -60,6 +61,5 @@ The following attributes are exported:
 An existing group can be imported using `terraform import hsdp_iam_group`, e.g.
 
 ```shell
-> terraform import hsdp_iam_group.mygroup a-guid
+terraform import hsdp_iam_group.mygroup a-guid
 ```
-

@@ -5,7 +5,7 @@ Retrieve configuration details from services based on region and environment
 ## Example Usage
 
 ```hcl
-data "hsdp_config" "iam_us_east_prod" {
+data "hsdp_config" "iam_us_east_prod" { 
   service = "iam"
   region = "us-east"
   environment = "prod"
@@ -17,6 +17,7 @@ output "iam_url_us_east_prod" {
    value = data.hsdp_config.iam_us_east_prod.url
 }
 ```
+
 ## Argument Reference
 
 The following arguments are supported:

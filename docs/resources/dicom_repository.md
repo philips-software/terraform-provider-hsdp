@@ -1,7 +1,9 @@
 # hsdp_dicom_repository
+
 This resource manages a DICOM repository
 
-# Example Usage
+## Example Usage
+
 ```hcl
 resource "hsdp_dicom_repository" "repo1" {
   config_url = hsdp_dicom_store_config.dicom.config_url
@@ -10,7 +12,7 @@ resource "hsdp_dicom_repository" "repo1" {
 }
 ```
 
-# Argument reference
+## Argument reference
 
 * `config_url` - (Required) The base config URL of the DICOM Store instance
 * `organization_id` - (Required) The organization ID

@@ -1,4 +1,5 @@
 # hsdp_notification_topic
+
 Look up a HSDP Notification Topic resource
 
 ## Example usage
@@ -10,9 +11,11 @@ data "hsdp_notification_topic" "topic" {
 ```
 
 ## Argument reference
+
 * `topic_id` - (Required) The GUID of the topic to look up.
 
 ## Attribute reference
+
 * `producer_id` - The UUID of the producer associated with this topic
 * `scope` - The scope of this topic. Can be either `public` or `private`
 * `allowed_scopes` - The list of allowed scopes

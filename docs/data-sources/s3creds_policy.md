@@ -23,16 +23,19 @@ output "s3_credential_policies_my_org" {
    value = data.hsdp_s3creds_policy.my_org_policies.policies
 }
 ```
+
 ## Argument Reference
 
 The following arguments are supported:
-* `product_key` - (Required) The product key under which to search for policies 
-* `username` - (Optional) The IAM username to authenticate under 
+
+* `product_key` - (Required) The product key under which to search for policies
+* `username` - (Optional) The IAM username to authenticate under
 * `password` - (Optional) The password of `username`
 * `filter` - (Required) The filter conditions block for selecting policies
 
 ### filter options
-* `id` - (Optional) The id (uuid) of the filter 
+
+* `id` - (Optional) The id (uuid) of the filter
 * `managing_org` - (Optional) Finds policies under `managing_org` (uuid)
 * `group_name` - (Optional) Find policies assigned to this group
 

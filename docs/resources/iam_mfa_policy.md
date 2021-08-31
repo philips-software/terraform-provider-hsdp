@@ -14,6 +14,7 @@ resource "hsdp_iam_mfa_policy" "mymfapolicy" {
   active = true
 }
 ```
+
 And the example below creates a server OTP MFA Policy for an individual user
 
 ```hcl
@@ -30,9 +31,9 @@ resource "hsdp_iam_mfa_policy" "joes_policy" {
 The following arguments are supported:
 
 * `type` - (Required) the OTP type. Valid values: [`SOFT_OTP` | `SERVER_OTP`]
-* `user` - (Required) The user UUID to attach this policy to. Conficts with `organization`
+* `user` - (Required) The user UUID to attach this policy to. Conflicts with `organization`
 * `organization` - (Required) The organization to attach this policy to. Conflicts with `user`
-* `active` - (Required) Defaults to true. Set to false to disable MFA for the subject. 
+* `active` - (Required) Defaults to true. Setting to false will disable MFA for the subject.
 * `name` - (Optional) The name of the policy
 * `description` - (Optional) The description of the policy
 
@@ -43,11 +44,10 @@ The following attributes are exported:
 * `id` - The GUID of the MFA policy
 * `version` - The version of the MFA policy
 
-
 ## Import
 
 An existing MFA policy can be imported using `terraform import hsdp_iam_mfa_policy`, e.g.
 
 ```shell
-$ terraform import hsdp_iam_mfa_policy.mymfapolicy a-guid
+terraform import hsdp_iam_mfa_policy.mymfapolicy a-guid
 ```

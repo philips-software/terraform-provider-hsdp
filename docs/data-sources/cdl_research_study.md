@@ -15,7 +15,6 @@ output "uploaders" {
 }
 ```
 
-
 ## Argument Reference
 
 The following arguments are supported:
@@ -36,4 +35,3 @@ In addition to all arguments above, the following attributes are exported:
 * `study_managers` - The list of IAM users who have role STUDYMANAGER
 * `research_scientists` - The list of IAM users who have role RESEARCHSCIENTIST
 * `data_protected_from_deletion` - Is data protected from deletion
-

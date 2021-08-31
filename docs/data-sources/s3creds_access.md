@@ -25,6 +25,7 @@ The following attributes are exported:
 * `access` - JSON response to access request
 
 Example output:
+
 ```json
 [
   {

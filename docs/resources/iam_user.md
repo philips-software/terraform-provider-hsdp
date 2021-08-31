@@ -1,13 +1,13 @@
 # hsdp_iam_user
 
-Provides a resource for managing an HSDP IAM user. 
-When a new user is created an invitation email is triggered with a validity of 72 hours. 
+Provides a resource for managing an HSDP IAM user.
+When a new user is created an invitation email is triggered with a validity of 72 hours.
 If not activated within this period IAM will purge the account.
 The provider will recreate the user in that case.
 
 ## Example Usage
 
-The following example creates a user. 
+The following example creates a user.
 
 ```hcl
 resource "hsdp_iam_user" "developer" {
@@ -30,10 +30,10 @@ The following arguments are supported:
 * `first_name` - (Required) First name of the user
 * `last_name` - (Required) Last name of the user
 * `mobile` - (Optional) Mobile number of the user. E.164 format
-* `password` - (Optional) When specified this will skip the email activation 
+* `password` - (Optional) When specified this will skip the email activation
   flow and immediately activate the IAM account. **Very Important**: you are responsible
-  for sharing this password with the new IAM user through some channel of communication. 
-  No email will be triggered by the system. If unsure, do not set a password so the normal 
+  for sharing this password with the new IAM user through some channel of communication.
+  No email will be triggered by the system. If unsure, do not set a password so the normal
   email activation flow is followed. Finally, any password value changes after user creation
   will have no effect on the users' actual password.
 
@@ -50,4 +50,3 @@ An existing user can be imported using `terraform import hsdp_iam_user`, e.g.
 ```shell
 > terraform import hsdp_iam_user.developer a-guid
 ```
-

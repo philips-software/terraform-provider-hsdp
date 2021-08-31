@@ -1,7 +1,7 @@
 # hsdp_cdl_research_study
 
 Provides a resource for managing HSDP Clinical Data Lake research studies.
-A Research Study is a concept in CDL used to organize the data within Data Lake. 
+A Research Study is a concept in CDL used to organize the data within Data Lake.
 It acts as a container of your clinical trial. Data will be completely isolated,
 an authorization model can be enforced per Research Study.
 
@@ -60,19 +60,18 @@ The following arguments are supported:
   * `email` - (Required) The email address for this data scientist (for display purposes)
   * `institute_id` - (Optional) The institute ID associated with this role
 * `monitor` - (Optional) A monitor role definition for the study
-    * `user_id` (Required) The IAM user ID of the monitor
-    * `email` - (Required) The email address for this monitor (for display purposes)
-    * `institute_id` - (Optional) The institute ID associated with this role
+  * `user_id` (Required) The IAM user ID of the monitor
+  * `email` - (Required) The email address for this monitor (for display purposes)
+  * `institute_id` - (Optional) The institute ID associated with this role
 * `uploader` - (Optional) An uploader role definition for the study
-    * `user_id` (Required) The IAM user ID of the uploader
-    * `email` - (Required) The email address for this uploader (for display purposes)
-    * `institute_id` - (Optional) The institute ID associated with this role    
+  * `user_id` (Required) The IAM user ID of the uploader
+  * `email` - (Required) The email address for this uploader (for display purposes)
+  * `institute_id` - (Optional) The institute ID associated with this role
 * `study_manager` - (Optional) An study manager role definition for the study
-    * `user_id` (Required) The IAM user ID of the study manager
-    * `email` - (Required) The email address for this study manager (for display purposes)
-    * `institute_id` - (Optional) The institute ID associated with this role
+  * `user_id` (Required) The IAM user ID of the study manager
+  * `email` - (Required) The email address for this study manager (for display purposes)
+  * `institute_id` - (Optional) The institute ID associated with this role
 * `data_protected_from_deletion` (Optional) Protects data from being deleted. Default is `false`
-
 
 ## Attributes Reference
 
@@ -85,6 +84,5 @@ In addition to all arguments above, the following attributes are exported:
 An existing research study can be imported using `terraform import hsdp_cdl_research_study`, e.g.
 
 ```shell
-> terraform import hsdp_cdl_research_study.mystudy a-guid
+terraform import hsdp_cdl_research_study.mystudy a-guid
 ```
-

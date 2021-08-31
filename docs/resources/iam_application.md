@@ -21,7 +21,8 @@ The following arguments are supported:
 * `name` - (Required) The name of the application
 * `description` - (Required) The description of the application
 * `proposition_id` - (Required) the proposition ID (GUID) to attach this a application to
-* `global_reference_id` - (Optional, UUIDv4) Reference identifier defined by the provisioning user. Highly recommend to never set this and let Terraform generate a UUID for you. 
+* `global_reference_id` - (Optional, UUIDv4) Reference identifier defined by the provisioning user. Highly recommend to never set this and let Terraform generate a UUID for you.
+
 ## Attributes Reference
 
 The following attributes are exported:
@@ -33,6 +34,5 @@ The following attributes are exported:
 An existing application can be imported using `terraform import hsdp_iam_application`, e.g.
 
 ```shell
-> terraform import hsdp_iam_application.myapp a-guid
+terraform import hsdp_iam_application.myapp a-guid
 ```
-

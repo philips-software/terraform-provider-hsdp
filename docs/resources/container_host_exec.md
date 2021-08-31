@@ -1,4 +1,5 @@
 # hsdp_container_host_exec
+
 Copies content and executes commands on Container Host instances
 
 > This resource is only available when the `cartel_*` keys are set in the provider config
@@ -35,8 +36,8 @@ The following arguments are supported:
 * `file` - (Optional) Block specifying content to be written to the container host after creation
 * `commands` - (Required, list(string)) List of commands to execute after creation of container host
 * `bastion_host` - (Optional) The bastion host to use.  When not set, this will be deduced from the container host location
-* `triggers` - (Optional, list(string)) An list of strings which when changes will trigger recreation of the resource triggering 
-all create files and commands executions.
+* `triggers` - (Optional, list(string)) An list of strings which when changes will trigger recreation of the resource triggering
+   all create files and commands executions.
 
 Each `file` block can contain the following fields. Use either `content` or `source`:
 

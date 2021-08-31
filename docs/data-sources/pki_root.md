@@ -1,7 +1,8 @@
 # hsdp_pki_root
+
 Retrieves the HSDP PKI Root CA and CRL
 
-# Example Usage
+## Example Usage
 
 ```hcl
 
@@ -16,11 +17,13 @@ output "root_crl" {
   value = data.hsdp_pki_root.info.crl_pem
 }
 ```
-# Argument reference
+
+## Argument reference
+
 * `region` - (Optional) the HSDP PKI regional selection
 * `environment` - (Optional) the HSDP PKI environment to use [`client_test` | `prod`]
- 
-# Attribute reference
+
+## Attribute reference
 
 * `ca_pem` - The root CA in PEM format
 * `crl_pem` - The root CRL in PEM format
