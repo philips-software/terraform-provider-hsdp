@@ -9,15 +9,15 @@ import (
 	"github.com/philips-software/go-hsdp-api/stl"
 )
 
-func resourceSTLApp() *schema.Resource {
+func resourceEdgeApp() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		CreateContext: resourceSTLAppCreate,
-		ReadContext:   resourceSTLAppRead,
-		UpdateContext: resourceSTLAppUpdate,
-		DeleteContext: resourceSTLAppDelete,
+		CreateContext: resourceEdgeAppCreate,
+		ReadContext:   resourceEdgeAppRead,
+		UpdateContext: resourceEdgeAppUpdate,
+		DeleteContext: resourceEdgeAppDelete,
 
 		Schema: map[string]*schema.Schema{
 			"serial_number": {
@@ -46,7 +46,7 @@ func resourceSTLApp() *schema.Resource {
 	}
 }
 
-func resourceSTLAppUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceEdgeAppUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
@@ -71,13 +71,13 @@ func resourceSTLAppUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		IsLocked: false,
 	})
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("stl_app: update STL app: %w", err))
+		return diag.FromErr(fmt.Errorf("edge_app: update Edge app: %w", err))
 	}
 	syncSTLIfNeeded(ctx, client, d, m)
 	return diags
 }
 
-func resourceSTLAppDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceEdgeAppDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
@@ -97,14 +97,14 @@ func resourceSTLAppDelete(ctx context.Context, d *schema.ResourceData, m interfa
 		ID: resourceID,
 	})
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("stl_app: delete STL resource: %w", err))
+		return diag.FromErr(fmt.Errorf("edge_app: delete Edge resource: %w", err))
 	}
 	syncSTLIfNeeded(ctx, client, d, m)
 	d.SetId("")
 	return diags
 }
 
-func resourceSTLAppRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceEdgeAppRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
@@ -122,12 +122,12 @@ func resourceSTLAppRead(ctx context.Context, d *schema.ResourceData, m interface
 	_, _ = fmt.Sscanf(d.Id(), "%d", &resourceID)
 	resource, err := client.Apps.GetAppResourceByID(ctx, resourceID)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("stl_app: read STL device: %w", err))
+		return diag.FromErr(fmt.Errorf("edge_app: read Edge device: %w", err))
 	}
 	_ = d.Set("name", resource.Name)
 	content, err := base64.StdEncoding.DecodeString(resource.Content)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("stl_app: decode content: %w", err))
+		return diag.FromErr(fmt.Errorf("edge_app: decode content: %w", err))
 	}
 	_ = d.Set("content", content)
 	_ = d.Set("device_id", resource.DeviceID)
@@ -138,7 +138,7 @@ func resourceSTLAppRead(ctx context.Context, d *schema.ResourceData, m interface
 	return diags
 }
 
-func resourceSTLAppCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceEdgeAppCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
@@ -162,7 +162,7 @@ func resourceSTLAppCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		IsLocked:     false,
 	})
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("stl_app: create STL app: %w", err))
+		return diag.FromErr(fmt.Errorf("edge_app: create Edge app: %w", err))
 	}
 	d.SetId(fmt.Sprintf("%d", resource.ID))
 	syncSTLIfNeeded(ctx, client, d, m)
