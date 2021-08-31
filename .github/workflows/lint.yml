@@ -27,4 +27,8 @@ jobs:
       - uses: actions/checkout@v2
       - uses: DavidAnson/markdownlint-cli2-action@v3
         with:
-          globs: **/*.md
+          globs: |
+            docs/*.md
+            docs/guides/*.md
+            docs/resources/*.md
+            docs/data-sources/*.md
