@@ -3,11 +3,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.19.0
+- Initial AI Inference support
+- NEW: Data source `hsdp_ai_inference_compute_environments`
+- NEW: Data source `hsdp_ai_inference_compute_targets`
+- NEW: Data source `hsdp_ai_inference_instance`
+- NEW: Resource `hsdp_ai_inference_compute_environment`
+- NEW: Resource `hsdp_ai_inference_compute_target`
+- NEW: Resource `hsdp_ai_inference_job`
+- NEW: Resource `hsdp_ai_inference_model`
+- BREAKING: use `edge` instead of `stl` namespace for Edge device support
+- DICOM: Fix remote node parameter reading (#109)
+- DICOM: Reduce retries (#110)
+
 ## v0.18.9
 - Container Host: add readiness check
 
 ## v0.18.8
-- CDL: Add exxport route support
+- CDL: Add export route support
 
 ## v0.18.7
 - CDL: Add Label definition support
