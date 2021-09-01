@@ -5,18 +5,17 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/philips-software/go-hsdp-api/cdl"
 )
 
-func dataSourceCDLResearchStudies() *schema.Resource {
+func dataSourceAIInferenceModels() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceCDLResearchStudiesRead,
+		ReadContext: dataSourceAIInferenceModelsRead,
 		Schema: map[string]*schema.Schema{
-			"cdl_endpoint": {
+			"endpoint": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"titles": {
+			"names": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -31,34 +30,31 @@ func dataSourceCDLResearchStudies() *schema.Resource {
 
 }
 
-func dataSourceCDLResearchStudiesRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*Config)
-
+func dataSourceAIInferenceModelsRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	endpoint := d.Get("cdl_endpoint").(string)
-
-	client, err := config.getCDLClientFromEndpoint(endpoint)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	defer client.Close()
-
-	studies, _, err := client.Study.GetStudies(&cdl.GetOptions{})
+	config := m.(*Config)
+	endpoint := d.Get("endpoint").(string)
+	client, err := config.getAIInferenceClientFromEndpoint(endpoint)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	d.SetId(endpoint + "studies")
+	models, _, err := client.Model.GetModels(nil)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-	var titles []string
+	d.SetId("ai_inference_compute_targets")
+
+	var names []string
 	var ids []string
 
-	for _, study := range studies {
-		titles = append(titles, study.Title)
-		ids = append(ids, study.ID)
+	for _, model := range models {
+		names = append(names, model.Name)
+		ids = append(ids, model.ID)
 	}
-	_ = d.Set("titles", titles)
+	_ = d.Set("names", names)
 	_ = d.Set("ids", ids)
 
 	return diags

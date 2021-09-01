@@ -155,6 +155,10 @@ func Provider(build string) *schema.Provider {
 				Optional:    true,
 				Description: descriptions["debug_log"],
 			},
+			"ai_inference_endpoint": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_org":                   resourceIAMOrg(),
@@ -188,6 +192,10 @@ func Provider(build string) *schema.Provider {
 			"hsdp_notification_subscriber":   resourceNotificationSubscriber(),
 			"hsdp_notification_topic":        resourceNotificationTopic(),
 			"hsdp_notification_subscription": resourceNotificationSubscription(),
+			"hsdp_ai_inference_compute_environment": resourceAIInferenceComputeEnvironment(),
+			"hsdp_ai_inference_compute_target":      resourceAIInferenceComputeTarget(),
+			"hsdp_ai_inference_model":               resourceAIInferenceModel(),
+			"hsdp_ai_inference_job":                 resourceAIInferenceJob(),
 			"hsdp_dicom_gateway_config":      resourceDICOMGatewayConfig(),
 			"hsdp_cdl_research_study":        resourceCDLResearchStudy(),
 			"hsdp_dicom_remote_node":         resourceDICOMRemoteNode(),
@@ -217,6 +225,11 @@ func Provider(build string) *schema.Provider {
 			"hsdp_notification_topic":          dataSourceNotificationTopic(),
 			"hsdp_notification_subscription":   dataSourceNotificationSubscription(),
 			"hsdp_notification_subscriber":     dataSourceNotificationSubscriber(),
+			"hsdp_ai_inference_instance":             dataSourceAIInferenceInstance(),
+			"hsdp_ai_inference_compute_environments": dataSourceAIInferenceComputeEnvironments(),
+			"hsdp_ai_inference_compute_targets":      dataSourceAIInferenceComputeTargets(),
+			"hsdp_ai_inference_jobs":                 dataSourceAIInferenceJobs(),
+			"hsdp_ai_inference_models":               dataSourceAIInferenceModels(),
 			"hsdp_cdl_instance":                dataSourceCDLInstance(),
 			"hsdp_cdl_research_study":          dataSourceCDLResearchStudy(),
 			"hsdp_cdl_research_studies":        dataSourceCDLResearchStudies(),
@@ -293,6 +306,7 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		config.UAAURL = d.Get("uaa_url").(string)
 		config.NotificationURL = d.Get("notification_url").(string)
 		config.TimeZone = "UTC"
+		config.AIInferenceEndpoint = d.Get("ai_inference_endpoint").(string)
 
 		config.setupIAMClient()
 		config.setupS3CredsClient()

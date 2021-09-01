@@ -18,10 +18,9 @@ func dataSourceNotificationTopics() *schema.Resource {
 				Required: true,
 			},
 			"topic_ids": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
-				Set:      schema.HashString,
 			},
 		},
 	}

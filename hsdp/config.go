@@ -7,6 +7,8 @@ import (
 
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/go-retryablehttp"
+	"github.com/philips-software/go-hsdp-api/ai"
+	"github.com/philips-software/go-hsdp-api/ai/inference"
 	"github.com/philips-software/go-hsdp-api/cartel"
 	"github.com/philips-software/go-hsdp-api/cdl"
 	"github.com/philips-software/go-hsdp-api/cdr"
@@ -23,21 +25,22 @@ import (
 // Config contains configuration for the client
 type Config struct {
 	iam.Config
-	BuildVersion      string
-	ServiceID         string
-	ServicePrivateKey string
-	S3CredsURL        string
-	NotificationURL   string
-	STLURL            string
-	CartelHost        string
-	CartelToken       string
-	CartelSecret      string
-	CartelNoTLS       bool
-	CartelSkipVerify  bool
-	RetryMax          int
-	UAAUsername       string
-	UAAPassword       string
-	UAAURL            string
+	BuildVersion        string
+	ServiceID           string
+	ServicePrivateKey   string
+	S3CredsURL          string
+	NotificationURL     string
+	STLURL              string
+	CartelHost          string
+	CartelToken         string
+	CartelSecret        string
+	CartelNoTLS         bool
+	CartelSkipVerify    bool
+	RetryMax            int
+	UAAUsername         string
+	UAAPassword         string
+	UAAURL              string
+	AIInferenceEndpoint string
 
 	iamClient             *iam.Client
 	cartelClient          *cartel.Client
@@ -338,7 +341,46 @@ func (c *Config) getCDLClient(baseURL, tenantID string) (*cdl.Client, error) {
 		DebugLog:       c.DebugLog,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("getFHIRClient: %w", err)
+		return nil, fmt.Errorf("getCDLClient: %w", err)
+	}
+	return client, nil
+}
+
+func (c *Config) getAIInferenceClient(baseURL, tenantID string) (*inference.Client, error) {
+	if c.iamClientErr != nil {
+		return nil, fmt.Errorf("IAM client error in getAIInferenceClient: %w", c.iamClientErr)
+	}
+	if tenantID == "" {
+		return nil, fmt.Errorf("getAIInferenceClient: %w", ErrMissingOrganizationID)
+	}
+	client, err := inference.NewClient(c.iamClient, &ai.Config{
+		AnalyzeURL:     baseURL,
+		OrganizationID: tenantID,
+		DebugLog:       c.DebugLog,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("getAIInferenceClient: %w", err)
+	}
+	return client, nil
+}
+
+func (c *Config) getAIInferenceClientFromEndpoint(endpointURL string) (*inference.Client, error) {
+	if c.iamClientErr != nil {
+		return nil, c.iamClientErr
+	}
+	if endpointURL == "" {
+		endpointURL = c.AIInferenceEndpoint
+	}
+	client, err := inference.NewClient(c.iamClient, &ai.Config{
+		AnalyzeURL:     "http://localhost",
+		OrganizationID: "not-set",
+		DebugLog:       c.DebugLog,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("getAIInferenceClientFromEndpoint: %w", err)
+	}
+	if err = client.SetEndpointURL(endpointURL); err != nil {
+		return nil, err
 	}
 	return client, nil
 }
