@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - BREAKING: use `edge` instead of `stl` namespace for Edge device support
 - DICOM: Fix remote node parameter reading (#109)
 - DICOM: Reduce retries (#110)
+- Documentation fixes
 
 ## v0.18.9
 - Container Host: add readiness check
