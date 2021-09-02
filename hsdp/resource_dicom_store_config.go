@@ -4,12 +4,13 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/dicom"
-	"net/http"
-	"time"
 )
 
 func resourceDICOMStoreConfig() *schema.Resource {
@@ -125,7 +126,7 @@ func resourceDICOMStoreConfigUpdate(_ context.Context, d *schema.ResourceData, m
 				})
 				return checkForPermissionErrors(client, resp, err)
 			}
-			err := backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+			err := backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -156,7 +157,7 @@ func resourceDICOMStoreConfigUpdate(_ context.Context, d *schema.ResourceData, m
 				})
 				return checkForPermissionErrors(client, resp, err)
 			}
-			err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+			err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 			if err != nil {
 				return diag.FromErr(err)
 			}
@@ -227,7 +228,7 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 	}
 	defer client.Close()
 
-	// Refresh token so we hopefully have DICOM permissions to proceed without error
+	// Refresh token, so we hopefully have DICOM permissions to proceed without error
 	_ = client.TokenRefresh()
 
 	// Set up CDR service account
@@ -251,7 +252,7 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 			})
 			return checkForPermissionErrors(client, resp, err)
 		}
-		err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+		err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -283,7 +284,7 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 			})
 			return checkForPermissionErrors(client, resp, err)
 		}
-		err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+		err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -306,7 +307,13 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 }
 
 func checkForPermissionErrors(client *dicom.Client, resp *dicom.Response, err error) error {
-	if resp == nil || resp.StatusCode > 500 {
+	if resp == nil {
+		if err == nil {
+			return backoff.Permanent(fmt.Errorf("response is 'nil'"))
+		}
+		return backoff.Permanent(err)
+	}
+	if resp.StatusCode > 500 {
 		return err
 	}
 	if resp.StatusCode == http.StatusForbidden {
