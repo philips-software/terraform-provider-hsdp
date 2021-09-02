@@ -229,7 +229,9 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 	defer client.Close()
 
 	// Refresh token, so we hopefully have DICOM permissions to proceed without error
+	_, _ = config.Debug("resourceDICOMStoreConfigCreate: TokenRefresh()\n")
 	_ = client.TokenRefresh()
+	_, _ = config.Debug("resourceDICOMStoreConfigCreate: refreshed!\n")
 
 	// Set up CDR service account
 	cdrService := dicom.CDRServiceAccount{}
@@ -247,6 +249,7 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 		var configured *dicom.CDRServiceAccount
 		operation := func() error {
 			var resp *dicom.Response
+			_, _ = config.Debug("resourceDICOMStoreConfigCreate: cdr_service_account operation run\n")
 			configured, resp, err = client.Config.SetCDRServiceAccount(cdrService, &dicom.QueryOptions{
 				OrganizationID: &orgID,
 			})
@@ -278,7 +281,7 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 		var configured *dicom.FHIRStore
 		operation := func() error {
 			var resp *dicom.Response
-			_ = client.TokenRefresh()
+			_, _ = config.Debug("resourceDICOMStoreConfigCreate: fhir_store operation run\n")
 			configured, _, err = client.Config.SetFHIRStore(fhirStore, &dicom.QueryOptions{
 				OrganizationID: &orgID,
 			})
