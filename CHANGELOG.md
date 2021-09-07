@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.19.4
+- Expose `service_id` and `org_admin_username` through `hsdp_config` (#113)
+
 ## v0.19.3
 - Fix authentication issue when using service identities
 
