@@ -47,13 +47,23 @@ func dataSourceConfig() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"service_id": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The service ID used to authenticate against IAM",
+			},
+			"org_admin_username": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The OrgAdmin username used to authenticate against IAM",
+			},
 		},
 	}
 
 }
 
-func dataSourceConfigRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	providerConfig := meta.(*Config)
+func dataSourceConfigRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	providerConfig := m.(*Config)
 
 	var diags diag.Diagnostics
 
@@ -82,6 +92,8 @@ func dataSourceConfigRead(_ context.Context, d *schema.ResourceData, meta interf
 		_ = d.Set("domain", domain)
 	}
 	_ = d.Set("services", c.Services())
+	_ = d.Set("service_id", providerConfig.ServiceID)
+	_ = d.Set("org_admin_username", providerConfig.OrgAdminUsername)
 
 	return diags
 }

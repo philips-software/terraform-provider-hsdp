@@ -34,3 +34,5 @@ The following attributes are exported:
 * `host` - (string) The host of the service
 * `domain` - (string) The domain associated with the service
 * `services` - (list(string)) The list of available services in the region/environment
+* `service_id` - (string) The IAM service ID used for authenticating against IAM
+* `org_admin_username` - (string) The IAM OrgAdmin used for authenticating against IAM
