@@ -29,10 +29,12 @@ func resourceIAMService() *schema.Resource {
 			"name": {
 				Type:             schema.TypeString,
 				Required:         true,
+				ForceNew:         true,
 				DiffSuppressFunc: suppressCaseDiffs,
 			},
 			"description": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"application_id": {

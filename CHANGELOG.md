@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.19.5
+- IAM: Fix `application_id` changes on IAM Service identities
+
 ## v0.19.4
 - Expose `service_id` and `org_admin_username` through `hsdp_config` (#113)
 
