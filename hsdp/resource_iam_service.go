@@ -37,6 +37,7 @@ func resourceIAMService() *schema.Resource {
 			},
 			"application_id": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"validity": {
