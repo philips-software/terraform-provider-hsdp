@@ -135,6 +135,10 @@ func resourceCDROrgRead(_ context.Context, d *schema.ResourceData, m interface{}
 				Summary:  "response is nil",
 			})
 		}
+		if resp.StatusCode == http.StatusNotFound {
+			d.SetId("")
+			return diags
+		}
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
