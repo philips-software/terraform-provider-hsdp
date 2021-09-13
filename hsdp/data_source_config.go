@@ -57,6 +57,11 @@ func dataSourceConfig() *schema.Resource {
 				Computed:    true,
 				Description: "The OrgAdmin username used to authenticate against IAM",
 			},
+			"regions": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 
@@ -94,6 +99,7 @@ func dataSourceConfigRead(_ context.Context, d *schema.ResourceData, m interface
 	_ = d.Set("services", c.Services())
 	_ = d.Set("service_id", providerConfig.ServiceID)
 	_ = d.Set("org_admin_username", providerConfig.OrgAdminUsername)
+	_ = d.Set("regions", c.Regions())
 
 	return diags
 }
