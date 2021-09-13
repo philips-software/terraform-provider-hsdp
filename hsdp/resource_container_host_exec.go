@@ -51,7 +51,7 @@ The ` + "`triggers`" + ` argument allows specifying an arbitrary set of values t
 			},
 			commandsField: {
 				Type:     schema.TypeList,
-				MaxItems: 10,
+				MaxItems: 50,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				ForceNew: true,
