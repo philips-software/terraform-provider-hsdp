@@ -128,14 +128,8 @@ func resourceCDROrgRead(_ context.Context, d *schema.ResourceData, m interface{}
 	}
 	defer client.Close()
 	org, resp, err := client.TenantSTU3.GetOrganizationByID(orgID)
-	if err != nil || resp == nil {
-		if resp == nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Warning,
-				Summary:  "response is nil",
-			})
-		}
-		if resp.StatusCode == http.StatusNotFound {
+	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
 			d.SetId("")
 			return diags
 		}
