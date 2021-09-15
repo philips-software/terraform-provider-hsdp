@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.19.7
+- IAM: Proper error reporting in case of missing CLIENT.SCOPE permissions
+- DICOM Gateway: add title and description fields
+
 ## v0.19.6
 - Config: improve documentation (#106)
 - Container Host: increase command limit to 50
