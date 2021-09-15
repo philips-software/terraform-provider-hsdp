@@ -52,6 +52,16 @@ func resourceDICOMGatewayConfig() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"title": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 			"store_service": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -248,6 +258,9 @@ func getSCPConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 			}
 		}
 	}
+	scpConfig.Title = d.Get("title").(string)
+	scpConfig.Description = d.Get("description").(string)
+
 	return &scpConfig, nil
 }
 
@@ -295,13 +308,14 @@ func resourceDICOMGatewayConfigCreate(_ context.Context, d *schema.ResourceData,
 	}
 	defer client.Close()
 
-	// Refresh token so we hopefully have DICOM permissions to proceed without error
+	// Refresh token, so we hopefully have DICOM permissions to proceed without error
 	_ = client.TokenRefresh()
 
 	scpConfig, err := getSCPConfig(d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("getSCPConfig: %w", err))
 	}
+
 	queryConfig, err := getQueryConfig(d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("getQueryConfig: %w", err))
