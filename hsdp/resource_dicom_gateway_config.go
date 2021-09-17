@@ -52,16 +52,6 @@ func resourceDICOMGatewayConfig() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"title": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"description": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-			},
 			"store_service": {
 				Type:     schema.TypeSet,
 				Optional: true,
@@ -69,6 +59,16 @@ func resourceDICOMGatewayConfig() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"title": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
 						"is_secure": {
 							Type:     schema.TypeBool,
 							Required: true,
@@ -76,19 +76,30 @@ func resourceDICOMGatewayConfig() *schema.Resource {
 						"port": {
 							Type:     schema.TypeInt,
 							Optional: true,
-							Default:  104,
+							Default:  0,
 						},
 						// ---Advanced features start
 						"pdu_length": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Default:  65535,
 						},
 						"artim_timeout": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Default:  3000,
 						},
 						"association_idle_timeout": {
 							Type:     schema.TypeInt,
+							Optional: true,
+							Default:  4500,
+						},
+						"certificate_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"authenticate_client_certificate": {
+							Type:     schema.TypeBool,
 							Optional: true,
 						},
 						// ---Advanced features end
@@ -103,6 +114,16 @@ func resourceDICOMGatewayConfig() *schema.Resource {
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"title": {
+							Type:     schema.TypeString,
+							Required: true,
+							ForceNew: true,
+						},
+						"description": {
+							Type:     schema.TypeString,
+							Optional: true,
+							ForceNew: true,
+						},
 						"is_secure": {
 							Type:     schema.TypeBool,
 							Required: true,
@@ -110,7 +131,31 @@ func resourceDICOMGatewayConfig() *schema.Resource {
 						"port": {
 							Type:     schema.TypeInt,
 							Optional: true,
-							Default:  104,
+							Default:  0,
+						},
+						// ---Advanced features start
+						"pdu_length": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Default:  65535,
+						},
+						"artim_timeout": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Default:  3000,
+						},
+						"association_idle_timeout": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Default:  4500,
+						},
+						"certificate_id": {
+							Type:     schema.TypeString,
+							Optional: true,
+						},
+						"authenticate_client_certificate": {
+							Type:     schema.TypeBool,
+							Optional: true,
 						},
 						"application_entity": schemaApplicationEntity(),
 					},
@@ -224,18 +269,30 @@ func getSCPConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})
+			scpConfig.Title = mVi["title"].(string)
+			scpConfig.Description = mVi["description"].(string)
 			isSecure := mVi["is_secure"].(bool)
 			port := mVi["port"].(int)
 			pduLength := mVi["pdu_length"].(int)
 			artimTimeout := mVi["artim_timeout"].(int)
 			associationIdleIimeout := mVi["association_idle_timeout"].(int)
+			certificateID := mVi["certificate_id"].(string)
+			authenticateClientCertificate := mVi["authenticate_client_certificate"].(bool)
 			if isSecure {
+				if port == 0 {
+					port = 105
+				}
 				scpConfig.SecureNetworkConnection.IsSecure = true
 				scpConfig.SecureNetworkConnection.Port = port
 				scpConfig.SecureNetworkConnection.AdvancedSettings.ArtimTimeOut = artimTimeout
 				scpConfig.SecureNetworkConnection.AdvancedSettings.AssociationIdleTimeOut = associationIdleIimeout
 				scpConfig.SecureNetworkConnection.AdvancedSettings.PDULength = pduLength
+				scpConfig.SecureNetworkConnection.CertificateInfo.ID = certificateID
+				scpConfig.SecureNetworkConnection.AuthenticateClientCertificate = authenticateClientCertificate
 			} else {
+				if port == 0 {
+					port = 104
+				}
 				scpConfig.UnSecureNetworkConnection.IsSecure = false
 				scpConfig.UnSecureNetworkConnection.Port = port
 				scpConfig.UnSecureNetworkConnection.AdvancedSettings.ArtimTimeOut = artimTimeout
@@ -258,32 +315,51 @@ func getSCPConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 			}
 		}
 	}
-	scpConfig.Title = d.Get("title").(string)
-	scpConfig.Description = d.Get("description").(string)
 
 	return &scpConfig, nil
 }
 
-func getQueryConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
-	var queryConfig dicom.SCPConfig
+func getQueryRetrieveConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
+	var queryRetrieveConfig dicom.SCPConfig
 	if v, ok := d.GetOk("query_retrieve_service"); ok {
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})
+			queryRetrieveConfig.Title = mVi["title"].(string)
+			queryRetrieveConfig.Description = mVi["description"].(string)
 			isSecure := mVi["is_secure"].(bool)
 			port := mVi["port"].(int)
+			pduLength := mVi["pdu_length"].(int)
+			artimTimeout := mVi["artim_timeout"].(int)
+			associationIdleIimeout := mVi["association_idle_timeout"].(int)
+			certificateID := mVi["certificate_id"].(string)
+			authenticateClientCertificate := mVi["authenticate_client_certificate"].(bool)
 			if isSecure {
-				queryConfig.SecureNetworkConnection.IsSecure = true
-				queryConfig.SecureNetworkConnection.Port = port
+				if port == 0 {
+					port = 109
+				}
+				queryRetrieveConfig.SecureNetworkConnection.IsSecure = true
+				queryRetrieveConfig.SecureNetworkConnection.Port = port
+				queryRetrieveConfig.SecureNetworkConnection.AdvancedSettings.ArtimTimeOut = artimTimeout
+				queryRetrieveConfig.SecureNetworkConnection.AdvancedSettings.AssociationIdleTimeOut = associationIdleIimeout
+				queryRetrieveConfig.SecureNetworkConnection.AdvancedSettings.PDULength = pduLength
+				queryRetrieveConfig.SecureNetworkConnection.AuthenticateClientCertificate = authenticateClientCertificate
+				queryRetrieveConfig.SecureNetworkConnection.CertificateInfo.ID = certificateID
 			} else {
-				queryConfig.UnSecureNetworkConnection.IsSecure = true
-				queryConfig.UnSecureNetworkConnection.Port = port
+				if port == 0 {
+					port = 108
+				}
+				queryRetrieveConfig.UnSecureNetworkConnection.IsSecure = true
+				queryRetrieveConfig.UnSecureNetworkConnection.Port = port
+				queryRetrieveConfig.UnSecureNetworkConnection.AdvancedSettings.ArtimTimeOut = artimTimeout
+				queryRetrieveConfig.UnSecureNetworkConnection.AdvancedSettings.AssociationIdleTimeOut = associationIdleIimeout
+				queryRetrieveConfig.UnSecureNetworkConnection.AdvancedSettings.PDULength = pduLength
 			}
 			if as, ok := mVi["applications"].(*schema.Set); ok {
 				aL := as.List()
 				for _, entry := range aL {
 					app := entry.(map[string]interface{})
-					queryConfig.ApplicationEntities = append(queryConfig.ApplicationEntities, dicom.ApplicationEntity{
+					queryRetrieveConfig.ApplicationEntities = append(queryRetrieveConfig.ApplicationEntities, dicom.ApplicationEntity{
 						AllowAny:       app["allow_any"].(bool),
 						AeTitle:        app["ae_title"].(string),
 						OrganizationID: app["organization_id"].(string),
@@ -295,7 +371,7 @@ func getQueryConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 			}
 		}
 	}
-	return &queryConfig, nil
+	return &queryRetrieveConfig, nil
 }
 
 func resourceDICOMGatewayConfigCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -316,9 +392,9 @@ func resourceDICOMGatewayConfigCreate(_ context.Context, d *schema.ResourceData,
 		return diag.FromErr(fmt.Errorf("getSCPConfig: %w", err))
 	}
 
-	queryConfig, err := getQueryConfig(d)
+	queryConfig, err := getQueryRetrieveConfig(d)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("getQueryConfig: %w", err))
+		return diag.FromErr(fmt.Errorf("getQueryRetrieveConfig: %w", err))
 	}
 
 	createdSCPConfig, _, err := client.Config.SetStoreService(*scpConfig)

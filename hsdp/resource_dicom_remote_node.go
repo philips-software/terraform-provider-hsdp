@@ -32,7 +32,7 @@ func resourceDICOMRemoteNode() *schema.Resource {
 			},
 			"title": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"ae_title": {
@@ -65,25 +65,28 @@ func resourceDICOMRemoteNode() *schema.Resource {
 						},
 						"port": {
 							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  104,
+							Required: true,
 						},
 						"network_timeout": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Default:  3000,
 						},
 						// ---Advanced features start
 						"pdu_length": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Default:  65535,
 						},
 						"artim_timeout": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Default:  3000,
 						},
 						"association_idle_timeout": {
 							Type:     schema.TypeInt,
 							Optional: true,
+							Default:  4500,
 						},
 					},
 				},

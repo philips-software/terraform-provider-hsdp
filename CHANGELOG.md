@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.19.10
+- DICOM Gateway: Fix various structures
+
 ## v0.19.9
 - IAM: Fix detection of purged user accounts
 
