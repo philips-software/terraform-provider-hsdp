@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -47,7 +48,14 @@ func dataSourceUserRead(_ context.Context, d *schema.ResourceData, meta interfac
 		// Fallback to legacy user find
 		uuid, _, err = client.Users.LegacyGetUserIDByLoginID(username)
 		if err != nil {
-			return diag.FromErr(err)
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  "user not found",
+				Detail:   fmt.Sprintf("user '%s' not found", username),
+			})
+			d.SetId(fmt.Sprintf("%s-404", username))
+			_ = d.Set("uuid", "")
+			return diags
 		}
 	}
 	user, _, err := client.Users.LegacyGetUserByUUID(uuid)

@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.19.8
+- IAM: Do not error out in case IAM user is not found using data source
+
 ## v0.19.7
 - IAM: Proper error reporting in case of missing CLIENT.SCOPE permissions
 - DICOM Gateway: add title and description fields
