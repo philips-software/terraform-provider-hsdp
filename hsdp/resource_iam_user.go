@@ -2,7 +2,9 @@ package hsdp
 
 import (
 	"context"
+	"errors"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -146,8 +148,8 @@ func resourceIAMUserRead(_ context.Context, d *schema.ResourceData, m interface{
 
 	user, _, err := client.Users.GetUserByID(id)
 	if err != nil {
-		// Means the user was cleared, probably due to not activating their account
-		if _, ok := err.(*iam.UserError); ok {
+		if errors.Is(err, iam.ErrEmptyResults) {
+			// Means the user was cleared, probably due to not activating their account
 			d.SetId("")
 			return diags
 		}
