@@ -9,13 +9,13 @@ data "hsdp_config" "inference" {
   service = "inference"
 }
 
-data "hsdp_ai_inference_instance" "inference" {
+data "hsdp_ai_inference_service_instance" "inference" {
   base_url        = data.hsdp_config.inference.url
   organization_id = var.inference_tenant_org_id
 }
 
 resource "hsdp_ai_inference_model" "model" {
-  endpoint = data.hsdp_ai_inference_instance.inference.endpoint
+  endpoint = data.hsdp_ai_inference_service_instance.inference.endpoint
   
   name          = "model1"
   version       = "v1"

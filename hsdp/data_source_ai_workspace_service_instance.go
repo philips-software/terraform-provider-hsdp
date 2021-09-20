@@ -7,9 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceAIWorkspaceInstance() *schema.Resource {
+func dataSourceAIWorkspaceServiceInstance() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceAIWorkspaceInstanceRead,
+		ReadContext: dataSourceAIWorkspaceServiceInstanceRead,
 		Schema: map[string]*schema.Schema{
 			"base_url": {
 				Type:     schema.TypeString,
@@ -28,7 +28,7 @@ func dataSourceAIWorkspaceInstance() *schema.Resource {
 
 }
 
-func dataSourceAIWorkspaceInstanceRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceAIWorkspaceServiceInstanceRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 
 	var diags diag.Diagnostics

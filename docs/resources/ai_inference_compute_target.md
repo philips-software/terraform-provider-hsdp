@@ -9,13 +9,13 @@ data "hsdp_config" "inference" {
   service = "inference"
 }
 
-data "hsdp_ai_inference_instance" "inference" {
+data "hsdp_ai_inference_service_instance" "inference" {
   base_url        = data.hsdp_config.inference.url
   organization_id = var.inference_tenant_org_id
 }
 
 resource "hsdp_ai_inference_compute_target" "target" {
-  endpoint = data.hsdp_ai_inference_instance.inference.endpoint
+  endpoint = data.hsdp_ai_inference_service_instance.inference.endpoint
   
   name          = "gpu1"
   description   = "Tesla v100 GPU based environment with 128MB GPU memory"

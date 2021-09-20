@@ -9,13 +9,13 @@ data "hsdp_config" "inference" {
   service = "inference"
 }
 
-data "hsdp_ai_inference_instance" "inference" {
+data "hsdp_ai_inference_service_instance" "inference" {
   base_url        = data.hsdp_config.inference.url
   organization_id = var.inference_tenant_org_id
 }
 
 resource "hsdp_ai_inference_compute_environment" "compute" {
-  endpoint = data.hsdp_ai_inference_instance.inference.endpoint
+  endpoint = data.hsdp_ai_inference_service_instance.inference.endpoint
   
   name  = "python3.8_keras_gpu"
   image = "arn:aws:ecr:us-west-2:012345678910:repository/test"

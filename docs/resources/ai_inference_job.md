@@ -6,7 +6,7 @@ Manages HSDP IA Inference Jobs
 
 ```hcl
 resource "hsdp_ai_inference_job" "job" {
-  endpoint = data.hsdp_ai_inference_instance.inference.endpoint
+  endpoint = data.hsdp_ai_inference_service_instance.inference.endpoint
   
   name          = "job1"
   description   = "Long running Inference Job"

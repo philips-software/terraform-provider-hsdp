@@ -1,4 +1,4 @@
-# hsdp_ai_inference_instance
+# hsdp_ai_inference_service_instance
 
 Retrieve details of an existing HSDP AI Inference instance.
 
@@ -9,7 +9,7 @@ data "hsdp_config" "inference" {
   service = "inference"
 }
 
-data "hsdp_ai_inference_instance" "inference" {
+data "hsdp_ai_inference_service_instance" "inference" {
   base_url        = data.hsdp_config.inference.url
   organization_id = var.inference_tenant_org_id
 }

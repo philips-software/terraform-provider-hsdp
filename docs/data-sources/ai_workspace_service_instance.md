@@ -1,6 +1,6 @@
-# hsdp_ai_workspace_instance
+# hsdp_ai_workspace_service_instance
 
-Retrieve details of an existing HSDP AI Workspace instance.
+Retrieve details of an existing HSDP AI Workspace service instance.
 
 ## Example Usage
 
@@ -9,7 +9,7 @@ data "hsdp_config" "workspace" {
   service = "workspace"
 }
 
-data "hsdp_ai_workspace_instance" "workspace" {
+data "hsdp_ai_workspace_service_instance" "workspace" {
   base_url        = data.hsdp_config.workspace.url
   organization_id = var.workspace_tenant_org_id
 }
