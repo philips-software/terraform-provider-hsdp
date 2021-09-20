@@ -42,7 +42,7 @@ The following arguments are supported:
 * `endpoint` - (Required) The AI Inference instance endpoint
 * `name` - (Required) The name of the Model
 * `compute_target` - (Required)
-  * `reference` - (Required) Reference to the compute target 
+  * `reference` - (Required) Reference to the compute target
 * `source_code` - (Required)
 * `labels` - (Optional)
 * `artifact_path` - (Optional)
