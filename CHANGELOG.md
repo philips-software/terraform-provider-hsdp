@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.20.0
+- Initial AI Workspace support
+- NEW: Data source `hsdp_ai_workspace_compute_targets`
+- NEW: Data source `hsdp_ai_workspace`
+- NEW: Resource `hsdp_ai_workspace_compute_target`
+- NEW: Resource `hsdp_ai_workspace`
+- DICOM Gateway: fix more field reads
+
 ## v0.19.10
 - DICOM Gateway: Fix various structures
 
