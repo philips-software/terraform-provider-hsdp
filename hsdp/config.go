@@ -354,7 +354,7 @@ func (c *Config) getAIInferenceClient(baseURL, tenantID string) (*inference.Clie
 		return nil, fmt.Errorf("getAIInferenceClient: %w", ErrMissingOrganizationID)
 	}
 	client, err := inference.NewClient(c.iamClient, &ai.Config{
-		AnalyzeURL:     baseURL,
+		BaseURL:        baseURL,
 		OrganizationID: tenantID,
 		DebugLog:       c.DebugLog,
 	})
@@ -372,7 +372,7 @@ func (c *Config) getAIInferenceClientFromEndpoint(endpointURL string) (*inferenc
 		endpointURL = c.AIInferenceEndpoint
 	}
 	client, err := inference.NewClient(c.iamClient, &ai.Config{
-		AnalyzeURL:     "http://localhost",
+		BaseURL:        "http://localhost",
 		OrganizationID: "not-set",
 		DebugLog:       c.DebugLog,
 	})
