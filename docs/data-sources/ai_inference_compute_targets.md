@@ -21,7 +21,7 @@ data "hsdp_ai_inference_compute_targets" "targets" {
 
 ## Argument reference
 
-* `endpoint`- (Required) the AI Infernece endpoint
+* `endpoint`- (Required) the AI Inference endpoint
 
 ## Attribute reference
 
