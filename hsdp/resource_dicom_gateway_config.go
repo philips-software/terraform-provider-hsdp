@@ -299,7 +299,7 @@ func getSCPConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 				scpConfig.UnSecureNetworkConnection.AdvancedSettings.AssociationIdleTimeOut = associationIdleIimeout
 				scpConfig.UnSecureNetworkConnection.AdvancedSettings.PDULength = pduLength
 			}
-			if as, ok := mVi["applications"].(*schema.Set); ok {
+			if as, ok := mVi["application_entity"].(*schema.Set); ok {
 				aL := as.List()
 				for _, entry := range aL {
 					app := entry.(map[string]interface{})
@@ -355,7 +355,7 @@ func getQueryRetrieveConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 				queryRetrieveConfig.UnSecureNetworkConnection.AdvancedSettings.AssociationIdleTimeOut = associationIdleIimeout
 				queryRetrieveConfig.UnSecureNetworkConnection.AdvancedSettings.PDULength = pduLength
 			}
-			if as, ok := mVi["applications"].(*schema.Set); ok {
+			if as, ok := mVi["application_entity"].(*schema.Set); ok {
 				aL := as.List()
 				for _, entry := range aL {
 					app := entry.(map[string]interface{})
