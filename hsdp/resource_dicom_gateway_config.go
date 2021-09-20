@@ -212,12 +212,16 @@ func setSCPConfig(scpConfig dicom.SCPConfig, d *schema.ResourceData) error {
 	storeService["is_secure"] = scpConfig.SecureNetworkConnection.IsSecure
 	if secure {
 		storeService["port"] = scpConfig.SecureNetworkConnection.Port
-		storeService["pdu_length"] = scpConfig.SecureNetworkConnection.AdvancedSettings.PDULength
-		storeService["artim_timeout"] = scpConfig.SecureNetworkConnection.AdvancedSettings.ArtimTimeOut
+		if scpConfig.SecureNetworkConnection.AdvancedSettings != nil {
+			storeService["pdu_length"] = scpConfig.SecureNetworkConnection.AdvancedSettings.PDULength
+			storeService["artim_timeout"] = scpConfig.SecureNetworkConnection.AdvancedSettings.ArtimTimeout
+		}
 	} else {
 		storeService["port"] = scpConfig.UnSecureNetworkConnection.Port
-		storeService["pdu_length"] = scpConfig.UnSecureNetworkConnection.AdvancedSettings.PDULength
-		storeService["artim_timeout"] = scpConfig.UnSecureNetworkConnection.AdvancedSettings.ArtimTimeOut
+		if scpConfig.UnSecureNetworkConnection.AdvancedSettings != nil {
+			storeService["pdu_length"] = scpConfig.UnSecureNetworkConnection.AdvancedSettings.PDULength
+			storeService["artim_timeout"] = scpConfig.UnSecureNetworkConnection.AdvancedSettings.ArtimTimeout
+		}
 	}
 	// Add applications
 	a := &schema.Set{F: resourceMetricsThresholdHash}
@@ -282,22 +286,34 @@ func getSCPConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 				if port == 0 {
 					port = 105
 				}
-				scpConfig.SecureNetworkConnection.IsSecure = true
-				scpConfig.SecureNetworkConnection.Port = port
-				scpConfig.SecureNetworkConnection.AdvancedSettings.ArtimTimeOut = artimTimeout
-				scpConfig.SecureNetworkConnection.AdvancedSettings.AssociationIdleTimeOut = associationIdleIimeout
-				scpConfig.SecureNetworkConnection.AdvancedSettings.PDULength = pduLength
-				scpConfig.SecureNetworkConnection.CertificateInfo.ID = certificateID
-				scpConfig.SecureNetworkConnection.AuthenticateClientCertificate = authenticateClientCertificate
+				scpConfig.SecureNetworkConnection = &dicom.NetworkConnection{
+					IsSecure:                      true,
+					Port:                          port,
+					AuthenticateClientCertificate: authenticateClientCertificate,
+					AdvancedSettings: &dicom.AdvancedSettings{
+						ArtimTimeout:           artimTimeout,
+						AssociationIdleTimeout: associationIdleIimeout,
+						PDULength:              pduLength,
+					},
+				}
+				if certificateID != "" {
+					scpConfig.SecureNetworkConnection.CertificateInfo = &dicom.CertificateInfo{
+						ID: certificateID,
+					}
+				}
 			} else {
 				if port == 0 {
 					port = 104
 				}
-				scpConfig.UnSecureNetworkConnection.IsSecure = false
-				scpConfig.UnSecureNetworkConnection.Port = port
-				scpConfig.UnSecureNetworkConnection.AdvancedSettings.ArtimTimeOut = artimTimeout
-				scpConfig.UnSecureNetworkConnection.AdvancedSettings.AssociationIdleTimeOut = associationIdleIimeout
-				scpConfig.UnSecureNetworkConnection.AdvancedSettings.PDULength = pduLength
+				scpConfig.UnSecureNetworkConnection = &dicom.NetworkConnection{
+					IsSecure: false,
+					Port:     port,
+					AdvancedSettings: &dicom.AdvancedSettings{
+						ArtimTimeout:           artimTimeout,
+						AssociationIdleTimeout: associationIdleIimeout,
+						PDULength:              pduLength,
+					},
+				}
 			}
 			if as, ok := mVi["application_entity"].(*schema.Set); ok {
 				aL := as.List()
@@ -307,7 +323,7 @@ func getSCPConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 						AllowAny:       app["allow_any"].(bool),
 						AeTitle:        app["ae_title"].(string),
 						OrganizationID: app["organization_id"].(string),
-						AdditionalSettings: dicom.AdditionalSettings{
+						AdditionalSettings: &dicom.AdditionalSettings{
 							ServiceTimeout: app["service_timeout"].(int),
 						},
 					})
@@ -338,22 +354,34 @@ func getQueryRetrieveConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 				if port == 0 {
 					port = 109
 				}
-				queryRetrieveConfig.SecureNetworkConnection.IsSecure = true
-				queryRetrieveConfig.SecureNetworkConnection.Port = port
-				queryRetrieveConfig.SecureNetworkConnection.AdvancedSettings.ArtimTimeOut = artimTimeout
-				queryRetrieveConfig.SecureNetworkConnection.AdvancedSettings.AssociationIdleTimeOut = associationIdleIimeout
-				queryRetrieveConfig.SecureNetworkConnection.AdvancedSettings.PDULength = pduLength
-				queryRetrieveConfig.SecureNetworkConnection.AuthenticateClientCertificate = authenticateClientCertificate
-				queryRetrieveConfig.SecureNetworkConnection.CertificateInfo.ID = certificateID
+				queryRetrieveConfig.SecureNetworkConnection = &dicom.NetworkConnection{
+					IsSecure:                      true,
+					Port:                          port,
+					AuthenticateClientCertificate: authenticateClientCertificate,
+					AdvancedSettings: &dicom.AdvancedSettings{
+						ArtimTimeout:           artimTimeout,
+						AssociationIdleTimeout: associationIdleIimeout,
+						PDULength:              pduLength,
+					},
+				}
+				if certificateID != "" {
+					queryRetrieveConfig.SecureNetworkConnection.CertificateInfo = &dicom.CertificateInfo{
+						ID: certificateID,
+					}
+				}
 			} else {
 				if port == 0 {
 					port = 108
 				}
-				queryRetrieveConfig.UnSecureNetworkConnection.IsSecure = true
-				queryRetrieveConfig.UnSecureNetworkConnection.Port = port
-				queryRetrieveConfig.UnSecureNetworkConnection.AdvancedSettings.ArtimTimeOut = artimTimeout
-				queryRetrieveConfig.UnSecureNetworkConnection.AdvancedSettings.AssociationIdleTimeOut = associationIdleIimeout
-				queryRetrieveConfig.UnSecureNetworkConnection.AdvancedSettings.PDULength = pduLength
+				queryRetrieveConfig.UnSecureNetworkConnection = &dicom.NetworkConnection{
+					IsSecure: false,
+					Port:     port,
+					AdvancedSettings: &dicom.AdvancedSettings{
+						ArtimTimeout:           artimTimeout,
+						AssociationIdleTimeout: associationIdleIimeout,
+						PDULength:              pduLength,
+					},
+				}
 			}
 			if as, ok := mVi["application_entity"].(*schema.Set); ok {
 				aL := as.List()
@@ -363,7 +391,7 @@ func getQueryRetrieveConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 						AllowAny:       app["allow_any"].(bool),
 						AeTitle:        app["ae_title"].(string),
 						OrganizationID: app["organization_id"].(string),
-						AdditionalSettings: dicom.AdditionalSettings{
+						AdditionalSettings: &dicom.AdditionalSettings{
 							ServiceTimeout: app["service_timeout"].(int),
 						},
 					})
