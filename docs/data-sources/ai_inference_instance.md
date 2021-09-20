@@ -26,4 +26,4 @@ The following arguments are supported:
 
 The following attributes are exported:
 
-* `endpoint` - The Inference endpoint URL
+* `endpoint` - The Inference endpoint URL~~

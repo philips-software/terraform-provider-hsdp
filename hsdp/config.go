@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/philips-software/go-hsdp-api/ai"
 	"github.com/philips-software/go-hsdp-api/ai/inference"
+	"github.com/philips-software/go-hsdp-api/ai/workspace"
 	"github.com/philips-software/go-hsdp-api/cartel"
 	"github.com/philips-software/go-hsdp-api/cdl"
 	"github.com/philips-software/go-hsdp-api/cdr"
@@ -41,6 +42,7 @@ type Config struct {
 	UAAPassword         string
 	UAAURL              string
 	AIInferenceEndpoint string
+	AIWorkspaceEndpoint string
 
 	iamClient             *iam.Client
 	cartelClient          *cartel.Client
@@ -378,6 +380,45 @@ func (c *Config) getAIInferenceClientFromEndpoint(endpointURL string) (*inferenc
 	})
 	if err != nil {
 		return nil, fmt.Errorf("getAIInferenceClientFromEndpoint: %w", err)
+	}
+	if err = client.SetEndpointURL(endpointURL); err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+func (c *Config) getAIWorkspaceClient(baseURL, tenantID string) (*workspace.Client, error) {
+	if c.iamClientErr != nil {
+		return nil, fmt.Errorf("IAM client error in getAIWorkspaceClient: %w", c.iamClientErr)
+	}
+	if tenantID == "" {
+		return nil, fmt.Errorf("getAIWorkspaceClient: %w", ErrMissingOrganizationID)
+	}
+	client, err := workspace.NewClient(c.iamClient, &ai.Config{
+		BaseURL:        baseURL,
+		OrganizationID: tenantID,
+		DebugLog:       c.DebugLog,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("getAIWorkspaceClient: %w", err)
+	}
+	return client, nil
+}
+
+func (c *Config) getAIWorkspaceClientFromEndpoint(endpointURL string) (*workspace.Client, error) {
+	if c.iamClientErr != nil {
+		return nil, c.iamClientErr
+	}
+	if endpointURL == "" {
+		endpointURL = c.AIWorkspaceEndpoint
+	}
+	client, err := workspace.NewClient(c.iamClient, &ai.Config{
+		BaseURL:        "http://localhost",
+		OrganizationID: "not-set",
+		DebugLog:       c.DebugLog,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("getAIWorkspaceClientFromEndpoint: %w", err)
 	}
 	if err = client.SetEndpointURL(endpointURL); err != nil {
 		return nil, err

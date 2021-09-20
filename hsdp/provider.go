@@ -202,6 +202,8 @@ func Provider(build string) *schema.Provider {
 			"hsdp_cdl_data_type_definition":         resourceCDLDataTypeDefinition(),
 			"hsdp_cdl_label_definition":             resourceCDLLabelDefinition(),
 			"hsdp_cdl_export_route":                 resourceCDLExportRoute(),
+			"hsdp_ai_workspace_compute_target":      resourceAIWorkspaceComputeTarget(),
+			"hsdp_ai_workspace":                     resourceAIWorkspace(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                    dataSourceIAMIntrospect(),
@@ -238,6 +240,9 @@ func Provider(build string) *schema.Provider {
 			"hsdp_cdl_data_type_definition":          dataSourceCDLDataTypeDefinition(),
 			"hsdp_cdl_label_definition":              dataSourceCDLLabelDefinition(),
 			"hsdp_cdl_export_route":                  dataSourceCDLExportRoute(),
+			"hsdp_ai_workspace_instance":             dataSourceAIWorkspaceInstance(),
+			"hsdp_ai_workspace_compute_targets":      dataSourceAIWorkspaceComputeTargets(),
+			"hsdp_ai_workspace":                      dataSourceAIWorkspace(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
