@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.20.2
+- DICOM Gateway: remove unused field
+
 ## v0.20.1
 - AI: More consistent naming convention for service instances
 - DICOM Gateway: use pointers in structs to satisfy validations

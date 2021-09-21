@@ -28,10 +28,6 @@ func schemaApplicationEntity() *schema.Schema {
 					Type:     schema.TypeString,
 					Required: true,
 				},
-				"service_timeout": {
-					Type:     schema.TypeInt,
-					Required: true,
-				},
 			},
 		},
 	}
@@ -323,9 +319,6 @@ func getSCPConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 						AllowAny:       app["allow_any"].(bool),
 						AeTitle:        app["ae_title"].(string),
 						OrganizationID: app["organization_id"].(string),
-						AdditionalSettings: &dicom.AdditionalSettings{
-							ServiceTimeout: app["service_timeout"].(int),
-						},
 					})
 				}
 			}
@@ -391,9 +384,6 @@ func getQueryRetrieveConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 						AllowAny:       app["allow_any"].(bool),
 						AeTitle:        app["ae_title"].(string),
 						OrganizationID: app["organization_id"].(string),
-						AdditionalSettings: &dicom.AdditionalSettings{
-							ServiceTimeout: app["service_timeout"].(int),
-						},
 					})
 				}
 			}

@@ -24,14 +24,12 @@ resource "hsdp_dicom_gateway_config" "dicom_gateway" {
       allow_any = true
       ae_title = "Foo"
       organization_id = "aaa-bbb-ccc-ddd"
-      service_timeout = 0
     }
 
     application_entity {
       allow_any = true
       ae_title = "Bar"
       organization_id = "bbb-ccc-ddd-eee-bbb"
-      service_timeout = 0
     }
   }
 
@@ -45,14 +43,12 @@ resource "hsdp_dicom_gateway_config" "dicom_gateway" {
       allow_any = true
       ae_title = "Foo"
       organization_id = "aaa-bbb-ccc-ddd"
-      service_timeout = 0
     }
 
     application_entity {
       allow_any = true
       ae_title = "Bar"
       organization_id = "bbb-ccc-ddd-eee-bbb"
-      service_timeout = 0
     }
   }
 }
