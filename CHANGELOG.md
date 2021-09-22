@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.20.3
+- DICOM Gateway: don't propagate secure toggle field
+
 ## v0.20.2
 - DICOM Gateway: remove unused field
 
