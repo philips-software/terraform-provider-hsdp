@@ -158,7 +158,6 @@ func resourceDICOMRemoteNodeCreate(ctx context.Context, d *schema.ResourceData, 
 		networkConnection := dicom.NetworkConnection{}
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})
-			networkConnection.IsSecure = mVi["is_secure"].(bool)
 			networkConnection.HostName = mVi["hostname"].(string)
 			networkConnection.IPAddress = mVi["ip_address"].(string)
 			networkConnection.DisableIPv6 = mVi["disable_ipv6"].(bool)

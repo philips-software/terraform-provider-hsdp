@@ -204,15 +204,16 @@ func resourceDICOMGatewayConfigRead(_ context.Context, d *schema.ResourceData, m
 
 func setSCPConfig(scpConfig dicom.SCPConfig, d *schema.ResourceData) error {
 	storeService := make(map[string]interface{})
-	secure := scpConfig.SecureNetworkConnection.IsSecure
-	storeService["is_secure"] = scpConfig.SecureNetworkConnection.IsSecure
-	if secure {
+	if scpConfig.SecureNetworkConnection != nil {
+		storeService["is_secure"] = true
 		storeService["port"] = scpConfig.SecureNetworkConnection.Port
 		if scpConfig.SecureNetworkConnection.AdvancedSettings != nil {
 			storeService["pdu_length"] = scpConfig.SecureNetworkConnection.AdvancedSettings.PDULength
 			storeService["artim_timeout"] = scpConfig.SecureNetworkConnection.AdvancedSettings.ArtimTimeout
 		}
-	} else {
+	}
+	if scpConfig.UnSecureNetworkConnection != nil {
+		storeService["is_secure"] = false
 		storeService["port"] = scpConfig.UnSecureNetworkConnection.Port
 		if scpConfig.UnSecureNetworkConnection.AdvancedSettings != nil {
 			storeService["pdu_length"] = scpConfig.UnSecureNetworkConnection.AdvancedSettings.PDULength
@@ -238,11 +239,10 @@ func setSCPConfig(scpConfig dicom.SCPConfig, d *schema.ResourceData) error {
 
 func setQueryConfig(queryConfig dicom.SCPConfig, d *schema.ResourceData) error {
 	queryService := make(map[string]interface{})
-	secure := queryConfig.SecureNetworkConnection.IsSecure
-	if secure {
+	if queryConfig.SecureNetworkConnection != nil {
 		queryService["port"] = queryConfig.SecureNetworkConnection.Port
-
-	} else {
+	}
+	if queryConfig.UnSecureNetworkConnection != nil {
 		queryService["port"] = queryConfig.UnSecureNetworkConnection.Port
 	}
 	// Add applications
@@ -283,7 +283,6 @@ func getSCPConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 					port = 105
 				}
 				scpConfig.SecureNetworkConnection = &dicom.NetworkConnection{
-					IsSecure:                      true,
 					Port:                          port,
 					AuthenticateClientCertificate: authenticateClientCertificate,
 					AdvancedSettings: &dicom.AdvancedSettings{
@@ -302,8 +301,7 @@ func getSCPConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 					port = 104
 				}
 				scpConfig.UnSecureNetworkConnection = &dicom.NetworkConnection{
-					IsSecure: false,
-					Port:     port,
+					Port: port,
 					AdvancedSettings: &dicom.AdvancedSettings{
 						ArtimTimeout:           artimTimeout,
 						AssociationIdleTimeout: associationIdleIimeout,
@@ -348,7 +346,6 @@ func getQueryRetrieveConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 					port = 109
 				}
 				queryRetrieveConfig.SecureNetworkConnection = &dicom.NetworkConnection{
-					IsSecure:                      true,
 					Port:                          port,
 					AuthenticateClientCertificate: authenticateClientCertificate,
 					AdvancedSettings: &dicom.AdvancedSettings{
@@ -367,8 +364,7 @@ func getQueryRetrieveConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 					port = 108
 				}
 				queryRetrieveConfig.UnSecureNetworkConnection = &dicom.NetworkConnection{
-					IsSecure: false,
-					Port:     port,
+					Port: port,
 					AdvancedSettings: &dicom.AdvancedSettings{
 						ArtimTimeout:           artimTimeout,
 						AssociationIdleTimeout: associationIdleIimeout,
