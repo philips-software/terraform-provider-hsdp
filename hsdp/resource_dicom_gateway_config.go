@@ -348,7 +348,6 @@ func getQueryRetrieveConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 					port = 109
 				}
 				queryRetrieveConfig.SecureNetworkConnection = &dicom.NetworkConnection{
-					IsSecure:                      true,
 					Port:                          port,
 					AuthenticateClientCertificate: authenticateClientCertificate,
 					AdvancedSettings: &dicom.AdvancedSettings{
@@ -367,7 +366,6 @@ func getQueryRetrieveConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 					port = 108
 				}
 				queryRetrieveConfig.UnSecureNetworkConnection = &dicom.NetworkConnection{
-					IsSecure: false,
 					Port:     port,
 					AdvancedSettings: &dicom.AdvancedSettings{
 						ArtimTimeout:           artimTimeout,
