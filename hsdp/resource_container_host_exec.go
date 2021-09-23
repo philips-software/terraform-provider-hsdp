@@ -20,6 +20,7 @@ The ` + "`triggers`" + ` argument allows specifying an arbitrary set of values t
 		CreateContext: resourceContainerHostExecCreate,
 		Read:          resourceContainerHostExecRead,
 		Delete:        resourceConainterHostDelete,
+		SchemaVersion: 1,
 
 		Schema: map[string]*schema.Schema{
 			"triggers": {
@@ -48,6 +49,12 @@ The ` + "`triggers`" + ` argument allows specifying an arbitrary set of values t
 				Optional:  true,
 				ForceNew:  true,
 				Sensitive: true,
+			},
+			"agent": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  false,
 			},
 			commandsField: {
 				Type:     schema.TypeList,
@@ -112,6 +119,7 @@ func resourceContainerHostExecCreate(_ context.Context, d *schema.ResourceData, 
 	user := d.Get("user").(string)
 	privateKey := d.Get("private_key").(string)
 	host := d.Get("host").(string)
+	agent := d.Get("agent").(bool)
 
 	// Fetch files first before starting provisioning
 	createFiles, diags := collectFilesToCreate(d)
@@ -144,6 +152,9 @@ func resourceContainerHostExecCreate(_ context.Context, d *schema.ResourceData, 
 		},
 	}
 	if privateKey != "" {
+		if agent {
+			return diag.FromErr(fmt.Errorf("'agent' is enabled so not expecting a private key to be set"))
+		}
 		ssh.Key = privateKey
 		ssh.Bastion.Key = privateKey
 	}
