@@ -45,7 +45,7 @@ The ` + "`triggers`" + ` argument allows specifying an arbitrary set of values t
 			},
 			"private_key": {
 				Type:      schema.TypeString,
-				Required:  true,
+				Optional:  true,
 				ForceNew:  true,
 				Sensitive: true,
 			},
@@ -127,9 +127,6 @@ func resourceContainerHostExecCreate(_ context.Context, d *schema.ResourceData, 
 		if user == "" {
 			return diag.FromErr(fmt.Errorf("user must be set when '%s' is specified", commandsField))
 		}
-		if privateKey == "" {
-			return diag.FromErr(fmt.Errorf("privateKey must be set when '%s' is specified", commandsField))
-		}
 	}
 	// Collect SSH details
 	privateIP := host
@@ -145,6 +142,10 @@ func resourceContainerHostExecCreate(_ context.Context, d *schema.ResourceData, 
 			Port:   "22",
 			Key:    privateKey,
 		},
+	}
+	if privateKey != "" {
+		ssh.Key = privateKey
+		ssh.Bastion.Key = privateKey
 	}
 
 	// Provision files

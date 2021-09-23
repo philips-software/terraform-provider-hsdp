@@ -162,15 +162,13 @@ func resourceContainerHost() *schema.Resource {
 				Optional: true,
 			},
 			"user": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				RequiredWith: []string{"private_key"},
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"private_key": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Sensitive:    true,
-				RequiredWith: []string{"user"},
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
 			},
 			"keep_failed_instances": {
 				Type:     schema.TypeBool,
@@ -339,9 +337,6 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		if user == "" {
 			return diag.FromErr(fmt.Errorf("user must be set when '%s' is specified", commandsField))
 		}
-		if privateKey == "" {
-			return diag.FromErr(fmt.Errorf("privateKey must be set when '%s' is specified", commandsField))
-		}
 	}
 
 	ch, resp, err := client.Create(tagName,
@@ -427,14 +422,16 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		User:   user,
 		Server: privateIP,
 		Port:   "22",
-		Key:    privateKey,
 		Proxy:  http.ProxyFromEnvironment,
 		Bastion: easyssh.DefaultConfig{
 			User:   user,
 			Server: bastionHost,
 			Port:   "22",
-			Key:    privateKey,
 		},
+	}
+	if privateKey != "" {
+		ssh.Key = privateKey
+		ssh.Bastion.Key = privateKey
 	}
 
 	// Create files
