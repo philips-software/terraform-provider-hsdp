@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.20.5
+- DICOM Gateway: fix refresh and destroy for config resource
+
 ## v0.20.4
 - DICOM Gateway: various fixes based on API changes
 - Container Host: support for SSH-agent authentication
