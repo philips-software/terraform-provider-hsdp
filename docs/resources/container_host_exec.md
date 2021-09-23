@@ -11,10 +11,9 @@ The following example uses the internal provisioning support for bootstrapping a
 ```hcl
 resource "hsdp_container_host_exec" "init" {
   host = hsdp_container_host.mybox.private_ip
-  bastion_host = var.bastion_host
   user = var.user
-  private_key = var.private_key
-
+  # an SSH agent should be running with the SSH private key loaded
+   
   file {
     content = "echo Hello world"
     destination = "/tmp/hello.sh"
@@ -32,7 +31,7 @@ resource "hsdp_container_host_exec" "init" {
 The following arguments are supported:
 
 * `user` - (Required) The username to use for provision activities using SSH
-* `private_key` - (Required) The SSH private key to use for provision activities
+* `private_key` - (Optional) The SSH private key to use for provision activities. When not provided an ssh-agent should be available.
 * `file` - (Optional) Block specifying content to be written to the container host after creation
 * `commands` - (Required, list(string)) List of commands to execute after creation of container host
 * `bastion_host` - (Optional) The bastion host to use.  When not set, this will be deduced from the container host location

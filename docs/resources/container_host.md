@@ -16,7 +16,6 @@ resource "hsdp_container_host" "zahadoom" {
   user_groups = var.user_groups
   security_groups = ["analytics", var.user]
 
-  bastion_host = var.bastion_host
   user = var.user
   private_key = var.private_key
 

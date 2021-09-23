@@ -162,15 +162,18 @@ func resourceContainerHost() *schema.Resource {
 				Optional: true,
 			},
 			"user": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				RequiredWith: []string{"private_key"},
+				Type:     schema.TypeString,
+				Required: true,
 			},
 			"private_key": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				Sensitive:    true,
-				RequiredWith: []string{"user"},
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
+			},
+			"agent": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 			"keep_failed_instances": {
 				Type:     schema.TypeBool,
@@ -259,7 +262,7 @@ func resourceContainerHost() *schema.Resource {
 			},
 			"tags": tagsSchema(),
 		},
-		SchemaVersion: 3,
+		SchemaVersion: 4,
 	}
 }
 
@@ -308,6 +311,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	image := d.Get("image").(string)
 	user := d.Get("user").(string)
 	privateKey := d.Get("private_key").(string)
+	agent := d.Get("agent").(bool)
 
 	if subnetType == "" {
 		subnetType = "private"
@@ -338,9 +342,6 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	if len(commands) > 0 {
 		if user == "" {
 			return diag.FromErr(fmt.Errorf("user must be set when '%s' is specified", commandsField))
-		}
-		if privateKey == "" {
-			return diag.FromErr(fmt.Errorf("privateKey must be set when '%s' is specified", commandsField))
 		}
 	}
 
@@ -427,14 +428,19 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		User:   user,
 		Server: privateIP,
 		Port:   "22",
-		Key:    privateKey,
 		Proxy:  http.ProxyFromEnvironment,
 		Bastion: easyssh.DefaultConfig{
 			User:   user,
 			Server: bastionHost,
 			Port:   "22",
-			Key:    privateKey,
 		},
+	}
+	if privateKey != "" {
+		if agent {
+			return diag.FromErr(fmt.Errorf("'agent' is enabled so not expecting a private key to be set"))
+		}
+		ssh.Key = privateKey
+		ssh.Bastion.Key = privateKey
 	}
 
 	// Create files

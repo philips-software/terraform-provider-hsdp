@@ -20,6 +20,7 @@ The ` + "`triggers`" + ` argument allows specifying an arbitrary set of values t
 		CreateContext: resourceContainerHostExecCreate,
 		Read:          resourceContainerHostExecRead,
 		Delete:        resourceConainterHostDelete,
+		SchemaVersion: 1,
 
 		Schema: map[string]*schema.Schema{
 			"triggers": {
@@ -45,9 +46,15 @@ The ` + "`triggers`" + ` argument allows specifying an arbitrary set of values t
 			},
 			"private_key": {
 				Type:      schema.TypeString,
-				Required:  true,
+				Optional:  true,
 				ForceNew:  true,
 				Sensitive: true,
+			},
+			"agent": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				ForceNew: true,
+				Default:  false,
 			},
 			commandsField: {
 				Type:     schema.TypeList,
@@ -112,6 +119,7 @@ func resourceContainerHostExecCreate(_ context.Context, d *schema.ResourceData, 
 	user := d.Get("user").(string)
 	privateKey := d.Get("private_key").(string)
 	host := d.Get("host").(string)
+	agent := d.Get("agent").(bool)
 
 	// Fetch files first before starting provisioning
 	createFiles, diags := collectFilesToCreate(d)
@@ -126,9 +134,6 @@ func resourceContainerHostExecCreate(_ context.Context, d *schema.ResourceData, 
 	if len(commands) > 0 {
 		if user == "" {
 			return diag.FromErr(fmt.Errorf("user must be set when '%s' is specified", commandsField))
-		}
-		if privateKey == "" {
-			return diag.FromErr(fmt.Errorf("privateKey must be set when '%s' is specified", commandsField))
 		}
 	}
 	// Collect SSH details
@@ -145,6 +150,13 @@ func resourceContainerHostExecCreate(_ context.Context, d *schema.ResourceData, 
 			Port:   "22",
 			Key:    privateKey,
 		},
+	}
+	if privateKey != "" {
+		if agent {
+			return diag.FromErr(fmt.Errorf("'agent' is enabled so not expecting a private key to be set"))
+		}
+		ssh.Key = privateKey
+		ssh.Bastion.Key = privateKey
 	}
 
 	// Provision files
