@@ -52,20 +52,24 @@ func resourceDICOMObjectStore() *schema.Resource {
 						"endpoint": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"bucket_name": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"access_key": {
 							Type:      schema.TypeString,
 							Required:  true,
 							Sensitive: true,
+							ForceNew:  true,
 						},
 						"secret_key": {
 							Type:      schema.TypeString,
 							Required:  true,
 							Sensitive: true,
+							ForceNew:  true,
 						},
 					},
 				},
@@ -84,18 +88,22 @@ func resourceDICOMObjectStore() *schema.Resource {
 						"endpoint": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"bucket_name": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"folder_path": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"product_key": {
 							Type:      schema.TypeString,
 							Required:  true,
+							ForceNew:  true,
 							Sensitive: true,
 						},
 						"service_account": {
@@ -107,24 +115,29 @@ func resourceDICOMObjectStore() *schema.Resource {
 									"name": {
 										Type:     schema.TypeString,
 										Optional: true,
+										ForceNew: true,
 									},
 									"service_id": {
 										Type:      schema.TypeString,
 										Required:  true,
 										Sensitive: true,
+										ForceNew:  true,
 									},
 									"private_key": {
 										Type:      schema.TypeString,
 										Required:  true,
 										Sensitive: true,
+										ForceNew:  true,
 									},
 									"access_token_endpoint": {
 										Type:     schema.TypeString,
 										Required: true,
+										ForceNew: true,
 									},
 									"token_endpoint": {
 										Type:     schema.TypeString,
 										Required: true,
+										ForceNew: true,
 									},
 								},
 							},

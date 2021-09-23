@@ -193,7 +193,7 @@ func resourceDICOMGatewayConfigRead(_ context.Context, d *schema.ResourceData, m
 	}
 	_ = setSCPConfig(*storeConfig, d)
 
-	queryConfig, _, err := client.Config.GetQueryService(nil)
+	queryConfig, _, err := client.Config.GetMoveService(nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -417,7 +417,7 @@ func resourceDICOMGatewayConfigCreate(_ context.Context, d *schema.ResourceData,
 	}
 	_ = d.Set("store_service_id", createdSCPConfig.ID)
 
-	createdQuerySCPConfig, _, err := client.Config.SetQueryService(*queryConfig, nil)
+	createdQuerySCPConfig, _, err := client.Config.SetMoveService(*queryConfig, nil)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("SetQueryService: %w", err))
 	}
