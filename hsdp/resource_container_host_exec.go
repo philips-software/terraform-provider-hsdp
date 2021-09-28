@@ -142,13 +142,11 @@ func resourceContainerHostExecCreate(_ context.Context, d *schema.ResourceData, 
 		User:   user,
 		Server: privateIP,
 		Port:   "22",
-		Key:    privateKey,
 		Proxy:  http.ProxyFromEnvironment,
 		Bastion: easyssh.DefaultConfig{
 			User:   user,
 			Server: bastionHost,
 			Port:   "22",
-			Key:    privateKey,
 		},
 	}
 	if privateKey != "" {
