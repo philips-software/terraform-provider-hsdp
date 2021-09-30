@@ -24,8 +24,8 @@ terraform {
 
 ## Development requirements
 
--	[Terraform](https://www.terraform.io/downloads.html) 0.14.x
--	[Go](https://golang.org/doc/install) 1.16 or newer (to build the provider plugin)
+-	[Terraform](https://www.terraform.io/downloads.html) 0.15.x or newer
+-	[Go](https://golang.org/doc/install) 1.17 or newer (to build the provider plugin)
 
 ## Building the provider
 
