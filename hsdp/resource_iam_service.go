@@ -260,7 +260,7 @@ func resourceIAMServiceDelete(_ context.Context, d *schema.ResourceData, m inter
 func setSelfPrivateKey(client *iam.Client, service iam.Service, d *schema.ResourceData) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	selfPrivateKey := d.Get("private_key").(string)
+	selfPrivateKey := d.Get("self_managed_private_key").(string)
 	selfExpiresOn := d.Get("expires_on").(string)
 	expiresOn := time.Now().Add(5 * 86400 * 365 * time.Second)
 	if selfExpiresOn != "" {
@@ -272,7 +272,10 @@ func setSelfPrivateKey(client *iam.Client, service iam.Service, d *schema.Resour
 	}
 	block, _ := pem.Decode([]byte(iam.FixPEM(selfPrivateKey)))
 	if block == nil {
-		return diag.FromErr(fmt.Errorf("error decoding 'private_key'"))
+		block, _ = pem.Decode([]byte(selfPrivateKey)) // Try unmodified decode
+		if block == nil {
+			return diag.FromErr(fmt.Errorf("error decoding 'private_key'"))
+		}
 	}
 	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
 	if err != nil {
