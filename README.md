@@ -60,7 +60,7 @@ Terraform will now use the local running copy instead of the `philips-software/h
 
 ## Issues
 
-* If you have an issue: report it on the [issue tracker](https://github.com/philips-software/terraform-provider-hsdp/issues)
+If you have found an issue, please report it on the [issue tracker](https://github.com/philips-software/terraform-provider-hsdp/issues)
 
 ## LICENSE
 
