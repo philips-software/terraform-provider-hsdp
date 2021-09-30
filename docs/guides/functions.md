@@ -48,7 +48,7 @@ Cloud foundry space. If no space is specified one will be created automatically.
 
 ## Defining your first function
 
-With the above module in place you can continue defining a function:
+With the above module in place you can continue on to defining a function:
 
 ```hcl
 resource "hsdp_function" "cuda_test" {
@@ -93,7 +93,7 @@ In asynchronous mode the Siderite helper will pull the payload from the Gateway 
 ## Example Docker file
 
 ```dockerfile
-FROM golang:1.16.5-alpine3.14 as builder
+FROM golang:1.17.1-alpine3.14 as builder
 RUN apk add --no-cache git openssh gcc musl-dev
 WORKDIR /src
 COPY go.mod .
@@ -106,13 +106,12 @@ RUN go mod download
 COPY . .
 RUN go build -o server .
 
-FROM philipslabs/siderite:v0.8.0 AS siderite
+FROM philipslabs/siderite:v0.11.3 AS siderite
 
 FROM alpine:latest
-RUN apk add --no-cache git openssh openssl bash postgresql-client
 WORKDIR /app
 COPY --from=siderite /app/siderite /app/siderite
-COPY --from=builder /src/server /app
+COPY --from=builder /src/server /app/server
 
 CMD ["/app/siderite","function"]
 ```
@@ -133,7 +132,7 @@ Notes:
 curl -v \
     -X POST \
     -H "Authorization: Token XXX" \
-    -H "X-Callback-URL: https://hook.bin/XYZ" \
+    -H "X-Callback-URL: https://hookb.in/XYZ" \
     https://hsdp-func-gateway-yyy.eu-west.philips-healthsuite.com/function/zzz
 ```
 
