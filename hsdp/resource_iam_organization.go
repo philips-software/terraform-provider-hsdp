@@ -3,9 +3,10 @@ package hsdp
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/philips-software/go-hsdp-api/iam"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -15,42 +16,41 @@ func resourceIAMOrg() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
+		SchemaVersion: 2,
 		CreateContext: resourceIAMOrgCreate,
 		ReadContext:   resourceIAMOrgRead,
 		UpdateContext: resourceIAMOrgUpdate,
 		DeleteContext: resourceIAMOrgDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
-			"distinct_name": &schema.Schema{
+			"type": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"external_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"is_root_org": {
+				Type:       schema.TypeBool,
+				Optional:   true,
+				Deprecated: "This field is deprecated, please remove it",
+			},
+			"parent_org_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"active": {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-			"type": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"external_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"is_root_org": &schema.Schema{
-				Type:          schema.TypeBool,
-				Optional:      true,
-				ConflictsWith: []string{"parent_org_id"},
-			},
-			"parent_org_id": &schema.Schema{
-				Type:          schema.TypeString,
-				Optional:      true,
-				ConflictsWith: []string{"is_root_org"},
 			},
 		},
 	}
@@ -59,8 +59,6 @@ func resourceIAMOrg() *schema.Resource {
 func resourceIAMOrgCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
-	var diags diag.Diagnostics
-
 	client, err := config.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
@@ -68,12 +66,8 @@ func resourceIAMOrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
-	isRootOrg := d.Get("is_root_org").(bool)
 	externalID := d.Get("external_id").(string)
 	orgType := d.Get("type").(string)
-	if isRootOrg {
-		return diag.FromErr(ErrCannotCreateRootOrg)
-	}
 	parentOrgID, ok := d.Get("parent_org_id").(string)
 	if !ok {
 		return diag.FromErr(ErrMissingParentOrgID)
@@ -92,7 +86,7 @@ func resourceIAMOrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(fmt.Errorf("failed to create organization: %d", resp.StatusCode))
 	}
 	d.SetId(org.ID)
-	return diags
+	return resourceIAMOrgRead(ctx, d, m)
 }
 
 func resourceIAMOrgRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -114,7 +108,6 @@ func resourceIAMOrgRead(ctx context.Context, d *schema.ResourceData, m interface
 		}
 		return diag.FromErr(err)
 	}
-	_ = d.Set("org_id", org.ID)
 	_ = d.Set("description", org.Description)
 	_ = d.Set("name", org.Name)
 	_ = d.Set("external_id", org.ExternalID)
@@ -141,9 +134,13 @@ func resourceIAMOrgUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 
-	if d.HasChange("description") {
-		description := d.Get("description").(string)
-		org.Description = description
+	if d.HasChange("description") || d.HasChange("name") ||
+		d.HasChange("type") || d.HasChange("external_id") || d.HasChange("display_name") {
+		org.Name = d.Get("name").(string)
+		org.Description = d.Get("description").(string)
+		org.Type = d.Get("type").(string)
+		org.ExternalID = d.Get("external_id").(string)
+		org.DisplayName = d.Get("display_name").(string)
 		_, _, err = client.Organizations.UpdateOrganization(*org)
 		if err != nil {
 			diags = append(diags, diag.FromErr(err)...)
