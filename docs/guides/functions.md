@@ -28,7 +28,7 @@ Example:
 ```hcl
 module "siderite-backend" {
   source  = "philips-labs/siderite-backend/cloudfoundry"
-  version = "0.7.0"
+  version = "0.8.0"
 
   cf_region   = "eu-west"
   cf_org_name = "my-cf-org"
