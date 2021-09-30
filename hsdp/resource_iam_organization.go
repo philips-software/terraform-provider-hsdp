@@ -25,9 +25,14 @@ func resourceIAMOrg() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"display_name": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -68,6 +73,7 @@ func resourceIAMOrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	description := d.Get("description").(string)
 	externalID := d.Get("external_id").(string)
 	orgType := d.Get("type").(string)
+	displayName := d.Get("display_name").(string)
 	parentOrgID, ok := d.Get("parent_org_id").(string)
 	if !ok {
 		return diag.FromErr(ErrMissingParentOrgID)
@@ -77,6 +83,7 @@ func resourceIAMOrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	newOrg.Description = description
 	newOrg.Parent.Value = parentOrgID
 	newOrg.ExternalID = externalID
+	newOrg.DisplayName = displayName
 	newOrg.Type = orgType
 	org, resp, err := client.Organizations.CreateOrganization(newOrg)
 	if err != nil {
@@ -89,7 +96,7 @@ func resourceIAMOrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	return resourceIAMOrgRead(ctx, d, m)
 }
 
-func resourceIAMOrgRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMOrgRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -118,7 +125,7 @@ func resourceIAMOrgRead(ctx context.Context, d *schema.ResourceData, m interface
 	return diags
 }
 
-func resourceIAMOrgUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMOrgUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -149,7 +156,7 @@ func resourceIAMOrgUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	return diags
 }
 
-func resourceIAMOrgDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMOrgDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
