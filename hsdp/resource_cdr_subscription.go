@@ -3,12 +3,14 @@ package hsdp
 import (
 	"context"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/google/fhir/go/proto/google/fhir/proto/stu3/datatypes_go_proto"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	jsonpatch "github.com/herkyl/patchwerk"
 	"github.com/philips-software/go-hsdp-api/cdr/helper/fhir/stu3"
-	"time"
 )
 
 func resourceCDRSubscription() *schema.Resource {
@@ -127,6 +129,10 @@ func resourceCDRSubscriptionRead(ctx context.Context, d *schema.ResourceData, m 
 				Severity: diag.Warning,
 				Summary:  "response is nil",
 			})
+		}
+		if resp.StatusCode == http.StatusNotFound {
+			d.SetId("")
+			return diags
 		}
 		if err != nil {
 			diags = append(diags, diag.Diagnostic{
