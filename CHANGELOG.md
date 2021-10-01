@@ -3,6 +3,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.20.8
+- DICOM: Fix JSON field names
+
 ## v0.20.7
 - DICOM: Fix JSON rendering issue
 
