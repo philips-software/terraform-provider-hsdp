@@ -164,8 +164,10 @@ func resourceDICOMRemoteNodeCreate(ctx context.Context, d *schema.ResourceData, 
 
 			networkConnection.Port = mVi["port"].(int)
 			networkConnection.NetworkTimeout = mVi["network_timeout"].(int)
-			networkConnection.AdvancedSettings.PDULength = mVi["pdu_length"].(int)
-			networkConnection.AdvancedSettings.ArtimTimeout = mVi["association_idle_timeout"].(int)
+			networkConnection.AdvancedSettings = &dicom.AdvancedSettings{
+				PDULength:    mVi["pdu_length"].(int),
+				ArtimTimeout: mVi["association_idle_timeout"].(int),
+			}
 		}
 		node.NetworkConnection = networkConnection
 	}
