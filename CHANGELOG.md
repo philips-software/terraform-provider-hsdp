@@ -3,6 +3,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+## v0.20.6
+- IAM: Fix issue with self_managed_key
+- IAM: Fix perma-diff when changing Org names
+- CDR: Handle Subscription drift detection
+- Function: update siderite-backend version
+
 ## v0.20.5
 - DICOM Gateway: fix refresh and destroy for config resource
 
