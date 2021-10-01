@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - IAM: Fix perma-diff when changing Org names
 - CDR: Handle Subscription drift detection
 - Function: update siderite-backend version
+- DICOM: Fix crashing bug
 
 ## v0.20.5
 - DICOM Gateway: fix refresh and destroy for config resource
