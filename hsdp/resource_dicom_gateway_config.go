@@ -94,10 +94,6 @@ func resourceDICOMGatewayConfig() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"authenticate_client_certificate": {
-							Type:     schema.TypeBool,
-							Optional: true,
-						},
 						// ---Advanced features end
 						"application_entity": schemaApplicationEntity(),
 					},
@@ -147,10 +143,6 @@ func resourceDICOMGatewayConfig() *schema.Resource {
 						},
 						"certificate_id": {
 							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"authenticate_client_certificate": {
-							Type:     schema.TypeBool,
 							Optional: true,
 						},
 						"application_entity": schemaApplicationEntity(),
@@ -277,14 +269,12 @@ func getSCPConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 			artimTimeout := mVi["artim_timeout"].(int)
 			associationIdleIimeout := mVi["association_idle_timeout"].(int)
 			certificateID := mVi["certificate_id"].(string)
-			authenticateClientCertificate := mVi["authenticate_client_certificate"].(bool)
 			if isSecure {
 				if port == 0 {
 					port = 105
 				}
 				scpConfig.SecureNetworkConnection = &dicom.NetworkConnection{
-					Port:                          port,
-					AuthenticateClientCertificate: authenticateClientCertificate,
+					Port: port,
 					AdvancedSettings: &dicom.AdvancedSettings{
 						ArtimTimeout:           artimTimeout,
 						AssociationIdleTimeout: associationIdleIimeout,
@@ -340,14 +330,13 @@ func getQueryRetrieveConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 			artimTimeout := mVi["artim_timeout"].(int)
 			associationIdleIimeout := mVi["association_idle_timeout"].(int)
 			certificateID := mVi["certificate_id"].(string)
-			authenticateClientCertificate := mVi["authenticate_client_certificate"].(bool)
 			if isSecure {
 				if port == 0 {
 					port = 109
 				}
 				queryRetrieveConfig.SecureNetworkConnection = &dicom.NetworkConnection{
-					Port:                          port,
-					AuthenticateClientCertificate: authenticateClientCertificate,
+					Port:     port,
+					IsSecure: true,
 					AdvancedSettings: &dicom.AdvancedSettings{
 						ArtimTimeout:           artimTimeout,
 						AssociationIdleTimeout: associationIdleIimeout,
