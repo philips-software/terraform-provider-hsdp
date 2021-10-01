@@ -6,10 +6,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/google/fhir/go/proto/google/fhir/proto/stu3/datatypes_go_proto"
+	"github.com/google/fhir/go/proto/google/fhir/proto/stu3/resources_go_proto"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	jsonpatch "github.com/herkyl/patchwerk"
+	"github.com/philips-software/go-hsdp-api/cdr"
 	"github.com/philips-software/go-hsdp-api/cdr/helper/fhir/stu3"
 )
 
@@ -84,6 +87,7 @@ func resourceCDRSubscriptionCreate(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	defer client.Close()
 
 	subscription, err := stu3.NewSubscription(
 		stu3.WithReason(reason),
@@ -95,15 +99,21 @@ func resourceCDRSubscriptionCreate(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	defer client.Close()
-
 	jsonSubscription, err := config.ma.MarshalResource(subscription)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	contained, resp, err := client.OperationsSTU3.Post("Subscription", jsonSubscription)
-	if err != nil || resp == nil {
-		return diag.FromErr(err)
+	var contained *resources_go_proto.ContainedResource
+
+	operation := func() error {
+		var resp *cdr.Response
+		contained, resp, err = client.OperationsSTU3.Post("Subscription", jsonSubscription)
+		return checkForIAMPermissionErrors(client, resp.Response, err)
+	}
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("create subscription: %w", err))
 	}
 	createdSub := contained.GetSubscription()
 	d.SetId(createdSub.Id.Value)
@@ -245,6 +255,7 @@ func resourceCDRSubscriptionDelete(ctx context.Context, d *schema.ResourceData, 
 	}
 	defer client.Close()
 
+	// TODO: Check HTTP 500 issue
 	ok, _, err := client.OperationsSTU3.Delete("Subscription/" + id)
 	if err != nil {
 		return diag.FromErr(err)
