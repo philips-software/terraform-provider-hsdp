@@ -71,6 +71,8 @@ func resourceCDROrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	defer client.Close()
+
 
 	name := d.Get("name").(string)
 
@@ -78,7 +80,6 @@ func resourceCDROrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	defer client.Close()
 
 	partOf := d.Get("part_of").(string)
 	if partOf != "" {
