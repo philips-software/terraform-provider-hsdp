@@ -702,6 +702,9 @@ func resourceContainerHostUpdate(_ context.Context, d *schema.ResourceData, m in
 	host := d.Get("host").(string)
 	commandsAfterFileChanges := d.Get("commands_after_file_changes").(bool)
 	agent := d.Get("agent").(bool)
+	if bastionHost == "" {
+		bastionHost = client.BastionHost()
+	}
 
 	if d.HasChange("tags") {
 		o, n := d.GetChange("tags")
