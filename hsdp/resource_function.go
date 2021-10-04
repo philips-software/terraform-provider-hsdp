@@ -298,6 +298,7 @@ func createSchedules(ironClient *iron.Client, ironConfig *iron.Config, modConfig
 		_, _, _ = ironClient.Codes.DeleteCode(codeID)
 		return diag.FromErr(err)
 	}
+	timeout := d.Get("timeout").(int)
 	startAt := time.Now().Add(aLongTime * time.Second)
 	var syncSchedule *iron.Schedule
 	var asyncSchedule *iron.Schedule
@@ -337,6 +338,7 @@ func createSchedules(ironClient *iron.Client, ironConfig *iron.Config, modConfig
 			Cluster:  ironConfig.ClusterInfo[0].ClusterID,
 			StartAt:  &startAt,
 			RunEvery: aLongTime,
+			Timeout:  timeout,
 		}
 		_, resp, err := ironClient.Schedules.CreateSchedule(*syncSchedule)
 		if err != nil {
@@ -358,6 +360,7 @@ func createSchedules(ironClient *iron.Client, ironConfig *iron.Config, modConfig
 			Cluster:  ironConfig.ClusterInfo[0].ClusterID,
 			StartAt:  &startAt,
 			RunEvery: aLongTime,
+			Timeout:  timeout,
 		}
 		_, resp, err = ironClient.Schedules.CreateSchedule(*asyncSchedule)
 		if err != nil {
