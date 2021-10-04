@@ -452,6 +452,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	// Create files
+	_, _ = config.Debug("about to copy %d files to remote\n", len(createFiles))
 	if err := copyFiles(ssh, config, createFiles); err != nil {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Warning,
@@ -696,10 +697,7 @@ func resourceContainerHostUpdate(_ context.Context, d *schema.ResourceData, m in
 	}
 	bastionHost := d.Get("bastion_host").(string)
 	user := d.Get("user").(string)
-	hostUser := d.Get("host_user").(string)
 	privateKey := d.Get("private_key").(string)
-	hostPrivateKey := d.Get("host_private_key").(string)
-	host := d.Get("host").(string)
 	commandsAfterFileChanges := d.Get("commands_after_file_changes").(bool)
 	agent := d.Get("agent").(bool)
 	if bastionHost == "" {
@@ -770,9 +768,9 @@ func resourceContainerHostUpdate(_ context.Context, d *schema.ResourceData, m in
 		}
 	}
 	// Collect SSH details
-	privateIP := host
+	privateIP := d.Get("private_ip").(string)
 	ssh := &easyssh.MakeConfig{
-		User:   hostUser,
+		User:   user,
 		Server: privateIP,
 		Port:   "22",
 		Proxy:  http.ProxyFromEnvironment,
@@ -782,13 +780,11 @@ func resourceContainerHostUpdate(_ context.Context, d *schema.ResourceData, m in
 			Port:   "22",
 		},
 	}
-	if hostPrivateKey != "" {
-		if agent {
-			return diag.FromErr(fmt.Errorf("agent mode is enabled, not expecting a private key"))
-		}
-		ssh.Key = hostPrivateKey
-	}
 	if privateKey != "" {
+		if agent {
+			return diag.FromErr(fmt.Errorf("'agent' is enabled so not expecting a private key to be set"))
+		}
+		ssh.Key = privateKey
 		ssh.Bastion.Key = privateKey
 	}
 	if d.HasChange("file") {
@@ -796,6 +792,7 @@ func resourceContainerHostUpdate(_ context.Context, d *schema.ResourceData, m in
 		if len(diags) > 0 {
 			return diags
 		}
+		_, _ = config.Debug("about to copy %d files to remote\n", len(createFiles))
 		if err := copyFiles(ssh, config, createFiles); err != nil {
 			return diag.FromErr(fmt.Errorf("copying files to remote: %w", err))
 		}
