@@ -180,6 +180,11 @@ func resourceContainerHost() *schema.Resource {
 				Optional: true,
 				Default:  false,
 			},
+			"commands_after_file_changes": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
 			commandsField: {
 				Type:     schema.TypeList,
 				MaxItems: 10,
@@ -260,9 +265,13 @@ func resourceContainerHost() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"result": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"tags": tagsSchema(),
 		},
-		SchemaVersion: 4,
+		SchemaVersion: 5,
 	}
 }
 
@@ -397,7 +406,6 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		instanceID = ch.InstanceID()
 		ipAddress = ch.IPAddress()
 	}
-	d.SetId(instanceID)
 
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"provisioning", "indeterminate"},
@@ -465,15 +473,19 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	// Run commands
+	var stdout, stderr string
+	var done bool
 	for i := 0; i < len(commands); i++ {
-		stdout, stderr, done, err := ssh.Run(commands[i], 5*time.Minute)
+		stdout, stderr, done, err = ssh.Run(commands[i], 5*time.Minute)
+		_, _ = config.Debug("command: %s\ndone: %t\nstdout:\n%s\nstderr:\n%s\n", commands[i], done, stdout, stderr)
 		if err != nil {
+			_, _ = config.Debug("error: %v\n", err)
 			_, _, _ = client.Destroy(tagName)
 			return append(diags, diag.FromErr(fmt.Errorf("command [%s]: %w", commands[i], err))...)
-		} else {
-			_, _ = config.Debug("command: %s\ndone: %t\nstdout:\n%s\nstderr:\n%s\n", commands[i], done, stdout, stderr)
 		}
 	}
+	_ = d.Set("result", stdout)
+	d.SetId(instanceID)
 	readDiags := resourceContainerHostRead(ctx, d, m)
 	return append(diags, readDiags...)
 }
@@ -682,6 +694,14 @@ func resourceContainerHostUpdate(_ context.Context, d *schema.ResourceData, m in
 	if diags := validateContainerHostSchema(d); len(diags) > 0 {
 		return diags
 	}
+	bastionHost := d.Get("bastion_host").(string)
+	user := d.Get("user").(string)
+	hostUser := d.Get("host_user").(string)
+	privateKey := d.Get("private_key").(string)
+	hostPrivateKey := d.Get("host_private_key").(string)
+	host := d.Get("host").(string)
+	commandsAfterFileChanges := d.Get("commands_after_file_changes").(bool)
+	agent := d.Get("agent").(bool)
 
 	if d.HasChange("tags") {
 		o, n := d.GetChange("tags")
@@ -746,8 +766,57 @@ func resourceContainerHostUpdate(_ context.Context, d *schema.ResourceData, m in
 			return diag.FromErr(err)
 		}
 	}
+	// Collect SSH details
+	privateIP := host
+	ssh := &easyssh.MakeConfig{
+		User:   hostUser,
+		Server: privateIP,
+		Port:   "22",
+		Proxy:  http.ProxyFromEnvironment,
+		Bastion: easyssh.DefaultConfig{
+			User:   user,
+			Server: bastionHost,
+			Port:   "22",
+		},
+	}
+	if hostPrivateKey != "" {
+		if agent {
+			return diag.FromErr(fmt.Errorf("agent mode is enabled, not expecting a private key"))
+		}
+		ssh.Key = hostPrivateKey
+	}
+	if privateKey != "" {
+		ssh.Bastion.Key = privateKey
+	}
+	if d.HasChange("file") {
+		createFiles, diags := collectFilesToCreate(d)
+		if len(diags) > 0 {
+			return diags
+		}
+		if err := copyFiles(ssh, config, createFiles); err != nil {
+			return diag.FromErr(fmt.Errorf("copying files to remote: %w", err))
+		}
+		if commandsAfterFileChanges {
+			commands, diags := collectList(commandsField, d)
+			if len(diags) > 0 {
+				return diags
+			}
+			// Run commands
+			var stdout, stderr string
+			var done bool
+			var err error
+			for i := 0; i < len(commands); i++ {
+				stdout, stderr, done, err = ssh.Run(commands[i], 5*time.Minute)
+				_, _ = config.Debug("command: %s\ndone: %t\nstdout:\n%s\nstderr:\n%s\n", commands[i], done, stdout, stderr)
+				if err != nil {
+					_, _ = config.Debug("error: %v\n", err)
+					return append(diags, diag.FromErr(fmt.Errorf("command [%s]: %w", commands[i], err))...)
+				}
+			}
+			_ = d.Set("result", stdout)
+		}
+	}
 	return diags
-
 }
 
 func resourceContainerHostRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
