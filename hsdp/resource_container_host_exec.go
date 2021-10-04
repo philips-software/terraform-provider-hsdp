@@ -19,8 +19,8 @@ The ` + "`triggers`" + ` argument allows specifying an arbitrary set of values t
 
 		CreateContext: resourceContainerHostExecCreate,
 		Read:          resourceContainerHostExecRead,
-		Delete:        resourceConainterHostDelete,
-		SchemaVersion: 1,
+		Delete:        resourceContainterHostExecDelete,
+		SchemaVersion: 2,
 
 		Schema: map[string]*schema.Schema{
 			"triggers": {
@@ -55,6 +55,10 @@ The ` + "`triggers`" + ` argument allows specifying an arbitrary set of values t
 				Optional: true,
 				ForceNew: true,
 				Default:  false,
+			},
+			"result": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			commandsField: {
 				Type:     schema.TypeList,
@@ -168,14 +172,17 @@ func resourceContainerHostExecCreate(_ context.Context, d *schema.ResourceData, 
 	}
 
 	// Run commands
+	var stdout, stderr string
+	var done bool
 	for i := 0; i < len(commands); i++ {
-		stdout, stderr, done, err := ssh.Run(commands[i], 5*time.Minute)
+		stdout, stderr, done, err = ssh.Run(commands[i], 5*time.Minute)
 		_, _ = config.Debug("command: %s\ndone: %t\nstdout:\n%s\nstderr:\n%s\n", commands[i], done, stdout, stderr)
 		if err != nil {
+			_, _ = config.Debug("error: %v\n", err)
 			return append(diags, diag.FromErr(fmt.Errorf("command [%s]: %w", commands[i], err))...)
 		}
 	}
-
+	_ = d.Set("result", stdout)
 	d.SetId(fmt.Sprintf("%d", rand.Int()))
 	return diags
 }
@@ -184,7 +191,7 @@ func resourceContainerHostExecRead(_ *schema.ResourceData, _ interface{}) error 
 	return nil
 }
 
-func resourceConainterHostDelete(d *schema.ResourceData, _ interface{}) error {
+func resourceContainterHostExecDelete(d *schema.ResourceData, _ interface{}) error {
 	d.SetId("")
 	return nil
 }

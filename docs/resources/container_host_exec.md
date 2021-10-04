@@ -52,3 +52,5 @@ Each `file` block can contain the following fields. Use either `content` or `sou
 The following attributes are exported:
 
 * `id` - The resource ID
+* `result` - The stdout of the last command executed in the `commands` list
+

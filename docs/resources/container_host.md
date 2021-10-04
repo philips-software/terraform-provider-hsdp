@@ -123,6 +123,7 @@ The following attributes are exported:
 * `zone` - The Zone the instance was provisioned in.
 * `launch_time` - Timestamp when the instance was launched.
 * `block_devices` - The list of block devices attached to the instance.
+* `result` - The stdout of the last command executed in the `commands` list
 
 ## Import
 
