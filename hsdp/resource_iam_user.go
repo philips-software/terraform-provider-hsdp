@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
@@ -24,37 +25,39 @@ func resourceIAMUser() *schema.Resource {
 
 		SchemaVersion: 1,
 		Schema: map[string]*schema.Schema{
-			"username": &schema.Schema{
+			"username": {
 				Type:       schema.TypeString,
 				Optional:   true,
 				Deprecated: "use login field instead",
 			},
-			"login": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+			"login": {
+				Type:             schema.TypeString,
+				DiffSuppressFunc: suppressCaseDiffs,
+				Required:         true,
 			},
-			"email": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+			"email": {
+				Type:             schema.TypeString,
+				DiffSuppressFunc: suppressCaseDiffs,
+				Required:         true,
 			},
 			"password": {
 				Type:      schema.TypeString,
 				Sensitive: true,
 				Optional:  true,
 			},
-			"first_name": &schema.Schema{
+			"first_name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"last_name": &schema.Schema{
+			"last_name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"mobile": &schema.Schema{
+			"mobile": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"organization_id": &schema.Schema{
+			"organization_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -89,7 +92,7 @@ func resourceIAMUserCreate(ctx context.Context, d *schema.ResourceData, m interf
 		user, _, _ := client.Users.GetUserByID(uuid)
 		if user != nil {
 			if user.AccountStatus.Disabled {
-				// Retrigger activation email
+				// Ret-rigger activation email
 				_, _, err = client.Users.ResendActivation(email)
 				return diag.FromErr(err)
 			}
@@ -129,7 +132,7 @@ func resourceIAMUserCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(err)
 	}
 	if user == nil {
-		return diag.FromErr(fmt.Errorf("Error creating user: %w", err))
+		return diag.FromErr(fmt.Errorf("error creating user '%s': %w", login, err))
 	}
 	d.SetId(user.ID)
 	return diags
@@ -235,7 +238,14 @@ func resourceIAMUserDelete(_ context.Context, d *schema.ResourceData, m interfac
 	}
 	var person iam.Person
 	person.ID = user.ID
-	ok, _, _ := client.Users.DeleteUser(person)
+	ok, resp, _ := client.Users.DeleteUser(person)
+	if resp != nil && resp.StatusCode != http.StatusNoContent {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "DeleteUser returned unexpected result",
+			Detail:   fmt.Sprintf("DeleteUser returned status '%d', which is unexpected", resp.StatusCode),
+		})
+	}
 	if ok {
 		d.SetId("")
 	}
