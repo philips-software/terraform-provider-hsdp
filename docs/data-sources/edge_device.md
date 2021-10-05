@@ -20,6 +20,8 @@ output "sme100_status" {
 
 ## Attribute reference
 
+In addition to all arguments above, the following attributes are exported:
+
 * `id` - The device ID
 * `region` - The region to which this device is connected to
 * `state` - State of the device

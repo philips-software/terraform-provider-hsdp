@@ -243,6 +243,8 @@ func Provider(build string) *schema.Provider {
 			"hsdp_ai_workspace_service_instance":     dataSourceAIWorkspaceServiceInstance(),
 			"hsdp_ai_workspace_compute_targets":      dataSourceAIWorkspaceComputeTargets(),
 			"hsdp_ai_workspace":                      dataSourceAIWorkspace(),
+			"hsdp_iam_group":                         dataSourceIAMGroup(),
+			"hsdp_iam_role":                          dataSourceIAMRole(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}

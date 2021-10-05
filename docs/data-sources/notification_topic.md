@@ -16,6 +16,8 @@ data "hsdp_notification_topic" "topic" {
 
 ## Attribute reference
 
+In addition to all arguments above, the following attributes are exported:
+
 * `producer_id` - The UUID of the producer associated with this topic
 * `scope` - The scope of this topic. Can be either `public` or `private`
 * `allowed_scopes` - The list of allowed scopes

@@ -16,6 +16,8 @@ data "hsdp_notification_subscription" "subscription" {
 
 ## Attribute reference
 
+In addition to all arguments above, the following attributes are exported:
+
 * `managed_organization_id` - (Optional) The managed organization id
 * `managed_organization` - (Optional) The managed organization name
 * `topic_id` - (Optional) The UUID of the topic
