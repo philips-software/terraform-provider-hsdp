@@ -16,4 +16,6 @@ data "hsdp_notification_topics" "topic1" {
 
 ## Attribute reference
 
+In addition to all arguments above, the following attributes are exported:
+
 * `topic_ids` - The list of matching topic IDs

@@ -26,7 +26,7 @@ The following arguments are supported:
 
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
 * `description` - The description of the application
 * `global_reference_id` - The global reference ID of the application

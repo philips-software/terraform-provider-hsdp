@@ -25,5 +25,7 @@ output "root_crl" {
 
 ## Attribute reference
 
+In addition to all arguments above, the following attributes are exported:
+
 * `ca_pem` - The root CA in PEM format
 * `crl_pem` - The root CRL in PEM format
