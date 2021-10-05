@@ -78,6 +78,9 @@ resource "hsdp_container_host" "zahadoom" {
 The following arguments are supported:
 
 * `name` - (Required) The container host name. Must be unique.
+* `user` - (Optional) The username to use for provision activities using SSH
+* `private_key` - (Optional) The SSH private key to use for provision activities
+* `agent` - (Optional) Signals the resource should use an SSH-agent connection. Default is `false`
 * `instance_type` - (Optional) The EC2 instance type to use. Default `m5.large`
 * `instance_role` - (Optional) The role to use. Default `container-host` (other values: `vanilla`, `base`)
 * `image` - (Optional) The OS image to use. Only use this if you have access to additional image types (example: `centos7`). Conflicts with `instance_role` value `container-host`
@@ -92,8 +95,6 @@ The following arguments are supported:
 * `subnet` - (Optional) This will cause a new instance to get deployed on a specific subnet. Conflicts with `subnet_type`. You should only use this option if you have very specific requirements that dictate all the instances you are creating need to reside in the same AZ. An example of this would be a cluster of systems that need to reside in the same datacenter.
 * `subnet_type` - (Optional) What subnet type to use. Can be `public` or `private`. Default is `private`.
 * `tags` - (Optional) Map of tags to assign to the instances
-* `user` - (Optional) The username to use for provision activities using SSH
-* `private_key` - (Optional) The SSH private key to use for provision activities
 * `file` - (Optional) Block specifying content to be written to the container host after creation
 * `bastion_host` - (Optional) The bastion host to use.  When not set, this will be deduced from the container host location
 * `keep_failed_instances` - (Optional) Keep instances around for post-mortem analysis on failure. Default is `false`.
