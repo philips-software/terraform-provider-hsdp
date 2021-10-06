@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 # v0.21.2
 
+- DICOM: Ensure ForceNew is pervasive for remote nodes
+
+# v0.21.2
+
 - DICOM: Use different type structures for certain API endpoints
 
 ## v0.21.1
