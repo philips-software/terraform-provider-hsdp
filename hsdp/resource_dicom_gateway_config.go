@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"crypto/md5"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -183,18 +184,18 @@ func resourceDICOMGatewayConfigRead(_ context.Context, d *schema.ResourceData, m
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	_ = setSCPConfig(*storeConfig, d)
+	_ = setBrokenSCPConfig(*storeConfig, d)
 
-	queryConfig, _, err := client.Config.GetMoveService(nil)
+	queryConfig, _, err := client.Config.GetQueryRetrieveService(nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	_ = setQueryConfig(*queryConfig, d)
+	_ = setQueryRetrieveConfig(*queryConfig, d)
 
 	return diags
 }
 
-func setSCPConfig(scpConfig dicom.SCPConfig, d *schema.ResourceData) error {
+func setBrokenSCPConfig(scpConfig dicom.BrokenSCPConfig, d *schema.ResourceData) error {
 	storeService := make(map[string]interface{})
 	if scpConfig.SecureNetworkConnection != nil {
 		storeService["is_secure"] = true
@@ -229,7 +230,7 @@ func setSCPConfig(scpConfig dicom.SCPConfig, d *schema.ResourceData) error {
 	return nil
 }
 
-func setQueryConfig(queryConfig dicom.SCPConfig, d *schema.ResourceData) error {
+func setQueryRetrieveConfig(queryConfig dicom.BrokenSCPConfig, d *schema.ResourceData) error {
 	queryService := make(map[string]interface{})
 	if queryConfig.SecureNetworkConnection != nil {
 		queryService["port"] = queryConfig.SecureNetworkConnection.Port
@@ -254,8 +255,8 @@ func setQueryConfig(queryConfig dicom.SCPConfig, d *schema.ResourceData) error {
 	return nil
 }
 
-func getSCPConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
-	var scpConfig dicom.SCPConfig
+func getBrokenSCPConfig(d *schema.ResourceData) (*dicom.BrokenSCPConfig, error) {
+	var scpConfig dicom.BrokenSCPConfig
 
 	if v, ok := d.GetOk("store_service"); ok {
 		vL := v.(*schema.Set).List()
@@ -273,9 +274,9 @@ func getSCPConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 				if port == 0 {
 					port = 105
 				}
-				scpConfig.SecureNetworkConnection = &dicom.NetworkConnection{
+				scpConfig.SecureNetworkConnection = &dicom.BrokenNetworkConnection{
 					Port: port,
-					AdvancedSettings: &dicom.AdvancedSettings{
+					AdvancedSettings: &dicom.BrokenAdvancedSettings{
 						ArtimTimeout:           artimTimeout,
 						AssociationIdleTimeout: associationIdleIimeout,
 						PDULength:              pduLength,
@@ -290,9 +291,9 @@ func getSCPConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 				if port == 0 {
 					port = 104
 				}
-				scpConfig.UnSecureNetworkConnection = &dicom.NetworkConnection{
+				scpConfig.UnSecureNetworkConnection = &dicom.BrokenNetworkConnection{
 					Port: port,
-					AdvancedSettings: &dicom.AdvancedSettings{
+					AdvancedSettings: &dicom.BrokenAdvancedSettings{
 						ArtimTimeout:           artimTimeout,
 						AssociationIdleTimeout: associationIdleIimeout,
 						PDULength:              pduLength,
@@ -316,8 +317,8 @@ func getSCPConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 	return &scpConfig, nil
 }
 
-func getQueryRetrieveConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
-	var queryRetrieveConfig dicom.SCPConfig
+func getQueryRetrieveConfig(d *schema.ResourceData) (*dicom.BrokenSCPConfig, error) {
+	var queryRetrieveConfig dicom.BrokenSCPConfig
 	if v, ok := d.GetOk("query_retrieve_service"); ok {
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
@@ -334,10 +335,9 @@ func getQueryRetrieveConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 				if port == 0 {
 					port = 109
 				}
-				queryRetrieveConfig.SecureNetworkConnection = &dicom.NetworkConnection{
-					Port:     port,
-					IsSecure: true,
-					AdvancedSettings: &dicom.AdvancedSettings{
+				queryRetrieveConfig.SecureNetworkConnection = &dicom.BrokenNetworkConnection{
+					Port: port,
+					AdvancedSettings: &dicom.BrokenAdvancedSettings{
 						ArtimTimeout:           artimTimeout,
 						AssociationIdleTimeout: associationIdleIimeout,
 						PDULength:              pduLength,
@@ -352,9 +352,9 @@ func getQueryRetrieveConfig(d *schema.ResourceData) (*dicom.SCPConfig, error) {
 				if port == 0 {
 					port = 108
 				}
-				queryRetrieveConfig.UnSecureNetworkConnection = &dicom.NetworkConnection{
+				queryRetrieveConfig.UnSecureNetworkConnection = &dicom.BrokenNetworkConnection{
 					Port: port,
-					AdvancedSettings: &dicom.AdvancedSettings{
+					AdvancedSettings: &dicom.BrokenAdvancedSettings{
 						ArtimTimeout:           artimTimeout,
 						AssociationIdleTimeout: associationIdleIimeout,
 						PDULength:              pduLength,
@@ -390,7 +390,7 @@ func resourceDICOMGatewayConfigCreate(_ context.Context, d *schema.ResourceData,
 	// Refresh token, so we hopefully have DICOM permissions to proceed without error
 	_ = client.TokenRefresh()
 
-	scpConfig, err := getSCPConfig(d)
+	scpConfig, err := getBrokenSCPConfig(d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("getSCPConfig: %w", err))
 	}
@@ -406,12 +406,13 @@ func resourceDICOMGatewayConfigCreate(_ context.Context, d *schema.ResourceData,
 	}
 	_ = d.Set("store_service_id", createdSCPConfig.ID)
 
-	createdQuerySCPConfig, _, err := client.Config.SetMoveService(*queryConfig, nil)
+	createdQuerySCPConfig, _, err := client.Config.SetQueryRetrieveService(*queryConfig, nil)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("SetQueryService: %w", err))
+		return diag.FromErr(fmt.Errorf("SetMoveService: %w", err))
 	}
 	_ = d.Set("query_retrieve_service_id", createdQuerySCPConfig.ID)
 
-	d.SetId(fmt.Sprintf("%s:%s", createdQuerySCPConfig.ID, createdQuerySCPConfig.ID))
+	generatedID := fmt.Sprintf("%x", md5.Sum([]byte(configURL)))
+	d.SetId(generatedID)
 	return diags
 }
