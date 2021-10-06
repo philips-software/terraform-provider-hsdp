@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+
+# v0.21.2
+
+- DICOM: Use different type structures for certain API endpoints
+
 ## v0.21.1
 
 - IAM: Ignore case for login and email fields
