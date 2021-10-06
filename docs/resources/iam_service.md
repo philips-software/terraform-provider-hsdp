@@ -41,7 +41,7 @@ resource "tls_self_signed_cert" "cert" {
   }
 
   validity_period_hours = 720
-  early_renewal_hours   = 48
+  early_renewal_hours   = 24
   is_ca_certificate     = true
   
   allowed_uses = [
@@ -52,11 +52,9 @@ resource "tls_self_signed_cert" "cert" {
 resource "hsdp_iam_service" "test" {
   name                     = "TestService"
   description              = "TestDesc"
-  application_id           = "bfa887bb-c7e8-42bb-bee4-e1ce83f34643"
+  application_id           = var.application_id
   scopes                   = ["openid"]
   default_scopes           = ["openid"]
-  #self_managed_private_key = tls_private_key.test.private_key_pem
-  #expires_on               = "2022-10-01T07:20:50.52Z"
   self_managed_certificate = tls_self_signed_cert.cert.cert_pem
 }
 ```
