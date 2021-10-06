@@ -19,7 +19,7 @@ The ` + "`triggers`" + ` argument allows specifying an arbitrary set of values t
 
 		CreateContext: resourceContainerHostExecCreate,
 		Read:          resourceContainerHostExecRead,
-		Delete:        resourceContainterHostExecDelete,
+		Delete:        resourceContainerHostExecDelete,
 		SchemaVersion: 2,
 
 		Schema: map[string]*schema.Schema{
@@ -191,7 +191,7 @@ func resourceContainerHostExecRead(_ *schema.ResourceData, _ interface{}) error 
 	return nil
 }
 
-func resourceContainterHostExecDelete(d *schema.ResourceData, _ interface{}) error {
+func resourceContainerHostExecDelete(d *schema.ResourceData, _ interface{}) error {
 	d.SetId("")
 	return nil
 }
