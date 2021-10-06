@@ -50,18 +50,22 @@ func resourceDICOMRemoteNode() *schema.Resource {
 						"is_secure": {
 							Type:     schema.TypeBool,
 							Required: true,
+							ForceNew: true,
 						},
 						"hostname": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"ip_address": {
 							Type:     schema.TypeString,
 							Required: true,
+							ForceNew: true,
 						},
 						"disable_ipv6": {
 							Type:     schema.TypeBool,
 							Required: true,
+							ForceNew: true,
 						},
 						"port": {
 							Type:     schema.TypeInt,
@@ -71,22 +75,26 @@ func resourceDICOMRemoteNode() *schema.Resource {
 							Type:     schema.TypeInt,
 							Optional: true,
 							Default:  3000,
+							ForceNew: true,
 						},
 						// ---Advanced features start
 						"pdu_length": {
 							Type:     schema.TypeInt,
 							Optional: true,
 							Default:  65535,
+							ForceNew: true,
 						},
 						"artim_timeout": {
 							Type:     schema.TypeInt,
 							Optional: true,
 							Default:  3000,
+							ForceNew: true,
 						},
 						"association_idle_timeout": {
 							Type:     schema.TypeInt,
 							Optional: true,
 							Default:  4500,
+							ForceNew: true,
 						},
 					},
 				},
