@@ -82,3 +82,5 @@ The following attributes are exported:
 * `services` - (list(string)) The list of available services in the region/environment
 * `service_id` - (string) The IAM service ID used for authenticating against IAM
 * `org_admin_username` - (string) The IAM OrgAdmin used for authenticating against IAM
+* `sliding_expires_on` - (string) A sliding expires on RFC3339 timestamp which can be used to rotate e.g. credentials.
+  The value is the first day of the next quarter calculated from the current wall clock time.

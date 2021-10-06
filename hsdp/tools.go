@@ -3,6 +3,7 @@ package hsdp
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -48,4 +49,27 @@ func difference(a, b []string) []string {
 		}
 	}
 	return ab
+}
+
+func nextQuarterStart(now time.Time) time.Time {
+	year := now.Year()
+	month := now.Month()
+	if now.Day() > 1 {
+		month += 1
+	}
+	month += 4 - (month % 3)
+	if month > 12 {
+		year += 1
+	}
+	month = month % 12
+	return time.Date(year, month, 1, 0, 0, 0, 0, now.Location())
+}
+
+func slidingExpiresOn(now time.Time) time.Time {
+	expiresOn := nextQuarterStart(now)
+	delta := expiresOn.Sub(now).Hours() / 24
+	if delta < 30 {
+		expiresOn = nextQuarterStart(expiresOn)
+	}
+	return expiresOn
 }

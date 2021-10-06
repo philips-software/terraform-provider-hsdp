@@ -2,6 +2,7 @@ package hsdp
 
 import (
 	"context"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -62,6 +63,11 @@ func dataSourceConfig() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"sliding_expires_on": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The next quarter starting date based on the current time. Useful for setting certificate expires",
+			},
 		},
 	}
 
@@ -100,6 +106,7 @@ func dataSourceConfigRead(_ context.Context, d *schema.ResourceData, m interface
 	_ = d.Set("service_id", providerConfig.ServiceID)
 	_ = d.Set("org_admin_username", providerConfig.OrgAdminUsername)
 	_ = d.Set("regions", c.Regions())
+	_ = d.Set("sliding_expires_on", slidingExpiresOn(time.Now()))
 
 	return diags
 }
