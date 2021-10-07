@@ -503,7 +503,7 @@ func ensureContainerHostReady(ssh *easyssh.MakeConfig, config *Config) error {
 		}
 		return nil
 	}
-	err := backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 12))
+	err := backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 20))
 	if err != nil {
 		return err
 	}
