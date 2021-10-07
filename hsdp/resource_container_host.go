@@ -348,9 +348,13 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	if len(diags) > 0 {
 		return diags
 	}
-	if len(commands) > 0 {
+
+	if len(commands) > 0 || len(createFiles) > 0 {
 		if user == "" {
-			return diag.FromErr(fmt.Errorf("user must be set when '%s' is specified", commandsField))
+			return diag.FromErr(fmt.Errorf("user must be set when '%s' is specified or there are files to upload", commandsField))
+		}
+		if privateKey == "" && !agent {
+			return diag.FromErr(fmt.Errorf("no SSH 'private_key' was set and 'agent' is 'false', authentication will fail after provisioning step"))
 		}
 	}
 
@@ -503,7 +507,7 @@ func ensureContainerHostReady(ssh *easyssh.MakeConfig, config *Config) error {
 		}
 		return nil
 	}
-	err := backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+	err := backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 20))
 	if err != nil {
 		return err
 	}

@@ -3,11 +3,12 @@ package hsdp
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
-	"net/http"
 )
 
 func resourceIAMApplication() *schema.Resource {
@@ -47,10 +48,8 @@ func resourceIAMApplication() *schema.Resource {
 	}
 }
 
-func resourceIAMApplicationCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMApplicationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
-
-	var diags diag.Diagnostics
 
 	client, err := config.IAMClient()
 	if err != nil {
@@ -98,11 +97,7 @@ func resourceIAMApplicationCreate(_ context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(fmt.Errorf("Unexpected failure creating '%s': [%v] [%v]", app.Name, err, resp))
 	}
 	d.SetId(createdApp.ID)
-	_ = d.Set("name", createdApp.Name)
-	_ = d.Set("description", createdApp.Description)
-	_ = d.Set("proposition_id", createdApp.PropositionID)
-	_ = d.Set("global_reference_id", createdApp.GlobalReferenceID)
-	return diags
+	return resourceIAMApplicationRead(ctx, d, m)
 }
 
 func resourceIAMApplicationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

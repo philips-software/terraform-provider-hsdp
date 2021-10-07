@@ -113,8 +113,6 @@ func resourceIAMClient() *schema.Resource {
 func resourceIAMClientCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
-	var diags diag.Diagnostics
-
 	client, err := config.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
@@ -146,7 +144,7 @@ func resourceIAMClientCreate(ctx context.Context, d *schema.ResourceData, m inte
 	}
 	d.SetId(createdClient.ID)
 	_ = d.Set("password", cl.Password)
-	return diags
+	return resourceIAMClientRead(ctx, d, m)
 }
 
 func resourceIAMClientRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

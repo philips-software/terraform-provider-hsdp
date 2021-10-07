@@ -18,7 +18,7 @@ func TestPrune(t *testing.T) {
 
 func TestSlidingExpiresOn(t *testing.T) {
 	now := time.Date(1975, 10, 28, 0, 0, 0, 0, time.UTC)
-	expected := time.Date(1976, 1, 1, 0, 0, 0, 0, time.UTC)
+	expected := time.Date(1976, 1, 1, 0, 0, 0, 0, time.UTC).Format(time.RFC3339)
 
 	sliding := slidingExpiresOn(now)
 	assert.Equal(t, expected, sliding)

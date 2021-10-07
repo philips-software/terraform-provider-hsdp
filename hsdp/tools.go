@@ -62,14 +62,14 @@ func nextQuarterStart(now time.Time) time.Time {
 		year += 1
 	}
 	month = month % 12
-	return time.Date(year, month, 1, 0, 0, 0, 0, now.Location())
+	return time.Date(year, month, 1, 0, 0, 0, 0, time.UTC)
 }
 
-func slidingExpiresOn(now time.Time) time.Time {
+func slidingExpiresOn(now time.Time) string {
 	expiresOn := nextQuarterStart(now)
 	delta := expiresOn.Sub(now).Hours() / 24
 	if delta < 30 {
 		expiresOn = nextQuarterStart(expiresOn)
 	}
-	return expiresOn
+	return expiresOn.Format(time.RFC3339)
 }

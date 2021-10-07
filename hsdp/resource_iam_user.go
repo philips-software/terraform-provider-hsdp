@@ -135,7 +135,7 @@ func resourceIAMUserCreate(ctx context.Context, d *schema.ResourceData, m interf
 		return diag.FromErr(fmt.Errorf("error creating user '%s': %w", login, err))
 	}
 	d.SetId(user.ID)
-	return diags
+	return resourceIAMUserRead(ctx, d, m)
 }
 
 func resourceIAMUserRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
