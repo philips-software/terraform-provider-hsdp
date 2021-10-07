@@ -78,6 +78,7 @@ func resourceIAMService() *schema.Resource {
 				Optional:         true,
 				DiffSuppressFunc: suppressWhenGenerated,
 				ConflictsWith:    []string{"self_managed_certificate"},
+				RequiredWith:     []string{"self_managed_private_key"},
 			},
 			"scopes": {
 				Type:     schema.TypeSet,
@@ -285,6 +286,7 @@ func setSelfManaged(client *iam.Client, service iam.Service, d *schema.ResourceD
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("setting RAW certificate: %w", err))
 		}
+		_ = d.Set("private_key", "")
 		return diags
 	}
 	selfPrivateKey := d.Get("self_managed_private_key").(string)
@@ -315,5 +317,6 @@ func setSelfManaged(client *iam.Client, service iam.Service, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("setting private key: %w", err))
 	}
+	_ = d.Set("private_key", "")
 	return diags
 }
