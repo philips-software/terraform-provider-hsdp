@@ -3,9 +3,10 @@ package hsdp
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -48,10 +49,8 @@ func resourceIAMProposition() *schema.Resource {
 	}
 }
 
-func resourceIAMPropositionCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMPropositionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
-
-	var diags diag.Diagnostics
 
 	client, err := config.IAMClient()
 	if err != nil {
@@ -98,11 +97,7 @@ func resourceIAMPropositionCreate(_ context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(fmt.Errorf("Unexpected error creating proposition: %v", resp))
 	}
 	d.SetId(createdProp.ID)
-	_ = d.Set("name", createdProp.Name)
-	_ = d.Set("description", createdProp.Description)
-	_ = d.Set("organization_id", createdProp.OrganizationID)
-	_ = d.Set("global_reference_id", createdProp.GlobalReferenceID)
-	return diags
+	return resourceIAMPropositionRead(ctx, d, m)
 }
 
 func resourceIAMPropositionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
