@@ -4,11 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-# v0.21.3
+## v0.21.4
+
+- IAM: [service] add 'self_managed_certificate' to support auto-rotation
+- IAM: [service] clear private key when self-managed credentials are used
+- IAM: read after create improvements
+- Container Host: bump number of retries container host ready check
+- Container Host: credentials validation check before provisioning
+- Config: fix 'sliding_expired_on' value
+
+## v0.21.3
 
 - DICOM: Ensure ForceNew is pervasive for remote nodes
 
-# v0.21.2
+## v0.21.2
 
 - DICOM: Use different type structures for certain API endpoints
 
