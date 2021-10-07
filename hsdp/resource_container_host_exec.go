@@ -135,9 +135,12 @@ func resourceContainerHostExecCreate(_ context.Context, d *schema.ResourceData, 
 	if len(diags) > 0 {
 		return diags
 	}
-	if len(commands) > 0 {
+	if len(commands) > 0 || len(createFiles) > 0 {
 		if user == "" {
 			return diag.FromErr(fmt.Errorf("user must be set when '%s' is specified", commandsField))
+		}
+		if privateKey == "" && !agent {
+			return diag.FromErr(fmt.Errorf("no SSH 'private_key' was set and 'agent' is 'false', authentication will fail after provisioning step"))
 		}
 	}
 	// Collect SSH details
