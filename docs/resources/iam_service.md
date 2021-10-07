@@ -22,8 +22,8 @@ resource "hsdp_iam_service" "testservice" {
 ## Self-managed certificates
 
 This resource allows you to set up self-managed certificates which gives you full
-control over the validity. It also allows you to auto-rotate the certificate. Below is 
-an example script that auto-rotates the service identity certificate every 30 day 
+control over the validity. It also allows you to auto-rotate the certificate. Below is
+an example script that auto-rotates the service identity certificate every 30 day
 (Note: schedule a Terraform run at least once a day, so the change is triggered)
 
 ```hcl
