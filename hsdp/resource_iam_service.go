@@ -50,15 +50,14 @@ func resourceIAMService() *schema.Resource {
 				ValidateFunc: validation.IntBetween(1, 600),
 			},
 			"self_managed_private_key": {
-				Type:          schema.TypeString,
-				Sensitive:     true,
-				Optional:      true,
-				ConflictsWith: []string{"self_managed_certificate"},
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
 			},
 			"self_managed_certificate": {
-				Type:          schema.TypeString,
-				Optional:      true,
-				ConflictsWith: []string{"self_managed_private_key", "expires_on"},
+				Type:       schema.TypeString,
+				Optional:   true,
+				Deprecated: "Use 'self_managed_private_key' instead. This will be removed in a future version",
 			},
 			"private_key": {
 				Type:      schema.TypeString,
@@ -77,7 +76,6 @@ func resourceIAMService() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				DiffSuppressFunc: suppressWhenGenerated,
-				ConflictsWith:    []string{"self_managed_certificate"},
 				RequiredWith:     []string{"self_managed_private_key"},
 			},
 			"scopes": {
@@ -117,7 +115,6 @@ func resourceIAMServiceCreate(ctx context.Context, d *schema.ResourceData, m int
 	defaultScopes := expandStringList(d.Get("default_scopes").(*schema.Set).List())
 	expiresOn := d.Get("expires_on").(string)
 	selfPrivateKey := d.Get("self_managed_private_key").(string)
-	selfCertificate := d.Get("self_managed_certificate").(string)
 	if selfPrivateKey == "" && expiresOn != "" {
 		return diag.FromErr(fmt.Errorf("you cannot set an 'expires_on' value without also specifying the 'self_managed_private_key'"))
 	}
@@ -126,17 +123,16 @@ func resourceIAMServiceCreate(ctx context.Context, d *schema.ResourceData, m int
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	_ = d.Set("private_key", iam.FixPEM(createdService.PrivateKey))
 
 	// Set certificate if set from the get go
-	if selfPrivateKey != "" || selfCertificate != "" {
+	if selfPrivateKey != "" {
 		diags = setSelfManaged(client, *createdService, d)
 		if len(diags) > 0 {
 			_, _, _ = client.Services.DeleteService(*createdService) // Cleanup
 			return diags
 		}
 		_ = d.Set("private_key", selfPrivateKey)
-	} else {
-		_ = d.Set("private_key", iam.FixPEM(createdService.PrivateKey))
 	}
 
 	// Set scopes and default_scopes
@@ -229,8 +225,7 @@ func resourceIAMServiceUpdate(ctx context.Context, d *schema.ResourceData, m int
 			_, _, _ = client.Services.AddScopes(s, []string{}, toAdd)
 		}
 	}
-	if d.HasChange("private_key") || d.HasChange("expires_on") ||
-		d.HasChange("self_managed_private_key") || d.HasChange("self_managed_certificate") {
+	if d.HasChange("expires_on") || d.HasChange("self_managed_private_key") || d.HasChange("self_managed_certificate") {
 		_, npk := d.GetChange("self_managed_private_key")
 		_, npc := d.GetChange("self_managed_certificate")
 
@@ -272,23 +267,6 @@ func resourceIAMServiceDelete(_ context.Context, d *schema.ResourceData, m inter
 func setSelfManaged(client *iam.Client, service iam.Service, d *schema.ResourceData) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	selfCertificate := d.Get("self_managed_certificate").(string)
-	if selfCertificate != "" {
-		block, _ := pem.Decode([]byte(iam.FixPEM(selfCertificate)))
-		if block == nil {
-			return diag.FromErr(fmt.Errorf("error decoding 'self_managed_certificate'"))
-		}
-		cert, err := x509.ParseCertificate(block.Bytes)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("error parsing certificate: %w", err))
-		}
-		_, _, err = client.Services.UpdateServiceCertificateDER(service, cert.Raw)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("setting RAW certificate: %w", err))
-		}
-		_ = d.Set("private_key", "")
-		return diags
-	}
 	selfPrivateKey := d.Get("self_managed_private_key").(string)
 	selfExpiresOn := d.Get("expires_on").(string)
 	expiresOn := time.Now().Add(5 * 86400 * 365 * time.Second)
@@ -299,7 +277,8 @@ func setSelfManaged(client *iam.Client, service iam.Service, d *schema.ResourceD
 		}
 		expiresOn = parsedExpiresOn
 	}
-	block, _ := pem.Decode([]byte(iam.FixPEM(selfPrivateKey)))
+	fixedPEM := iam.FixPEM(selfPrivateKey)
+	block, _ := pem.Decode([]byte(fixedPEM))
 	if block == nil {
 		block, _ = pem.Decode([]byte(selfPrivateKey)) // Try unmodified decode
 		if block == nil {
@@ -317,6 +296,8 @@ func setSelfManaged(client *iam.Client, service iam.Service, d *schema.ResourceD
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("setting private key: %w", err))
 	}
-	_ = d.Set("private_key", "")
+	if fixedPEM != "" {
+		_ = d.Set("private_key", fixedPEM)
+	}
 	return diags
 }
