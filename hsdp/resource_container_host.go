@@ -163,7 +163,7 @@ func resourceContainerHost() *schema.Resource {
 			},
 			"user": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"private_key": {
 				Type:      schema.TypeString,
@@ -350,7 +350,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	if len(commands) > 0 || len(createFiles) > 0 {
-		if user == "" {
+		if user == "" && !agent {
 			return diag.FromErr(fmt.Errorf("user must be set when '%s' is specified or there are files to upload", commandsField))
 		}
 		if privateKey == "" && !agent {
