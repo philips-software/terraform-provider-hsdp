@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.21.6
+
+- Container Host: user is optional
+- Container Host: add additional checks and fix order
+
 ## v0.21.5
 
 - IAM: [service] remove self-managed certificate, it's an anti-pattern
