@@ -351,13 +351,13 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 
 	if len(commands) > 0 || len(createFiles) > 0 {
 		if user == "" && !agent {
-			return diag.FromErr(fmt.Errorf("user must be set when '%s' is specified or there are files to upload", commandsField))
+			return diag.FromErr(fmt.Errorf("'user' must be set when 'agent = false' and '%s' are set or 'file' blocks are present", commandsField))
 		}
 		if privateKey == "" && !agent {
-			return diag.FromErr(fmt.Errorf("no SSH 'private_key' was set and 'agent' is 'false', authentication will fail after provisioning step"))
+			return diag.FromErr(fmt.Errorf("no SSH 'private_key' was set and 'agent = false', authentication will fail after provisioning step"))
 		}
 		if agent && !sshAgentReachable() {
-			return diag.FromErr(fmt.Errorf("'agent' is 'true' but no working 'ssh-agent' socket is advertised in SSH_AUTH_SOCK environment variable"))
+			return diag.FromErr(fmt.Errorf("'agent = true' but no working 'ssh-agent' socket is advertised in SSH_AUTH_SOCK environment variable"))
 		}
 	}
 
