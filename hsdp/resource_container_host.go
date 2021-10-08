@@ -356,6 +356,9 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		if privateKey == "" && !agent {
 			return diag.FromErr(fmt.Errorf("no SSH 'private_key' was set and 'agent' is 'false', authentication will fail after provisioning step"))
 		}
+		if agent && !sshAgentReachable() {
+			return diag.FromErr(fmt.Errorf("'agent' is 'true' but no working 'ssh-agent' socket is advertised in SSH_AUTH_SOCK environment variable"))
+		}
 	}
 
 	ch, resp, err := client.Create(tagName,
@@ -448,11 +451,21 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		},
 	}
 	if privateKey != "" {
-		if agent {
-			return diag.FromErr(fmt.Errorf("'agent' is enabled so not expecting a private key to be set"))
-		}
 		ssh.Key = privateKey
 		ssh.Bastion.Key = privateKey
+	}
+
+	// Check health of Docker daemon in case of 'container-host' role and file or commands are set
+	if (len(commands) > 0 || len(createFiles) > 0) && instanceRole == "container-host" {
+		if err := ensureContainerHostReady(ssh, config); err != nil {
+			if !keepFailedInstances {
+				_, _, _ = client.Destroy(tagName)
+				d.SetId("")
+			}
+			return diag.FromErr(fmt.Errorf(
+				"container host instance '%s' was not deemed healthy: %v",
+				instanceID, err))
+		}
 	}
 
 	// Create files
@@ -463,18 +476,6 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 			Summary:  "failed to copy all files",
 			Detail:   fmt.Sprintf("One or more files failed to copy: %v", err),
 		})
-	}
-	// Check health of Docker daemon in case of 'container-host' role
-	if instanceRole == "container-host" && user != "" {
-		if err := ensureContainerHostReady(ssh, config); err != nil {
-			if !keepFailedInstances {
-				_, _, _ = client.Destroy(tagName)
-				d.SetId("")
-			}
-			return diag.FromErr(fmt.Errorf(
-				"container host instance '%s' was not deemed healthy: %v",
-				instanceID, err))
-		}
 	}
 
 	// Run commands

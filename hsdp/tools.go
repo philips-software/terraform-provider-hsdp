@@ -2,7 +2,9 @@ package hsdp
 
 import (
 	"fmt"
+	"net"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -72,4 +74,14 @@ func slidingExpiresOn(now time.Time) string {
 		expiresOn = nextQuarterStart(expiresOn)
 	}
 	return expiresOn.Format(time.RFC3339)
+}
+
+func sshAgentReachable() bool {
+	socket := os.Getenv("SSH_AUTH_SOCK")
+	conn, err := net.Dial("unix", socket)
+	if err != nil {
+		return false
+	}
+	defer conn.Close()
+	return true
 }
