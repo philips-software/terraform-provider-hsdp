@@ -4,7 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# v0.22.1
+
+DICOM: Add query param (#125)
+DICOM: Fix hsdp_dicom_store_config hash resources
+PKI: Fix hash resources
+Edge: Fix hash resources
+Autoscaler: Fix hash resources
+DICOM: Fix hash resources
+
 ## v0.22.0
+
 - DICOM Gateway: Breaking change: new 'organization_id' required field
 - DICOM: Add proper Hash functions for nested resources
 
