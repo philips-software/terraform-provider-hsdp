@@ -11,9 +11,7 @@ We'd love for you to contribute to our source code and to make HSDP terraform pr
 
 ## <a name="question"></a> Got a Question or Problem?
 
-If you have questions about how to use the HSDP terraform provider, please direct these to the [Slack group / hsdp-utilities][slack].
-
-[![Slack](https://philips-software-slackin.now.sh/badge.svg)](https://philips-software-slackin.now.sh)
+If you have questions about how to use the HSDP terraform provider, please direct these to the #terraform channel on HSDP Slack or open a [discussion](https://github.com/philips-software/terraform-provider-hsdp/discussions).
 
 ## <a name="issue"></a> Found an Issue?
 
@@ -132,4 +130,3 @@ For more info, please reach out to the team on [Slack group / hsdp-utilities][sl
 
 [contribute]: CONTRIBUTING.md
 [github]: https://github.com/philips-software/terraform-provider-hsdp/issues 
-[slack]: https://philips-software-slackin.now.sh/
