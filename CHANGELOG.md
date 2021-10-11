@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.22.0
+- DICOM Gateway: Breaking change: new 'organization_id' required field
+- DICOM: Add proper Hash functions for nested resources
+
 ## v0.21.6
 
 - Container Host: user is optional
