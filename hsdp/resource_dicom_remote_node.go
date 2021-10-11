@@ -45,59 +45,63 @@ func resourceDICOMRemoteNode() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"is_secure": {
-							Type:     schema.TypeBool,
-							Required: true,
-							ForceNew: true,
-						},
-						"hostname": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-						"ip_address": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-						"disable_ipv6": {
-							Type:     schema.TypeBool,
-							Required: true,
-							ForceNew: true,
-						},
-						"port": {
-							Type:     schema.TypeInt,
-							Required: true,
-						},
-						"network_timeout": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  3000,
-							ForceNew: true,
-						},
-						// ---Advanced features start
-						"pdu_length": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  65535,
-							ForceNew: true,
-						},
-						"artim_timeout": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  3000,
-							ForceNew: true,
-						},
-						"association_idle_timeout": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  4500,
-							ForceNew: true,
-						},
-					},
-				},
+				Elem:     networkConnectionSchema(),
+			},
+		},
+	}
+}
+
+func networkConnectionSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"is_secure": {
+				Type:     schema.TypeBool,
+				Required: true,
+				ForceNew: true,
+			},
+			"hostname": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"ip_address": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"disable_ipv6": {
+				Type:     schema.TypeBool,
+				Required: true,
+				ForceNew: true,
+			},
+			"port": {
+				Type:     schema.TypeInt,
+				Required: true,
+			},
+			"network_timeout": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  3000,
+				ForceNew: true,
+			},
+			// ---Advanced features start
+			"pdu_length": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  65535,
+				ForceNew: true,
+			},
+			"artim_timeout": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  3000,
+				ForceNew: true,
+			},
+			"association_idle_timeout": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  4500,
+				ForceNew: true,
 			},
 		},
 	}
@@ -107,6 +111,7 @@ func resourceDICOMRemoteNodeDelete(_ context.Context, d *schema.ResourceData, m 
 	var diags diag.Diagnostics
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
+	organizationID := d.Get("organization_id").(string)
 	client, err := config.getDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
@@ -114,7 +119,9 @@ func resourceDICOMRemoteNodeDelete(_ context.Context, d *schema.ResourceData, m 
 	defer client.Close()
 	operation := func() error {
 		var resp *dicom.Response
-		_, resp, err = client.Config.DeleteRemoteNode(dicom.RemoteNode{ID: d.Id()})
+		_, resp, err = client.Config.DeleteRemoteNode(dicom.RemoteNode{ID: d.Id()}, &dicom.QueryOptions{
+			OrganizationID: &organizationID,
+		})
 		return checkForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
@@ -129,6 +136,7 @@ func resourceDICOMRemoteNodeRead(_ context.Context, d *schema.ResourceData, m in
 	var diags diag.Diagnostics
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
+	organizationID := d.Get("organization_id").(string)
 	client, err := config.getDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
@@ -137,7 +145,9 @@ func resourceDICOMRemoteNodeRead(_ context.Context, d *schema.ResourceData, m in
 	var node *dicom.RemoteNode
 	operation := func() error {
 		var resp *dicom.Response
-		node, resp, err = client.Config.GetRemoteNode(d.Id(), nil)
+		node, resp, err = client.Config.GetRemoteNode(d.Id(), &dicom.QueryOptions{
+			OrganizationID: &organizationID,
+		})
 		return checkForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
@@ -152,6 +162,7 @@ func resourceDICOMRemoteNodeRead(_ context.Context, d *schema.ResourceData, m in
 func resourceDICOMRemoteNodeCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
+	organizationID := d.Get("organization_id").(string)
 	client, err := config.getDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
@@ -184,7 +195,9 @@ func resourceDICOMRemoteNodeCreate(ctx context.Context, d *schema.ResourceData, 
 	var created *dicom.RemoteNode
 	operation := func() error {
 		var resp *dicom.Response
-		created, resp, err = client.Config.CreateRemoteNode(node)
+		created, resp, err = client.Config.CreateRemoteNode(node, &dicom.QueryOptions{
+			OrganizationID: &organizationID,
+		})
 		return checkForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))

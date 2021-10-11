@@ -7,6 +7,7 @@ import (
 
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	creds "github.com/philips-software/go-hsdp-api/s3creds"
 	"github.com/robfig/cron/v3"
 )
@@ -45,9 +46,14 @@ func validatePolicyJSON(val interface{}, key string) (warns []string, errs []err
 	return
 }
 
-var thresholdMapping = map[string]string{
-	"cpu":          "threshold_cpu",
-	"memory":       "threshold_memory",
-	"http-rate":    "threshold_http_rate",
-	"http-latency": "threshold_http_latency",
+type threshold struct {
+	fieldName string
+	schema    func() *schema.Resource
+}
+
+var thresholdMapping = map[string]threshold{
+	"cpu":          {"threshold_cpu", thresholdCPUSchema},
+	"memory":       {"threshold_memory", thresholdMemorySchema},
+	"http-rate":    {"threshold_http_rate", thresholdHTTPRateSchema},
+	"http-latency": {"threshold_http_latency", thresholdHTTPLatencySchema},
 }

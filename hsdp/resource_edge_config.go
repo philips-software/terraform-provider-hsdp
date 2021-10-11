@@ -42,79 +42,86 @@ func resourceEdgeConfig() *schema.Resource {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
 				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"tcp": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							MaxItems: 1024,
-							Elem:     &schema.Schema{Type: schema.TypeInt},
-						},
-						"udp": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							MaxItems: 1024,
-							Elem:     &schema.Schema{Type: schema.TypeInt},
-						},
-						"clear_on_destroy": {
-							Description: "Clear ports on resource destroy",
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Default:     clearOnDestroyDefault,
-						},
-						"ensure_tcp": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							MaxItems: 1024,
-							Elem:     &schema.Schema{Type: schema.TypeInt},
-						},
-						"ensure_udp": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							MaxItems: 1024,
-							Elem:     &schema.Schema{Type: schema.TypeInt},
-						},
-					},
-				},
+				Elem:     firewallExceptionsSchema(),
 			},
 			"logging": {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
 				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"raw_config": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"hsdp_logging": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
-						},
-						"hsdp_product_key": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"hsdp_shared_key": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"hsdp_secret_key": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"hsdp_ingestor_host": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"hsdp_custom_field": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
-						},
-					},
-				},
+				Elem:     loggingSchema(),
+			},
+		},
+	}
+}
+
+func loggingSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"raw_config": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"hsdp_logging": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"hsdp_product_key": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"hsdp_shared_key": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"hsdp_secret_key": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"hsdp_ingestor_host": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"hsdp_custom_field": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+		},
+	}
+}
+func firewallExceptionsSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"tcp": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MaxItems: 1024,
+				Elem:     &schema.Schema{Type: schema.TypeInt},
+			},
+			"udp": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MaxItems: 1024,
+				Elem:     &schema.Schema{Type: schema.TypeInt},
+			},
+			"clear_on_destroy": {
+				Description: "Clear ports on resource destroy",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     clearOnDestroyDefault,
+			},
+			"ensure_tcp": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MaxItems: 1024,
+				Elem:     &schema.Schema{Type: schema.TypeInt},
+			},
+			"ensure_udp": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MaxItems: 1024,
+				Elem:     &schema.Schema{Type: schema.TypeInt},
 			},
 		},
 	}
@@ -299,7 +306,7 @@ func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.
 	}
 	// Logging
 	if _, ok := d.GetOk("logging"); ok {
-		s := &schema.Set{F: resourceMetricsThresholdHash}
+		s := &schema.Set{F: schema.HashResource(loggingSchema())}
 		appLoggingDef := make(map[string]interface{})
 		appLoggingDef["raw_config"] = appLogging.RawConfig
 		appLoggingDef["hsdp_product_key"] = appLogging.HSDPProductKey
@@ -317,7 +324,7 @@ func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.
 	}
 	// Firewall exceptions
 	if _, ok := d.GetOk("firewall_exceptions"); ok {
-		s := &schema.Set{F: resourceMetricsThresholdHash}
+		s := &schema.Set{F: schema.HashResource(firewallExceptionsSchema())}
 		fwExceptionsDef := make(map[string]interface{})
 
 		// Determine actual TCP/UDP settings

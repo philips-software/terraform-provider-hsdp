@@ -218,7 +218,7 @@ func resourceDICOMStoreConfigRead(_ context.Context, d *schema.ResourceData, m i
 		fhirSettings := make(map[string]interface{})
 		fhirSettings["mpi_endpoint"] = fhirConfigured.MPIEndpoint
 		fhirSettings["id"] = fhirConfigured.ID
-		s := &schema.Set{F: resourceMetricsThresholdHash}
+		s := &schema.Set{F: schema.HashResource(fhirStoreSettingsSchema())}
 		s.Add(fhirSettings)
 		_ = d.Set("fhir_store", s)
 	}
@@ -271,7 +271,7 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 		cdrSettings["service_id"] = configured.ServiceID
 		cdrSettings["private_key"] = configured.PrivateKey
 		cdrSettings["id"] = configured.ID
-		s := &schema.Set{F: resourceMetricsThresholdHash}
+		s := &schema.Set{F: schema.HashResource(cdrSettingsSchema())}
 		s.Add(cdrSettings)
 		_ = d.Set("cdr_service_account", s)
 	}
@@ -302,7 +302,7 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 		fhirSettings := make(map[string]interface{})
 		fhirSettings["mpi_endpoint"] = configured.MPIEndpoint
 		fhirSettings["id"] = configured.ID
-		s := &schema.Set{F: resourceMetricsThresholdHash}
+		s := &schema.Set{F: schema.HashResource(fhirStoreSettingsSchema())}
 		s.Add(fhirSettings)
 		_ = d.Set("fhir_store", s)
 	}
