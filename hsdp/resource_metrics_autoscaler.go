@@ -239,11 +239,6 @@ func resourceMetricsAutoscalerRead(_ context.Context, d *schema.ResourceData, m 
 	return diags
 }
 
-// TODO: get rid of this bogus implementation
-func resourceMetricsThresholdHash(v interface{}) int {
-	return 0
-}
-
 func resourceMetricsAutoscalerCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
