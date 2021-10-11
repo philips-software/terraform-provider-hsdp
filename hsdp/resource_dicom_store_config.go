@@ -38,35 +38,13 @@ func resourceDICOMStoreConfig() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"service_id": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"private_key": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"id": {
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-					},
-				},
+				Elem:     cdrSettingsSchema(),
 			},
 			"fhir_store": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"mpi_endpoint": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-					},
-				},
+				Elem:     fhirStoreSettingsSchema(),
 			},
 			"qido_url": {
 				Type:     schema.TypeString,
@@ -81,6 +59,36 @@ func resourceDICOMStoreConfig() *schema.Resource {
 				Computed: true,
 			},
 			"data_management_url": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+	}
+}
+
+func fhirStoreSettingsSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"mpi_endpoint": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+		},
+	}
+}
+
+func cdrSettingsSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"service_id": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"private_key": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -134,7 +142,7 @@ func resourceDICOMStoreConfigUpdate(_ context.Context, d *schema.ResourceData, m
 			cdrSettings["service_id"] = configured.ServiceID
 			cdrSettings["private_key"] = configured.PrivateKey
 			cdrSettings["id"] = configured.ID
-			s := &schema.Set{F: resourceMetricsThresholdHash}
+			s := &schema.Set{F: schema.HashResource(cdrSettingsSchema())}
 			s.Add(cdrSettings)
 			_ = d.Set("cdr_service_account", s)
 		}
@@ -164,7 +172,7 @@ func resourceDICOMStoreConfigUpdate(_ context.Context, d *schema.ResourceData, m
 			fhirSettings := make(map[string]interface{})
 			fhirSettings["mpi_endpoint"] = configured.MPIEndpoint
 			fhirSettings["id"] = configured.ID
-			s := &schema.Set{F: resourceMetricsThresholdHash}
+			s := &schema.Set{F: schema.HashResource(fhirStoreSettingsSchema())}
 			s.Add(fhirSettings)
 			_ = d.Set("fhir_store", s)
 		}
@@ -198,7 +206,7 @@ func resourceDICOMStoreConfigRead(_ context.Context, d *schema.ResourceData, m i
 		cdrSettings["service_id"] = configured.ServiceID
 		cdrSettings["private_key"] = configured.PrivateKey
 		cdrSettings["id"] = configured.ID
-		s := &schema.Set{F: resourceMetricsThresholdHash}
+		s := &schema.Set{F: schema.HashResource(cdrSettingsSchema())}
 		s.Add(cdrSettings)
 		_ = d.Set("cdr_service_account", s)
 	}

@@ -118,10 +118,9 @@ func resourceDICOMObjectStore() *schema.Resource {
 										ForceNew: true,
 									},
 									"service_id": {
-										Type:      schema.TypeString,
-										Required:  true,
-										Sensitive: true,
-										ForceNew:  true,
+										Type:     schema.TypeString,
+										Required: true,
+										ForceNew: true,
 									},
 									"private_key": {
 										Type:      schema.TypeString,

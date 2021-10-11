@@ -15,20 +15,24 @@ func schemaApplicationEntity() *schema.Schema {
 		Type:     schema.TypeSet,
 		MaxItems: 100,
 		Optional: true,
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				"allow_any": {
-					Type:     schema.TypeBool,
-					Required: true,
-				},
-				"ae_title": {
-					Type:     schema.TypeString,
-					Required: true,
-				},
-				"organization_id": {
-					Type:     schema.TypeString,
-					Required: true,
-				},
+		Elem:     applicationEntitySchema(),
+	}
+}
+
+func applicationEntitySchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"allow_any": {
+				Type:     schema.TypeBool,
+				Required: true,
+			},
+			"ae_title": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"organization_id": {
+				Type:     schema.TypeString,
+				Required: true,
 			},
 		},
 	}
@@ -42,9 +46,15 @@ func resourceDICOMGatewayConfig() *schema.Resource {
 		CreateContext: resourceDICOMGatewayConfigCreate,
 		ReadContext:   resourceDICOMGatewayConfigRead,
 		DeleteContext: resourceDICOMGatewayConfigDelete,
+		SchemaVersion: 1,
 
 		Schema: map[string]*schema.Schema{
 			"config_url": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"organization_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
@@ -54,101 +64,14 @@ func resourceDICOMGatewayConfig() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"title": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-						},
-						"is_secure": {
-							Type:     schema.TypeBool,
-							Required: true,
-						},
-						"port": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  0,
-						},
-						// ---Advanced features start
-						"pdu_length": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  65535,
-						},
-						"artim_timeout": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  3000,
-						},
-						"association_idle_timeout": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  4500,
-						},
-						"certificate_id": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						// ---Advanced features end
-						"application_entity": schemaApplicationEntity(),
-					},
-				},
+				Elem:     storeServiceSchema(),
 			},
 			"query_retrieve_service": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: true,
 				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"title": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-						"description": {
-							Type:     schema.TypeString,
-							Optional: true,
-							ForceNew: true,
-						},
-						"is_secure": {
-							Type:     schema.TypeBool,
-							Required: true,
-						},
-						"port": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  0,
-						},
-						// ---Advanced features start
-						"pdu_length": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  65535,
-						},
-						"artim_timeout": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  3000,
-						},
-						"association_idle_timeout": {
-							Type:     schema.TypeInt,
-							Optional: true,
-							Default:  4500,
-						},
-						"certificate_id": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"application_entity": schemaApplicationEntity(),
-					},
-				},
+				Elem:     queryRetrieveSchema(),
 			},
 			"store_service_id": {
 				Type:     schema.TypeString,
@@ -158,6 +81,100 @@ func resourceDICOMGatewayConfig() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+		},
+	}
+}
+
+func queryRetrieveSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"title": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"is_secure": {
+				Type:     schema.TypeBool,
+				Required: true,
+			},
+			"port": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  0,
+			},
+			// ---Advanced features start
+			"pdu_length": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  65535,
+			},
+			"artim_timeout": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  3000,
+			},
+			"association_idle_timeout": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  4500,
+			},
+			"certificate_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"application_entity": schemaApplicationEntity(),
+		},
+	}
+}
+func storeServiceSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"title": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"is_secure": {
+				Type:     schema.TypeBool,
+				Required: true,
+			},
+			"port": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  0,
+			},
+			// ---Advanced features start
+			"pdu_length": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  65535,
+			},
+			"artim_timeout": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  3000,
+			},
+			"association_idle_timeout": {
+				Type:     schema.TypeInt,
+				Optional: true,
+				Default:  4500,
+			},
+			"certificate_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			// ---Advanced features end
+			"application_entity": schemaApplicationEntity(),
 		},
 	}
 }
@@ -172,6 +189,7 @@ func resourceDICOMGatewayConfigRead(_ context.Context, d *schema.ResourceData, m
 	var diags diag.Diagnostics
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
+	organizationID := d.Get("organization_id").(string)
 	client, err := config.getDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
@@ -180,13 +198,17 @@ func resourceDICOMGatewayConfigRead(_ context.Context, d *schema.ResourceData, m
 
 	// Refresh token so we hopefully have DICOM permissions to proceed without error
 	_ = client.TokenRefresh()
-	storeConfig, _, err := client.Config.GetStoreService()
+	storeConfig, _, err := client.Config.GetStoreService(&dicom.QueryOptions{
+		OrganizationID: &organizationID,
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	_ = setBrokenSCPConfig(*storeConfig, d)
 
-	queryConfig, _, err := client.Config.GetQueryRetrieveService(nil)
+	queryConfig, _, err := client.Config.GetQueryRetrieveService(&dicom.QueryOptions{
+		OrganizationID: &organizationID,
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -197,12 +219,14 @@ func resourceDICOMGatewayConfigRead(_ context.Context, d *schema.ResourceData, m
 
 func setBrokenSCPConfig(scpConfig dicom.BrokenSCPConfig, d *schema.ResourceData) error {
 	storeService := make(map[string]interface{})
+	storeService["title"] = scpConfig.Title
 	if scpConfig.SecureNetworkConnection != nil {
 		storeService["is_secure"] = true
 		storeService["port"] = scpConfig.SecureNetworkConnection.Port
 		if scpConfig.SecureNetworkConnection.AdvancedSettings != nil {
 			storeService["pdu_length"] = scpConfig.SecureNetworkConnection.AdvancedSettings.PDULength
 			storeService["artim_timeout"] = scpConfig.SecureNetworkConnection.AdvancedSettings.ArtimTimeout
+			storeService["association_idle_timeout"] = scpConfig.SecureNetworkConnection.AdvancedSettings.AssociationIdleTimeout
 		}
 	}
 	if scpConfig.UnSecureNetworkConnection != nil {
@@ -211,10 +235,11 @@ func setBrokenSCPConfig(scpConfig dicom.BrokenSCPConfig, d *schema.ResourceData)
 		if scpConfig.UnSecureNetworkConnection.AdvancedSettings != nil {
 			storeService["pdu_length"] = scpConfig.UnSecureNetworkConnection.AdvancedSettings.PDULength
 			storeService["artim_timeout"] = scpConfig.UnSecureNetworkConnection.AdvancedSettings.ArtimTimeout
+			storeService["association_idle_timeout"] = scpConfig.UnSecureNetworkConnection.AdvancedSettings.AssociationIdleTimeout
 		}
 	}
 	// Add applications
-	a := &schema.Set{F: resourceMetricsThresholdHash}
+	a := &schema.Set{F: schema.HashResource(applicationEntitySchema())}
 	for _, app := range scpConfig.ApplicationEntities {
 		entry := make(map[string]interface{})
 		entry["allow_any"] = app.AllowAny
@@ -224,7 +249,7 @@ func setBrokenSCPConfig(scpConfig dicom.BrokenSCPConfig, d *schema.ResourceData)
 	}
 	storeService["application_entity"] = a
 
-	s := &schema.Set{F: resourceMetricsThresholdHash} // TODO: look at the significance of this
+	s := &schema.Set{F: schema.HashResource(storeServiceSchema())}
 	s.Add(storeService)
 	_ = d.Set("store_service", s)
 	return nil
@@ -232,14 +257,27 @@ func setBrokenSCPConfig(scpConfig dicom.BrokenSCPConfig, d *schema.ResourceData)
 
 func setQueryRetrieveConfig(queryConfig dicom.BrokenSCPConfig, d *schema.ResourceData) error {
 	queryService := make(map[string]interface{})
+	queryService["title"] = queryConfig.Title
 	if queryConfig.SecureNetworkConnection != nil {
 		queryService["port"] = queryConfig.SecureNetworkConnection.Port
+		queryService["is_secure"] = true
+		if queryConfig.SecureNetworkConnection.AdvancedSettings != nil {
+			queryService["artim_timeout"] = queryConfig.SecureNetworkConnection.AdvancedSettings.ArtimTimeout
+			queryService["association_idle_timeout"] = queryConfig.SecureNetworkConnection.AdvancedSettings.AssociationIdleTimeout
+			queryService["pdu_length"] = queryConfig.SecureNetworkConnection.AdvancedSettings.PDULength
+		}
 	}
 	if queryConfig.UnSecureNetworkConnection != nil {
 		queryService["port"] = queryConfig.UnSecureNetworkConnection.Port
+		queryService["is_secure"] = false
+		if queryConfig.UnSecureNetworkConnection.AdvancedSettings != nil {
+			queryService["artim_timeout"] = queryConfig.UnSecureNetworkConnection.AdvancedSettings.ArtimTimeout
+			queryService["association_idle_timeout"] = queryConfig.UnSecureNetworkConnection.AdvancedSettings.AssociationIdleTimeout
+			queryService["pdu_length"] = queryConfig.UnSecureNetworkConnection.AdvancedSettings.PDULength
+		}
 	}
 	// Add applications
-	a := &schema.Set{F: resourceMetricsThresholdHash}
+	a := &schema.Set{F: schema.HashResource(applicationEntitySchema())}
 	for _, app := range queryConfig.ApplicationEntities {
 		entry := make(map[string]interface{})
 		entry["allow_any"] = app.AllowAny
@@ -249,7 +287,7 @@ func setQueryRetrieveConfig(queryConfig dicom.BrokenSCPConfig, d *schema.Resourc
 	}
 	queryService["application_entity"] = a
 
-	s := &schema.Set{F: resourceMetricsThresholdHash} // TODO: look at the significance of this
+	s := &schema.Set{F: schema.HashResource(queryRetrieveSchema())}
 	s.Add(queryService)
 	_ = d.Set("query_retrieve_service", s)
 	return nil
@@ -377,10 +415,10 @@ func getQueryRetrieveConfig(d *schema.ResourceData) (*dicom.BrokenSCPConfig, err
 	return &queryRetrieveConfig, nil
 }
 
-func resourceDICOMGatewayConfigCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
+func resourceDICOMGatewayConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 	configURL := d.Get("config_url").(string)
+	organizationID := d.Get("organization_id").(string)
 	client, err := config.getDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
@@ -400,13 +438,17 @@ func resourceDICOMGatewayConfigCreate(_ context.Context, d *schema.ResourceData,
 		return diag.FromErr(fmt.Errorf("getQueryRetrieveConfig: %w", err))
 	}
 
-	createdSCPConfig, _, err := client.Config.SetStoreService(*scpConfig)
+	createdSCPConfig, _, err := client.Config.SetStoreService(*scpConfig, &dicom.QueryOptions{
+		OrganizationID: &organizationID,
+	})
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("SetStoreService: %w", err))
 	}
 	_ = d.Set("store_service_id", createdSCPConfig.ID)
 
-	createdQuerySCPConfig, _, err := client.Config.SetQueryRetrieveService(*queryConfig, nil)
+	createdQuerySCPConfig, _, err := client.Config.SetQueryRetrieveService(*queryConfig, &dicom.QueryOptions{
+		OrganizationID: &organizationID,
+	})
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("SetMoveService: %w", err))
 	}
@@ -414,5 +456,5 @@ func resourceDICOMGatewayConfigCreate(_ context.Context, d *schema.ResourceData,
 
 	generatedID := fmt.Sprintf("%x", md5.Sum([]byte(configURL)))
 	d.SetId(generatedID)
-	return diags
+	return resourceDICOMGatewayConfigRead(ctx, d, m)
 }

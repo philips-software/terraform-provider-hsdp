@@ -10,6 +10,8 @@ The following example demonstrates the basic configuration of a DICOM Gateway
 resource "hsdp_dicom_gateway_config" "dicom_gateway" {
   config_url = var.config_url
   
+  organization_id = var.site_id
+  
   store_service {
     title = "Store title"
     
@@ -25,12 +27,6 @@ resource "hsdp_dicom_gateway_config" "dicom_gateway" {
       ae_title = "Foo"
       organization_id = "aaa-bbb-ccc-ddd"
     }
-
-    application_entity {
-      allow_any = true
-      ae_title = "Bar"
-      organization_id = "bbb-ccc-ddd-eee-bbb"
-    }
   }
 
   query_retrieve_service {
@@ -43,12 +39,6 @@ resource "hsdp_dicom_gateway_config" "dicom_gateway" {
       allow_any = true
       ae_title = "Foo"
       organization_id = "aaa-bbb-ccc-ddd"
-    }
-
-    application_entity {
-      allow_any = true
-      ae_title = "Bar"
-      organization_id = "bbb-ccc-ddd-eee-bbb"
     }
   }
 }
