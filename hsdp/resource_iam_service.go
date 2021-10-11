@@ -225,12 +225,11 @@ func resourceIAMServiceUpdate(ctx context.Context, d *schema.ResourceData, m int
 			_, _, _ = client.Services.AddScopes(s, []string{}, toAdd)
 		}
 	}
-	if d.HasChange("expires_on") || d.HasChange("self_managed_private_key") || d.HasChange("self_managed_certificate") {
+	if d.HasChange("expires_on") || d.HasChange("self_managed_private_key") {
 		_, npk := d.GetChange("self_managed_private_key")
-		_, npc := d.GetChange("self_managed_certificate")
 
-		if npk.(string) == "" && npc.(string) == "" {
-			return diag.FromErr(fmt.Errorf("you cannot revert to a server side managed private key once you set a self managed key or certificate"))
+		if npk.(string) == "" {
+			return diag.FromErr(fmt.Errorf("you cannot revert to a server side managed private key once you set a self managed private key"))
 		}
 		diags = setSelfManaged(client, s, d)
 		if len(diags) > 0 {
