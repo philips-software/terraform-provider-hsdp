@@ -47,32 +47,7 @@ func resourceDICOMObjectStore() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"endpoint": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-						"bucket_name": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-						"access_key": {
-							Type:      schema.TypeString,
-							Required:  true,
-							Sensitive: true,
-							ForceNew:  true,
-						},
-						"secret_key": {
-							Type:      schema.TypeString,
-							Required:  true,
-							Sensitive: true,
-							ForceNew:  true,
-						},
-					},
-				},
+				Elem:     staticAccessSchema(),
 			},
 			"access_type": {
 				Type:     schema.TypeString,
@@ -83,66 +58,101 @@ func resourceDICOMObjectStore() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"endpoint": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-						"bucket_name": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-						"folder_path": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-						"product_key": {
-							Type:      schema.TypeString,
-							Required:  true,
-							ForceNew:  true,
-							Sensitive: true,
-						},
-						"service_account": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							MaxItems: 1,
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									"name": {
-										Type:     schema.TypeString,
-										Optional: true,
-										ForceNew: true,
-									},
-									"service_id": {
-										Type:     schema.TypeString,
-										Required: true,
-										ForceNew: true,
-									},
-									"private_key": {
-										Type:      schema.TypeString,
-										Required:  true,
-										Sensitive: true,
-										ForceNew:  true,
-									},
-									"access_token_endpoint": {
-										Type:     schema.TypeString,
-										Required: true,
-										ForceNew: true,
-									},
-									"token_endpoint": {
-										Type:     schema.TypeString,
-										Required: true,
-										ForceNew: true,
-									},
-								},
-							},
-						},
-					},
-				},
+				Elem:     s3credsAccessSchema(),
+			},
+		},
+	}
+}
+
+func s3credsAccessSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"endpoint": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"bucket_name": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"folder_path": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"product_key": {
+				Type:      schema.TypeString,
+				Required:  true,
+				ForceNew:  true,
+				Sensitive: true,
+			},
+			"service_account": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				MaxItems: 1,
+				Elem:     serviceAccountSchema(),
+			},
+		},
+	}
+}
+func staticAccessSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"endpoint": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"bucket_name": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"access_key": {
+				Type:      schema.TypeString,
+				Required:  true,
+				Sensitive: true,
+				ForceNew:  true,
+			},
+			"secret_key": {
+				Type:      schema.TypeString,
+				Required:  true,
+				Sensitive: true,
+				ForceNew:  true,
+			},
+		},
+	}
+}
+func serviceAccountSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"service_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"private_key": {
+				Type:      schema.TypeString,
+				Required:  true,
+				Sensitive: true,
+				ForceNew:  true,
+			},
+			"access_token_endpoint": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"token_endpoint": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
 			},
 		},
 	}
@@ -209,7 +219,7 @@ func resourceDICOMObjectStoreRead(_ context.Context, d *schema.ResourceData, m i
 		staticSettings["bucket_name"] = store.StaticAccess.BucketName
 		staticSettings["access_key"] = store.StaticAccess.AccessKey
 		staticSettings["secret_key"] = store.StaticAccess.SecretKey
-		s := &schema.Set{F: resourceMetricsThresholdHash}
+		s := &schema.Set{F: schema.HashResource(staticAccessSchema())}
 		s.Add(staticSettings)
 		_ = d.Set("static_access", s)
 	}
@@ -226,11 +236,11 @@ func resourceDICOMObjectStoreRead(_ context.Context, d *schema.ResourceData, m i
 		accountSettings["access_token_endpoint"] = store.CredServiceAccess.ServiceAccount.AccessTokenEndPoint
 		accountSettings["token_endpoint"] = store.CredServiceAccess.ServiceAccount.TokenEndPoint
 		accountSettings["name"] = store.CredServiceAccess.ServiceAccount.Name
-		s := &schema.Set{F: resourceMetricsThresholdHash}
+		s := &schema.Set{F: schema.HashResource(serviceAccountSchema())}
 		s.Add(accountSettings)
 		credsSettings["service_account"] = s
 
-		c := &schema.Set{F: resourceMetricsThresholdHash}
+		c := &schema.Set{F: schema.HashResource(s3credsAccessSchema())}
 		c.Add(credsSettings)
 		_ = d.Set("s3creds_access", c)
 	}
