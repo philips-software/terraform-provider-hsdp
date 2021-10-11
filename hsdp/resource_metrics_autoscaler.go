@@ -59,108 +59,124 @@ func resourceMetricsAutoscaler() *schema.Resource {
 				Type:     schema.TypeSet,
 				Required: true,
 				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"enabled": {
-							Type:     schema.TypeBool,
-							Required: true,
-						},
-						"max": {
-							Type:         schema.TypeFloat,
-							Optional:     true,
-							Default:      10000,
-							ValidateFunc: validation.FloatBetween(1, 1000000),
-						},
-						"min": {
-							Type:         schema.TypeFloat,
-							Optional:     true,
-							Default:      10,
-							ValidateFunc: validation.FloatBetween(1, 1000000),
-						},
-					},
-				},
+				Elem:     thresholdHTTPLatencySchema(),
 			},
 			"threshold_http_rate": {
 				Type:     schema.TypeSet,
 				Required: true,
 				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"enabled": {
-							Type:     schema.TypeBool,
-							Required: true,
-						},
-						"max": {
-							Type:         schema.TypeFloat,
-							Optional:     true,
-							Default:      6000000,
-							ValidateFunc: validation.FloatBetween(1, 6000000),
-						},
-						"min": {
-							Type:         schema.TypeFloat,
-							Optional:     true,
-							Default:      300,
-							ValidateFunc: validation.FloatBetween(1, 6000000),
-						},
-					},
-				},
+				Elem:     thresholdHTTPRateSchema(),
 			},
 			"threshold_memory": {
 				Type:     schema.TypeSet,
 				Required: true,
 				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"enabled": {
-							Type:     schema.TypeBool,
-							Required: true,
-						},
-						"max": {
-							Type:         schema.TypeFloat,
-							Optional:     true,
-							Default:      100,
-							ValidateFunc: validation.FloatBetween(0, 100),
-						},
-						"min": {
-							Type:         schema.TypeFloat,
-							Optional:     true,
-							Default:      20,
-							ValidateFunc: validation.FloatBetween(0, 100),
-						},
-					},
-				},
+				Elem:     thresholdMemorySchema(),
 			},
 			"threshold_cpu": {
 				Type:     schema.TypeSet,
 				Required: true,
 				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"enabled": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
-						},
-						"max": {
-							Type:         schema.TypeFloat,
-							Optional:     true,
-							Default:      100,
-							ValidateFunc: validation.FloatBetween(0, 100),
-						},
-						"min": {
-							Type:         schema.TypeFloat,
-							Optional:     true,
-							Default:      5,
-							ValidateFunc: validation.FloatBetween(0, 100),
-						},
-					},
-				},
+				Elem:     thresholdCPUSchema(),
 			},
 		},
 	}
 }
 
-func resourceMetricsAutoscalerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func thresholdHTTPLatencySchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"enabled": {
+				Type:     schema.TypeBool,
+				Required: true,
+			},
+			"max": {
+				Type:         schema.TypeFloat,
+				Optional:     true,
+				Default:      10000,
+				ValidateFunc: validation.FloatBetween(1, 1000000),
+			},
+			"min": {
+				Type:         schema.TypeFloat,
+				Optional:     true,
+				Default:      10,
+				ValidateFunc: validation.FloatBetween(1, 1000000),
+			},
+		},
+	}
+}
+
+func thresholdHTTPRateSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"enabled": {
+				Type:     schema.TypeBool,
+				Required: true,
+			},
+			"max": {
+				Type:         schema.TypeFloat,
+				Optional:     true,
+				Default:      6000000,
+				ValidateFunc: validation.FloatBetween(1, 6000000),
+			},
+			"min": {
+				Type:         schema.TypeFloat,
+				Optional:     true,
+				Default:      300,
+				ValidateFunc: validation.FloatBetween(1, 6000000),
+			},
+		},
+	}
+}
+
+func thresholdMemorySchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"enabled": {
+				Type:     schema.TypeBool,
+				Required: true,
+			},
+			"max": {
+				Type:         schema.TypeFloat,
+				Optional:     true,
+				Default:      100,
+				ValidateFunc: validation.FloatBetween(0, 100),
+			},
+			"min": {
+				Type:         schema.TypeFloat,
+				Optional:     true,
+				Default:      20,
+				ValidateFunc: validation.FloatBetween(0, 100),
+			},
+		},
+	}
+}
+
+func thresholdCPUSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"max": {
+				Type:         schema.TypeFloat,
+				Optional:     true,
+				Default:      100,
+				ValidateFunc: validation.FloatBetween(0, 100),
+			},
+			"min": {
+				Type:         schema.TypeFloat,
+				Optional:     true,
+				Default:      5,
+				ValidateFunc: validation.FloatBetween(0, 100),
+			},
+		},
+	}
+}
+
+func resourceMetricsAutoscalerDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -188,7 +204,7 @@ func resourceMetricsAutoscalerUpdate(ctx context.Context, d *schema.ResourceData
 	return resourceMetricsAutoscalerCreate(ctx, d, m)
 }
 
-func resourceMetricsAutoscalerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceMetricsAutoscalerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -216,18 +232,19 @@ func resourceMetricsAutoscalerRead(ctx context.Context, d *schema.ResourceData, 
 		fields["enabled"] = th.Enabled
 		fields["min"] = th.Min
 		fields["max"] = th.Max
-		s := &schema.Set{F: resourceMetricsThresholdHash}
+		s := &schema.Set{F: schema.HashResource(mapping.schema())}
 		s.Add(fields)
-		_ = d.Set(mapping, s)
+		_ = d.Set(mapping.fieldName, s)
 	}
 	return diags
 }
 
+// TODO: get rid of this bogus implementation
 func resourceMetricsThresholdHash(v interface{}) int {
 	return 0
 }
 
-func resourceMetricsAutoscalerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceMetricsAutoscalerCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
 
 	var diags diag.Diagnostics
@@ -246,7 +263,7 @@ func resourceMetricsAutoscalerCreate(ctx context.Context, d *schema.ResourceData
 	app.Enabled = d.Get("enabled").(bool)
 
 	for key, mapping := range thresholdMapping {
-		if v, ok := d.GetOk(mapping); ok {
+		if v, ok := d.GetOk(mapping.fieldName); ok {
 			vL := v.(*schema.Set).List()
 			for _, vi := range vL {
 				mVi := vi.(map[string]interface{})
