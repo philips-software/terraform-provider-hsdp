@@ -40,84 +40,14 @@ func resourcePKITenant() *schema.Resource {
 				Type:     schema.TypeSet,
 				MinItems: 1,
 				Required: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"name": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"key_type": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"key_bits": {
-							Type:     schema.TypeInt,
-							Required: true,
-						},
-						"allow_ip_sans": {
-							Type:     schema.TypeBool,
-							Required: true,
-						},
-						"allow_any_name": {
-							Type:     schema.TypeBool,
-							Required: true,
-						},
-						"allow_subdomains": {
-							Type:     schema.TypeBool,
-							Required: true,
-						},
-						"allowed_domains": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-						"allowed_other_sans": {
-							Type:     schema.TypeSet,
-							Required: true,
-							MinItems: 1,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-						"allowed_serial_numbers": {
-							Type:     schema.TypeSet,
-							Optional: true,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-						"allowed_uri_sans": {
-							Type:     schema.TypeSet,
-							Required: true,
-							MinItems: 1,
-							Elem:     &schema.Schema{Type: schema.TypeString},
-						},
-						"client_flag": {
-							Type:     schema.TypeBool,
-							Required: true,
-						},
-						"server_flag": {
-							Type:     schema.TypeBool,
-							Required: true,
-						},
-						"enforce_hostnames": {
-							Type:     schema.TypeBool,
-							Optional: true,
-							Default:  false,
-						},
-					},
-				},
+				Elem:     pkiRoleSchema(),
 			},
 			"ca": {
 				Type:     schema.TypeSet,
 				Required: true,
 				ForceNew: true, // Updates are not supported
 				MaxItems: 1,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"common_name": {
-							Type:     schema.TypeString,
-							Required: true,
-							ForceNew: true,
-						},
-					},
-				},
+				Elem:     pkiCASchema(),
 			},
 			"logical_path": {
 				Type:     schema.TypeString,
@@ -134,6 +64,84 @@ func resourcePKITenant() *schema.Resource {
 			"plan_name": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+		},
+	}
+}
+
+func pkiCASchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"common_name": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+		},
+	}
+}
+
+func pkiRoleSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"key_type": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"key_bits": {
+				Type:     schema.TypeInt,
+				Required: true,
+			},
+			"allow_ip_sans": {
+				Type:     schema.TypeBool,
+				Required: true,
+			},
+			"allow_any_name": {
+				Type:     schema.TypeBool,
+				Required: true,
+			},
+			"allow_subdomains": {
+				Type:     schema.TypeBool,
+				Required: true,
+			},
+			"allowed_domains": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"allowed_other_sans": {
+				Type:     schema.TypeSet,
+				Required: true,
+				MinItems: 1,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"allowed_serial_numbers": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"allowed_uri_sans": {
+				Type:     schema.TypeSet,
+				Required: true,
+				MinItems: 1,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"client_flag": {
+				Type:     schema.TypeBool,
+				Required: true,
+			},
+			"server_flag": {
+				Type:     schema.TypeBool,
+				Required: true,
+			},
+			"enforce_hostnames": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 		},
 	}
@@ -266,7 +274,7 @@ func tenantToSchema(tenant pki.Tenant, logicalPath string, d *schema.ResourceDat
 
 	if count := len(tenant.ServiceParameters.Roles); count > 0 {
 		_, _ = config.Debug("Found %d roles\n", count)
-		s := &schema.Set{F: resourceMetricsThresholdHash}
+		s := &schema.Set{F: schema.HashResource(pkiRoleSchema())}
 		for _, role := range tenant.ServiceParameters.Roles {
 			roleDef := make(map[string]interface{})
 			roleDef["name"] = role.Name
@@ -292,7 +300,7 @@ func tenantToSchema(tenant pki.Tenant, logicalPath string, d *schema.ResourceDat
 	} else {
 		_, _ = config.Debug("No roles found\n")
 	}
-	s := &schema.Set{F: resourceMetricsThresholdHash}
+	s := &schema.Set{F: schema.HashResource(pkiCASchema())}
 	caDef := make(map[string]interface{})
 	caDef["common_name"] = tenant.ServiceParameters.CA.CommonName
 	s.Add(caDef)
