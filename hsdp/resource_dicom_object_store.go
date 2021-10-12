@@ -232,7 +232,7 @@ func resourceDICOMObjectStoreRead(_ context.Context, d *schema.ResourceData, m i
 
 		accountSettings := make(map[string]interface{})
 		accountSettings["service_id"] = store.CredServiceAccess.ServiceAccount.ServiceID
-		accountSettings["private_key"] = store.CredServiceAccess.ServiceAccount.PrivateKey
+		accountSettings["private_key"] = getS3CredsPrivateKeyFromState(d)
 		accountSettings["access_token_endpoint"] = store.CredServiceAccess.ServiceAccount.AccessTokenEndPoint
 		accountSettings["token_endpoint"] = store.CredServiceAccess.ServiceAccount.TokenEndPoint
 		accountSettings["name"] = store.CredServiceAccess.ServiceAccount.Name
@@ -314,4 +314,21 @@ func resourceDICOMObjectStoreCreate(ctx context.Context, d *schema.ResourceData,
 	}
 	d.SetId(created.ID)
 	return resourceDICOMObjectStoreRead(ctx, d, m)
+}
+
+func getS3CredsPrivateKeyFromState(d *schema.ResourceData) string {
+	privateKey := ""
+	if v, ok := d.GetOk("s3creds_access"); ok {
+		vL := v.(*schema.Set).List()
+		var aVi []interface{}
+		for _, vi := range vL {
+			mVi := vi.(map[string]interface{})
+			aVi = mVi["service_account"].(*schema.Set).List()
+		}
+		for _, vi := range aVi {
+			mVi := vi.(map[string]interface{})
+			privateKey = mVi["private_key"].(string)
+		}
+	}
+	return privateKey
 }
