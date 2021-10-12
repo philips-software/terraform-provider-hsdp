@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+# v0.22.2
+
+DICOM: Fix unexpected recreate of dicom_object_store due to API changes
+
 # v0.22.1
 
 DICOM: Add query param (#125)
