@@ -204,6 +204,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_cdl_export_route":                 resourceCDLExportRoute(),
 			"hsdp_ai_workspace_compute_target":      resourceAIWorkspaceComputeTarget(),
 			"hsdp_ai_workspace":                     resourceAIWorkspace(),
+			"hsdp_iam_sms_gateway":                  resourceIAMSMSGatewayConfig(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                    dataSourceIAMIntrospect(),
