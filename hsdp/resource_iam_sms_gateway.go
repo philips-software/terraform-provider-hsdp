@@ -158,11 +158,16 @@ func resourceIAMSMSGatewayConfigUpdate(ctx context.Context, d *schema.ResourceDa
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	serverVersion, _, err := client.SMSGateways.GetSMSGatewayByID(id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	gw, err = schemaReadSMSGateway(d)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error reading SMS gateway: %w", err))
 	}
 	gw.ID = id
+	gw.Meta = serverVersion.Meta
 	err = tryIAMCall(func() (*iam.Response, error) {
 		var err error
 		gw, resp, err = client.SMSGateways.UpdateSMSGateway(*gw)
