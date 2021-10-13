@@ -10,7 +10,7 @@ The following example creates an IAM SMS Gateway configuration for an IAM organi
 resource "hsdp_iam_sms_gateway" "config" {
   organization_id = var.iam_org_id
   
-  provider = "twilio"
+  gateway_provider = "twilio"
   
   properties {
     sid = var.twilio_sub_account_sid
