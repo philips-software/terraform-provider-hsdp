@@ -194,34 +194,7 @@ func resourceContainerHost() *schema.Resource {
 			fileField: {
 				Type:     schema.TypeSet,
 				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"source": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"content": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"destination": {
-							Type:     schema.TypeString,
-							Required: true,
-						},
-						"permissions": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"owner": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-						"group": {
-							Type:     schema.TypeString,
-							Optional: true,
-						},
-					},
-				},
+				Elem:     fileFieldSchema(),
 			},
 			"subnet_type": {
 				Type:          schema.TypeString,
@@ -275,6 +248,36 @@ func resourceContainerHost() *schema.Resource {
 	}
 }
 
+func fileFieldSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"source": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"content": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"destination": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"permissions": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"owner": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"group": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+		},
+	}
+}
 func InstanceStateRefreshFunc(client *cartel.Client, nameTag string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		state, resp, err := client.GetDeploymentState(nameTag)
