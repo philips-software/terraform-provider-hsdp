@@ -202,7 +202,7 @@ func resourceIAMUserUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		}
 	}
 	if d.HasChange("last_name") || d.HasChange("first_name") || d.HasChange("email") ||
-		d.HasChange("mobile") || d.HasChange("preferred_language") {
+		d.HasChange("mobile") || d.HasChange("preferred_language") || d.HasChange("preferred_communication_channel") {
 		profile, _, err := client.Users.LegacyGetUserByUUID(d.Id())
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("resourceIAMUserUpdate LegacyGetUserByUUID: %w", err))
@@ -210,6 +210,7 @@ func resourceIAMUserUpdate(ctx context.Context, d *schema.ResourceData, m interf
 		profile.FamilyName = d.Get("last_name").(string)
 		profile.GivenName = d.Get("first_name").(string)
 		profile.PreferredLanguage = d.Get("preferred_language").(string)
+		profile.PreferredCommunicationChannel = d.Get("preferred_communication_channel").(string)
 		profile.Contact.EmailAddress = d.Get("email").(string)
 		if profile.MiddleName == "" {
 			profile.MiddleName = " "
@@ -226,13 +227,6 @@ func resourceIAMUserUpdate(ctx context.Context, d *schema.ResourceData, m interf
 			Severity: diag.Warning,
 			Summary:  "password change not propagated",
 			Detail:   "changing the password after a user is created has no effect",
-		})
-	}
-	if d.HasChange("preferred_communication_channel") {
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Warning,
-			Summary:  "preferred communication channel change not propagated",
-			Detail:   "changing the preferred communication channel is currently not possible via API",
 		})
 	}
 	readDiags := resourceIAMUserRead(ctx, d, m)
