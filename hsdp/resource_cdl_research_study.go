@@ -169,31 +169,23 @@ func resourceCDLResearchStudyCreate(ctx context.Context, d *schema.ResourceData,
 			return diag.FromErr(err)
 		}
 		// Search for existing study based on Title
-		studies, _, err2 := client.Study.GetStudies(nil) // Can be optimized if query supports title
-		if err2 != nil {
+		study, _, err := client.Study.GetStudyByTitle(title)
+		if err != nil {
 			return diag.FromErr(fmt.Errorf("on match attempt during Create conflict: %w", err))
 		}
-		matchFound := false
-		for _, study := range studies {
-			if study.Title == title && study.StudyOwner == studyOwner { // TODO: check if this is sufficient for a good match
-				if study.DataProtectedFromDeletion != dataProtectedFromDeletion ||
-					study.Description != description ||
-					study.Period.End != endsAt { // Update if needed
-					study.DataProtectedFromDeletion = dataProtectedFromDeletion
-					study.Description = description
-					study.Period.End = endsAt
-					_, _, _ = client.Study.UpdateStudy(study)
-				}
-				d.SetId(study.ID)
-				matchFound = true
-				break
+		if study.Title == title && study.StudyOwner == studyOwner { // TODO: check if this is sufficient for a good match
+			if study.DataProtectedFromDeletion != dataProtectedFromDeletion ||
+				study.Description != description ||
+				study.Period.End != endsAt { // Update if needed
+				study.DataProtectedFromDeletion = dataProtectedFromDeletion
+				study.Description = description
+				study.Period.End = endsAt
+				_, _, _ = client.Study.UpdateStudy(*study)
 			}
 		}
-		if !matchFound {
-			return diag.FromErr(err)
-		}
-		// Clear any existing permission so we start off with a known state
-		pruneAllPermissions(client, d.Id())
+		d.SetId(study.ID)
+		// Clear any existing permissions, so we start off with a known state
+		pruneAllPermissions(client, study.ID)
 	} else {
 		d.SetId(createdStudy.ID)
 	}
@@ -208,7 +200,6 @@ func resourceCDLResearchStudyCreate(ctx context.Context, d *schema.ResourceData,
 	for _, r := range perms {
 		_, _, _ = client.Study.GrantPermission(placeholder, r)
 	}
-
 	return resourceCDLResearchStudyRead(ctx, d, m)
 }
 
