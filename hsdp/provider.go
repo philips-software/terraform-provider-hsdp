@@ -205,6 +205,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_ai_workspace_compute_target":      resourceAIWorkspaceComputeTarget(),
 			"hsdp_ai_workspace":                     resourceAIWorkspace(),
 			"hsdp_iam_sms_gateway":                  resourceIAMSMSGatewayConfig(),
+			"hsdp_iam_sms_template":                 resourceIAMSMSTemplate(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                    dataSourceIAMIntrospect(),

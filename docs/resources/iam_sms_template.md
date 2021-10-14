@@ -13,7 +13,7 @@ The various template types supported by IAM are:
 | PHONE_VERIFICATION | Send when the users' phone needs to be verified |
 | PASSWORD_RECOVERY  | If a user triggers forgot password flow, OTP to reset password will be sent to user. The following placeholders are supported in this template |
 | PASSWORD_FAILED_ATTEMPTS | If there are multiple attempts to change user account password with invalid current password, then the user will get this SMS notification warning user about malicious login attempts. This notification will be sent after 5 invalid attempts. The following placeholders are supported in this template |
-| MFA_OTP | This SMS template is used for login using OTP for multi-fator authentication. |
+| LOGIN_OTP | This SMS template is used for login using OTP for multi-fator authentication. |
 
 ## Placeholders
 
@@ -48,7 +48,7 @@ If there are multiple attempts to change user account password with invalid curr
 
 * `{{user.lockoutPeriod}}` - How long the account will be in locked state (in minutes)
 
-### MFA_OTP
+### LOGIN_OTP
 
 This SMS template is used for login using OTP for multi-fator authentication.
 The following placeholders are supported in this template
@@ -61,19 +61,19 @@ The following placeholders are supported in this template
 The following example manages an email template for an org
 
 ```hcl
-resource "hsdp_iam_sms_template" "mfa_otp_default" {
-  type            = "MFA_OTP"
+resource "hsdp_iam_sms_template" "login_otp_default" {
+  type            = "LOGIN_OTP"
   organization_id = var.org_id
 
   message = "Hi {{user.givenName}}, your OTP code is {{template.otp}}, valid for {{template.otpExpiryPeriod}} minutes"
 }
 
-resource "hsdp_iam_sms_template" "mfa_otp_nl" {
-  type            = "MFA_OTP"
+resource "hsdp_iam_sms_template" "login_otp_nl" {
+  type            = "LOGIN_OTP"
   organization_id = var.org_id
   
-  message = "Hallo {{user.givenName}}, jouw OTP code is {{template.otp}}, geldig voor {{template.otpExpiryPeriod}} minuten"
-  locale  = "NL-nl"
+  message = "Hallo {{user.givenName}}, jouw OTP code is {{template.otp}}, deze is {{template.otpExpiryPeriod}} minuten geldig"
+  locale  = "nl-NL"
 }
 ```
 
