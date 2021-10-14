@@ -30,7 +30,7 @@ resource "hsdp_iam_mfa_policy" "joes_policy" {
 
 The following arguments are supported:
 
-* `type` - (Required) the OTP type. Valid values: [`SOFT_OTP` | `SERVER_OTP`]
+* `type` - (Required) the OTP type. Valid values: [`SOFT_OTP` | `SERVER_OTP` | `SERVER_OTP_EMAIL` | `SERVER_OTP_SMS` | `SERVER_OTP_ANY` ]
 * `user` - (Required) The user UUID to attach this policy to. Conflicts with `organization`
 * `organization` - (Required) The organization to attach this policy to. Conflicts with `user`
 * `active` - (Required) Defaults to true. Setting to false will disable MFA for the subject.

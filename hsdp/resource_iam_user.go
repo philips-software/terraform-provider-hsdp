@@ -23,7 +23,7 @@ func resourceIAMUser() *schema.Resource {
 		UpdateContext: resourceIAMUserUpdate,
 		DeleteContext: resourceIAMUserDelete,
 
-		SchemaVersion: 1,
+		SchemaVersion: 2,
 		Schema: map[string]*schema.Schema{
 			"username": {
 				Type:       schema.TypeString,
@@ -61,6 +61,15 @@ func resourceIAMUser() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"preferred_language": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"preferred_communication_channel": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Default:  "email",
+			},
 		},
 	}
 }
@@ -85,6 +94,8 @@ func resourceIAMUserCreate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 	email = d.Get("email").(string)
 	organization := d.Get("organization_id").(string)
+	preferredLanguage := d.Get("preferred_language").(string)
+	preferredCommunicationChannel := d.Get("preferred_communication_channel").(string)
 
 	// First check if this user already exists
 	uuid, _, err := client.Users.GetUserIDByLoginID(email)
@@ -117,8 +128,10 @@ func resourceIAMUserCreate(ctx context.Context, d *schema.ResourceData, m interf
 				Value:  email,
 			},
 		},
-		ManagingOrganization: organization,
-		IsAgeValidated:       "true",
+		ManagingOrganization:          organization,
+		PreferredLanguage:             preferredLanguage,
+		PreferredCommunicationChannel: preferredCommunicationChannel,
+		IsAgeValidated:                "true",
 	}
 	if mobile != "" {
 		person.Telecom = append(person.Telecom,
@@ -164,10 +177,12 @@ func resourceIAMUserRead(_ context.Context, d *schema.ResourceData, m interface{
 	_ = d.Set("email", user.EmailAddress)
 	_ = d.Set("login", user.LoginID)
 	_ = d.Set("organization_id", user.ManagingOrganization)
+	_ = d.Set("preferred_communication_channel", user.PreferredCommunicationChannel)
+	_ = d.Set("preferred_language", user.PreferredLanguage)
 	return diags
 }
 
-func resourceIAMUserUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMUserUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	config := m.(*Config)
@@ -186,13 +201,15 @@ func resourceIAMUserUpdate(_ context.Context, d *schema.ResourceData, m interfac
 			return diag.FromErr(err)
 		}
 	}
-	if d.HasChange("last_name") || d.HasChange("first_name") || d.HasChange("email") || d.HasChange("mobile") {
+	if d.HasChange("last_name") || d.HasChange("first_name") || d.HasChange("email") ||
+		d.HasChange("mobile") || d.HasChange("preferred_language") {
 		profile, _, err := client.Users.LegacyGetUserByUUID(d.Id())
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("resourceIAMUserUpdate LegacyGetUserByUUID: %w", err))
 		}
 		profile.FamilyName = d.Get("last_name").(string)
 		profile.GivenName = d.Get("first_name").(string)
+		profile.PreferredLanguage = d.Get("preferred_language").(string)
 		profile.Contact.EmailAddress = d.Get("email").(string)
 		if profile.MiddleName == "" {
 			profile.MiddleName = " "
@@ -211,7 +228,15 @@ func resourceIAMUserUpdate(_ context.Context, d *schema.ResourceData, m interfac
 			Detail:   "changing the password after a user is created has no effect",
 		})
 	}
-	return diags
+	if d.HasChange("preferred_communication_channel") {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "preferred communication channel change not propagated",
+			Detail:   "changing the preferred communication channel is currently not possible via API",
+		})
+	}
+	readDiags := resourceIAMUserRead(ctx, d, m)
+	return append(diags, readDiags...)
 }
 
 func resourceIAMUserDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

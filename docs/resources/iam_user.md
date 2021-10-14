@@ -16,6 +16,8 @@ resource "hsdp_iam_user" "developer" {
   first_name      = "Devel"
   last_name       = "Oper"
   organization_id = hsdp_iam_org.testdev.id
+  
+  preferred_communication_channel = "email"
 }
 ```
 
@@ -26,7 +28,7 @@ The following arguments are supported:
 * `organization_id` - (Required) The managing organization of the user
 
 * `login` - (Required) The login ID of the user (NEW since v0.4.0)
-* `email` - (Required) The email address of the user
+* `email` - (Semi-Required) The email address of the user
 * `first_name` - (Required) First name of the user
 * `last_name` - (Required) Last name of the user
 * `mobile` - (Optional) Mobile number of the user. E.164 format
@@ -36,6 +38,12 @@ The following arguments are supported:
   No email will be triggered by the system. If unsure, do not set a password so the normal
   email activation flow is followed. Finally, any password value changes after user creation
   will have no effect on the users' actual password.
+* `preferred_language` - (Optional) Language preference for all communications.
+  Value can be a two letter language code as defined by ISO 639-1 (en, de) or it can be a combination
+  of language code and country code (en-gb, en-us). The country code is as per ISO 3166 two letter code (alpha-2)
+* `preferred_communication_channel` - (Optional) Preferred communication channel.
+  Email and SMS are supported channels. Email is the default channel if e-mail address is provided.
+  Values supported: [ `email` | `sms` ]
 
 ## Attributes Reference
 
