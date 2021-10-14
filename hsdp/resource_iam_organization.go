@@ -16,7 +16,7 @@ func resourceIAMOrg() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		SchemaVersion: 2,
+		SchemaVersion: 3,
 		CreateContext: resourceIAMOrgCreate,
 		ReadContext:   resourceIAMOrgRead,
 		UpdateContext: resourceIAMOrgUpdate,
@@ -54,7 +54,7 @@ func resourceIAMOrg() *schema.Resource {
 				Optional: true,
 			},
 			"active": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Computed: true,
 			},
 		},
