@@ -1,7 +1,7 @@
 # hsdp_iam_sms_template
 
-This resource allows you to provision and manage custom SMS template 
-types for an organization. The SMS templates can be registered for 
+This resource allows you to provision and manage custom SMS template
+types for an organization. The SMS templates can be registered for
 different locales as well.
 
 ## Types of templates
@@ -34,7 +34,7 @@ The following placeholders are supported in this template
 * `{{template.otpExpiryPeriod}}` - How long the OTP is valid (in minutes)
 * `{{template.phoneNumber}}` - Phone number for verification.
 
-### PASSWORD_RECOVERY 
+### PASSWORD_RECOVERY
 
 If a user triggers forgot password flow, OTP to reset password will be sent to user. The following placeholders are supported in this template
 
