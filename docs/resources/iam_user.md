@@ -43,7 +43,7 @@ The following arguments are supported:
   Email and SMS are supported channels. Email is the default channel if e-mail address is provided.
   Values supported: [ `email` | `sms` ]
 
-> Use the `preferred_*` attributes sparingly as they will reset values if the user has changed these outside of Terraform
+> Use the `preferred_*` arguments sparingly as they will reset values if the user has changed these outside of Terraform
 
 ## Attributes Reference
 
