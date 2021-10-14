@@ -62,13 +62,14 @@ func resourceIAMUser() *schema.Resource {
 				Required: true,
 			},
 			"preferred_language": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: supressEmptyPreferredLanguage,
 			},
 			"preferred_communication_channel": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "email",
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: suppressDefaultCommunicationChannel,
 			},
 		},
 	}

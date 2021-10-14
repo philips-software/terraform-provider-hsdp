@@ -16,8 +16,6 @@ resource "hsdp_iam_user" "developer" {
   first_name      = "Devel"
   last_name       = "Oper"
   organization_id = hsdp_iam_org.testdev.id
-  
-  preferred_communication_channel = "email"
 }
 ```
 
@@ -44,6 +42,8 @@ The following arguments are supported:
 * `preferred_communication_channel` - (Optional) Preferred communication channel.
   Email and SMS are supported channels. Email is the default channel if e-mail address is provided.
   Values supported: [ `email` | `sms` ]
+
+> Use the `preferred_*` attributes sparingly as they will reset values if the user has changed these outside of Terraform
 
 ## Attributes Reference
 
