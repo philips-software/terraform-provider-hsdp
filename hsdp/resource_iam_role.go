@@ -206,8 +206,10 @@ func resourceIAMRoleDelete(ctx context.Context, d *schema.ResourceData, m interf
 	var role iam.Role
 	role.ID = d.Id()
 
-	_, _, _ = client.Roles.DeleteRole(role)
-	// Note: 2020-12-17, the DeleteRole call will always fail. Thanks IAM.
+	_, _, err = client.Roles.DeleteRole(role)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	d.SetId("")
 	return diags
 }

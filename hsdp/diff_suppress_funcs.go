@@ -32,6 +32,20 @@ func suppressDefault(k, old, new string, d *schema.ResourceData) bool {
 	return false
 }
 
+func suppressDefaultCommunicationChannel(k, old, new string, d *schema.ResourceData) bool {
+	if (old == "email" || old == "sms") && new == "" {
+		return true
+	}
+	return false
+}
+
+func supressEmptyPreferredLanguage(k, old, new string, d *schema.ResourceData) bool {
+	if old != "" && new == "" {
+		return true
+	}
+	return false
+}
+
 func suppressWhenGenerated(k, old, new string, d *schema.ResourceData) bool {
 	return new == ""
 }

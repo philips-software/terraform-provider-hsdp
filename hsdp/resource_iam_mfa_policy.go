@@ -3,8 +3,9 @@ package hsdp
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"net/http"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -20,38 +21,39 @@ func resourceIAMMFAPolicy() *schema.Resource {
 		ReadContext:   resourceIAMMFAPolicyRead,
 		UpdateContext: resourceIAMMFAPolicyUpdate,
 		DeleteContext: resourceIAMMFAPolicyDelete,
+		SchemaVersion: 1,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
+			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			"description": &schema.Schema{
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"type": &schema.Schema{
+			"type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"active": &schema.Schema{
+			"active": {
 				Type:     schema.TypeBool,
 				Required: true,
 			},
-			"user": &schema.Schema{
+			"user": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ConflictsWith: []string{"organization"},
 				ForceNew:      true,
 			},
-			"organization": &schema.Schema{
+			"organization": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				ConflictsWith: []string{"user"},
 				ForceNew:      true,
 			},
-			"version": &schema.Schema{
+			"version": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -61,8 +63,6 @@ func resourceIAMMFAPolicy() *schema.Resource {
 
 func resourceIAMMFAPolicyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	config := m.(*Config)
-
-	var diags diag.Diagnostics
 
 	client, err := config.IAMClient()
 	if err != nil {
@@ -100,11 +100,7 @@ func resourceIAMMFAPolicyCreate(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(fmt.Errorf("failed to create MFA policy: %d", resp.StatusCode))
 	}
 	d.SetId(newPolicy.ID)
-	_ = d.Set("name", newPolicy.Name)
-	_ = d.Set("description", newPolicy.Description)
-	_ = d.Set("active", *newPolicy.Active)
-	_ = d.Set("version", newPolicy.Meta.Version)
-	return diags
+	return resourceIAMMFAPolicyRead(ctx, d, m)
 }
 
 func resourceIAMMFAPolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
