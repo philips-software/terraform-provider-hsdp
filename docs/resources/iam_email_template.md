@@ -14,10 +14,12 @@ The various template types supported by IAM are:
 | ACCOUNT_VERIFICATION | When a user gets registered within an organization, an account verification email will be sent to the user. The email message will contain an account verification link that will redirect users to the set password page through which the user can set a password and complete the registration process. |
 | MFA_DISABLED | If multi-factor authentication is disabled for a user, the user will get this email notification. |
 | MFA_ENABLED | If multi-factor authentication is enabled for a user, the user will get this email notification. |
+| MFA_OTP | This multi-factor authentication is used to send out the OTP for authenticating your account. |
 | PASSWORD_CHANGED | If a user’s password is changed successfully, the user will get this email notification. |
 | PASSWORD_EXPIRY | If a user’s password is about to expire, this email will be sent to the user with a link to change the password. |
 | PASSWORD_FAILED_ATTEMPTS | If there are multiple attempts to change a user account password with invalid current password, then the user will get this email notification warning the user about malicious login attempts. This notification will be sent after 5 invalid attempts. |
 | PASSWORD_RECOVERY | If a user triggers the forgot password flow, a password reset email message will be sent to the user. The email message will contain a reset password link that will redirect the user to the reset password page, through which the user can set a new password. |
+| EMAIL_VERIFICATION_VIA_CODE | When a user gets registered within an organization & if the user wants to verify email address, an account verification email will be sent to user |
 
 ## Placeholders
 
@@ -84,6 +86,17 @@ If multi-factor authentication is enabled for a user, user will get this email n
 ### MFA_DISABLED
 
 If multi-factor authentication is disabled for a user, user will get this email notification. No link need to be configured for this template.
+
+### MFA_OTP
+
+This multi-factor authentication is used to send out the OTP for authenticating your account.
+
+### EMAIL_VERIFICATION_VIA_CODE
+
+When a user gets registered within an organization & if the user wants to verify email address, an account verification email will be sent to user . Otp will be received which needs to be used in IAM API confirm verification code to verify the email address. The following placeholders are supported in this template
+
+* `{{OTP}}` - Email verification code
+* `{{template.linkExpiryPeriod}}` - How long the verification link is valid (in hours)
 
 ## Example Usage
 

@@ -196,7 +196,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## v0.18.5
 
-- CDL: Add support for Data Type Definitons
+- CDL: Add support for Data Type Definitions
 
 ## v0.18.4
 
