@@ -9,6 +9,23 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+const (
+	Region           = "HSDP_REGION"
+	Environment      = "HSDP_ENVIRONMENT"
+	CartelSecret     = "HSDP_CARTEL_SECRET"
+	CartelToken      = "HSDP_CARTEL_TOKEN"
+	ServiceID        = "HSDP_IAM_SERVICE_ID"
+	ServicePK        = "HSDP_IAM_SERVICE_PRIVATE_KEY"
+	OrgAdminUsername = "HSDP_IAM_ORG_ADMIN_USERNAME"
+	OrgAdminPassword = "HSDP_IAM_ORG_ADMIN_PASSWORD"
+	ClientID         = "HSDP_IAM_OAUTH2_CLIENT_ID"
+	ClientPassword   = "HSDP_IAM_OAUTH2_PASSWORD"
+	SharedKey        = "HSDP_SHARED_KEY"
+	SecretKey        = "HSDP_SECRET_KEY"
+	UAAUsername      = "HSDP_UAA_USERNAME"
+	UAAPassword      = "HSDP_UAA_PASSWORD"
+)
+
 // Provider returns an instance of the HSDP provider
 func Provider(build string) *schema.Provider {
 	return &schema.Provider{
@@ -16,12 +33,13 @@ func Provider(build string) *schema.Provider {
 			"region": {
 				Type:        schema.TypeString,
 				Required:    true,
+				DefaultFunc: schema.EnvDefaultFunc(Region, nil),
 				Description: descriptions["region"],
 			},
 			"environment": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "client-test",
+				DefaultFunc: schema.EnvDefaultFunc(Environment, "client-test"),
 				Description: descriptions["environment"],
 			},
 			"iam_url": {
@@ -49,6 +67,7 @@ func Provider(build string) *schema.Provider {
 				Optional:      true,
 				ConflictsWith: []string{"org_admin_username"},
 				RequiredWith:  []string{"service_private_key"},
+				DefaultFunc:   schema.EnvDefaultFunc(ServiceID, nil),
 				Description:   descriptions["service_id"],
 			},
 			"service_private_key": {
@@ -57,17 +76,20 @@ func Provider(build string) *schema.Provider {
 				Sensitive:     true,
 				ConflictsWith: []string{"org_admin_password"},
 				RequiredWith:  []string{"service_id"},
+				DefaultFunc:   schema.EnvDefaultFunc(ServicePK, nil),
 				Description:   descriptions["service_private_key"],
 			},
 			"oauth2_client_id": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc(ClientID, nil),
 				Description: descriptions["oauth2_client_id"],
 			},
 			"oauth2_password": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
+				DefaultFunc: schema.EnvDefaultFunc(ClientPassword, nil),
 				Description: descriptions["oauth2_password"],
 			},
 			"org_admin_username": {
@@ -76,6 +98,7 @@ func Provider(build string) *schema.Provider {
 				Description:   descriptions["org_admin_username"],
 				RequiredWith:  []string{"org_admin_password"},
 				ConflictsWith: []string{"service_id"},
+				DefaultFunc:   schema.EnvDefaultFunc(OrgAdminUsername, nil),
 			},
 			"org_admin_password": {
 				Type:          schema.TypeString,
@@ -84,12 +107,14 @@ func Provider(build string) *schema.Provider {
 				Description:   descriptions["org_admin_password"],
 				RequiredWith:  []string{"org_admin_username"},
 				ConflictsWith: []string{"service_private_key"},
+				DefaultFunc:   schema.EnvDefaultFunc(OrgAdminPassword, nil),
 			},
 			"uaa_username": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Description:  descriptions["uaa_username"],
 				RequiredWith: []string{"uaa_password"},
+				DefaultFunc:  schema.EnvDefaultFunc(UAAPassword, nil),
 			},
 			"uaa_password": {
 				Type:         schema.TypeString,
@@ -97,6 +122,7 @@ func Provider(build string) *schema.Provider {
 				Sensitive:    true,
 				Description:  descriptions["uaa_password"],
 				RequiredWith: []string{"uaa_username"},
+				DefaultFunc:  schema.EnvDefaultFunc(UAAPassword, nil),
 			},
 			"uaa_url": {
 				Type:        schema.TypeString,
@@ -107,12 +133,14 @@ func Provider(build string) *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   false,
+				DefaultFunc: schema.EnvDefaultFunc(SharedKey, nil),
 				Description: descriptions["shared_key"],
 			},
 			"secret_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
+				DefaultFunc: schema.EnvDefaultFunc(SecretKey, nil),
 				Description: descriptions["secret_key"],
 			},
 			"cartel_host": {
@@ -124,12 +152,14 @@ func Provider(build string) *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
+				DefaultFunc: schema.EnvDefaultFunc(CartelToken, nil),
 				Description: descriptions["cartel_token"],
 			},
 			"cartel_secret": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Sensitive:   true,
+				DefaultFunc: schema.EnvDefaultFunc(CartelSecret, nil),
 				Description: descriptions["cartel_secret"],
 			},
 			"cartel_no_tls": {
