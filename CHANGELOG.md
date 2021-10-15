@@ -4,11 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-# v0.22.2
+## v0.23.0
+
+- NEW: IAM SMS Gateway configuration support: `hsdp_iam_sms_gateway`
+- NEW: IAM SMS Templates configuration: `hsdp_iam_sms_template`
+- NEW: Support provider credentials and settings from the Environment
+- NEW: IAM User resources supports setting preferred language and communication channel
+- CDL: Fix study conflict resolution
+
+## v0.22.2
 
 - DICOM: Fix unexpected recreate of dicom_object_store due to API changes
 
-# v0.22.1
+## v0.22.1
 
 - DICOM: Add query param (#125)
 - DICOM: Fix hsdp_dicom_store_config hash resources
