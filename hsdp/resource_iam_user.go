@@ -103,11 +103,6 @@ func resourceIAMUserCreate(ctx context.Context, d *schema.ResourceData, m interf
 	if err == nil && uuid != "" {
 		user, _, _ := client.Users.GetUserByID(uuid)
 		if user != nil {
-			if user.AccountStatus.Disabled {
-				// Ret-rigger activation email
-				_, _, err = client.Users.ResendActivation(email)
-				return diag.FromErr(err)
-			}
 			diags = resourceIAMUserRead(ctx, d, m)
 			if len(diags) == 0 {
 				d.SetId(user.ID)

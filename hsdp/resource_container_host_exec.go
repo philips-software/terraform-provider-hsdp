@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -175,15 +174,9 @@ func resourceContainerHostExecCreate(_ context.Context, d *schema.ResourceData, 
 	}
 
 	// Run commands
-	var stdout, stderr string
-	var done bool
-	for i := 0; i < len(commands); i++ {
-		stdout, stderr, done, err = ssh.Run(commands[i], 5*time.Minute)
-		_, _ = config.Debug("command: %s\ndone: %t\nstdout:\n%s\nstderr:\n%s\n", commands[i], done, stdout, stderr)
-		if err != nil {
-			_, _ = config.Debug("error: %v\n", err)
-			return append(diags, diag.FromErr(fmt.Errorf("command [%s]: %w", commands[i], err))...)
-		}
+	stdout, errDiags, err := runCommands(commands, ssh, m)
+	if err != nil {
+		return errDiags
 	}
 	_ = d.Set("result", stdout)
 	d.SetId(fmt.Sprintf("%d", rand.Int()))

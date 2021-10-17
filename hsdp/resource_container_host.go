@@ -482,16 +482,9 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	// Run commands
-	var stdout, stderr string
-	var done bool
-	for i := 0; i < len(commands); i++ {
-		stdout, stderr, done, err = ssh.Run(commands[i], 5*time.Minute)
-		_, _ = config.Debug("command: %s\ndone: %t\nstdout:\n%s\nstderr:\n%s\n", commands[i], done, stdout, stderr)
-		if err != nil {
-			_, _ = config.Debug("error: %v\n", err)
-			_, _, _ = client.Destroy(tagName)
-			return append(diags, diag.FromErr(fmt.Errorf("command [%s]: %w", commands[i], err))...)
-		}
+	stdout, errDiags, err := runCommands(commands, ssh, m)
+	if err != nil {
+		return errDiags
 	}
 	_ = d.Set("result", stdout)
 	d.SetId(instanceID)
@@ -810,16 +803,9 @@ func resourceContainerHostUpdate(_ context.Context, d *schema.ResourceData, m in
 				return diags
 			}
 			// Run commands
-			var stdout, stderr string
-			var done bool
-			var err error
-			for i := 0; i < len(commands); i++ {
-				stdout, stderr, done, err = ssh.Run(commands[i], 5*time.Minute)
-				_, _ = config.Debug("command: %s\ndone: %t\nstdout:\n%s\nstderr:\n%s\n", commands[i], done, stdout, stderr)
-				if err != nil {
-					_, _ = config.Debug("error: %v\n", err)
-					return append(diags, diag.FromErr(fmt.Errorf("command [%s]: %w", commands[i], err))...)
-				}
+			stdout, errDiags, err := runCommands(commands, ssh, m)
+			if err != nil {
+				return errDiags
 			}
 			_ = d.Set("result", stdout)
 		}
@@ -959,4 +945,34 @@ func generateTagChange(old, new interface{}) map[string]string {
 		}
 	}
 	return change
+}
+
+func runCommands(commands []string, ssh *easyssh.MakeConfig, m interface{}) (string, diag.Diagnostics, error) {
+	var diags diag.Diagnostics
+	var stdout, stderr string
+	var done bool
+	var err error
+	config := m.(*Config)
+
+	for i := 0; i < len(commands); i++ {
+		stdout, stderr, done, err = ssh.Run(commands[i], 5*time.Minute)
+		_, _ = config.Debug("command: %s\ndone: %t\nstdout:\n%s\nstderr:\n%s\n", commands[i], done, stdout, stderr)
+		if err != nil {
+			_, _ = config.Debug("error: %v\n", err)
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  fmt.Sprintf("execution of command '%s' failed. stdout output", commands[i]),
+				Detail:   stdout,
+			})
+			if stderr != "" {
+				diags = append(diags, diag.Diagnostic{
+					Severity: diag.Error,
+					Summary:  "stderr output",
+					Detail:   stderr,
+				})
+			}
+			return stdout, diags, err
+		}
+	}
+	return stdout, diags, nil
 }
