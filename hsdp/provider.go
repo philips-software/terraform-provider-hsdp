@@ -114,7 +114,7 @@ func Provider(build string) *schema.Provider {
 				Optional:     true,
 				Description:  descriptions["uaa_username"],
 				RequiredWith: []string{"uaa_password"},
-				DefaultFunc:  schema.EnvDefaultFunc(UAAPassword, nil),
+				DefaultFunc:  schema.EnvDefaultFunc(UAAUsername, nil),
 			},
 			"uaa_password": {
 				Type:         schema.TypeString,
@@ -277,6 +277,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_ai_workspace":                      dataSourceAIWorkspace(),
 			"hsdp_iam_group":                         dataSourceIAMGroup(),
 			"hsdp_iam_role":                          dataSourceIAMRole(),
+			"hsdp_iam_users":                         dataSourceIAMUsers(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
