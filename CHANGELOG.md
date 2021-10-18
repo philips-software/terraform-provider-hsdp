@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.23.2
+
+- Fix hsdp_iam_user data source
+
 ## v0.23.1
 
 - NEW: IAM Users data source: `data.hsdp_iam_users` 
