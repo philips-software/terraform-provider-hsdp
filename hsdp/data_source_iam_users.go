@@ -17,26 +17,13 @@ func dataSourceIAMUsers() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"filter": {
-				Type:     schema.TypeSet,
-				MaxItems: 1,
-				MinItems: 0,
+			"email_verified": {
+				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"email_verified": {
-							Type:     schema.TypeBool,
-							Default:  true,
-							Optional: true,
-						},
-						"disabled": {
-							Type:     schema.TypeBool,
-							Default:  false,
-							Optional: true,
-						},
-					},
-				},
+			},
+			"disabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 			"ids": {
 				Type:     schema.TypeList,
@@ -58,27 +45,6 @@ func dataSourceIAMUsers() *schema.Resource {
 
 }
 
-type iamUserFilter struct {
-	EmailVerified bool
-	Disabled      bool
-}
-
-func collectFilter(d *schema.ResourceData) (*iamUserFilter, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	var filter *iamUserFilter
-	if v, ok := d.GetOk("filter"); ok {
-		vL := v.(*schema.Set).List()
-		for _, vi := range vL {
-			mVi := vi.(map[string]interface{})
-			filter = &iamUserFilter{
-				EmailVerified: mVi["email_verified"].(bool),
-				Disabled:      mVi["disabled"].(bool),
-			}
-		}
-	}
-	return filter, diags
-}
-
 func dataSourceIAMUsersRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	config := meta.(*Config)
 
@@ -90,10 +56,17 @@ func dataSourceIAMUsersRead(_ context.Context, d *schema.ResourceData, meta inte
 	}
 
 	orgID := d.Get("organization_id").(string)
-	filter, filterDiags := collectFilter(d)
-	if len(filterDiags) > 0 {
-		return filterDiags
+	var emailVerified *bool
+	var disabled *bool
+	if val, ok := d.GetOk("disabled"); ok {
+		b := val.(bool)
+		disabled = &b
 	}
+	if val, ok := d.GetOk("email_verified"); ok {
+		b := val.(bool)
+		emailVerified = &b
+	}
+
 	profileType := "all"
 
 	userList, _, err := client.Users.GetAllUsers(&iam.GetUserOptions{
@@ -118,12 +91,13 @@ func dataSourceIAMUsersRead(_ context.Context, d *schema.ResourceData, meta inte
 			})
 			continue
 		}
-		if filter != nil && user.AccountStatus.Disabled != filter.Disabled {
+		if emailVerified != nil && *emailVerified != user.AccountStatus.EmailVerified {
 			continue
 		}
-		if filter != nil && user.AccountStatus.EmailVerified != filter.EmailVerified {
+		if disabled != nil && *disabled != user.AccountStatus.Disabled {
 			continue
 		}
+		// All criteria match, so add user
 		ids = append(ids, guid)
 		logins = append(logins, user.LoginID)
 		emailAddresses = append(emailAddresses, user.EmailAddress)
