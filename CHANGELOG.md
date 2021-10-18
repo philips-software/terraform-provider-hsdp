@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.23.1
+
+- NEW: IAM Users data source: `data.hsdp_iam_users` 
+- NEW: IAM Email Activation resource: `hsdp_iam_email_activation`
+- Container Host: improve commands error reporting
+
 ## v0.23.0
 
 - NEW: IAM SMS Gateway configuration support: `hsdp_iam_sms_gateway`
