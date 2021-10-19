@@ -1,4 +1,4 @@
-package ai
+package inference
 
 import (
 	"context"
@@ -13,15 +13,15 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
-func ResourceAIInferenceComputeEnvironment() *schema.Resource {
+func ResourceAIInferenceComputeTarget() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 
-		CreateContext: resourceAIInferenceComputeEnvironmentCreate,
-		ReadContext:   resourceAIInferenceComputeEnvironmentRead,
-		DeleteContext: resourceAIInferenceComputeEnvironmentDelete,
+		CreateContext: resourceAIInferenceComputeTargetCreate,
+		ReadContext:   resourceAIInferenceComputeTargetRead,
+		DeleteContext: resourceAIInferenceComputeTargetDelete,
 
 		Schema: map[string]*schema.Schema{
 			"endpoint": {
@@ -39,8 +39,13 @@ func ResourceAIInferenceComputeEnvironment() *schema.Resource {
 				Optional: true,
 				ForceNew: true,
 			},
-			"image": {
+			"instance_type": {
 				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"storage": {
+				Type:     schema.TypeInt,
 				Required: true,
 				ForceNew: true,
 			},
@@ -64,7 +69,7 @@ func ResourceAIInferenceComputeEnvironment() *schema.Resource {
 	}
 }
 
-func resourceAIInferenceComputeEnvironmentCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAIInferenceComputeTargetCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 	endpoint := d.Get("endpoint").(string)
 	client, err := c.GetAIInferenceClientFromEndpoint(endpoint)
@@ -75,17 +80,19 @@ func resourceAIInferenceComputeEnvironmentCreate(ctx context.Context, d *schema.
 
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
-	image := d.Get("image").(string)
+	instanceType := d.Get("instance_type").(string)
+	storage := d.Get("storage").(int)
 
-	var createdEnv *ai.ComputeEnvironment
+	var createdTarget *ai.ComputeTarget
+	var resp *ai.Response
 	// Do initial boarding
 	operation := func() error {
-		var resp *ai.Response
-		createdEnv, resp, err = client.ComputeEnvironment.CreateComputeEnvironment(ai.ComputeEnvironment{
-			ResourceType: "ComputeEnvironment",
+		createdTarget, resp, err = client.ComputeTarget.CreateComputeTarget(ai.ComputeTarget{
+			ResourceType: "ComputeTarget",
 			Name:         name,
 			Description:  description,
-			Image:        image,
+			InstanceType: instanceType,
+			Storage:      storage,
 		})
 		if resp == nil {
 			resp = &ai.Response{}
@@ -100,46 +107,40 @@ func resourceAIInferenceComputeEnvironmentCreate(ctx context.Context, d *schema.
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(createdEnv.ID)
-	return resourceAIInferenceComputeEnvironmentRead(ctx, d, m)
+	d.SetId(createdTarget.ID)
+	return resourceAIInferenceComputeTargetRead(ctx, d, m)
 }
 
-func resourceAIInferenceComputeEnvironmentRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var resp *ai.Response
+func resourceAIInferenceComputeTargetRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	var err error
 
 	c := m.(*config.Config)
 	endpoint := d.Get("endpoint").(string)
 	client, err := c.GetAIInferenceClientFromEndpoint(endpoint)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("AIInferenceComputeEnvironmentRead: %w", err))
+		return diag.FromErr(err)
 	}
 	defer client.Close()
 
 	id := d.Id()
 
-	var env *ai.ComputeEnvironment
-	err = tools.TryAICall(func() (*ai.Response, error) {
-		var err error
-		env, resp, err = client.ComputeEnvironment.GetComputeEnvironmentByID(id)
-		return resp, err
-	})
+	target, _, err := client.ComputeTarget.GetComputeTargetByID(id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	_ = d.Set("name", env.Name)
-	_ = d.Set("description", env.Description)
-	_ = d.Set("image", env.Image)
-	_ = d.Set("is_factory", env.IsFactory)
-	_ = d.Set("created", env.Created)
-	_ = d.Set("created_by", env.CreatedBy)
-	_ = d.Set("reference", fmt.Sprintf("%s/%s", env.ResourceType, env.ID))
+	_ = d.Set("name", target.Name)
+	_ = d.Set("description", target.Description)
+	_ = d.Set("instance_type", target.InstanceType)
+	_ = d.Set("storage", target.Storage)
+	_ = d.Set("is_factory", target.IsFactory)
+	_ = d.Set("created", target.Created)
+	_ = d.Set("created_by", target.CreatedBy)
+	_ = d.Set("reference", fmt.Sprintf("%s/%s", target.ResourceType, target.ID))
 
 	return diags
 }
 
-func resourceAIInferenceComputeEnvironmentDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceAIInferenceComputeTargetDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	c := m.(*config.Config)
@@ -152,7 +153,7 @@ func resourceAIInferenceComputeEnvironmentDelete(_ context.Context, d *schema.Re
 
 	id := d.Id()
 
-	resp, err := client.ComputeEnvironment.DeleteComputeEnvironment(ai.ComputeEnvironment{
+	resp, err := client.ComputeTarget.DeleteComputeTarget(ai.ComputeTarget{
 		ID: id,
 	})
 	if err != nil {

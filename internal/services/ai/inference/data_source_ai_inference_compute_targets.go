@@ -1,4 +1,4 @@
-package ai
+package inference
 
 import (
 	"context"
@@ -8,9 +8,9 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
 
-func DataSourceAIInferenceJobs() *schema.Resource {
+func DataSourceAIInferenceComputeTargets() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceAIInferenceJobsRead,
+		ReadContext: dataSourceAIInferenceComputeTargetsRead,
 		Schema: map[string]*schema.Schema{
 			"endpoint": {
 				Type:     schema.TypeString,
@@ -31,7 +31,7 @@ func DataSourceAIInferenceJobs() *schema.Resource {
 
 }
 
-func dataSourceAIInferenceJobsRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceAIInferenceComputeTargetsRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	c := m.(*config.Config)
@@ -41,7 +41,7 @@ func dataSourceAIInferenceJobsRead(_ context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
-	jobs, _, err := client.Job.GetJobs(nil)
+	environments, _, err := client.ComputeTarget.GetComputeTargets(nil)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -51,9 +51,9 @@ func dataSourceAIInferenceJobsRead(_ context.Context, d *schema.ResourceData, m 
 	var names []string
 	var ids []string
 
-	for _, job := range jobs {
-		names = append(names, job.Name)
-		ids = append(ids, job.ID)
+	for _, env := range environments {
+		names = append(names, env.Name)
+		ids = append(ids, env.ID)
 	}
 	_ = d.Set("names", names)
 	_ = d.Set("ids", ids)

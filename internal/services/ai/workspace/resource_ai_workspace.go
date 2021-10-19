@@ -1,4 +1,4 @@
-package ai
+package workspace
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 	"github.com/philips-software/go-hsdp-api/ai"
 	"github.com/philips-software/go-hsdp-api/ai/workspace"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/ai/helpers"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
@@ -138,8 +139,8 @@ func resourceAIWorkspaceCreate(ctx context.Context, d *schema.ResourceData, m in
 	name := d.Get("name").(string)
 	description := d.Get("description").(string)
 	labels, _ := tools.CollectList("labels", d)
-	computeTarget, _ := collectComputeTarget(d)
-	sourceCode, _ := collectSourceCode(d)
+	computeTarget, _ := helpers.CollectComputeTarget(d)
+	sourceCode, _ := helpers.CollectSourceCode(d)
 	additionalConfiguration := d.Get("additional_conifguration").(string)
 
 	ws := workspace.Workspace{

@@ -30,7 +30,7 @@ resource "hsdp_iam_org" "hospital_a" {
 The HSDP provider can read credentials and settings from the Environment or as
 arguments in its provider block. The following environment variables are recognized
 
-| Environment | Maps to argument | Required | Default |
+| Environment | Argument | Required | Default |
 |-------------|------------------|----------------------|---------|
 | HSDP_REGION | region           | Required             |         |
 | HSDP_ENVIRONMENT | environment | Optional             | client-test |

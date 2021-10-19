@@ -1,4 +1,4 @@
-package ai
+package inference
 
 import (
 	"context"
@@ -11,6 +11,7 @@ import (
 	"github.com/philips-software/go-hsdp-api/ai"
 	"github.com/philips-software/go-hsdp-api/ai/inference"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/ai/helpers"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
@@ -152,8 +153,8 @@ func resourceAIInferenceModelCreate(ctx context.Context, d *schema.ResourceData,
 	artifactPath := d.Get("artifact_path").(string)
 	entryCommands, _ := tools.CollectList("entry_commands", d)
 	labels, _ := tools.CollectList("labels", d)
-	computeEnvironment, _ := collectComputeEnvironment(d)
-	sourceCode, _ := collectSourceCode(d)
+	computeEnvironment, _ := helpers.CollectComputeEnvironment(d)
+	sourceCode, _ := helpers.CollectSourceCode(d)
 	additionalConfiguration := d.Get("additional_configuration").(string)
 
 	model := inference.Model{
@@ -199,40 +200,6 @@ func resourceAIInferenceModelCreate(ctx context.Context, d *schema.ResourceData,
 	}
 	d.SetId(createdModel.ID)
 	return resourceAIInferenceModelRead(ctx, d, m)
-}
-
-func collectComputeEnvironment(d *schema.ResourceData) (ai.ReferenceComputeEnvironment, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	var rce ai.ReferenceComputeEnvironment
-	if v, ok := d.GetOk("compute_environment"); ok {
-		vL := v.(*schema.Set).List()
-		for _, vi := range vL {
-			mVi := vi.(map[string]interface{})
-			rce = ai.ReferenceComputeEnvironment{
-				Reference:  mVi["reference"].(string),
-				Identifier: mVi["identifier"].(string),
-			}
-		}
-	}
-	return rce, diags
-}
-
-func collectSourceCode(d *schema.ResourceData) (ai.SourceCode, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	var rce ai.SourceCode
-	if v, ok := d.GetOk("source_code"); ok {
-		vL := v.(*schema.Set).List()
-		for _, vi := range vL {
-			mVi := vi.(map[string]interface{})
-			rce = ai.SourceCode{
-				URL:      mVi["url"].(string),
-				Branch:   mVi["branch"].(string),
-				CommitID: mVi["commit_id"].(string),
-				SSHKey:   mVi["ssh_key"].(string),
-			}
-		}
-	}
-	return rce, diags
 }
 
 func resourceAIInferenceModelRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

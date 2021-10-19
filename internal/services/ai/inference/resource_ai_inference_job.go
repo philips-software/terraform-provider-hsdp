@@ -1,4 +1,4 @@
-package ai
+package inference
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/ai"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/ai/helpers"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
@@ -186,8 +187,8 @@ func resourceAIInferenceJobCreate(ctx context.Context, d *schema.ResourceData, m
 	description := d.Get("description").(string)
 	commandArgs, _ := tools.CollectList("command_args", d)
 	labels, _ := tools.CollectList("labels", d)
-	computeTarget, _ := collectComputeTarget(d)
-	computeModel, _ := collectComputeModel(d)
+	computeTarget, _ := helpers.CollectComputeTarget(d)
+	computeModel, _ := helpers.CollectComputeModel(d)
 	inputs, _ := collectInputs(d)
 	outputs, _ := collectOutputs(d)
 	timeout := d.Get("timeout").(int)
@@ -235,38 +236,6 @@ func resourceAIInferenceJobCreate(ctx context.Context, d *schema.ResourceData, m
 	}
 	d.SetId(createdJob.ID)
 	return resourceAIInferenceJobRead(ctx, d, m)
-}
-
-func collectComputeTarget(d *schema.ResourceData) (ai.ReferenceComputeTarget, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	var target ai.ReferenceComputeTarget
-	if v, ok := d.GetOk("compute_target"); ok {
-		vL := v.(*schema.Set).List()
-		for _, vi := range vL {
-			mVi := vi.(map[string]interface{})
-			target = ai.ReferenceComputeTarget{
-				Reference:  mVi["reference"].(string),
-				Identifier: mVi["identifier"].(string),
-			}
-		}
-	}
-	return target, diags
-}
-
-func collectComputeModel(d *schema.ResourceData) (ai.ReferenceComputeModel, diag.Diagnostics) {
-	var diags diag.Diagnostics
-	var model ai.ReferenceComputeModel
-	if v, ok := d.GetOk("model"); ok {
-		vL := v.(*schema.Set).List()
-		for _, vi := range vL {
-			mVi := vi.(map[string]interface{})
-			model = ai.ReferenceComputeModel{
-				Reference:  mVi["reference"].(string),
-				Identifier: mVi["identifier"].(string),
-			}
-		}
-	}
-	return model, diags
 }
 
 func collectInputs(d *schema.ResourceData) ([]ai.InputEntry, diag.Diagnostics) {

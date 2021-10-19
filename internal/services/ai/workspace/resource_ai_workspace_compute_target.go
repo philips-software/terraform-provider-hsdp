@@ -1,4 +1,4 @@
-package ai
+package workspace
 
 import (
 	"context"
@@ -108,7 +108,7 @@ func resourceAIWorkspaceComputeTargetCreate(ctx context.Context, d *schema.Resou
 		return diag.FromErr(err)
 	}
 	d.SetId(createdTarget.ID)
-	return resourceAIInferenceComputeTargetRead(ctx, d, m)
+	return resourceAIWorkspaceComputeTargetRead(ctx, d, m)
 }
 
 func resourceAIWorkspaceComputeTargetRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
