@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.24.0
+
+- Chore: massive refactorin of package namespace
+
 ## v0.23.3
 
 - PKI: Fix schema bug
