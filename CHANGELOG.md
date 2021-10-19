@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.24.0
+
+- Chore: massive refactorin of package namespace
+
+## v0.23.3
+
+- PKI: Fix schema bug
+
 ## v0.23.2
 
 - Fix hsdp_iam_user data source
@@ -171,7 +179,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Initial AI Inference support
 - NEW: Data source `hsdp_ai_inference_compute_environments`
 - NEW: Data source `hsdp_ai_inference_compute_targets`
-- NEW: Data source `hsdp_ai_inference_instance`
+- NEW: Data source `hsdp_ai_inference_service_instance`
 - NEW: Resource `hsdp_ai_inference_compute_environment`
 - NEW: Resource `hsdp_ai_inference_compute_target`
 - NEW: Resource `hsdp_ai_inference_job`

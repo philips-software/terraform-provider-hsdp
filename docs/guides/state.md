@@ -82,11 +82,11 @@ Replace the values with the S3 credentails and choose a `key`
 
 ```shell
 terraform init \
-  -backend-config="access_key=<api_key>" \
-  -backend-config="secret_key=<secret_key>" \
-  -backend-config="bucket=<bucket>" \
-  -backend-config="region=<region>" \
-  -backend-config="key=<project_id>/<your_state_name>"
+  -backend-discovery="access_key=<api_key>" \
+  -backend-discovery="secret_key=<secret_key>" \
+  -backend-discovery="bucket=<bucket>" \
+  -backend-discovery="region=<region>" \
+  -backend-discovery="key=<project_id>/<your_state_name>"
 ```
 
 Your Terraform setup will now store state remotely in the S3 bucket.

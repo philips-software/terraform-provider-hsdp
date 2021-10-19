@@ -1,4 +1,4 @@
-# hsdp_ai_inference_instance
+# hsdp_ai_workspace
 
 Retrieve details of an existing HSDP AI Workspace instance.
 
