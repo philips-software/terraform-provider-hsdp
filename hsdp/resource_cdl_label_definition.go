@@ -52,7 +52,7 @@ func resourceCDLLabelDefinition() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"labels": &schema.Schema{
+			"labels": {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				Required: true,
