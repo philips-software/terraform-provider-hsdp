@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"flag"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-	"github.com/philips-software/terraform-provider-hsdp/hsdp"
+	"github.com/philips-software/terraform-provider-hsdp/internal/provider"
+
 	"log"
 )
 
@@ -22,7 +24,7 @@ func main() {
 	flag.Parse()
 
 	opts := &plugin.ServeOpts{ProviderFunc: func() *schema.Provider {
-		return hsdp.Provider(buildVersion)
+		return provider.Provider(buildVersion)
 	}}
 	if debugMode {
 		err := plugin.Debug(context.Background(), "registry.terraform.io/philips-software/hsdp", opts)
