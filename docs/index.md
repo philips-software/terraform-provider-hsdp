@@ -32,7 +32,7 @@ arguments in its provider block. The following environment variables are recogni
 
 | Environment | Argument | Required | Default |
 |-------------|------------------|----------------------|---------|
-| HSDP_REGION | region           | Required             |         |
+| HSDP_REGION | region           | Optional             | us-east     |
 | HSDP_ENVIRONMENT | environment | Optional             | client-test |
 | HSDP_CARTEL_SECRET | cartel_secret | Optional | |
 | HSDP_CARTEL_TOKEN | cartel_token | Optional | |

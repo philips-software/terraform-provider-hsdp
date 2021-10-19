@@ -47,8 +47,8 @@ func Provider(build string) *schema.Provider {
 		Schema: map[string]*schema.Schema{
 			"region": {
 				Type:        schema.TypeString,
-				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc(Region, nil),
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc(Region, "us-east"),
 				Description: descriptions["region"],
 			},
 			"environment": {
