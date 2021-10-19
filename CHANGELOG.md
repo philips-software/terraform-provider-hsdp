@@ -4,9 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.24.1
+
+- Made `region` optional and default to `us-east`
+- AI Workspace: fix reading bug
+- Test: skeleton code
+
 ## v0.24.0
 
-- Chore: massive refactorin of package namespace
+- Chore: massive refactoring of package namespace
 
 ## v0.23.3
 
