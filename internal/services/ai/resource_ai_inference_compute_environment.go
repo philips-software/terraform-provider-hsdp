@@ -105,7 +105,9 @@ func resourceAIInferenceComputeEnvironmentCreate(ctx context.Context, d *schema.
 }
 
 func resourceAIInferenceComputeEnvironmentRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var resp *ai.Response
 	var diags diag.Diagnostics
+	var err error
 
 	c := m.(*config.Config)
 	endpoint := d.Get("endpoint").(string)
@@ -117,7 +119,12 @@ func resourceAIInferenceComputeEnvironmentRead(_ context.Context, d *schema.Reso
 
 	id := d.Id()
 
-	env, _, err := client.ComputeEnvironment.GetComputeEnvironmentByID(id)
+	var env *ai.ComputeEnvironment
+	err = tools.TryAICall(func() (*ai.Response, error) {
+		var err error
+		env, resp, err = client.ComputeEnvironment.GetComputeEnvironmentByID(id)
+		return resp, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}

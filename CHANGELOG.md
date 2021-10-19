@@ -175,7 +175,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Initial AI Inference support
 - NEW: Data source `hsdp_ai_inference_compute_environments`
 - NEW: Data source `hsdp_ai_inference_compute_targets`
-- NEW: Data source `hsdp_ai_inference_instance`
+- NEW: Data source `hsdp_ai_inference_service_instance`
 - NEW: Resource `hsdp_ai_inference_compute_environment`
 - NEW: Resource `hsdp_ai_inference_compute_target`
 - NEW: Resource `hsdp_ai_inference_job`

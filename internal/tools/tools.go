@@ -12,10 +12,38 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/philips-software/go-hsdp-api/ai"
 	"github.com/philips-software/go-hsdp-api/iam"
 )
 
 func TryIAMCall(operation func() (*iam.Response, error), retryOnCodes ...int) error {
+	if len(retryOnCodes) == 0 {
+		retryOnCodes = []int{http.StatusUnprocessableEntity, http.StatusInternalServerError, http.StatusTooManyRequests}
+	}
+	doOp := func() error {
+		resp, err := operation()
+		if err == nil {
+			return nil
+		}
+		if resp == nil {
+			return backoff.Permanent(fmt.Errorf("response was nil: %w", err))
+		}
+		shouldRetry := false
+		for _, c := range retryOnCodes {
+			if c == resp.StatusCode {
+				shouldRetry = true
+				break
+			}
+		}
+		if shouldRetry {
+			return err
+		}
+		return backoff.Permanent(err)
+	}
+	return backoff.Retry(doOp, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+}
+
+func TryAICall(operation func() (*ai.Response, error), retryOnCodes ...int) error {
 	if len(retryOnCodes) == 0 {
 		retryOnCodes = []int{http.StatusUnprocessableEntity, http.StatusInternalServerError, http.StatusTooManyRequests}
 	}
