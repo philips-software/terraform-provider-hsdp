@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/notification"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
 
 func ResourceNotificationProducer() *schema.Resource {
@@ -73,8 +73,8 @@ func ResourceNotificationProducer() *schema.Resource {
 
 func resourceNotificationProducerDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	config := m.(*config2.Config)
-	client, err := config.NotificationClient()
+	c := m.(*config.Config)
+	client, err := c.NotificationClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -98,8 +98,8 @@ func resourceNotificationProducerDelete(_ context.Context, d *schema.ResourceDat
 
 func resourceNotificationProducerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	config := m.(*config2.Config)
-	client, err := config.NotificationClient()
+	c := m.(*config.Config)
+	client, err := c.NotificationClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -134,8 +134,8 @@ func resourceNotificationProducerRead(_ context.Context, d *schema.ResourceData,
 }
 
 func resourceNotificationProducerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
-	client, err := config.NotificationClient()
+	c := m.(*config.Config)
+	client, err := c.NotificationClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}

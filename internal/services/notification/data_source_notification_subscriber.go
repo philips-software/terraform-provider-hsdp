@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/notification"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
 
 func DataSourceNotificationSubscriber() *schema.Resource {
@@ -52,11 +52,11 @@ func DataSourceNotificationSubscriber() *schema.Resource {
 }
 
 func dataSourceNotificationSubscriberRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*config2.Config)
+	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics
 
-	client, err := config.NotificationClient()
+	client, err := c.NotificationClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}

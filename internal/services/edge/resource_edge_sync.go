@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/stl"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
 
 func ResourceEdgeSync() *schema.Resource {
@@ -43,15 +43,15 @@ func resourceEdgeSyncRead(_ context.Context, _ *schema.ResourceData, _ interface
 }
 
 func resourceEdgeSyncCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
 	var err error
 
 	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = config.STLClient(endpoint.(string))
+		client, err = c.STLClient(endpoint.(string))
 	} else {
-		client, err = config.STLClient()
+		client, err = c.STLClient()
 	}
 	if err != nil {
 		return diag.FromErr(err)

@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/stl"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
@@ -138,15 +138,15 @@ func containsInt(s []int, e int) bool {
 }
 
 func resourceEdgeConfigDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
 	var err error
 
 	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = config.STLClient(endpoint.(string))
+		client, err = c.STLClient(endpoint.(string))
 	} else {
-		client, err = config.STLClient()
+		client, err = c.STLClient()
 	}
 	if err != nil {
 		return diag.FromErr(err)
@@ -201,7 +201,7 @@ func resourceEdgeConfigUpdate(ctx context.Context, d *schema.ResourceData, m int
 }
 
 func resourceDataToInput(ctx context.Context, client *stl.Client, fwExceptions *stl.UpdateAppFirewallExceptionInput, appLogging *stl.UpdateAppLoggingInput, d *schema.ResourceData, m interface{}) error {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 
 	if d == nil {
 		return fmt.Errorf("dataToResourceData: schema.ResourceData is nil")
@@ -221,7 +221,7 @@ func resourceDataToInput(ctx context.Context, client *stl.Client, fwExceptions *
 	if v, ok := d.GetOk("firewall_exceptions"); ok {
 		vL := v.(*schema.Set).List()
 		for i, vi := range vL {
-			_, _ = config.Debug("Reading Logging Set %d\n", i)
+			_, _ = c.Debug("Reading Logging Set %d\n", i)
 			mVi := vi.(map[string]interface{})
 			if _, ok := mVi["tcp"].(*schema.Set); ok {
 				tcp = tools.ExpandIntList(mVi["tcp"].(*schema.Set).List())
@@ -257,7 +257,7 @@ func resourceDataToInput(ctx context.Context, client *stl.Client, fwExceptions *
 	if v, ok := d.GetOk("logging"); ok {
 		vL := v.(*schema.Set).List()
 		for i, vi := range vL {
-			_, _ = config.Debug("Reading Firewall exception Set %d\n", i)
+			_, _ = c.Debug("Reading Firewall exception Set %d\n", i)
 			mVi := vi.(map[string]interface{})
 			if a, ok := mVi["hsdp_logging"].(bool); ok {
 				appLogging.HSDPLogging = a
@@ -291,7 +291,7 @@ func resourceDataToInput(ctx context.Context, client *stl.Client, fwExceptions *
 }
 
 func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.AppLogging, d *schema.ResourceData, m interface{}) error {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 
 	if d == nil {
 		return fmt.Errorf("dataToResourceData: schema.ResourceData is nil")
@@ -308,7 +308,7 @@ func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.
 		appLoggingDef["hsdp_custom_field"] = appLogging.HSDPCustomField
 		appLoggingDef["hsdp_logging"] = appLogging.HSDPLogging
 		s.Add(appLoggingDef)
-		_, _ = config.Debug("Adding logging data")
+		_, _ = c.Debug("Adding logging data")
 		err := d.Set("logging", s)
 		if err != nil {
 			return fmt.Errorf("dataToResourceData: logging: %w", err)
@@ -346,7 +346,7 @@ func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.
 		}
 		fwExceptionsDef["clear_on_destroy"] = clearFirewallExceptionsOnDestroy(d)
 		s.Add(fwExceptionsDef)
-		_, _ = config.Debug("Adding firewall exceptions data\n")
+		_, _ = c.Debug("Adding firewall exceptions data\n")
 		err := d.Set("firewall_exceptions", s)
 		if err != nil {
 			return fmt.Errorf("dataToResourceData: firewall_exceptions: %w", err)
@@ -356,15 +356,15 @@ func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.
 }
 
 func resourceEdgeConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
 	var err error
 
 	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = config.STLClient(endpoint.(string))
+		client, err = c.STLClient(endpoint.(string))
 	} else {
-		client, err = config.STLClient()
+		client, err = c.STLClient()
 	}
 	if err != nil {
 		return diag.FromErr(err)
@@ -386,14 +386,14 @@ func resourceEdgeConfigRead(ctx context.Context, d *schema.ResourceData, m inter
 }
 
 func resourceEdgeConfigCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 	var client *stl.Client
 	var err error
 
 	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = config.STLClient(endpoint.(string))
+		client, err = c.STLClient(endpoint.(string))
 	} else {
-		client, err = config.STLClient()
+		client, err = c.STLClient()
 	}
 	if err != nil {
 		return diag.FromErr(err)

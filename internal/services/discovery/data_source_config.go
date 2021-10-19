@@ -6,8 +6,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/philips-software/go-hsdp-api/config"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	discovery "github.com/philips-software/go-hsdp-api/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
@@ -76,7 +76,7 @@ func DataSourceConfig() *schema.Resource {
 }
 
 func dataSourceConfigRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	providerConfig := m.(*config2.Config)
+	providerConfig := m.(*config.Config)
 
 	var diags diag.Diagnostics
 
@@ -89,8 +89,8 @@ func dataSourceConfigRead(_ context.Context, d *schema.ResourceData, m interface
 	if environment == "" {
 		environment = providerConfig.Environment
 	}
-	c, err := config.New(config.WithEnv(environment),
-		config.WithRegion(region))
+	c, err := discovery.New(discovery.WithEnv(environment),
+		discovery.WithRegion(region))
 	if err != nil {
 		return diag.FromErr(err)
 	}

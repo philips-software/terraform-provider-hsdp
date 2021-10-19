@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/stl"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
 
 func ResourceEdgeCustomCert() *schema.Resource {
@@ -48,15 +48,15 @@ func ResourceEdgeCustomCert() *schema.Resource {
 }
 
 func resourceEdgeCustomCertDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
 	var err error
 
 	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = config.STLClient(endpoint.(string))
+		client, err = c.STLClient(endpoint.(string))
 	} else {
-		client, err = config.STLClient()
+		client, err = c.STLClient()
 	}
 	if err != nil {
 		return diag.FromErr(err)
@@ -73,15 +73,15 @@ func resourceEdgeCustomCertDelete(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceEdgeCustomCertUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
 	var err error
 
 	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = config.STLClient(endpoint.(string))
+		client, err = c.STLClient(endpoint.(string))
 	} else {
-		client, err = config.STLClient()
+		client, err = c.STLClient()
 	}
 	if err != nil {
 		return diag.FromErr(err)
@@ -102,15 +102,15 @@ func resourceEdgeCustomCertUpdate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceEdgeCustomCertRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
 	var err error
 
 	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = config.STLClient(endpoint.(string))
+		client, err = c.STLClient(endpoint.(string))
 	} else {
-		client, err = config.STLClient()
+		client, err = c.STLClient()
 	}
 	if err != nil {
 		return diag.FromErr(err)
@@ -128,15 +128,15 @@ func resourceEdgeCustomCertRead(ctx context.Context, d *schema.ResourceData, m i
 }
 
 func resourceEdgeCustomCertCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 	var diags diag.Diagnostics
 	var client *stl.Client
 	var err error
 
 	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = config.STLClient(endpoint.(string))
+		client, err = c.STLClient(endpoint.(string))
 	} else {
-		client, err = config.STLClient()
+		client, err = c.STLClient()
 	}
 	if err != nil {
 		return diag.FromErr(err)
@@ -157,13 +157,13 @@ func resourceEdgeCustomCertCreate(ctx context.Context, d *schema.ResourceData, m
 	return diags
 }
 
-func syncSTLIfNeeded(ctx context.Context, c *stl.Client, d *schema.ResourceData, m interface{}) {
-	config := m.(*config2.Config)
+func syncSTLIfNeeded(ctx context.Context, client *stl.Client, d *schema.ResourceData, m interface{}) {
+	c := m.(*config.Config)
 	sync := d.Get("sync").(bool)
 	if !sync {
 		return
 	}
 	serialNumber := d.Get("serial_number").(string)
-	_, _ = config.Debug("Syncing %s\n", serialNumber)
-	_ = c.Devices.SyncDeviceConfig(ctx, serialNumber)
+	_, _ = c.Debug("Syncing %s\n", serialNumber)
+	_ = client.Devices.SyncDeviceConfig(ctx, serialNumber)
 }

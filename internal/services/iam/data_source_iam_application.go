@@ -6,7 +6,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
 
 func DataSourceIAMApplication() *schema.Resource {
@@ -35,11 +35,11 @@ func DataSourceIAMApplication() *schema.Resource {
 }
 
 func dataSourceIAMApplicationRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*config2.Config)
+	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics
 
-	client, err := config.IAMClient()
+	client, err := c.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -54,7 +54,7 @@ func dataSourceIAMApplicationRead(_ context.Context, d *schema.ResourceData, met
 		return diag.FromErr(err)
 	}
 	if len(apps) == 0 {
-		return diag.FromErr(config2.ErrResourceNotFound)
+		return diag.FromErr(config.ErrResourceNotFound)
 	}
 
 	d.SetId(apps[0].ID)
