@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/pkg/errors"
 )
 
@@ -61,9 +61,9 @@ func ResourceIAMActivationEmail() *schema.Resource {
 
 func resourceIAMActivationEmailUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 
-	client, err := config.IAMClient()
+	client, err := c.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -81,9 +81,9 @@ func resourceIAMActivationEmailUpdate(_ context.Context, d *schema.ResourceData,
 
 func resourceIAMActivationEmailRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 
-	client, err := config.IAMClient()
+	client, err := c.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -117,9 +117,9 @@ func resourceIAMActivationEmailRead(_ context.Context, d *schema.ResourceData, m
 
 func resourceIAMActivationEmailCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 
-	client, err := config.IAMClient()
+	client, err := c.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}

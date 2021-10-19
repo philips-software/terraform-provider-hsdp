@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
 
 func DataSourceAIInferenceServiceInstance() *schema.Resource {
@@ -30,14 +30,14 @@ func DataSourceAIInferenceServiceInstance() *schema.Resource {
 }
 
 func dataSourceAIInferenceServiceInstanceRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*config2.Config)
+	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics
 
 	baseURL := d.Get("base_url").(string)
 	InferenceOrgID := d.Get("organization_id").(string)
 
-	client, err := config.GetAIInferenceClient(baseURL, InferenceOrgID)
+	client, err := c.GetAIInferenceClient(baseURL, InferenceOrgID)
 	if err != nil {
 		return diag.FromErr(err)
 	}

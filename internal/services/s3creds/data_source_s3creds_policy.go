@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	creds "github.com/philips-software/go-hsdp-api/s3creds"
@@ -62,7 +62,7 @@ func DataSourceS3CredsPolicy() *schema.Resource {
 }
 
 func dataSourceS3CredsPolicyRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*config2.Config)
+	c := meta.(*config.Config)
 	var diags diag.Diagnostics
 	productKey := ""
 	managingOrg := ""
@@ -99,12 +99,12 @@ func dataSourceS3CredsPolicyRead(_ context.Context, d *schema.ResourceData, meta
 	if id == 0 {
 		idPtr = nil
 	}
-	client, err := config.S3CredsClient()
+	client, err := c.S3CredsClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	if username != "" {
-		client, err = config.S3CredsClientWithLogin(username, password)
+		client, err = c.S3CredsClientWithLogin(username, password)
 		if err != nil {
 			return diag.FromErr(err)
 		}

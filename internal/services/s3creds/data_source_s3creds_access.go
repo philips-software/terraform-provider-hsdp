@@ -7,7 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	creds "github.com/philips-software/go-hsdp-api/s3creds"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
 
 func DataSourceS3CredsAccess() *schema.Resource {
@@ -38,7 +38,7 @@ func DataSourceS3CredsAccess() *schema.Resource {
 }
 
 func dataSourceS3CredsAccessRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*config2.Config)
+	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics
 
@@ -50,18 +50,18 @@ func dataSourceS3CredsAccessRead(_ context.Context, d *schema.ResourceData, meta
 	var err error
 
 	if username != "" && password != "" {
-		client, err = config.S3CredsClientWithLogin(username, password)
+		client, err = c.S3CredsClientWithLogin(username, password)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 	} else {
-		client, err = config.S3CredsClient()
+		client, err = c.S3CredsClient()
 		if err != nil {
 			return diag.FromErr(err)
 		}
 	}
 	if client == nil {
-		return diag.FromErr(config2.ErrMissingClientPassword)
+		return diag.FromErr(config.ErrMissingClientPassword)
 	}
 	s3creds, _, err := client.Access.GetAccess(&creds.GetAccessOptions{
 		ProductKey: &productKey,

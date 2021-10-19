@@ -7,13 +7,13 @@ import (
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/ai"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdl"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/ch"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/dicom"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/discovery"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/edge"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/function"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam"
@@ -262,7 +262,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_application":                   iam.DataSourceIAMApplication(),
 			"hsdp_s3creds_access":                    s3creds.DataSourceS3CredsAccess(),
 			"hsdp_s3creds_policy":                    s3creds.DataSourceS3CredsPolicy(),
-			"hsdp_config":                            config.DataSourceConfig(),
+			"hsdp_config":                            discovery.DataSourceConfig(),
 			"hsdp_container_host_subnet_types":       ch.DataSourceContainerHostSubnetTypes(),
 			"hsdp_cdr_fhir_store":                    cdr.DataSourceCDRFHIRStore(),
 			"hsdp_pki_root":                          pki.DataSourcePKIRoot(),
@@ -333,50 +333,50 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 	return func(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		var diags diag.Diagnostics
 
-		config := &config2.Config{}
+		c := &config.Config{}
 
-		config.BuildVersion = build
-		config.Region = d.Get("region").(string)
-		config.Environment = d.Get("environment").(string)
-		config.IAMURL = d.Get("iam_url").(string)
-		config.IDMURL = d.Get("idm_url").(string)
-		config.OAuth2ClientID = d.Get("oauth2_client_id").(string)
-		config.OAuth2Secret = d.Get("oauth2_password").(string)
-		config.ServiceID = d.Get("service_id").(string)
-		config.ServicePrivateKey = d.Get("service_private_key").(string)
-		config.OrgAdminUsername = d.Get("org_admin_username").(string)
-		config.OrgAdminPassword = d.Get("org_admin_password").(string)
-		config.SharedKey = d.Get("shared_key").(string)
-		config.SecretKey = d.Get("secret_key").(string)
-		config.DebugLog = d.Get("debug_log").(string)
-		config.S3CredsURL = d.Get("s3creds_url").(string)
-		config.CartelHost = d.Get("cartel_host").(string)
-		config.CartelToken = d.Get("cartel_token").(string)
-		config.CartelSecret = d.Get("cartel_secret").(string)
-		config.CartelNoTLS = d.Get("cartel_no_tls").(bool)
-		config.CartelSkipVerify = d.Get("cartel_skip_verify").(bool)
-		config.RetryMax = d.Get("retry_max").(int)
-		config.UAAUsername = d.Get("uaa_username").(string)
-		config.UAAPassword = d.Get("uaa_password").(string)
-		config.UAAURL = d.Get("uaa_url").(string)
-		config.NotificationURL = d.Get("notification_url").(string)
-		config.TimeZone = "UTC"
-		config.AIInferenceEndpoint = d.Get("ai_inference_endpoint").(string)
+		c.BuildVersion = build
+		c.Region = d.Get("region").(string)
+		c.Environment = d.Get("environment").(string)
+		c.IAMURL = d.Get("iam_url").(string)
+		c.IDMURL = d.Get("idm_url").(string)
+		c.OAuth2ClientID = d.Get("oauth2_client_id").(string)
+		c.OAuth2Secret = d.Get("oauth2_password").(string)
+		c.ServiceID = d.Get("service_id").(string)
+		c.ServicePrivateKey = d.Get("service_private_key").(string)
+		c.OrgAdminUsername = d.Get("org_admin_username").(string)
+		c.OrgAdminPassword = d.Get("org_admin_password").(string)
+		c.SharedKey = d.Get("shared_key").(string)
+		c.SecretKey = d.Get("secret_key").(string)
+		c.DebugLog = d.Get("debug_log").(string)
+		c.S3CredsURL = d.Get("s3creds_url").(string)
+		c.CartelHost = d.Get("cartel_host").(string)
+		c.CartelToken = d.Get("cartel_token").(string)
+		c.CartelSecret = d.Get("cartel_secret").(string)
+		c.CartelNoTLS = d.Get("cartel_no_tls").(bool)
+		c.CartelSkipVerify = d.Get("cartel_skip_verify").(bool)
+		c.RetryMax = d.Get("retry_max").(int)
+		c.UAAUsername = d.Get("uaa_username").(string)
+		c.UAAPassword = d.Get("uaa_password").(string)
+		c.UAAURL = d.Get("uaa_url").(string)
+		c.NotificationURL = d.Get("notification_url").(string)
+		c.TimeZone = "UTC"
+		c.AIInferenceEndpoint = d.Get("ai_inference_endpoint").(string)
 
-		config.SetupIAMClient()
-		config.SetupS3CredsClient()
-		config.SetupCartelClient()
-		config.SetupConsoleClient()
-		config.SetupPKIClient()
-		config.SetupSTLClient()
-		config.SetupNotificationClient()
+		c.SetupIAMClient()
+		c.SetupS3CredsClient()
+		c.SetupCartelClient()
+		c.SetupConsoleClient()
+		c.SetupPKIClient()
+		c.SetupSTLClient()
+		c.SetupNotificationClient()
 
-		if config.DebugLog != "" {
-			debugFile, err := os.OpenFile(config.DebugLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+		if c.DebugLog != "" {
+			debugFile, err := os.OpenFile(c.DebugLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 			if err != nil {
-				config.DebugFile = nil
+				c.DebugFile = nil
 			} else {
-				config.DebugFile = debugFile
+				c.DebugFile = debugFile
 			}
 		}
 
@@ -384,14 +384,14 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
-		config.Ma = ma
+		c.Ma = ma
 
 		um, err := jsonformat.NewUnmarshaller("UTC", jsonformat.STU3)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
-		config.Um = um
+		c.Um = um
 
-		return config, diags
+		return c, diags
 	}
 }

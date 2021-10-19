@@ -257,7 +257,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	signature := strings.Replace(uuid.New().String(), "-", "", -1)
 
 	if ironConfig == nil || len(ironConfig.ClusterInfo) == 0 {
-		return diag.FromErr(fmt.Errorf("invalid iron config: %v", ironConfig))
+		return diag.FromErr(fmt.Errorf("invalid iron discovery: %v", ironConfig))
 	}
 	codeName := fmt.Sprintf("%s-%s", name, signature)
 	createdCode, resp, err := ironClient.Codes.CreateOrUpdateCode(iron.Code{
@@ -568,7 +568,7 @@ func newIronClient(d *schema.ResourceData, m interface{}) (*iron.Client, *iron.C
 	c := m.(*config.Config)
 	backend, ok := d.Get("backend").([]interface{})
 	if !ok {
-		return nil, nil, nil, fmt.Errorf("expected array of 'backend' config")
+		return nil, nil, nil, fmt.Errorf("expected array of 'backend' discovery")
 	}
 	backendResource, ok := backend[0].(map[string]interface{})
 	if !ok {
@@ -577,7 +577,7 @@ func newIronClient(d *schema.ResourceData, m interface{}) (*iron.Client, *iron.C
 
 	configMap, ok := backendResource["credentials"].(map[string]interface{})
 	if !ok {
-		return nil, nil, nil, fmt.Errorf("invalid or missing iron config credentials")
+		return nil, nil, nil, fmt.Errorf("invalid or missing iron discovery credentials")
 	}
 	config := make(map[string]string)
 	for k, v := range configMap {

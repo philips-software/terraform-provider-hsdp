@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
 
 func DataSourceCDLExportRoute() *schema.Resource {
@@ -68,14 +68,14 @@ func DataSourceCDLExportRoute() *schema.Resource {
 }
 
 func dataSourceCDLExportRouteRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
 
 	exportRouteId := d.Get("export_route_id").(string)
 	endpoint := d.Get("cdl_endpoint").(string)
 
-	client, err := config.GetCDLClientFromEndpoint(endpoint)
+	client, err := c.GetCDLClientFromEndpoint(endpoint)
 	if err != nil {
 		return diag.FromErr(err)
 	}

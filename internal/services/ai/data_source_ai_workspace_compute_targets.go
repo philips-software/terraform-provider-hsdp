@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
 
 func DataSourceAIWorkspaceComputeTargets() *schema.Resource {
@@ -34,9 +34,9 @@ func DataSourceAIWorkspaceComputeTargets() *schema.Resource {
 func dataSourceAIWorkspaceComputeTargetsRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 	endpoint := d.Get("endpoint").(string)
-	client, err := config.GetAIWorkspaceClientFromEndpoint(endpoint)
+	client, err := c.GetAIWorkspaceClientFromEndpoint(endpoint)
 	if err != nil {
 		return diag.FromErr(err)
 	}

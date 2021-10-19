@@ -168,7 +168,7 @@ func resourceEdgeConfigDelete(ctx context.Context, d *schema.ResourceData, m int
 	if _, ok := d.GetOk("firewall_exceptions"); ok && clearFirewallExceptionsOnDestroy(d) {
 		currentSettings, err := client.Config.GetFirewallExceptionsBySerial(ctx, serialNumber)
 		if err != nil {
-			return diag.FromErr(fmt.Errorf("delete Edge config: %w", err))
+			return diag.FromErr(fmt.Errorf("delete Edge discovery: %w", err))
 		}
 		fwExceptionRef.TCP = currentSettings.TCP
 		fwExceptionRef.UDP = currentSettings.UDP

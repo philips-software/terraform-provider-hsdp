@@ -6,7 +6,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
 
 func DataSourceUser() *schema.Resource {
@@ -32,11 +32,11 @@ func DataSourceUser() *schema.Resource {
 }
 
 func dataSourceUserRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*config2.Config)
+	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics
 
-	client, err := config.IAMClient()
+	client, err := c.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}

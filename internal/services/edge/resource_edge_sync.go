@@ -12,7 +12,7 @@ import (
 
 func ResourceEdgeSync() *schema.Resource {
 	return &schema.Resource{
-		Description:   `The ` + "`hsdp_edge_sync`" + ` resource syncs device config to the actual device.`,
+		Description:   `The ` + "`hsdp_edge_sync`" + ` resource syncs device discovery to the actual device.`,
 		CreateContext: resourceEdgeSyncCreate,
 		ReadContext:   resourceEdgeSyncRead,
 		DeleteContext: resourceEdgeSyncDelete,

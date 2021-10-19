@@ -7,7 +7,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/philips-software/go-hsdp-api/iam"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -63,9 +63,9 @@ func ResourceIAMOrg() *schema.Resource {
 }
 
 func resourceIAMOrgCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 
-	client, err := config.IAMClient()
+	client, err := c.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -77,7 +77,7 @@ func resourceIAMOrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	displayName := d.Get("display_name").(string)
 	parentOrgID, ok := d.Get("parent_org_id").(string)
 	if !ok {
-		return diag.FromErr(config2.ErrMissingParentOrgID)
+		return diag.FromErr(config.ErrMissingParentOrgID)
 	}
 	var newOrg iam.Organization
 	newOrg.Name = name
@@ -98,11 +98,11 @@ func resourceIAMOrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 }
 
 func resourceIAMOrgRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
 
-	client, err := config.IAMClient()
+	client, err := c.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -127,11 +127,11 @@ func resourceIAMOrgRead(_ context.Context, d *schema.ResourceData, m interface{}
 }
 
 func resourceIAMOrgUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
 
-	client, err := config.IAMClient()
+	client, err := c.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -158,11 +158,11 @@ func resourceIAMOrgUpdate(_ context.Context, d *schema.ResourceData, m interface
 }
 
 func resourceIAMOrgDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
 
-	client, err := config.IAMClient()
+	client, err := c.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -178,7 +178,7 @@ func resourceIAMOrgDelete(_ context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(err)
 	}
 	if !ok {
-		return diag.FromErr(config2.ErrInvalidResponse)
+		return diag.FromErr(config.ErrInvalidResponse)
 	}
 	return diags
 }

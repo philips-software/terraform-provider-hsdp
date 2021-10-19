@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -63,9 +63,9 @@ func ResourceIAMMFAPolicy() *schema.Resource {
 }
 
 func resourceIAMMFAPolicyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 
-	client, err := config.IAMClient()
+	client, err := c.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -105,11 +105,11 @@ func resourceIAMMFAPolicyCreate(ctx context.Context, d *schema.ResourceData, m i
 }
 
 func resourceIAMMFAPolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
 
-	client, err := config.IAMClient()
+	client, err := c.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -139,11 +139,11 @@ func resourceIAMMFAPolicyRead(ctx context.Context, d *schema.ResourceData, m int
 }
 
 func resourceIAMMFAPolicyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
 
-	client, err := config.IAMClient()
+	client, err := c.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -177,11 +177,11 @@ func resourceIAMMFAPolicyUpdate(ctx context.Context, d *schema.ResourceData, m i
 }
 
 func resourceIAMMFAPolicyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	config := m.(*config2.Config)
+	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
 
-	client, err := config.IAMClient()
+	client, err := c.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -194,7 +194,7 @@ func resourceIAMMFAPolicyDelete(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 	if !ok {
-		return diag.FromErr(config2.ErrDeleteMFAPolicyFailed)
+		return diag.FromErr(config.ErrDeleteMFAPolicyFailed)
 	}
 	d.SetId("")
 	return diags

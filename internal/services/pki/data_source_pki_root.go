@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/pki"
-	config2 "github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
 
 func DataSourcePKIRoot() *schema.Resource {
@@ -38,7 +38,7 @@ func DataSourcePKIRoot() *schema.Resource {
 }
 
 func dataSourcePKIRootRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	config := meta.(*config2.Config)
+	c := meta.(*config.Config)
 	var diags diag.Diagnostics
 	var err error
 	var client *pki.Client
@@ -46,9 +46,9 @@ func dataSourcePKIRootRead(_ context.Context, d *schema.ResourceData, meta inter
 	region := d.Get("region").(string)
 	environment := d.Get("environment").(string)
 	if region != "" || environment != "" {
-		client, err = config.PKIClient(region, environment)
+		client, err = c.PKIClient(region, environment)
 	} else {
-		client, err = config.PKIClient()
+		client, err = c.PKIClient()
 	}
 	if err != nil {
 		return diag.FromErr(err)
