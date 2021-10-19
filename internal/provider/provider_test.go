@@ -25,6 +25,3 @@ func TestProvider(t *testing.T) {
 func TestProvider_impl(t *testing.T) {
 	var _ *schema.Provider = Provider("v0.0.0")
 }
-
-func testAccPreCheck(t *testing.T) {
-}
