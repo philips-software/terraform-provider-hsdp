@@ -51,7 +51,7 @@ arguments in its provider block. The following environment variables are recogni
 
 In addition to generic provider arguments (e.g. alias and version), the following arguments are supported in the HSDP provider block:
 
-* `region` - (Required) The HSDP region to use [`us-east`, `eu-west`, `sa1`, `ca1`, `apac3`, ...]
+* `region` - (Required) The HSDP region to use [`us-east`, `eu-west`, `sa1`, `ca1`, `apac3`, ...]. Default is `us-east`
 * `environment` - (Optional) The HSDP environment to use within region [`client-test`, `prod`] . Default is `client-test`
 * `iam_url` - (Optional) IAM API endpoint. Auto-discovered from region and environment.
 * `idm_url` - (Optional) IDM API endpoint Auto-discovered from region and environment.
