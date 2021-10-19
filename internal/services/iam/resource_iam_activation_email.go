@@ -22,6 +22,7 @@ func ResourceIAMActivationEmail() *schema.Resource {
 		ReadContext:   resourceIAMActivationEmailRead,
 		UpdateContext: resourceIAMActivationEmailUpdate,
 		DeleteContext: resourceIAMActivationEmailDelete,
+		SchemaVersion: 1,
 
 		Schema: map[string]*schema.Schema{
 			"user_id": {
@@ -44,7 +45,7 @@ func ResourceIAMActivationEmail() *schema.Resource {
 				Computed: true,
 			},
 			"verified": {
-				Type:     schema.TypeString,
+				Type:     schema.TypeBool,
 				Computed: true,
 			},
 			"login_id": {
