@@ -122,6 +122,7 @@ func resourceAIInferenceComputeEnvironmentRead(_ context.Context, d *schema.Reso
 	var env *ai.ComputeEnvironment
 	err = tools.TryAICall(func() (*ai.Response, error) {
 		var err error
+		_ = client.TokenRefresh()
 		env, resp, err = client.ComputeEnvironment.GetComputeEnvironmentByID(id)
 		return resp, err
 	})

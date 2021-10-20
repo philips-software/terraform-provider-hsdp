@@ -5,7 +5,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/philips-software/go-hsdp-api/ai"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func DataSourceAIInferenceComputeEnvironments() *schema.Resource {
@@ -41,7 +43,14 @@ func dataSourceAIInferenceComputeEnvironmentsRead(_ context.Context, d *schema.R
 		return diag.FromErr(err)
 	}
 
-	environments, _, err := client.ComputeEnvironment.GetComputeEnvironments(nil)
+	var environments []ai.ComputeEnvironment
+	err = tools.TryAICall(func() (*ai.Response, error) {
+		var err error
+		var resp *ai.Response
+		_ = client.TokenRefresh()
+		environments, resp, err = client.ComputeEnvironment.GetComputeEnvironments(nil)
+		return resp, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}

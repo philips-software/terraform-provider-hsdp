@@ -5,7 +5,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/philips-software/go-hsdp-api/ai"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func DataSourceAIInferenceJobs() *schema.Resource {
@@ -41,7 +43,15 @@ func dataSourceAIInferenceJobsRead(_ context.Context, d *schema.ResourceData, m 
 		return diag.FromErr(err)
 	}
 
-	jobs, _, err := client.Job.GetJobs(nil)
+	var jobs []ai.Job
+
+	err = tools.TryAICall(func() (*ai.Response, error) {
+		var err error
+		var resp *ai.Response
+		_ = client.TokenRefresh()
+		jobs, resp, err = client.Job.GetJobs(nil)
+		return resp, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}

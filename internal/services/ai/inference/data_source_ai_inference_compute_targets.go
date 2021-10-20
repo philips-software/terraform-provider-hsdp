@@ -5,7 +5,9 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/philips-software/go-hsdp-api/ai"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func DataSourceAIInferenceComputeTargets() *schema.Resource {
@@ -41,7 +43,14 @@ func dataSourceAIInferenceComputeTargetsRead(_ context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	environments, _, err := client.ComputeTarget.GetComputeTargets(nil)
+	var targets []ai.ComputeTarget
+	err = tools.TryAICall(func() (*ai.Response, error) {
+		var err error
+		var resp *ai.Response
+		_ = client.TokenRefresh()
+		targets, resp, err = client.ComputeTarget.GetComputeTargets(nil)
+		return resp, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -51,7 +60,7 @@ func dataSourceAIInferenceComputeTargetsRead(_ context.Context, d *schema.Resour
 	var names []string
 	var ids []string
 
-	for _, env := range environments {
+	for _, env := range targets {
 		names = append(names, env.Name)
 		ids = append(ids, env.ID)
 	}

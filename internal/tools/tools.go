@@ -45,7 +45,7 @@ func TryIAMCall(operation func() (*iam.Response, error), retryOnCodes ...int) er
 
 func TryAICall(operation func() (*ai.Response, error), retryOnCodes ...int) error {
 	if len(retryOnCodes) == 0 {
-		retryOnCodes = []int{http.StatusUnprocessableEntity, http.StatusInternalServerError, http.StatusTooManyRequests}
+		retryOnCodes = []int{http.StatusForbidden, http.StatusUnprocessableEntity, http.StatusInternalServerError, http.StatusTooManyRequests}
 	}
 	doOp := func() error {
 		resp, err := operation()
