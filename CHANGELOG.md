@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.25.1
+
+- Guide: fix S3 backend command
+- Provider: update go-hsdp-api
+
 ## v0.25.0
 
 - CDR: Support STU3 and R4 FHIR resources. Defaults to STU3, no change to existing resources
