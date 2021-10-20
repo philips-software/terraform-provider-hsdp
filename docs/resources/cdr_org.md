@@ -31,12 +31,15 @@ resource "hsdp_cdr_org" "hospital" {
 The following arguments are supported:
 
 * `fhir_store` - (Required) The CDR FHIR store to use
+* `version` - (Optional) The FHIR version to use. Options [ `stu3` | `r4` ]. Default is `stu3`
 * `org_id` - (Required) The Org ID (GUID) under which to onboard. Usually same as IAM Org ID
 * `name` - (Required) The name of the FHIR Org
 * `part_of` - (Optional) The parent Organization ID (GUID) this Org is part of
 * `purge_delete` - (Optional) If set to `true`, when the resource is destroyed the provider will purge all FHIR resources associated with the Organization. The `ORGANIZATION.PURGE` IAM permission is required for this to work. Default: `false`
 
 !> Only use `purge_delete = true` when you are sure recursive deletion of FHIR resources under the Organization is acceptable for the given deployment.
+
+!> Switching FHIR versions causes the resource to be replaced, so be careful with this.
 
 ## Attributes Reference
 

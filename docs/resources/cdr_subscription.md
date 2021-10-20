@@ -42,6 +42,7 @@ CDR will send a `POST` request to the endpoint with a JSON body containing:
 The following arguments are supported:
 
 * `fhir_store` - (Required) The CDR FHIR store endpoint to use
+* `version` - (Optional) The FHIR version to use. Options [ `stu3` | `r4` ]. Default is `stu3`
 * `criteria` - (Required) On which resource to notify
 * `reason` - (Required) Reason for creating the subscription
 * `endpoint` - (Required) The REST endpoint to call. Must use `https://`  schema
