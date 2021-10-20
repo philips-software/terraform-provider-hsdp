@@ -1,4 +1,4 @@
-package cdr
+package fhir_store
 
 import (
 	"context"

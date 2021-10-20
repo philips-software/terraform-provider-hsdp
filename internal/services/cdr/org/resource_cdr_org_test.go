@@ -1,4 +1,4 @@
-package cdr
+package org
 
 import (
 	"testing"

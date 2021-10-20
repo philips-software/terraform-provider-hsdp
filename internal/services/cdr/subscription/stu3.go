@@ -1,4 +1,4 @@
-package cdr
+package subscription
 
 import (
 	"context"
@@ -18,62 +18,9 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
-func ResourceCDRSubscription() *schema.Resource {
-	return &schema.Resource{
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
-
-		CreateContext: resourceCDRSubscriptionCreate,
-		ReadContext:   resourceCDRSubscriptionRead,
-		UpdateContext: resourceCDRSubscriptionUpdate,
-		DeleteContext: resourceCDRSubscriptionDelete,
-
-		Schema: map[string]*schema.Schema{
-			"fhir_store": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"delete_endpoint": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"criteria": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"endpoint": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"reason": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"headers": {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Optional: true,
-			},
-			"end": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"status": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-		},
-	}
-}
-
-func resourceCDRSubscriptionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(*config.Config)
-
+func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	fhirStore := d.Get("fhir_store").(string)
 	endpoint := d.Get("endpoint").(string)
 	deleteEndpoint := d.Get("delete_endpoint").(string)
 	reason := d.Get("reason").(string)
@@ -85,12 +32,6 @@ func resourceCDRSubscriptionCreate(ctx context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	client, err := c.GetFHIRClientFromEndpoint(fhirStore)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	defer client.Close()
-
 	subscription, err := stu3.NewSubscription(
 		stu3.WithReason(reason),
 		stu3.WithCriteria(criteria),
@@ -101,7 +42,7 @@ func resourceCDRSubscriptionCreate(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	jsonSubscription, err := c.Ma.MarshalResource(subscription)
+	jsonSubscription, err := c.STU3MA.MarshalResource(subscription)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -122,18 +63,9 @@ func resourceCDRSubscriptionCreate(ctx context.Context, d *schema.ResourceData, 
 	return diags
 }
 
-func resourceCDRSubscriptionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(*config.Config)
-
+func stu3Read(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	fhirStore := d.Get("fhir_store").(string)
-
-	client, err := c.GetFHIRClientFromEndpoint(fhirStore)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("subscription read: %w", err))
-	}
-	defer client.Close()
 	contained, resp, err := client.OperationsSTU3.Get("Subscription/" + d.Id())
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
@@ -162,25 +94,16 @@ func resourceCDRSubscriptionRead(ctx context.Context, d *schema.ResourceData, m 
 	return diags
 }
 
-func resourceCDRSubscriptionUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(*config.Config)
+func stu3Update(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	fhirStore := d.Get("fhir_store").(string)
 	id := d.Id()
-
-	client, err := c.GetFHIRClientFromEndpoint(fhirStore)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	defer client.Close()
-
 	contained, _, err := client.OperationsSTU3.Get("Subscription/" + id)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("subscription update: %w", err))
 	}
 	sub := contained.GetSubscription()
-	jsonSub, err := c.Ma.MarshalResource(sub)
+	jsonSub, err := c.STU3MA.MarshalResource(sub)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("subscription update: %w", err))
 	}
@@ -225,7 +148,7 @@ func resourceCDRSubscriptionUpdate(ctx context.Context, d *schema.ResourceData, 
 		return diags
 	}
 
-	changedOrg, _ := c.Ma.MarshalResource(sub)
+	changedOrg, _ := c.STU3MA.MarshalResource(sub)
 	patch, err := jsonpatch.DiffBytes(jsonSub, changedOrg)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("subscription update: %w", err))
@@ -238,20 +161,11 @@ func resourceCDRSubscriptionUpdate(ctx context.Context, d *schema.ResourceData, 
 	return diags
 }
 
-func resourceCDRSubscriptionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(*config.Config)
+func stu3Delete(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	fhirStore := d.Get("fhir_store").(string)
-	id := d.Id()
-
-	client, err := c.GetFHIRClientFromEndpoint(fhirStore)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	defer client.Close()
-
 	// TODO: Check HTTP 500 issue
+	id := d.Id()
 	ok, _, err := client.OperationsSTU3.Delete("Subscription/" + id)
 	if err != nil {
 		return diag.FromErr(err)

@@ -1,4 +1,4 @@
-package cdr
+package org
 
 import (
 	"context"
@@ -21,67 +21,16 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
-func ResourceCDROrg() *schema.Resource {
-	return &schema.Resource{
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
-
-		CreateContext: resourceCDROrgCreate,
-		ReadContext:   resourceCDROrgRead,
-		UpdateContext: resourceCDROrgUpdate,
-		DeleteContext: resourceCDROrgDelete,
-
-		Schema: map[string]*schema.Schema{
-			"fhir_store": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"org_id": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-			},
-			"part_of": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
-			"purge_delete": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
-			},
-		},
-	}
-}
-
-func resourceCDROrgCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(*config.Config)
-
+func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	endpoint := d.Get("fhir_store").(string)
 	orgID := d.Get("org_id").(string)
-
-	client, err := c.GetFHIRClientFromEndpoint(endpoint)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	defer client.Close()
-
 	name := d.Get("name").(string)
-
+	partOf := d.Get("part_of").(string)
 	org, err := stu3.NewOrganization(c.TimeZone, orgID, name)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	partOf := d.Get("part_of").(string)
 	if partOf != "" {
 		org.PartOf = &datatypes_go_proto.Reference{
 			Reference: &datatypes_go_proto.Reference_OrganizationId{
@@ -91,7 +40,6 @@ func resourceCDROrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 			},
 		}
 	}
-
 	// Check if already onboarded
 	var onboardedOrg *resources_go_proto.Organization
 
@@ -110,24 +58,14 @@ func resourceCDROrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
 	d.SetId(onboardedOrg.Id.Value)
 	return diags
 }
 
-func resourceCDROrgRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(*config.Config)
-
+func stu3Read(_ context.Context, client *cdr.Client, d *schema.ResourceData) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	endpoint := d.Get("fhir_store").(string)
 	orgID := d.Get("org_id").(string)
-
-	client, err := c.GetFHIRClientFromEndpoint(endpoint)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	defer client.Close()
 	org, resp, err := client.TenantSTU3.GetOrganizationByID(orgID)
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
@@ -149,24 +87,16 @@ func resourceCDROrgRead(_ context.Context, d *schema.ResourceData, m interface{}
 	return diags
 }
 
-func resourceCDROrgUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(*config.Config)
+func stu3Update(ctx context.Context, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
+	c := m.(*config.Config)
 
-	endpoint := d.Get("fhir_store").(string)
 	id := d.Id()
-
-	client, err := c.GetFHIRClientFromEndpoint(endpoint)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	defer client.Close()
-
 	org, _, err := client.TenantSTU3.GetOrganizationByID(id)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	jsonOrg, err := c.Ma.MarshalResource(org)
+	jsonOrg, err := c.STU3MA.MarshalResource(org)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -195,7 +125,7 @@ func resourceCDROrgUpdate(_ context.Context, d *schema.ResourceData, m interface
 		return diags
 	}
 
-	changedOrg, _ := c.Ma.MarshalResource(org)
+	changedOrg, _ := c.STU3MA.MarshalResource(org)
 	patch, err := jsonpatch.DiffBytes(jsonOrg, changedOrg)
 	if err != nil {
 		return diag.FromErr(err)
@@ -208,19 +138,38 @@ func resourceCDROrgUpdate(_ context.Context, d *schema.ResourceData, m interface
 	return diags
 }
 
-func resourceCDROrgDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	c := m.(*config.Config)
-	var diags diag.Diagnostics
-
-	endpoint := d.Get("fhir_store").(string)
-	id := d.Id()
-
-	client, err := c.GetFHIRClientFromEndpoint(endpoint)
+func stu3PurgeStateRefreshFunc(client *cdr.Client, purgeStatusURL, id string) resource.StateRefreshFunc {
+	statusURL, err := url.Parse(purgeStatusURL)
 	if err != nil {
-		return diag.FromErr(err)
+		return func() (result interface{}, state string, err error) {
+			return nil, "FAILED", err
+		}
 	}
-	defer client.Close()
+	return func() (interface{}, string, error) {
+		contained, resp, err := client.OperationsSTU3.Get(id, func(request *http.Request) error {
+			request.URL = statusURL
+			return nil
+		})
+		if err != nil {
+			return resp, "FAILED", err
+		}
+		if resp.StatusCode == http.StatusAccepted { // In progress
+			return resp, "PURGING", nil
+		}
+		params := contained.GetParameters()
+		// Return the status value
+		for _, p := range params.Parameter {
+			if p.Name.Value == "status" {
+				return resp, p.Value.GetStringValue().Value, nil
+			}
+		}
+		return resp, "FAILED", fmt.Errorf("missing status parameter for GET %s", purgeStatusURL)
+	}
+}
 
+func stu3Delete(ctx context.Context, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+	id := d.Id()
 	purgeDelete := d.Get("purge_delete").(bool)
 
 	if !purgeDelete {
@@ -262,7 +211,7 @@ func resourceCDROrgDelete(ctx context.Context, d *schema.ResourceData, m interfa
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"PURGING"},
 		Target:     []string{"SUCCESS"},
-		Refresh:    purgeStateRefreshFunc(client, resp.Header.Get("Location"), id),
+		Refresh:    stu3PurgeStateRefreshFunc(client, resp.Header.Get("Location"), id),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
 		MinTimeout: 3 * time.Second,
@@ -275,33 +224,4 @@ func resourceCDROrgDelete(ctx context.Context, d *schema.ResourceData, m interfa
 	}
 	d.SetId("")
 	return diags
-}
-
-func purgeStateRefreshFunc(client *cdr.Client, purgeStatusURL, id string) resource.StateRefreshFunc {
-	statusURL, err := url.Parse(purgeStatusURL)
-	if err != nil {
-		return func() (result interface{}, state string, err error) {
-			return nil, "FAILED", err
-		}
-	}
-	return func() (interface{}, string, error) {
-		contained, resp, err := client.OperationsSTU3.Get(id, func(request *http.Request) error {
-			request.URL = statusURL
-			return nil
-		})
-		if err != nil {
-			return resp, "FAILED", err
-		}
-		if resp.StatusCode == http.StatusAccepted { // In progress
-			return resp, "PURGING", nil
-		}
-		params := contained.GetParameters()
-		// Return the status value
-		for _, p := range params.Parameter {
-			if p.Name.Value == "status" {
-				return resp, p.Value.GetStringValue().Value, nil
-			}
-		}
-		return resp, "FAILED", fmt.Errorf("missing status parameter for GET %s", purgeStatusURL)
-	}
 }

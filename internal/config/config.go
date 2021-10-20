@@ -61,8 +61,10 @@ type Config struct {
 	notificationClientErr error
 	TimeZone              string
 
-	Ma *jsonformat.Marshaller
-	Um *jsonformat.Unmarshaller
+	STU3MA *jsonformat.Marshaller
+	STU3UM *jsonformat.Unmarshaller
+	R4MA   *jsonformat.Marshaller
+	R4UM   *jsonformat.Unmarshaller
 }
 
 func (c *Config) IAMClient() (*iam.Client, error) {
