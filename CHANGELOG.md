@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## v0.25.0
 
 - CDR: Support STU3 and R4 FHIR resources. Defaults to STU3, no change to existing resources
+- Provider: Add validation to region and environment fields (#54)
+- IAM Service: Mark expires_on as computed (#94)
 
 ## v0.24.1
 
