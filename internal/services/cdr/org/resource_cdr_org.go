@@ -62,14 +62,6 @@ func ResourceCDROrg() *schema.Resource {
 	}
 }
 
-func patchCDROrgV0(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
-	if rawState == nil {
-		rawState = map[string]interface{}{}
-	}
-	rawState["version"] = "stu3"
-	return rawState, nil
-}
-
 func resourceCDROrgCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 

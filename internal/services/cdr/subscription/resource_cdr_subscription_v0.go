@@ -1,8 +1,20 @@
 package subscription
 
 import (
+	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+// Upgrades a CDR Subscription resource from v0 to v1
+func patchSubscriptionV0(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
+	if rawState == nil {
+		rawState = map[string]interface{}{}
+	}
+	// New version field in version 1
+	rawState["version"] = "stu3"
+	return rawState, nil
+}
 
 func resourceCDRSubscriptionV0() *schema.Resource {
 	return &schema.Resource{

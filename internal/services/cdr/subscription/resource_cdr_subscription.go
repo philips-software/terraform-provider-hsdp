@@ -73,15 +73,6 @@ func ResourceCDRSubscription() *schema.Resource {
 	}
 }
 
-func patchSubscriptionV0(ctx context.Context, rawState map[string]interface{}, meta interface{}) (map[string]interface{}, error) {
-	if rawState == nil {
-		rawState = map[string]interface{}{}
-	}
-	// New version field in version 1
-	rawState["version"] = "stu3"
-	return rawState, nil
-}
-
 func resourceCDRSubscriptionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
