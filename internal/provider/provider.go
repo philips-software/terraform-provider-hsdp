@@ -24,6 +24,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/notification"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/pki"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/s3creds"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 const (
@@ -48,16 +49,18 @@ func Provider(build string) *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(Region, "us-east"),
-				Description: descriptions["region"],
+				Type:         schema.TypeString,
+				Optional:     true,
+				DefaultFunc:  schema.EnvDefaultFunc(Region, "us-east"),
+				Description:  descriptions["region"],
+				ValidateFunc: tools.ValidateRegion,
 			},
 			"environment": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(Environment, "client-test"),
-				Description: descriptions["environment"],
+				Type:         schema.TypeString,
+				Optional:     true,
+				DefaultFunc:  schema.EnvDefaultFunc(Environment, "client-test"),
+				Description:  descriptions["environment"],
+				ValidateFunc: tools.ValidateEnvironment,
 			},
 			"iam_url": {
 				Type:        schema.TypeString,

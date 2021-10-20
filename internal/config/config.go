@@ -129,7 +129,7 @@ func (c *Config) SetupIAMClient() {
 	c.iamClient = nil
 	client, err := iam.NewClient(standardClient, &c.Config)
 	if err != nil {
-		c.iamClientErr = err
+		c.iamClientErr = fmt.Errorf("possible invalid region/environment: %w", err)
 		return
 	}
 	if c.ServiceID != "" && c.ServicePrivateKey != "" {
