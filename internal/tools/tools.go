@@ -196,3 +196,8 @@ func CheckForIAMPermissionErrors(client iam.TokenRefresher, resp *http.Response,
 	}
 	return backoff.Permanent(err)
 }
+
+func DisableFHIRValidation(request *http.Request) error {
+	request.Header.Set("X-Validate-Resource", "false")
+	return nil
+}
