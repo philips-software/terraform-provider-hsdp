@@ -77,6 +77,7 @@ func ResourceIAMService() *schema.Resource {
 			"expires_on": {
 				Type:             schema.TypeString,
 				Optional:         true,
+				Computed:         true,
 				DiffSuppressFunc: tools.SuppressWhenGenerated,
 				RequiredWith:     []string{"self_managed_private_key"},
 			},

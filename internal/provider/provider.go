@@ -11,7 +11,9 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/ai/inference"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/ai/workspace"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdl"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/fhir_store"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/org"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/subscription"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/ch"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/dicom"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/discovery"
@@ -22,6 +24,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/notification"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/pki"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/s3creds"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 const (
@@ -46,16 +49,18 @@ func Provider(build string) *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"region": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(Region, "us-east"),
-				Description: descriptions["region"],
+				Type:         schema.TypeString,
+				Optional:     true,
+				DefaultFunc:  schema.EnvDefaultFunc(Region, "us-east"),
+				Description:  descriptions["region"],
+				ValidateFunc: tools.ValidateRegion,
 			},
 			"environment": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc(Environment, "client-test"),
-				Description: descriptions["environment"],
+				Type:         schema.TypeString,
+				Optional:     true,
+				DefaultFunc:  schema.EnvDefaultFunc(Environment, "client-test"),
+				Description:  descriptions["environment"],
+				ValidateFunc: tools.ValidateEnvironment,
 			},
 			"iam_url": {
 				Type:        schema.TypeString,
@@ -221,8 +226,8 @@ func Provider(build string) *schema.Provider {
 			"hsdp_container_host":                   ch.ResourceContainerHost(),
 			"hsdp_container_host_exec":              ch.ResourceContainerHostExec(),
 			"hsdp_metrics_autoscaler":               metrics.ResourceMetricsAutoscaler(),
-			"hsdp_cdr_org":                          cdr.ResourceCDROrg(),
-			"hsdp_cdr_subscription":                 cdr.ResourceCDRSubscription(),
+			"hsdp_cdr_org":                          org.ResourceCDROrg(),
+			"hsdp_cdr_subscription":                 subscription.ResourceCDRSubscription(),
 			"hsdp_dicom_store_config":               dicom.ResourceDICOMStoreConfig(),
 			"hsdp_dicom_object_store":               dicom.ResourceDICOMObjectStore(),
 			"hsdp_dicom_repository":                 dicom.ResourceDICOMRepository(),
@@ -265,7 +270,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_s3creds_policy":                    s3creds.DataSourceS3CredsPolicy(),
 			"hsdp_config":                            discovery.DataSourceConfig(),
 			"hsdp_container_host_subnet_types":       ch.DataSourceContainerHostSubnetTypes(),
-			"hsdp_cdr_fhir_store":                    cdr.DataSourceCDRFHIRStore(),
+			"hsdp_cdr_fhir_store":                    fhir_store.DataSourceCDRFHIRStore(),
 			"hsdp_pki_root":                          pki.DataSourcePKIRoot(),
 			"hsdp_pki_policy":                        pki.DataSourcePKIPolicy(),
 			"hsdp_edge_device":                       edge.DataSourceEdgeDevice(),
@@ -385,13 +390,25 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
-		c.Ma = ma
+		c.STU3MA = ma
 
 		um, err := jsonformat.NewUnmarshaller("UTC", jsonformat.STU3)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
-		c.Um = um
+		c.STU3UM = um
+
+		ma, err = jsonformat.NewMarshaller(false, "", "", jsonformat.R4)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+		c.R4MA = ma
+
+		um, err = jsonformat.NewUnmarshaller("UTC", jsonformat.R4)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+		c.R4UM = um
 
 		return c, diags
 	}
