@@ -3,6 +3,7 @@ package docker
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -81,7 +82,7 @@ func resourceDockerServiceKeyRead(ctx context.Context, d *schema.ResourceData, m
 	}
 	_ = d.Set("description", key.Description)
 	_ = d.Set("username", key.Username)
-	_ = d.Set("created_at", key.CreatedAt)
+	_ = d.Set("created_at", key.CreatedAt.Format(time.RFC3339))
 	return diags
 }
 
