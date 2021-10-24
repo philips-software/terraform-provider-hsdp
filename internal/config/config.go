@@ -52,7 +52,6 @@ type Config struct {
 	pkiClient             *pki.Client
 	stlClient             *stl.Client
 	notificationClient    *notification.Client
-	dockerClient          *docker.Client
 	DebugFile             *os.File
 	credsClientErr        error
 	cartelClientErr       error
