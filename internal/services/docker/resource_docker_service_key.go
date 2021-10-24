@@ -99,6 +99,7 @@ func resourceDockerServiceKeyCreate(ctx context.Context, d *schema.ResourceData,
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	_ = d.Set("password", created.Password) // Only time we get the password
 	d.SetId(fmt.Sprintf("%d", created.ID))
 	return resourceDockerServiceKeyRead(ctx, d, m)
 }
