@@ -24,87 +24,87 @@ func ResourceIAMClient() *schema.Resource {
 		DeleteContext: resourceIAMClientDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Required: true,
 			},
-			"type": &schema.Schema{
+			"type": {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Required: true,
 			},
-			"client_id": &schema.Schema{
+			"client_id": {
 				Type:             schema.TypeString,
 				ForceNew:         true,
 				Required:         true,
 				DiffSuppressFunc: tools.SuppressCaseDiffs,
 			},
-			"password": &schema.Schema{
+			"password": {
 				Type:      schema.TypeString,
 				Required:  true,
 				Sensitive: true,
 				ForceNew:  true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Required: true,
 			},
-			"application_id": &schema.Schema{
+			"application_id": {
 				Type:     schema.TypeString,
 				ForceNew: true,
 				Required: true,
 			},
-			"global_reference_id": &schema.Schema{
+			"global_reference_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"redirection_uris": &schema.Schema{
+			"redirection_uris": {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"response_types": &schema.Schema{
+			"response_types": {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"scopes": &schema.Schema{
+			"scopes": {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"default_scopes": &schema.Schema{
+			"default_scopes": {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"consent_implied": &schema.Schema{
+			"consent_implied": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"access_token_lifetime": &schema.Schema{
+			"access_token_lifetime": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  1800,
 			},
-			"refresh_token_lifetime": &schema.Schema{
+			"refresh_token_lifetime": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  2592000,
 			},
-			"id_token_lifetime": &schema.Schema{
+			"id_token_lifetime": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  3600,
 			},
-			"disabled": &schema.Schema{
+			"disabled": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
@@ -140,7 +140,17 @@ func resourceIAMClientCreate(ctx context.Context, d *schema.ResourceData, m inte
 	cl.RefreshTokenLifetime = d.Get("refresh_token_lifetime").(int)
 	cl.AccessTokenLifetime = d.Get("access_token_lifetime").(int)
 
-	createdClient, _, err := client.Clients.CreateClient(cl)
+	var createdClient *iam.ApplicationClient
+
+	err = tools.TryIAMCall(func() (*iam.Response, error) {
+		var err error
+		var resp *iam.Response
+		createdClient, _, err = client.Clients.CreateClient(cl)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		return resp, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -149,7 +159,7 @@ func resourceIAMClientCreate(ctx context.Context, d *schema.ResourceData, m inte
 	return resourceIAMClientRead(ctx, d, m)
 }
 
-func resourceIAMClientRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMClientRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -249,7 +259,7 @@ func resourceIAMClientUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	return diags
 }
 
-func resourceIAMClientDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMClientDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics

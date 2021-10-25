@@ -74,7 +74,17 @@ func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, meta int
 	managingOrganization := d.Get("managing_organization").(string)
 	permissions := tools.ExpandStringList(d.Get("permissions").(*schema.Set).List())
 
-	role, resp, err := client.Roles.CreateRole(name, description, managingOrganization)
+	var role *iam.Role
+	var resp *iam.Response
+
+	err = tools.TryIAMCall(func() (*iam.Response, error) {
+		var err error
+		role, resp, err = client.Roles.CreateRole(name, description, managingOrganization)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		return resp, err
+	})
 	if err != nil {
 		if resp == nil {
 			return diag.FromErr(fmt.Errorf("response is nil: %v", err))
@@ -108,7 +118,7 @@ func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, meta int
 	return diags
 }
 
-func resourceIAMRoleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIAMRoleRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -142,7 +152,7 @@ func resourceIAMRoleRead(ctx context.Context, d *schema.ResourceData, meta inter
 	return diags
 }
 
-func resourceIAMRoleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMRoleUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -195,7 +205,7 @@ func resourceIAMRoleUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	return diags
 }
 
-func resourceIAMRoleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMRoleDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
