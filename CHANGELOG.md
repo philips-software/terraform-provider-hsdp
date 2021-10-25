@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.25.2
+
+- IAM: Add retry logic to additional IAM resources
+
 ## v0.25.1
 
 - Guide: fix S3 backend command
