@@ -3,6 +3,8 @@
 There are certain IAM flows that trigger email notifications to the user. The email delivered to users will use the IAM specific email template by default.
 This resource allows you to manage template for your HSDP IAM organization. [Further reading](https://www.hsdp.io/documentation/identity-and-access-management-iam/how-to/customize#_email_template_customization).
 
+~> To use this resource the configured IAM account should have the `EMAILTEMPLATE.READ`, `EMAILTEMPLATE.WRITE` and `EMAILTEMPLATE.DELETE` permissions assigned to it
+
 ## Types of templates
 
 The various template types supported by IAM are:

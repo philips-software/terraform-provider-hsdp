@@ -31,4 +31,4 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The ID of the service key
 * `username` - (Computed) The service id
 * `password` - (Computed, Sensitive) The active private of the service
-* `created_At` - (Computed) The timestamp this key was created
+* `created_at` - (Computed) The timestamp this key was created
