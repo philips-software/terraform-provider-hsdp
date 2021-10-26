@@ -122,7 +122,17 @@ func resourceIAMServiceCreate(ctx context.Context, d *schema.ResourceData, m int
 		return diag.FromErr(fmt.Errorf("you cannot set an 'expires_on' value without also specifying the 'self_managed_private_key'"))
 	}
 
-	createdService, _, err := client.Services.CreateService(s)
+	var createdService *iam.Service
+
+	err = tools.TryIAMCall(func() (*iam.Response, error) {
+		var err error
+		var resp *iam.Response
+		createdService, _, err = client.Services.CreateService(s)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		return resp, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -70,8 +70,17 @@ func resourceIAMApplicationCreate(ctx context.Context, d *schema.ResourceData, m
 		}
 		app.GlobalReferenceID = result
 	}
+	var createdApp *iam.Application
+	var resp *iam.Response
 
-	createdApp, resp, err := client.Applications.CreateApplication(app)
+	err = tools.TryIAMCall(func() (*iam.Response, error) {
+		var err error
+		createdApp, resp, err = client.Applications.CreateApplication(app)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		return resp, err
+	})
 	if err != nil {
 		if resp == nil {
 			return diag.FromErr(err)

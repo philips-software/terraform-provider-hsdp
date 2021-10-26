@@ -71,8 +71,17 @@ func resourceIAMPropositionCreate(ctx context.Context, d *schema.ResourceData, m
 		}
 		prop.GlobalReferenceID = result
 	}
+	var createdProp *iam.Proposition
+	var resp *iam.Response
 
-	createdProp, resp, err := client.Propositions.CreateProposition(prop)
+	err = tools.TryIAMCall(func() (*iam.Response, error) {
+		var err error
+		createdProp, resp, err = client.Propositions.CreateProposition(prop)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		return resp, err
+	})
 	if err != nil {
 		if resp == nil {
 			return diag.FromErr(err)

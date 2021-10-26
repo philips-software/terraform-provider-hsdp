@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/philips-software/go-hsdp-api/iam"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -86,7 +87,17 @@ func resourceIAMOrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	newOrg.ExternalID = externalID
 	newOrg.DisplayName = displayName
 	newOrg.Type = orgType
-	org, resp, err := client.Organizations.CreateOrganization(newOrg)
+
+	var org *iam.Organization
+	var resp *iam.Response
+	err = tools.TryIAMCall(func() (*iam.Response, error) {
+		var err error
+		org, resp, err = client.Organizations.CreateOrganization(newOrg)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		return resp, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}

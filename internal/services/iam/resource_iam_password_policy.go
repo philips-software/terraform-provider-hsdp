@@ -29,17 +29,17 @@ func ResourceIAMPasswordPolicy() *schema.Resource {
 
 				ForceNew: true,
 			},
-			"expiry_period_in_days": &schema.Schema{
+			"expiry_period_in_days": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  90,
 			},
-			"history_count": &schema.Schema{
+			"history_count": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  5,
 			},
-			"complexity": &schema.Schema{
+			"complexity": {
 				Type:     schema.TypeSet,
 				Required: true,
 				MaxItems: 1,
@@ -78,12 +78,12 @@ func ResourceIAMPasswordPolicy() *schema.Resource {
 					},
 				},
 			},
-			"challenges_enabled": &schema.Schema{
+			"challenges_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"challenge_policy": &schema.Schema{
+			"challenge_policy": {
 				Type:         schema.TypeSet,
 				Optional:     true,
 				RequiredWith: []string{"challenges_enabled"},
@@ -114,7 +114,7 @@ func ResourceIAMPasswordPolicy() *schema.Resource {
 					},
 				},
 			},
-			"_policy": &schema.Schema{
+			"_policy": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -152,7 +152,7 @@ func resourceDataToToPasswordPolicy(d *schema.ResourceData, policy *iam.Password
 	}
 }
 
-func resourceIAMPasswordPolicyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMPasswordPolicyCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -178,8 +178,17 @@ func resourceIAMPasswordPolicyCreate(ctx context.Context, d *schema.ResourceData
 		policy.Meta = existingPolicy.Meta
 		policyFunc = client.PasswordPolicies.UpdatePasswordPolicy
 	}
+	var createdPolicy *iam.PasswordPolicy
 
-	createdPolicy, _, err := policyFunc(policy)
+	err = tools.TryIAMCall(func() (*iam.Response, error) {
+		var err error
+		var resp *iam.Response
+		createdPolicy, resp, err = policyFunc(policy)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		return resp, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -192,7 +201,7 @@ func resourceIAMPasswordPolicyCreate(ctx context.Context, d *schema.ResourceData
 	return diags
 }
 
-func resourceIAMPasswordPolicyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMPasswordPolicyUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -227,7 +236,7 @@ func resourceIAMPasswordPolicyUpdate(ctx context.Context, d *schema.ResourceData
 	return diags
 }
 
-func resourceIAMPasswordPolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMPasswordPolicyRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -250,7 +259,7 @@ func resourceIAMPasswordPolicyRead(ctx context.Context, d *schema.ResourceData, 
 	return diags
 }
 
-func resourceIAMPasswordPolicyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMPasswordPolicyDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
