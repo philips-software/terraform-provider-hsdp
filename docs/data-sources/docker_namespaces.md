@@ -20,3 +20,4 @@ output "namespaces" {
 The following attributes are available:
 
 * `names` - The list of available namespaces
+* `num_repos` - The number of repositories. Index matches the `names` list
