@@ -15,6 +15,7 @@ import (
 	"github.com/philips-software/go-hsdp-api/cdr"
 	"github.com/philips-software/go-hsdp-api/config"
 	"github.com/philips-software/go-hsdp-api/console"
+	"github.com/philips-software/go-hsdp-api/console/docker"
 	"github.com/philips-software/go-hsdp-api/dicom"
 	"github.com/philips-software/go-hsdp-api/iam"
 	"github.com/philips-software/go-hsdp-api/notification"
@@ -85,6 +86,19 @@ func (c *Config) ConsoleClient() (*console.Client, error) {
 
 func (c *Config) STLClient(_ ...string) (*stl.Client, error) {
 	return c.stlClient, c.stlClientErr
+}
+
+func (c *Config) DockerClient(region ...string) (*docker.Client, error) {
+	r := c.Region
+	if len(region) > 0 {
+		r = region[0]
+	}
+	if c.consoleClientErr != nil {
+		return nil, c.consoleClientErr
+	}
+	return docker.NewClient(c.consoleClient, &docker.Config{
+		Region: r,
+	})
 }
 
 func (c *Config) PKIClient(regionEnvironment ...string) (*pki.Client, error) {
