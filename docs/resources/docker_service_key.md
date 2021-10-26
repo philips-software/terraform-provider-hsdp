@@ -2,6 +2,8 @@
 
 Manages HSDP Docker Registry service keys
 
+~> This resource only works when `HSDP_UAA_USERNAME` and `HSDP_UAA_PASSWORD` values matching provider arguments are set.
+
 ## Example usage
 
 ```hcl
