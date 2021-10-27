@@ -10,9 +10,9 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
 
-func DataSourceDockerRegistry() *schema.Resource {
+func DataSourceDockerRepository() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceDockerRegistryRead,
+		ReadContext: dataSourceDockerRepositoryRead,
 		Schema: map[string]*schema.Schema{
 			"namespace_id": {
 				Type:     schema.TypeString,
@@ -21,6 +21,14 @@ func DataSourceDockerRegistry() *schema.Resource {
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
+			},
+			"short_description": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"full_description": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"total_pulls": {
 				Type:     schema.TypeInt,
@@ -70,7 +78,7 @@ func DataSourceDockerRegistry() *schema.Resource {
 
 }
 
-func dataSourceDockerRegistryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceDockerRepositoryRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -118,6 +126,8 @@ func dataSourceDockerRegistryRead(ctx context.Context, d *schema.ResourceData, m
 	_ = d.Set("compressed_sizes", compressedSizes)
 	_ = d.Set("total_pulls", repo.NumPulls)
 	_ = d.Set("total_tags", repo.NumTags)
+	_ = d.Set("short_description", repo.Details.ShortDescription)
+	_ = d.Set("full_description", repo.Details.FullDescription)
 	d.SetId(repo.ID)
 	return diags
 }

@@ -32,6 +32,8 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
+* `short_description` - A short description of the repository
+* `full_description` - A longer description, supporting markdown
 * `ids` - The ids of the tags
 * `tags` - The list of tags names
 * `updated_at` - The update timestamp
