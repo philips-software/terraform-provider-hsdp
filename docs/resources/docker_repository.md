@@ -27,7 +27,7 @@ The following arguments are supported:
 * `namespace_id` - (Required) The organization users should belong to
 * `name` - (Required) Filter users on verified email state
 * `short_description` - (Optional) A short description of the repository (100 chars max)
-* `full_description` - (Optional) A longer description, supporting markdown 
+* `full_description` - (Optional) A longer description, supporting markdown
 
 ## Attributes Reference
 
