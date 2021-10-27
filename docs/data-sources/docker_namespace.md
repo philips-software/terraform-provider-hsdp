@@ -28,4 +28,4 @@ In addition to all arguments above, the following attributes are exported:
 * `id` - The id of the namespace
 * `repositories` - (list(string)) The list of repositories in this namespace
 * `created_at` - When the namespace was created
-* `is_public` - If the repo is public or not 
+* `is_public` - If the repo is public or not
