@@ -18,6 +18,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/dicom"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/discovery"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/namespace"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/repository"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/service_key"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/edge"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/function"
@@ -306,6 +307,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_users":                         iam.DataSourceIAMUsers(),
 			"hsdp_docker_namespace":                  namespace.DataSourceDockerNamespace(),
 			"hsdp_docker_namespaces":                 namespace.DataSourceDockerNamespaces(),
+			"hsdp_docker_registry":                   repository.DataSourceDockerRegistry(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
