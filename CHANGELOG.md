@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.26.0
+
+- NEW HSDP Docker Registry support: manage namespaces and repositories
+
 ## v0.25.2
 
 - IAM: Add retry logic to additional IAM resources
