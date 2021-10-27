@@ -1,4 +1,4 @@
-package docker
+package service_key
 
 import (
 	"context"

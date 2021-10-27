@@ -2,6 +2,8 @@
 
 Manages HSDP Docker Registry service keys
 
+~> This resource only works when `HSDP_UAA_USERNAME` and `HSDP_UAA_PASSWORD` values matching provider arguments are set.
+
 ## Example usage
 
 ```hcl
@@ -29,6 +31,6 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID of the service key
-* `username` - (Computed) The service id
-* `password` - (Computed, Sensitive) The active private of the service
-* `created_at` - (Computed) The timestamp this key was created
+* `username` - (Computed) The service key username
+* `password` - (Computed, Sensitive) The service key password
+* `created_at` - (Computed) The timestamp the key was created

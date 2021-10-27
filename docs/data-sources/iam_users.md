@@ -28,5 +28,5 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `ids` - The list of matching users
-* `logins` - The list matching users login ids
+* `logins` - The list matching user login ids
 * `email_addresses` - The email addresses of the matching users

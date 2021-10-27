@@ -17,7 +17,9 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/ch"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/dicom"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/discovery"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/namespace"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/repository"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/service_key"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/edge"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/function"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam"
@@ -258,7 +260,10 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_sms_gateway":                  iam.ResourceIAMSMSGatewayConfig(),
 			"hsdp_iam_sms_template":                 iam.ResourceIAMSMSTemplate(),
 			"hsdp_iam_activation_email":             iam.ResourceIAMActivationEmail(),
-			"hsdp_docker_service_key":               docker.ResourceDockerServiceKey(),
+			"hsdp_docker_service_key":               service_key.ResourceDockerServiceKey(),
+			"hsdp_docker_namespace":                 namespace.ResourceDockerNamespace(),
+			"hsdp_docker_namespace_user":            namespace.ResourceDockerNamespaceUser(),
+			"hsdp_docker_repository":                repository.ResourceDockerRepository(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                    iam.DataSourceIAMIntrospect(),
@@ -301,6 +306,9 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_group":                         iam.DataSourceIAMGroup(),
 			"hsdp_iam_role":                          iam.DataSourceIAMRole(),
 			"hsdp_iam_users":                         iam.DataSourceIAMUsers(),
+			"hsdp_docker_namespace":                  namespace.DataSourceDockerNamespace(),
+			"hsdp_docker_namespaces":                 namespace.DataSourceDockerNamespaces(),
+			"hsdp_docker_repository":                 repository.DataSourceDockerRepository(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
