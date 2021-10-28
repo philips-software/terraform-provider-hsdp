@@ -7,6 +7,17 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+func SuppressMulti(fns ...schema.SchemaDiffSuppressFunc) schema.SchemaDiffSuppressFunc {
+	return func(k, old, new string, d *schema.ResourceData) bool {
+		for _, f := range fns {
+			if f(k, old, new, d) {
+				return true
+			}
+		}
+		return false
+	}
+}
+
 func SuppressCaseDiffs(k, old, new string, d *schema.ResourceData) bool {
 	return strings.EqualFold(old, new)
 }

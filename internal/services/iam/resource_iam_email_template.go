@@ -58,10 +58,13 @@ func ResourceIAMEmailTemplate() *schema.Resource {
 				ForceNew: true,
 			},
 			"locale": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				ForceNew:         true,
-				DiffSuppressFunc: tools.SuppressDefault,
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				DiffSuppressFunc: tools.SuppressMulti(
+					tools.SuppressDefault,
+					tools.SuppressCaseDiffs,
+				),
 			},
 			"link": {
 				Type:             schema.TypeString,
