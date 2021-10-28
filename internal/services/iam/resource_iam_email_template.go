@@ -3,6 +3,7 @@ package iam
 import (
 	"context"
 	"encoding/base64"
+	"fmt"
 	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -76,10 +77,8 @@ func ResourceIAMEmailTemplate() *schema.Resource {
 	}
 }
 
-func resourceIAMEmailTemplateCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMEmailTemplateCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
-
-	var diags diag.Diagnostics
 
 	client, err := c.IAMClient()
 	if err != nil {
@@ -97,19 +96,32 @@ func resourceIAMEmailTemplateCreate(_ context.Context, d *schema.ResourceData, m
 	template.ManagingOrganization = d.Get("managing_organization").(string)
 
 	var createdTemplate *iam.EmailTemplate
+	var resp *iam.Response
 	err = tools.TryIAMCall(func() (*iam.Response, error) {
-		var resp *iam.Response
 		var err error
 		createdTemplate, resp, err = client.EmailTemplates.CreateTemplate(template)
 		return resp, err
-	}, http.StatusInternalServerError)
+	}, http.StatusInternalServerError, http.StatusTooManyRequests)
 
 	if err != nil {
+		if resp.StatusCode == http.StatusConflict {
+			templates, _, getErr := client.EmailTemplates.GetTemplates(&iam.GetEmailTemplatesOptions{
+				Type:           &template.Type,
+				OrganizationID: &template.ManagingOrganization,
+				Locale:         &template.Locale,
+			})
+			if getErr != nil {
+				return diag.FromErr(fmt.Errorf("createEmailTemplate HTTP 409 conflict: %w", getErr))
+			}
+			if len(*templates) > 0 {
+				return diag.FromErr(fmt.Errorf("conflicting template with ID '%s': %w", (*templates)[0].ID, err))
+			}
+		}
 		return diag.FromErr(err)
 	}
 	_ = d.Set("message_base64", createdTemplate.Message)
 	d.SetId(createdTemplate.ID)
-	return diags
+	return resourceIAMEmailTemplateRead(ctx, d, m)
 }
 
 func resourceIAMEmailTemplateRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
