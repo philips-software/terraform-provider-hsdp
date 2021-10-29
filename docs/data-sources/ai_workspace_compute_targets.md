@@ -1,3 +1,7 @@
+---
+subcategory: "AI Workspace"
+---
+
 # hsdp_ai_workspace_compute_targets
 
 Retrieves AI Workspace Compute Targets

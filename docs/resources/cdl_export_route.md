@@ -1,3 +1,7 @@
+---
+subcategory: "Clinical Data Lake"
+---
+
 # hsdp_cdl_export_route
 
 Manages HSDP Clinical Data Lake ExportRoute.

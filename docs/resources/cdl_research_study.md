@@ -1,3 +1,7 @@
+---
+subcategory: "Clinical Data Lake"
+---
+
 # hsdp_cdl_research_study
 
 Provides a resource for managing HSDP Clinical Data Lake research studies.

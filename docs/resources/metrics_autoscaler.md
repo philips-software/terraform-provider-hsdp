@@ -1,3 +1,7 @@
+---
+subcategory: "Autoscaler"
+---
+
 # hsdp_metrics_autoscaler
 
 Manages HSDP Metrics Autoscaler settings for Cloudfoundry applications hosted in an HSDP CF space.

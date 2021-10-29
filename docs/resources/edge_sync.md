@@ -1,3 +1,7 @@
+---
+subcategory: "HealthSuite Edge"
+---
+
 # hsdp_edge_sync
 
 Synchronizes device configuration. This resource can be used to batch sync requests

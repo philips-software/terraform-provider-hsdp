@@ -1,3 +1,7 @@
+---
+subcategory: "Container Host"
+---
+
 # hsdp_container_host_instances
 
 Retrieve a list of container hosts instances

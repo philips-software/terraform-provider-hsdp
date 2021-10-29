@@ -1,3 +1,7 @@
+---
+subcategory: "Identity and Access Management"
+---
+
 # hsdp_iam_service
 
 Provides details of a given HSDP IAM service

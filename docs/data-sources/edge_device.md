@@ -1,3 +1,7 @@
+---
+subcategory: "HealthSuite Edge"
+---
+
 # hsdp_edge_device
 
 Represents an Edge device

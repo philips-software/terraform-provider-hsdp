@@ -1,3 +1,7 @@
+---
+subcategory: "Identity and Access Management"
+---
+
 # hsdp_iam_proposition
 
 Retrieve details of an existing proposition

@@ -1,3 +1,7 @@
+---
+subcategory: "Clinical Data Repository"
+---
+
 # hsdp_cdr_subscription
 
 Provides a resource for managing [FHIR Subscriptions](https://www.hl7.org/fhir/stu3/subscription.html) in a CDR.

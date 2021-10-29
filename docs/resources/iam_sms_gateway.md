@@ -1,3 +1,7 @@
+---
+subcategory: "Identity and Access Management"
+---
+
 # hsdp_iam_sms_gateway
 
 Provides a resource for managing HSDP IAM SMS gateway configurations.

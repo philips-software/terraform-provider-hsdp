@@ -1,3 +1,7 @@
+---
+subcategory: "Notification"
+---
+
 # hsdp_notification_topic
 
 Look up a HSDP Notification Topic resource

@@ -1,3 +1,7 @@
+---
+subcategory: "AI Inference"
+---
+
 # hsdp_ai_inference_service_instance
 
 Retrieve details of an existing HSDP AI Inference instance.

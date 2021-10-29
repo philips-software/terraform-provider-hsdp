@@ -1,3 +1,7 @@
+---
+subcategory: "Functions"
+---
+
 # hsdp_function
 
 Define function-as-a-service using various backends. Currently,

@@ -1,3 +1,7 @@
+---
+subcategory: "Discovery"
+---
+
 # hsdp_config
 
 Retrieve configuration details from services based on region and environment

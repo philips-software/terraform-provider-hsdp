@@ -1,3 +1,7 @@
+---
+subcategory: "S3 Credentials"
+---
+
 # hsdp_s3creds_policy
 
 Gets information on defined S3 Credential policies

@@ -1,3 +1,7 @@
+---
+subcategory: "Identity and Access Management"
+---
+
 # hsdp_iam_activation_email
 
 Re-sends activation emails. This resource can be used in combination with the

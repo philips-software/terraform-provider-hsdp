@@ -1,3 +1,7 @@
+---
+subcategory: "DICOM Store"
+---
+
 # hsdp_dicom_object_store
 
 This resource manages DICOM Object stores

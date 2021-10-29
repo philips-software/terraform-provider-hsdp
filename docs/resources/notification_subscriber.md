@@ -1,3 +1,7 @@
+---
+subcategory: "Notification"
+---
+
 # hsdp_notification_subscriber
 
 Create and manage HSDP Notification subscriber resources

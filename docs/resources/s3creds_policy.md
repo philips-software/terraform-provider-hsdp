@@ -1,3 +1,7 @@
+---
+subcategory: "S3 Credentials"
+---
+
 # hsdp_s3creds_policy
 
 Provides a resource for managing HSDP S3 Credentials policies

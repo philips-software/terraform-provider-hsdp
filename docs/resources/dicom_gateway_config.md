@@ -1,3 +1,7 @@
+---
+subcategory: "DICOM Gateway"
+---
+
 # hsdp_dicom_gateway_config
 
 This resource manages DICOM Gateway configuration for Store and QueryRetrieve services using HSDP provisioned DICOM Store configuration service.

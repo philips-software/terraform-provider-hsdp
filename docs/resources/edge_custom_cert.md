@@ -1,3 +1,7 @@
+---
+subcategory: "HealthSuite Edge"
+---
+
 # hsdp_edge_custom_cert
 
 Manage custom certificates on Edge devices. Set `sync` to true to immediately sync the certificate to the k3s cluster, otherwise

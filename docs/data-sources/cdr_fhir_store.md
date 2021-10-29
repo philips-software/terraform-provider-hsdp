@@ -1,3 +1,7 @@
+---
+subcategory: "Clinical Data Repository"
+---
+
 # hsdp_cdr_fhir_store
 
 Retrieve details of an existing Clinical Data Repository (CDR).

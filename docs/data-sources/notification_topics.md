@@ -1,3 +1,7 @@
+---
+subcategory: "Notification"
+---
+
 # hsdp_notification_topics
 
 Search for  HSDP Notification Topic resources

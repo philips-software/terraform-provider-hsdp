@@ -1,3 +1,7 @@
+---
+subcategory: "Identity and Access Management"
+---
+
 # hsdp_iam_user
 
 Provides a resource for managing an HSDP IAM user.

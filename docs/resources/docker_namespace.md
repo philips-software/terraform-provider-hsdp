@@ -1,3 +1,7 @@
+---
+subcategory: "Docker Registry"
+---
+
 # hsdp_docker_namespace
 
 Manage HSDP Docker registry namespaces

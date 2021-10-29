@@ -1,3 +1,7 @@
+---
+subcategory: "Clinical Data Lake"
+---
+
 # hsdp_cdl_data_type_definition
 
 Retrieve details on HSDP Clinical Data Lake Data Type Definition.

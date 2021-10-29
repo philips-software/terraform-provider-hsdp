@@ -1,3 +1,7 @@
+---
+subcategory: "Clinical Data Lake"
+---
+
 # hsdp_cdl_export_route
 
 Retrieve details on HSDP Clinical Data Lake Export Route.

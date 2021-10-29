@@ -1,3 +1,7 @@
+---
+subcategory: "HealthSuite Edge"
+---
+
 # hsdp_edge_app
 
 Manages an app resource on an Edge device. At this time resources are synced immediately to the device after create or update.

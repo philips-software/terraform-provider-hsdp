@@ -1,3 +1,7 @@
+---
+subcategory: "Clinical Data Lake"
+---
+
 # hsdp_cdl_instance
 
 Retrieve details of an existing Clinical Data Lake instance (CDL).

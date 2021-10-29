@@ -1,3 +1,7 @@
+---
+subcategory: "AI Workspace"
+---
+
 # hsdp_ai_workspace
 
 Manages HSDP AI Workspace instances

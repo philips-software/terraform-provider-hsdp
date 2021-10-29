@@ -1,3 +1,7 @@
+---
+subcategory: "Identity and Access Management"
+---
+
 # hsdp_iam_proposition
 
 Provides a resource for managing HSDP IAM proposition belonging to an Organization.
