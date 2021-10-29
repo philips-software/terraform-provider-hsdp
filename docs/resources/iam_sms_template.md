@@ -1,5 +1,5 @@
 ---
-subcategory: "IAM"
+subcategory: "Identity and Access Management"
 ---
 
 # hsdp_iam_sms_template
