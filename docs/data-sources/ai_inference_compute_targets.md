@@ -1,3 +1,7 @@
+---
+subcategory: "AI Inference"
+---
+
 # hsdp_ai_inference_compute_targets
 
 Retrieves AI Inference Compute Targets

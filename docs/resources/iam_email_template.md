@@ -1,3 +1,7 @@
+---
+subcategory: "IAM"
+---
+
 # hsdp_iam_email_template
 
 There are certain IAM flows that trigger email notifications to the user. The email delivered to users will use the IAM specific email template by default.

@@ -1,3 +1,7 @@
+---
+subcategory: "DICOM Store"
+---
+
 # hsdp_dicom_repository
 
 This resource manages a DICOM repository

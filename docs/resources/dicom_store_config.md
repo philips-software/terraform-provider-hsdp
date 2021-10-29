@@ -1,3 +1,7 @@
+---
+subcategory: "DICOM Store"
+---
+
 # hsdp_dicom_store_config
 
 This resource manages DICOM store configuration of an HSDP provisioned DICOM Store.

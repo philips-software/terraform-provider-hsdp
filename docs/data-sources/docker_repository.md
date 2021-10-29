@@ -1,3 +1,7 @@
+---
+subcategory: "Docker Registry"
+---
+
 # hsdp_docker_repository
 
 Retrieves information on a HSDP Docker repository

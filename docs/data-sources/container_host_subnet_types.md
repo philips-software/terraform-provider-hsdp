@@ -1,3 +1,7 @@
+---
+subcategory: "Container Host"
+---
+
 # hsdp_container_host_subnet_types
 
 Provides details of a given HSDP IAM user.

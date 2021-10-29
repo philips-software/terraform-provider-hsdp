@@ -1,3 +1,7 @@
+---
+subcategory: "IAM"
+---
+
 # hsdp_iam_org
 
 Provides a resource for managing HSDP IAM [organizations](https://www.hsdp.io/documentation/identity-and-access-management-iam/concepts/iam-resource-model).

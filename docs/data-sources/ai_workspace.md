@@ -1,3 +1,7 @@
+---
+subcategory: "AI Workspace"
+---
+
 # hsdp_ai_workspace
 
 Retrieve details of an existing HSDP AI Workspace instance.

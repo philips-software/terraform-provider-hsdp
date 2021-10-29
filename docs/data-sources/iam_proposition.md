@@ -1,3 +1,7 @@
+---
+subcategory: "IAM"
+---
+
 # hsdp_iam_proposition
 
 Retrieve details of an existing proposition

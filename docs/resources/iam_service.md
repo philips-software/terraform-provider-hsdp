@@ -1,3 +1,7 @@
+---
+subcategory: "IAM"
+---
+
 # hsdp_iam_service
 
 Provides a resource for managing HSDP IAM services of an application under a proposition.

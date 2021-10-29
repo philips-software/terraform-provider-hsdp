@@ -1,3 +1,7 @@
+---
+subcategory: "IAM"
+---
+
 # hsdp_iam_user
 
 Provide details of a given HSDP IAM user.

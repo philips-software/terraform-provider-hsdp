@@ -1,3 +1,7 @@
+---
+subcategory: "Clinical Data Repository"
+---
+
 # hsdp_cdr_org
 
 Provides a resource for onboarding HSDP CDR [organizations](https://www.hsdp.io/documentation/clinical-data-repository/stu3/getting-started/ehr).

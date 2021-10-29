@@ -1,3 +1,7 @@
+---
+subcategory: "IAM"
+---
+
 # hsdp_iam_introspect
 
 Introspects the ORG admin account in use by the provider

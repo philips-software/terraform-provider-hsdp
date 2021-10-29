@@ -1,3 +1,7 @@
+---
+subcategory: "Notification"
+---
+
 # hsdp_notification_producer
 
 Create and manage HSDP Notification producer resources

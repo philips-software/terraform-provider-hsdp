@@ -1,3 +1,7 @@
+---
+subcategory: "Public Key Infrastructure"
+---
+
 # hsdp_pki_policy
 
 Retrieves the HSDP PKI Policy CA and CRL

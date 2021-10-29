@@ -1,3 +1,7 @@
+---
+subcategory: "Docker Registry"
+---
+
 # hsdp_docker_repository
 
 Manages a HSDP Docker repository

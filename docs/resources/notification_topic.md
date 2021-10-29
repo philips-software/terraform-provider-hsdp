@@ -1,3 +1,7 @@
+---
+subcategory: "Notification"
+---
+
 # hsdp_notification_topic
 
 Create and manage HSDP Notification Topic resources

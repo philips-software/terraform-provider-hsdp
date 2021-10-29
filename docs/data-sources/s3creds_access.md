@@ -1,3 +1,7 @@
+---
+subcategory: "S3 Credentials"
+---
+
 # hsdp_s3creds_access
 
 Gets credentials for an S3 Credentials access

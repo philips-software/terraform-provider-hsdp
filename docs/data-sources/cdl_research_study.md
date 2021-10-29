@@ -1,3 +1,7 @@
+---
+subcategory: "Clinical Data Lake"
+---
+
 # hsdp_cdl_research_study
 
 Retrieve details on HSDP Clinical Data Lake research study.

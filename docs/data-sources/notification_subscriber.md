@@ -1,3 +1,7 @@
+---
+subcategory: "Notification"
+---
+
 # hsdp_notification_subscriber
 
 Looks up HSDP Notification subscriber resources

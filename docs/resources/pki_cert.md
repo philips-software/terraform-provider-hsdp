@@ -1,3 +1,7 @@
+---
+subcategory: "Public Key Infrastructure"
+---
+
 # hsdp_pki_cert
 
 Create and manage HSDP PKI leaf certificates

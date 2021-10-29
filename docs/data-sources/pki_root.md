@@ -1,3 +1,7 @@
+---
+subcategory: "Public Key Infrastructure"
+---
+
 # hsdp_pki_root
 
 Retrieves the HSDP PKI Root CA and CRL

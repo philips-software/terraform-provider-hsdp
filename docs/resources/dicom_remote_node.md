@@ -1,3 +1,7 @@
+---
+subcategory: "DICOM Gateway"
+---
+
 # hsdp_dicom_remote_node
 
 This resource manages DICOM Remote nodes using HSDP provisioned DICOM Store configuration service.

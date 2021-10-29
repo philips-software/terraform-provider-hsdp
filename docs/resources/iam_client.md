@@ -1,3 +1,7 @@
+---
+subcategory: "IAM"
+---
+
 # hsdp_iam_client
 
 Provides a resource for managing HSDP IAM client of an application under a proposition.

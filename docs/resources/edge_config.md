@@ -1,3 +1,7 @@
+---
+subcategory: "HealthSuite Edge"
+---
+
 # hsdp_edge_config
 
 Manage configuration of an Edge device. Set `sync` to true to immediately sync the config to the device, otherwise

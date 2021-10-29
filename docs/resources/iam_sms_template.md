@@ -1,3 +1,7 @@
+---
+subcategory: "IAM"
+---
+
 # hsdp_iam_sms_template
 
 This resource allows you to provision and manage custom SMS template

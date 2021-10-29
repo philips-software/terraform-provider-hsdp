@@ -1,3 +1,7 @@
+---
+subcategory: "AI Inference"
+---
+
 # hsdp_ai_inference_compute_environments
 
 Retrieves AI Inference Compute Environments

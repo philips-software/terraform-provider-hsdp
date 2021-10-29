@@ -1,3 +1,7 @@
+---
+subcategory: "AI Inference"
+---
+
 # hsdp_ai_inference_model
 
 Manages HSDP AI Inference models.

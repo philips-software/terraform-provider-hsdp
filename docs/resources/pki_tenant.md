@@ -1,3 +1,7 @@
+---
+subcategory: "Public Key Infrastructure"
+---
+
 # hsdp_pki_tenant
 
 Onboard tenant to PKI Service. Cloud foundry users with SpaceDeveloper role can onboard tenant

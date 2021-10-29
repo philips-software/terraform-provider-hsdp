@@ -1,3 +1,7 @@
+---
+subcategory: "Docker Registry"
+---
+
 # hsdp_docker_namespaces
 
 Retrieves information on available HSDP Docker Registry namespaces

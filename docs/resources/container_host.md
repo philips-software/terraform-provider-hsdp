@@ -1,3 +1,7 @@
+---
+subcategory: "Container Host"
+---
+
 # hsdp_container_host
 
 Manage HSDP Container Host instances

@@ -1,3 +1,7 @@
+---
+subcategory: "IAM"
+---
+
 # hsdp_iam_group
 
 Provides a resource for managing HSDP IAM groups

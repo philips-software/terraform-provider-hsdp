@@ -1,3 +1,7 @@
+---
+subcategory: "IAM"
+---
+
 # hsdp_iam_mfa_policy
 
 Provides a resource for managing HSDP IAM MFA (Multi Factor Authentication) policies

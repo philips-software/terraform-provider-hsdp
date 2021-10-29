@@ -1,3 +1,7 @@
+---
+subcategory: "Docker Registry"
+---
+
 # hsdp_docker_namespace_user
 
 Manages user access to namespace. Permissions can be set to pull, push and delete repositories

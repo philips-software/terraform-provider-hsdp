@@ -1,3 +1,7 @@
+---
+subcategory: "Clinical Data Lake"
+---
+
 # hsdp_cdl_research_studies
 
 Retrieve research studies present in a HSDP Clinical Data Lake instance.

@@ -1,3 +1,7 @@
+---
+subcategory: "IAM"
+---
+
 # hsdp_iam_role
 
 Provides a resource for managing HSDP IAM roles
