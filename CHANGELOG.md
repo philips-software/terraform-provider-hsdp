@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.26.3
+
+- Documentation: move hspd_function guide to right subcategory
+
 ## v0.26.2
 
 - Documentation: add subcategories
