@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"flag"
+	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 	"github.com/terraform-providers/terraform-provider-cloudfoundry/cloudfoundry"
@@ -17,8 +19,11 @@ func main() {
 		ProviderFunc: cloudfoundry.Provider,
 	}
 	if debugMode {
-		opts.Debug = true
-		opts.ProviderAddr = "registry.terraform.io/cloudfoundry-community/cloudfoundry"
+		err := plugin.Debug(context.Background(), "registry.terraform.io/philips-labs/cloudfoundry", opts)
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		return
 	}
 	plugin.Serve(opts)
 }
