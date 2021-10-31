@@ -26,7 +26,7 @@ const (
 
 func ResourceFunction() *schema.Resource {
 	return &schema.Resource{
-		SchemaVersion: 6,
+		SchemaVersion: 7,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -103,6 +103,10 @@ func ResourceFunction() *schema.Resource {
 				Computed:  true,
 			},
 			"endpoint": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"sync_endpoint": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -392,10 +396,13 @@ func createSchedules(ironClient *iron.Client, ironConfig *iron.Config, modConfig
 		d.SetId(fmt.Sprintf("%s-%s", codeID, signature))
 	}
 	if syncSchedule != nil {
-		_ = d.Set("endpoint", fmt.Sprintf("https://%s/function/%s", (modConfig)["siderite_upstream"], codeID))
+		syncEndpoint := fmt.Sprintf("https://%s/function/%s", (modConfig)["siderite_upstream"], codeID)
+		_ = d.Set("endpoint", syncEndpoint)
+		_ = d.Set("sync_endpoint", syncEndpoint)
 	}
 	if asyncSchedule != nil {
-		_ = d.Set("async_endpoint", fmt.Sprintf("https://%s/async-function/%s", (modConfig)["siderite_upstream"], codeID))
+		asyncEndpoint := fmt.Sprintf("https://%s/async-function/%s", (modConfig)["siderite_upstream"], codeID)
+		_ = d.Set("async_endpoint", asyncEndpoint)
 	}
 	return diags
 }
@@ -485,13 +492,13 @@ func dockerLogin(ironClient *iron.Client, d *schema.ResourceData) (bool, error) 
 	return true, nil
 }
 
-type functionSchedule struct {
+type taskSchedule struct {
 	Timeout int
 	Iron    *iron.Schedule
 	CRON    *string
 }
 
-func getSchedule(d *schema.ResourceData) (*functionSchedule, bool, error) {
+func getSchedule(d *schema.ResourceData) (*taskSchedule, bool, error) {
 	timeout := d.Get("timeout").(int)
 	// Check for cron
 	cronSchedule := d.Get("schedule").(string)
@@ -500,7 +507,7 @@ func getSchedule(d *schema.ResourceData) (*functionSchedule, bool, error) {
 		if err != nil {
 			return nil, false, fmt.Errorf("parsing cron field: %w", err)
 		}
-		return &functionSchedule{CRON: &cronSchedule, Timeout: timeout}, true, nil
+		return &taskSchedule{CRON: &cronSchedule, Timeout: timeout}, true, nil
 	}
 	runEverySchedule := d.Get("run_every").(string)
 	startAtSchedule := d.Get("start_at").(string)
@@ -514,7 +521,7 @@ func getSchedule(d *schema.ResourceData) (*functionSchedule, bool, error) {
 			RunEvery: runEvery,
 			Timeout:  timeout,
 		}
-		return &functionSchedule{Iron: &ironSchedule}, true, nil
+		return &taskSchedule{Iron: &ironSchedule}, true, nil
 	}
 	return nil, false, nil
 }
@@ -579,44 +586,44 @@ func newIronClient(d *schema.ResourceData, m interface{}) (*iron.Client, *iron.C
 	if !ok {
 		return nil, nil, nil, fmt.Errorf("invalid or missing iron discovery credentials")
 	}
-	config := make(map[string]string)
+	cfg := make(map[string]string)
 	for k, v := range configMap {
 		if str, ok := v.(string); ok {
-			config[k] = str
+			cfg[k] = str
 		}
 	}
-	backendType := config["type"]
+	backendType := cfg["type"]
 	if !(backendType == "siderite" || backendType == "ferrite") {
 		return nil, nil, nil, fmt.Errorf("expected backend type of ['siderite' | 'ferrite']")
 	}
 	// Bootstrap ferrite
 	if backendType == "ferrite" {
-		token := config["token"]
-		bootstrap, err := server.Bootstrap(config["base_url"], token)
+		token := cfg["token"]
+		bootstrap, err := server.Bootstrap(cfg["base_url"], token)
 		if err != nil {
 			return nil, nil, nil, fmt.Errorf("error bootstrapping ferrite: %w", err)
 		}
 		// Inject bootstrap data
-		config["project"] = bootstrap.ProjectID
-		config["project_id"] = bootstrap.ProjectID
-		config["cluster_info_0_cluster_id"] = bootstrap.ClusterID
-		config["cluster_info_0_pubkey"] = bootstrap.PublicKey
+		cfg["project"] = bootstrap.ProjectID
+		cfg["project_id"] = bootstrap.ProjectID
+		cfg["cluster_info_0_cluster_id"] = bootstrap.ClusterID
+		cfg["cluster_info_0_pubkey"] = bootstrap.PublicKey
 	}
 	ironConfig := iron.Config{
-		BaseURL:   config["base_url"],
-		Email:     config["email"],
-		Password:  config["password"],
-		Project:   config["project"],
-		ProjectID: config["project_id"],
-		Token:     config["token"],
-		UserID:    config["user_id"],
+		BaseURL:   cfg["base_url"],
+		Email:     cfg["email"],
+		Password:  cfg["password"],
+		Project:   cfg["project"],
+		ProjectID: cfg["project_id"],
+		Token:     cfg["token"],
+		UserID:    cfg["user_id"],
 		DebugLog:  c.DebugLog,
 		ClusterInfo: []iron.ClusterInfo{
 			{
-				ClusterID:   config["cluster_info_0_cluster_id"],
-				ClusterName: config["cluster_info_0_cluster_name"],
-				Pubkey:      config["cluster_info_0_pubkey"],
-				UserID:      config["cluster_info_0_user_id"],
+				ClusterID:   cfg["cluster_info_0_cluster_id"],
+				ClusterName: cfg["cluster_info_0_cluster_name"],
+				Pubkey:      cfg["cluster_info_0_pubkey"],
+				UserID:      cfg["cluster_info_0_user_id"],
 			},
 		},
 	}
@@ -625,5 +632,5 @@ func newIronClient(d *schema.ResourceData, m interface{}) (*iron.Client, *iron.C
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("iron.NewClient: %w", err)
 	}
-	return client, &ironConfig, &config, nil
+	return client, &ironConfig, &cfg, nil
 }
