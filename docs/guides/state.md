@@ -78,7 +78,7 @@ You can reuse a single bucket for storing multiple Terraform projects just make 
 
 ### Initialize the S3 backend
 
-Replace the values with the S3 credentails and choose a `key`
+Replace the values with the S3 credentials and choose a `key`
 
 ```shell
 terraform init \

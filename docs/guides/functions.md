@@ -1,6 +1,5 @@
 ---
-page_title: "Working with hsdp_function"
-subcategory: "Functions"
+page_title: "Working with HSDP functions"
 ---
 # Working with hsdp_function
 
