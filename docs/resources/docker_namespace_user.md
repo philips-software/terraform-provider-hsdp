@@ -4,8 +4,8 @@ subcategory: "Docker Registry"
 
 # hsdp_docker_namespace_user
 
-Manages user access to namespace. Permissions can be set to pull, push and delete repositories
-in the namespace. A user grant also be granted admin permissions
+Manages user access to a registry namespace. Permissions can be set to pull, push and delete repositories
+in the namespace. A user can also be granted full admin permissions.
 
 ## Example usage
 
@@ -14,7 +14,7 @@ resource "hsdp_docker_namespace" "tycho" {
   name = "tycho"
 }
 
-resource "hsdp_docker_namespace_user" "gnemath" {
+resource "hsdp_docker_namespace_user" "camina" {
   username     = "camina"
   namespace_id = hsdp_docker_namespace.tycho.id
   
