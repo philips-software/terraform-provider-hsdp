@@ -5,9 +5,7 @@ subcategory: "Clinical Data Repository"
 # hsdp_cdr_org
 
 Provides a resource for onboarding HSDP CDR [organizations](https://www.hsdp.io/documentation/clinical-data-repository/stu3/getting-started/ehr).
-This resource provides very limited management of the onboarded FHIR organization. At this time off-boarding is also
-not supported at API level, so the provider will silently forget a CDR Organization when destroy is called for and will try to
-rediscover already onboarded organizations and import their state.
+This resource provides  limited management of the onboarded FHIR organization.
 
 ## Example Usage
 

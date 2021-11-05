@@ -1,10 +1,10 @@
 ---
 page_title: "Working with HSDP functions"
 ---
-# Working with hsdp_function
+# Working with HSDP functions
 
 The `hsdp_function` resource is a higher level abstraction of the [HSDP Iron](https://www.hsdp.io/documentation/ironio-service-broker)
-service. It uses an Iron service broker instance together with an (optional) function Gateway running in Cloud foundry. This combination
+service. It uses an Iron service broker instance together with an (optional) function Gateway running on Cloud foundry. This combination
 unlocks capabilities beyond the standard Iron services:
 
 - No need to use Iron CLI to schedule tasks or upload code
@@ -21,7 +21,7 @@ unlocks capabilities beyond the standard Iron services:
 
 ## Configuring the backend
 
-The execution plane is pluggable but at this time we only support  the `siderite` backend type which utilizes the HSDP Iron services.
+The execution plane is pluggable but at this time we  support  the `siderite` backend type which utilizes the HSDP Iron services.
 The `siderite` backend should be provisioned using the [siderite-backend](https://registry.terraform.io/modules/philips-labs/siderite-backend/cloudfoundry/latest) terraform module.
 Example:
 
@@ -65,7 +65,7 @@ resource "hsdp_function" "cuda_test" {
 When applied, the provider will perform the following actions:
 
 - Create an iron `code` based on the specified docker image
-- Create two (2) `schedules` in the Iron backend which use the `code`, one for sychronous calls and one for asychnronous calls
+- Create two (2) `schedules` in the Iron backend which use the `code`, one for synchronous calls and one for asynchronous calls
 
 The `hsdp_function` resource will export a number of attributes:
 
@@ -73,16 +73,16 @@ The `hsdp_function` resource will export a number of attributes:
 |------|-------------|
 | `async_endpoint` | The endpoint to trigger your function asychronously |
 | `endpoint` | The endpoint to trigger your function synchronously |
-| `auth_type` |  The auth type conifguration of the API gateway |
+| `auth_type` |  The auth type configuration of the API gateway |
 | `token` | The security token to use for authenticating against the endpoints |
 
 ## Creating your own Docker function image
 
 A `hsdp_function` compatible Docker image needs to adhere to a number of criteria. We use
-a helper application called `siderite`. Siderite started as a convenience tool to ease Iron Worker usage. It now has a
-`function` mode where it will look for an `/app/server` (configurable) and execute it. The server should start up and
-listen on port `8080` for regular HTTP requests. The siderite binary will establish a connection to the gateway and wait
-for synchronous requests to come in.
+a helper application called `siderite`. Siderite started as a convenience tool to ease IronWorker usage. It now has a
+`function` mode where it will look for an `/app/server` (configurable) and execute it. The `siderite` helper also
+provides integration with [HSDP Logging](https://www.hsdp.io/documentation/logging) and supports streaming output in
+real-time to your central logging accounts.
 
 ## Asynchronous function
 
@@ -93,7 +93,7 @@ In asynchronous mode the Siderite helper will pull the payload from the Gateway 
 ## Example Docker file
 
 ```dockerfile
-FROM golang:1.17.1-alpine3.14 as builder
+FROM golang:1.17.3-alpine3.14 as builder
 RUN apk add --no-cache git openssh gcc musl-dev
 WORKDIR /src
 COPY go.mod .
@@ -222,7 +222,15 @@ The `hsdp_function` resource supports defining functions which are automatically
 periodically i.e. `Tasks`. A Docker image which defines a task should use the following `CMD`:
 
 ```dockerfile
-CMD ["/app/siderite","task"]
+FROM philipslabs/siderite:debian-v0.11.3 as siderite
+
+FROM minio/mc:latest
+COPY --from=siderite /app/siderite /usr/bin/siderite
+
+## Copy other tools or applications as needed
+#COPY s3mirror.sh /usr/bin/s3mirror.sh
+
+CMD ["siderite","task"]
 ```
 
 This ensures that after a single run the container exits gracefully instead of waiting to timeout.
@@ -269,5 +277,47 @@ environment = {
 }
 ```
 
-With the above configuration the gateway will do a introspect call on the Bearer token and if the user/service has the
+With the above configuration the gateway will do an introspect call on the Bearer token and if the user/service has the
 `HSDP_FUNCTION` role in either of the ORGs specified will be allowed to execute the function.
+
+## Logging
+
+The siderite helper supports direct logging to HSDP logging. You can either use API signing or an IAM service identity
+which has the `LOG.CREATE` scope (recommended). Configuration can be done using below environment variables:
+
+| environment | description | required |
+|-------------|-------------|----------|
+| SIDERITE_LOGINGESTOR_PRODUCT_KEY| The HSDP logging product key | Required |
+| SIDERITE_LOGINGESTOR_KEY | The HSDP logging shared key | Optional |
+| SIDERITE_LOGINGESTOR_SECRET | The HSDP logging shared secret | Optional |
+| SIDERITE_LOGINGESTOR_URL | The HSDP logging base URL | Required when not setting region and environment |
+| SIDERITE_LOGINGESTOR_SERVICE_ID | The HSDP service identity ID to use | Optional |
+| SIDERITE_LOGINGESTOR_SERVICE_PRIVATE_KEY | The private key belonging to the service identity | Optional |
+| SIDERITE_LOGINGESTOR_REGION | The HSDP region | Required for service identity |
+| SIDERITE_LOGINGESTOR_ENVIRONMENT | The HSDP environment (`client-test`, `prod`) | Required for service identity |
+
+Below is an example of using logging in a task:
+
+```hcl
+resource "hsdp_function" "request" {
+  name = "http-request"
+  docker_image = "philipslabs/hsdp-function-http-request:v0.6.0"
+
+  environment = {
+    REQUEST_METHOD   = "GET"
+    REQUEST_URL      = "https://go-hello-world.eu-west.philips-healthsuite.com/dump"
+    
+    SIDERITE_LOGINGESTOR_REGION              = var.region
+    SIDEIRTE_LOGINGESTOR_ENVIRONMENT         = var.environment
+    SIDERITE_LOGINGESTOR_PRODUCT_KEY         = var.logging_product_key
+    SIDERITE_LOGINGESTOR_SERVICE_ID          = hsdp_iam_service.logger.id
+    SIDERITE_LOGINGESTOR_SERVICE_PRIVATE_KEY = hsdp_iam_service.logger.private_key
+  }
+
+  timeout = 30
+
+  backend {
+    credentials = module.siderite_backend.credentials
+  }
+}
+```
