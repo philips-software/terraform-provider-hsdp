@@ -1,5 +1,5 @@
 ---
-subcategory: "Clinical Data Repository"
+subcategory: "Clinical Data Repository (CDR)"
 ---
 
 # hsdp_cdr_subscription
