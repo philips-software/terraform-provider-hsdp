@@ -4,10 +4,9 @@ subcategory: "Identity and Access Management (IAM)"
 
 # hsdp_iam_user
 
-Provides a resource for managing an HSDP IAM user.
-When a new user is created an invitation email is triggered with a validity of 72 hours.
-If not activated within this period IAM will purge the account.
-The provider will recreate the user in that case.
+Provides a resource for managing a HSDP IAM user. When a new user is created an invitation email is triggered with a validity of 72 hours.
+In case the user hasn't activated their account within this 72-hour period you can use the [hsdp_iam_activation_email](https://registry.terraform.io/providers/philips-software/hsdp/latest/docs/resources/iam_activation_email)
+resource to resend the email. Identifying unactivated users can be done using the [hsdp_iam_users](https://registry.terraform.io/providers/philips-software/hsdp/latest/docs/data-sources/iam_users) data source.
 
 ## Example Usage
 

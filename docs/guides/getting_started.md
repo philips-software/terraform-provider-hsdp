@@ -1,5 +1,5 @@
 ---
-page_title: "Getting start with the HSDP Terraform provider"
+page_title: "Getting started with HSDP Terraform"
 ---
 
 # Getting started with HSDP Terraform
