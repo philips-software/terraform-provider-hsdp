@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.26.5
+
+- Core: upgrade go-hsdp-api
+- Dcoumentation: updates
+
 ## v0.26.4
 
 - Core: upgrade go-hsdp-api
