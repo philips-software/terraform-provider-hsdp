@@ -1,5 +1,5 @@
 ---
-subcategory: "Discovery"
+subcategory: "Configuration"
 ---
 
 # hsdp_config
@@ -39,7 +39,7 @@ Availability of services varies across regions. The following services are disco
 | gateway          | Regional [SSH gateway](https://www.hsdp.io/develop/get-started-healthsuite/set-up-ssh-access/access-services-behind-ssh-gateway/connect-to-gateway) details |
 | has              | Hosted Application Streaming [HAS](https://www.hsdp.io/documentation/hosted-application-streaming/getting-started-with-hosted-application-streaming#) |
 | iam              | Identity and Access Management [IAM](https://www.hsdp.io/documentation/identity-and-access-management-iam) |
-| idm              | Identity and User Management. Part if [IAM](https://www.hsdp.io/documentation/identity-and-access-management-iam) |
+| idm              | Identity and User Management. Part of [IAM](https://www.hsdp.io/documentation/identity-and-access-management-iam) |
 | kibana           | Kibana endpoint. Part of [HSDP Logging](https://www.hsdp.io/documentation/logging) |
 | logging          | [HSDP Logging](https://www.hsdp.io/documentation/logging) API details |
 | logquery         | Log query endpoint details. Part of [HSDP Logging](https://www.hsdp.io/documentation/logging) |

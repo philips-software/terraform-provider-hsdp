@@ -1,5 +1,5 @@
 ---
-subcategory: "Identity and Access Management"
+subcategory: "Identity and Access Management (IAM)"
 ---
 
 # hsdp_iam_users
