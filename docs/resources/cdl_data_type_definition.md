@@ -1,10 +1,10 @@
 ---
-subcategory: "Clinical Data Lake"
+subcategory: "Clinical Data Lake (CDL)"
 ---
 
 # hsdp_cdl_data_type_definition
 
-Manages HSDP Clinical Data Lake Data Type Definitions.
+Manages HSDP Clinical Data Lake (CDL) Data Type Definitions.
 
 ## Example Usage
 

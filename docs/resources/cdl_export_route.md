@@ -1,10 +1,10 @@
 ---
-subcategory: "Clinical Data Lake"
+subcategory: "Clinical Data Lake (CDL)"
 ---
 
 # hsdp_cdl_export_route
 
-Manages HSDP Clinical Data Lake ExportRoute.
+Manages HSDP Clinical Data Lake (CDL) ExportRoute.
 
 ## Example Usage
 

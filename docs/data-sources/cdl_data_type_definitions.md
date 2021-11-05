@@ -1,10 +1,10 @@
 ---
-subcategory: "Clinical Data Lake"
+subcategory: "Clinical Data Lake (CDL)"
 ---
 
 # hsdp_cdl_data_type_definitions
 
-Retrieve DTDs present in a HSDP Clinical Data Lake instance.
+Retrieve DTDs present in a HSDP Clinical Data Lake (CDL) instance.
 
 ## Example Usage
 

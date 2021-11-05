@@ -1,10 +1,10 @@
 ---
-subcategory: "Clinical Data Lake"
+subcategory: "Clinical Data Lake (CDL)"
 ---
 
 # hsdp_cdl_label_definition
 
-Retrieve details on HSDP Clinical Data Lake Label Definition.
+Retrieve details on HSDP Clinical Data Lake (CDL) Label Definition.
 
 ## Example Usage
 

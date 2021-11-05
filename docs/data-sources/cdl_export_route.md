@@ -1,10 +1,10 @@
 ---
-subcategory: "Clinical Data Lake"
+subcategory: "Clinical Data Lake (CDL)"
 ---
 
 # hsdp_cdl_export_route
 
-Retrieve details on HSDP Clinical Data Lake Export Route.
+Retrieve details on HSDP Clinical Data Lake (CDL) Export Route.
 
 ## Example Usage
 

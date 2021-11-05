@@ -1,10 +1,10 @@
 ---
-subcategory: "Clinical Data Lake"
+subcategory: "Clinical Data Lake (CDL)"
 ---
 
 # hsdp_cdl_research_study
 
-Retrieve details on HSDP Clinical Data Lake research study.
+Retrieve details on HSDP Clinical Data Lake (CDL) research study.
 
 ## Example Usage
 
