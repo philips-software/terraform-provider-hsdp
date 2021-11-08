@@ -189,7 +189,7 @@ func resourceFunctionUpdate(_ context.Context, d *schema.ResourceData, m interfa
 
 	if d.HasChange("schedule") || d.HasChange("command") ||
 		d.HasChange("run_every") || d.HasChange("environment") ||
-		d.HasChange("start_at") || d.HasChange("image") || d.HasChange("timeout") {
+		d.HasChange("start_at") || d.HasChange("docker_image") || d.HasChange("timeout") {
 		schedules, _, err := ironClient.Schedules.GetSchedulesWithCode(codeName)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("GetSchedulesWithCode(%s): %w", codeName, err))
