@@ -309,6 +309,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_docker_namespace":                  namespace.DataSourceDockerNamespace(),
 			"hsdp_docker_namespaces":                 namespace.DataSourceDockerNamespaces(),
 			"hsdp_docker_repository":                 repository.DataSourceDockerRepository(),
+			"hsdp_iam_client":                        iam.DataSourceIAMClient(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}

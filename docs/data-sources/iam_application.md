@@ -11,7 +11,7 @@ Retrieve details of an existing application
 ```hcl
 data "hsdp_iam_application" "my_app" {
    name = "MYAPP"
-  proposition_id = data.hsdp_iam_proposition.my_prop.id
+   proposition_id = data.hsdp_iam_proposition.my_prop.id
 }
 ```
 
@@ -26,7 +26,7 @@ output "my_app_id" {
 The following arguments are supported:
 
 * `name` - (Required) The name of the application to look up
-* `organization_id` - (Required) the UUID of the proposition the application belongs to
+* `proposition_id` - (Required) the UUID of the proposition the application belongs to
 
 ## Attributes Reference
 
