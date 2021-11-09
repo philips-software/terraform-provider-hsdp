@@ -139,6 +139,7 @@ func resourceIAMClientCreate(ctx context.Context, d *schema.ResourceData, m inte
 	cl.IDTokenLifetime = d.Get("id_token_lifetime").(int)
 	cl.RefreshTokenLifetime = d.Get("refresh_token_lifetime").(int)
 	cl.AccessTokenLifetime = d.Get("access_token_lifetime").(int)
+	cl.ConsentImplied = d.Get("consent_implied").(bool)
 
 	var createdClient *iam.ApplicationClient
 
