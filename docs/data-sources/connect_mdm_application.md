@@ -1,5 +1,5 @@
 ---
-subcategory: "Identity and Access Management (IAM)"
+subcategory: "Master Data Management (MDM)"
 ---
 
 # hsdp_iam_application
@@ -9,15 +9,15 @@ Retrieve details of an existing application
 ## Example Usage
 
 ```hcl
-data "hsdp_iam_application" "my_app" {
+data "hsdp_connect_mdm_application" "app" {
    name = "MYAPP"
-   proposition_id = data.hsdp_iam_proposition.my_prop.id
+   proposition_id = data.hsdp_iam_proposition.app.id
 }
 ```
 
 ```hcl
 output "my_app_id" {
-   value = data.hsdp_iam_application.my_app.id
+   value = data.hsdp_connect_mdm_application.app.id
 }
 ```
 

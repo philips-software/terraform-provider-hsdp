@@ -15,6 +15,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/org"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/subscription"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/ch"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/mdm"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/dicom"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/discovery"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/namespace"
@@ -84,6 +85,11 @@ func Provider(build string) *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: descriptions["notification_url"],
+			},
+			"mdm_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: descriptions["mdm_url"],
 			},
 			"service_id": {
 				Type:          schema.TypeString,
@@ -310,6 +316,8 @@ func Provider(build string) *schema.Provider {
 			"hsdp_docker_namespaces":                 namespace.DataSourceDockerNamespaces(),
 			"hsdp_docker_repository":                 repository.DataSourceDockerRepository(),
 			"hsdp_iam_client":                        iam.DataSourceIAMClient(),
+			"hsdp_connect_mdm_proposition":           mdm.DataSourceConnectMDMProposition(),
+			"hsdp_connect_mdm_application":           mdm.DataSourceConnectMDMApplication(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
@@ -325,6 +333,7 @@ func init() {
 		"idm_url":             "The HSDP IDM instance URL",
 		"s3creds_url":         "The HSDP S3 Credentials instance URL",
 		"notification_url":    "The HSDP Notification service base URL to use",
+		"mdm_url":             "The Connect MDM URL to use",
 		"oauth2_client_id":    "The OAuth2 client id",
 		"oauth2_password":     "The OAuth2 password",
 		"service_id":          "The service ID to use as Organization Admin",
@@ -379,6 +388,7 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.NotificationURL = d.Get("notification_url").(string)
 		c.TimeZone = "UTC"
 		c.AIInferenceEndpoint = d.Get("ai_inference_endpoint").(string)
+		c.MDMURL = d.Get("mdm_url").(string)
 
 		c.SetupIAMClient()
 		c.SetupS3CredsClient()
@@ -387,6 +397,7 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.SetupPKIClient()
 		c.SetupSTLClient()
 		c.SetupNotificationClient()
+		c.SetupMDMClient()
 
 		if c.DebugLog != "" {
 			debugFile, err := os.OpenFile(c.DebugLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)

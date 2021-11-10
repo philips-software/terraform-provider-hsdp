@@ -1,23 +1,23 @@
 ---
-subcategory: "Identity and Access Management (IAM)"
+subcategory: "Master Data Management (MDM)"
 ---
 
-# hsdp_iam_proposition
+# hsdp_connect_mdm_proposition
 
 Retrieve details of an existing proposition
 
 ## Example Usage
 
 ```hcl
-data "hsdp_iam_proposition" "my_prop" {
-   name = "MYPROPOSITION"
+data "hsdp_connect_mdm_proposition" "first" {
+   name = "First"
    organization_id = var.my_org_id
 }
 ```
 
 ```hcl
-output "my_prop_display_name" {
-   value = data.hsdp_iam_proposition.my_prop.display_name
+output "my_prop_id" {
+   value = data.hsdp_iam_proposition.my_prop.id
 }
 ```
 

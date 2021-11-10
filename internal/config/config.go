@@ -14,6 +14,7 @@ import (
 	"github.com/philips-software/go-hsdp-api/cdl"
 	"github.com/philips-software/go-hsdp-api/cdr"
 	"github.com/philips-software/go-hsdp-api/config"
+	"github.com/philips-software/go-hsdp-api/connect/mdm"
 	"github.com/philips-software/go-hsdp-api/console"
 	"github.com/philips-software/go-hsdp-api/console/docker"
 	"github.com/philips-software/go-hsdp-api/dicom"
@@ -32,6 +33,7 @@ type Config struct {
 	ServicePrivateKey   string
 	S3CredsURL          string
 	NotificationURL     string
+	MDMURL              string
 	STLURL              string
 	CartelHost          string
 	CartelToken         string
@@ -52,6 +54,7 @@ type Config struct {
 	pkiClient             *pki.Client
 	stlClient             *stl.Client
 	notificationClient    *notification.Client
+	mdmClient             *mdm.Client
 	DebugFile             *os.File
 	credsClientErr        error
 	cartelClientErr       error
@@ -60,6 +63,7 @@ type Config struct {
 	pkiClientErr          error
 	stlClientErr          error
 	notificationClientErr error
+	mdmClientErr          error
 	TimeZone              string
 
 	STU3MA *jsonformat.Marshaller
@@ -82,6 +86,10 @@ func (c *Config) S3CredsClient() (*s3creds.Client, error) {
 
 func (c *Config) ConsoleClient() (*console.Client, error) {
 	return c.consoleClient, c.consoleClientErr
+}
+
+func (c *Config) MDMClient() (*mdm.Client, error) {
+	return c.mdmClient, c.mdmClientErr
 }
 
 func (c *Config) STLClient(_ ...string) (*stl.Client, error) {
@@ -256,6 +264,36 @@ func (c *Config) SetupNotificationClient() {
 		return
 	}
 	c.notificationClient = client
+}
+
+func (c *Config) SetupMDMClient() {
+	if c.iamClientErr != nil {
+		c.mdmClient = nil
+		c.mdmClientErr = c.iamClientErr
+		return
+	}
+	if c.MDMURL == "" {
+		env := c.Environment
+		if env == "" {
+			env = "prod"
+		}
+		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(env))
+		if err == nil {
+			if url := ac.Service("connect-mdm").URL; url != "" {
+				c.MDMURL = url
+			}
+		}
+	}
+	client, err := mdm.NewClient(c.iamClient, &mdm.Config{
+		BaseURL:  c.MDMURL,
+		DebugLog: c.DebugLog,
+	})
+	if err != nil {
+		c.mdmClient = nil
+		c.mdmClientErr = err
+		return
+	}
+	c.mdmClient = client
 }
 
 // SetupCartelClient sets up an Cartel client

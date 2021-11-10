@@ -15,7 +15,7 @@ require (
 	github.com/loafoe/easyssh-proxy/v2 v2.0.2
 	github.com/philips-labs/ferrite v0.1.2
 	github.com/philips-labs/siderite v0.11.3
-	github.com/philips-software/go-hsdp-api v0.49.1
+	github.com/philips-software/go-hsdp-api v0.49.3-0.20211110003803-5365526909eb
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.7.0

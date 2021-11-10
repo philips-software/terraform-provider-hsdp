@@ -1,23 +1,23 @@
-package iam
+package mdm
 
 import (
 	"context"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/philips-software/go-hsdp-api/iam"
+	"github.com/philips-software/go-hsdp-api/connect/mdm"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
 
-func DataSourceIAMProposition() *schema.Resource {
+func DataSourceConnectMDMApplication() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceIAMPropositionRead,
+		ReadContext: dataSourceConnectMDMApplicationRead,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"organization_id": {
+			"proposition_id": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -34,28 +34,32 @@ func DataSourceIAMProposition() *schema.Resource {
 
 }
 
-func dataSourceIAMPropositionRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceConnectMDMApplicationRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics
 
-	client, err := c.IAMClient()
+	client, err := c.MDMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	orgId := d.Get("organization_id").(string)
+	propID := d.Get("proposition_id").(string)
 	name := d.Get("name").(string)
 
-	prop, _, err := client.Propositions.GetProposition(&iam.GetPropositionsOptions{
-		OrganizationID: &orgId,
-		Name:           &name,
+	apps, _, err := client.Applications.GetApplications(&mdm.GetApplicationsOptions{
+		PropositionID: &propID,
+		Name:          &name,
 	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	if apps == nil || len(*apps) == 0 {
+		return diag.FromErr(config.ErrResourceNotFound)
+	}
+	app := (*apps)[0]
 
-	d.SetId(prop.ID)
-	_ = d.Set("description", prop.Description)
-	_ = d.Set("global_reference_id", prop.GlobalReferenceID)
+	d.SetId(app.ID)
+	_ = d.Set("description", app.Description)
+	_ = d.Set("global_reference_id", app.GlobalReferenceID)
 	return diags
 }
