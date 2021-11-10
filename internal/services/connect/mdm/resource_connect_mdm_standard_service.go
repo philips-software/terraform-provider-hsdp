@@ -55,10 +55,14 @@ func ResourceConnectMDMStandardService() *schema.Resource {
 			},
 			"organization_identifier": {
 				Type:             schema.TypeString,
-				Computed:         true,
+				Optional:         true,
 				DiffSuppressFunc: tools.SuppressWhenGenerated,
 			},
 			"version_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"guid": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -146,6 +150,7 @@ func standardServiceToSchema(service mdm.StandardService, d *schema.ResourceData
 	_ = d.Set("description", service.Description)
 	_ = d.Set("name", service.Name)
 	_ = d.Set("tags", service.Tags)
+	_ = d.Set("guid", service.ID)
 	if service.OrganizationGuid != nil && service.OrganizationGuid.Value != "" {
 		value := service.OrganizationGuid.Value
 		if service.OrganizationGuid.System != "" {
@@ -184,7 +189,8 @@ func resourceConnectMDMStandardServiceCreate(ctx context.Context, d *schema.Reso
 	if created == nil {
 		return diag.FromErr(fmt.Errorf("failed to create standard service: %d", resp.StatusCode))
 	}
-	d.SetId(created.ID)
+	_ = d.Set("guid", created.ID)
+	d.SetId(fmt.Sprintf("StandardService/%s", created.ID))
 	return resourceConnectMDMStandardServiceRead(ctx, d, m)
 }
 
@@ -198,7 +204,7 @@ func resourceConnectMDMStandardServiceRead(_ context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	id := d.Id()
+	id := d.Get("guid").(string)
 	service, resp, err := client.StandardServices.GetStandardServiceByID(id)
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
@@ -221,7 +227,7 @@ func resourceConnectMDMStandardServiceUpdate(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 
-	id := d.Id()
+	id := d.Get("guid").(string)
 
 	service := schemaToStandardService(d)
 	service.ID = id
@@ -246,7 +252,7 @@ func resourceConnectMDMStandardServiceDelete(_ context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	id := d.Id()
+	id := d.Get("guid").(string)
 	service, _, err := client.StandardServices.GetStandardServiceByID(id)
 	if err != nil {
 		return diag.FromErr(err)
@@ -259,5 +265,6 @@ func resourceConnectMDMStandardServiceDelete(_ context.Context, d *schema.Resour
 	if !ok {
 		return diag.FromErr(config.ErrInvalidResponse)
 	}
+	d.SetId("")
 	return diags
 }

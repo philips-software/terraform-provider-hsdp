@@ -271,6 +271,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_docker_namespace_user":            namespace.ResourceDockerNamespaceUser(),
 			"hsdp_docker_repository":                repository.ResourceDockerRepository(),
 			"hsdp_connect_mdm_standard_service":     mdm.ResourceConnectMDMStandardService(),
+			"hsdp_connect_mdm_service_action":       mdm.ResourceConnectMDMServiceAction(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                    iam.DataSourceIAMIntrospect(),
