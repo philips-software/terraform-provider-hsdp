@@ -2,7 +2,7 @@
 subcategory: "Master Data Management (MDM)"
 ---
 
-# hsdp_iam_application
+# hsdp_connect_mdm_application
 
 Retrieve details of an existing application
 

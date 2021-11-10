@@ -70,7 +70,6 @@ The following arguments are supported:
 ## Attributes reference
 
 In addition to all arguments above, the following attributes are exported:
-attributes are exported:
 
 * `id` - The GUID of the job
 * `reference` - The reference of this job

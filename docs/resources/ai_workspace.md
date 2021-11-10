@@ -56,7 +56,6 @@ The following arguments are supported:
 ## Attribute reference
 
 In addition to all arguments above, the following attributes are exported:
-attributes are exported:
 
 * `id` - The GUID of the Model
 * `created` - The date this Model  was created
