@@ -42,7 +42,7 @@ The following arguments are supported:
 * `scopes` - (Optional) Array. List of supported scopes for this client
 * `default_scopes` - (Optional) Array. Default scopes. You do not have to specify these explicitly when requesting a token
 * `redirection_uris` - (Optional) Array of valid RedirectionURIs for this client
-* `user_client` - (Optional, bool) 
+* `user_client` - (Optional, bool)
 * `client_revoked` - (Optional, bool)
 
 ## Attributes Reference
@@ -52,7 +52,7 @@ The following attributes are exported:
 * `id` - The GUID of the client
 * `disabled` - True if the client is disabled e.g. because the Org is disabled
 * `client_id` -  The client id
-* `password` - The password 
+* `password` - The password
 
 ## Import
 

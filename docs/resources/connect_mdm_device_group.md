@@ -25,7 +25,7 @@ The following attributes are exported:
 
 * `name` - (Required) The name of the device group
 * `description` - (Optional) A short description of the device group
-* `application_id` - (Required) Reference to the Application this group falls under 
+* `application_id` - (Required) Reference to the Application this group falls under
 * `default_iam_group_id` - (Optional) The IAM Group from which this group will inherit roles from
 
 ## Attributes reference
