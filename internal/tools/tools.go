@@ -16,7 +16,7 @@ import (
 	"github.com/philips-software/go-hsdp-api/iam"
 )
 
-func TryHTTPCall(operation func() (*http.Response, error), retryOnCodes ...int) error {
+func TryHTTPCall(numberOfTries uint64, operation func() (*http.Response, error), retryOnCodes ...int) error {
 	if len(retryOnCodes) == 0 {
 		retryOnCodes = []int{http.StatusUnprocessableEntity, http.StatusInternalServerError, http.StatusTooManyRequests}
 	}
@@ -40,7 +40,7 @@ func TryHTTPCall(operation func() (*http.Response, error), retryOnCodes ...int) 
 		}
 		return backoff.Permanent(err)
 	}
-	return backoff.Retry(doOp, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+	return backoff.Retry(doOp, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), numberOfTries))
 }
 
 func TryIAMCall(operation func() (*iam.Response, error), retryOnCodes ...int) error {
