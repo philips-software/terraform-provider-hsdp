@@ -2,6 +2,7 @@ package mdm
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -26,6 +27,10 @@ func DataSourceConnectMDMApplication() *schema.Resource {
 				Computed: true,
 			},
 			"global_reference_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"guid": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -58,7 +63,8 @@ func dataSourceConnectMDMApplicationRead(_ context.Context, d *schema.ResourceDa
 	}
 	app := (*apps)[0]
 
-	d.SetId(app.ID)
+	d.SetId(fmt.Sprintf("Application/%s", app.ID))
+	_ = d.Set("guid", app.ID)
 	_ = d.Set("description", app.Description)
 	_ = d.Set("global_reference_id", app.GlobalReferenceID)
 	return diags
