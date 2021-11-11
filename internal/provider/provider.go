@@ -324,6 +324,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_proposition":           mdm.DataSourceConnectMDMProposition(),
 			"hsdp_connect_mdm_application":           mdm.DataSourceConnectMDMApplication(),
 			"hsdp_connect_mdm_standard_services":     mdm.DataSourceConnectMDMStandardServices(),
+			"hsdp_connect_mdm_regions":               mdm.DataSourceConnectMDMRegions(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
