@@ -3,6 +3,7 @@ package iam
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -170,10 +171,13 @@ func resourceIAMSMSGatewayConfigUpdate(ctx context.Context, d *schema.ResourceDa
 	}
 	gw.ID = id
 	gw.Meta = serverVersion.Meta
-	err = tools.TryIAMCall(func() (*iam.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		gw, resp, err = client.SMSGateways.UpdateSMSGateway(*gw)
-		return resp, err
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	})
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error updating SMS gateway: %w", err))
@@ -181,7 +185,7 @@ func resourceIAMSMSGatewayConfigUpdate(ctx context.Context, d *schema.ResourceDa
 	return resourceIAMSMSGatewayConfigRead(ctx, d, meta)
 }
 
-func resourceIAMSMSGatewayConfigDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIAMSMSGatewayConfigDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	c := meta.(*config.Config)
@@ -193,10 +197,13 @@ func resourceIAMSMSGatewayConfigDelete(_ context.Context, d *schema.ResourceData
 	}
 	var resp *iam.Response
 
-	err = tools.TryIAMCall(func() (*iam.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		_, resp, err = client.SMSGateways.DeleteSMSGateway(iam.SMSGateway{ID: id})
-		return resp, err
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	})
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error deleting SMS gateway: %w", err))
@@ -205,7 +212,7 @@ func resourceIAMSMSGatewayConfigDelete(_ context.Context, d *schema.ResourceData
 	return diags
 }
 
-func resourceIAMSMSGatewayConfigRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIAMSMSGatewayConfigRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var resp *iam.Response
 	var gw *iam.SMSGateway
@@ -218,10 +225,13 @@ func resourceIAMSMSGatewayConfigRead(_ context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	err = tools.TryIAMCall(func() (*iam.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		gw, resp, err = client.SMSGateways.GetSMSGatewayByID(id)
-		return resp, err
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	})
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error reading SMS gateway: %w", err))
@@ -249,10 +259,13 @@ func resourceIAMSMSGatewayConfigCreate(ctx context.Context, d *schema.ResourceDa
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error reading SMS gateway: %w", err))
 	}
-	err = tools.TryIAMCall(func() (*iam.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		createdGW, resp, err = client.SMSGateways.CreateSMSGateway(*gw)
-		return resp, err
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	})
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error creating SMS gateway: %w", err))

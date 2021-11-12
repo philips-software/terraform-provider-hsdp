@@ -100,10 +100,13 @@ func resourceIAMEmailTemplateCreate(ctx context.Context, d *schema.ResourceData,
 
 	var createdTemplate *iam.EmailTemplate
 	var resp *iam.Response
-	err = tools.TryIAMCall(func() (*iam.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		createdTemplate, resp, err = client.EmailTemplates.CreateTemplate(template)
-		return resp, err
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	}, http.StatusInternalServerError, http.StatusTooManyRequests)
 
 	if err != nil {

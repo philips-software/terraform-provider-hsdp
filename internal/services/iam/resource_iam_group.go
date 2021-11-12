@@ -60,7 +60,7 @@ func ResourceIAMGroup() *schema.Resource {
 	}
 }
 
-func resourceIAMGroupCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -76,11 +76,14 @@ func resourceIAMGroupCreate(_ context.Context, d *schema.ResourceData, m interfa
 	group.ManagingOrganization = d.Get("managing_organization").(string)
 
 	var createdGroup *iam.Group
-	err = tools.TryIAMCall(func() (*iam.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var resp *iam.Response
 		var err error
 		createdGroup, resp, err = client.Groups.CreateGroup(group)
-		return resp, err
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	})
 
 	if err != nil {
@@ -97,9 +100,12 @@ func resourceIAMGroupCreate(_ context.Context, d *schema.ResourceData, m interfa
 	for _, r := range roles {
 		role, _, _ := client.Roles.GetRoleByID(r)
 		if role != nil {
-			err = tools.TryIAMCall(func() (*iam.Response, error) {
+			err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 				_, resp, err := client.Groups.AssignRole(*createdGroup, *role)
-				return resp, err
+				if resp == nil {
+					return nil, err
+				}
+				return resp.Response, err
 			})
 			if err != nil {
 				diags = append(diags, diag.FromErr(err)...)
@@ -110,9 +116,12 @@ func resourceIAMGroupCreate(_ context.Context, d *schema.ResourceData, m interfa
 	// Add users
 	users := tools.ExpandStringList(d.Get("users").(*schema.Set).List())
 	if len(users) > 0 {
-		err = tools.TryIAMCall(func() (*iam.Response, error) {
+		err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 			_, resp, err := client.Groups.AddMembers(*createdGroup, users...)
-			return resp, err
+			if resp == nil {
+				return nil, err
+			}
+			return resp.Response, err
 		})
 		if err != nil {
 			diags = append(diags, diag.FromErr(err)...)
@@ -122,9 +131,12 @@ func resourceIAMGroupCreate(_ context.Context, d *schema.ResourceData, m interfa
 	// Add services
 	services := tools.ExpandStringList(d.Get("services").(*schema.Set).List())
 	if len(services) > 0 {
-		err = tools.TryIAMCall(func() (*iam.Response, error) {
+		err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 			_, resp, err := client.Groups.AddServices(*createdGroup, services...)
-			return resp, err
+			if resp == nil {
+				return nil, err
+			}
+			return resp.Response, err
 		})
 		if err != nil {
 			diags = append(diags, diag.FromErr(err)...)
@@ -167,7 +179,7 @@ func resourceIAMGroupRead(_ context.Context, d *schema.ResourceData, m interface
 	return diags
 }
 
-func resourceIAMGroupUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -211,18 +223,24 @@ func resourceIAMGroupUpdate(_ context.Context, d *schema.ResourceData, m interfa
 		toRemove := tools.Difference(old, newList)
 
 		if len(toRemove) > 0 {
-			err = tools.TryIAMCall(func() (*iam.Response, error) {
+			err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 				_, resp, err := client.Groups.RemoveServices(group, toRemove...)
-				return resp, err
+				if resp == nil {
+					return nil, err
+				}
+				return resp.Response, err
 			})
 			if err != nil {
 				diags = append(diags, diag.FromErr(err)...)
 			}
 		}
 		if len(toAdd) > 0 {
-			err = tools.TryIAMCall(func() (*iam.Response, error) {
+			err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 				_, resp, err := client.Groups.AddServices(group, toAdd...)
-				return resp, err
+				if resp == nil {
+					return nil, err
+				}
+				return resp.Response, err
 			})
 			if err != nil {
 				diags = append(diags, diag.FromErr(err)...)
@@ -282,12 +300,15 @@ func resourceIAMGroupDelete(ctx context.Context, d *schema.ResourceData, m inter
 	users := tools.ExpandStringList(d.Get("users").(*schema.Set).List())
 	if len(users) > 0 {
 		for _, u := range users {
-			err := tools.TryIAMCall(func() (*iam.Response, error) {
+			err := tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 				_, resp, err := client.Groups.RemoveMembers(group, u)
 				if resp != nil && resp.StatusCode == http.StatusUnprocessableEntity {
-					return resp, nil // User is already gone
+					return resp.Response, nil // User is already gone
 				}
-				return resp, err
+				if resp == nil {
+					return nil, err
+				}
+				return resp.Response, err
 			}, http.StatusInternalServerError)
 			if err != nil {
 				diags = append(diags, diag.FromErr(err)...)
@@ -302,12 +323,15 @@ func resourceIAMGroupDelete(ctx context.Context, d *schema.ResourceData, m inter
 	services := tools.ExpandStringList(d.Get("services").(*schema.Set).List())
 	if len(services) > 0 {
 		for _, s := range services {
-			err := tools.TryIAMCall(func() (*iam.Response, error) {
+			err := tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 				_, resp, err := client.Groups.RemoveServices(group, s)
 				if resp != nil && resp.StatusCode == http.StatusUnprocessableEntity {
-					return resp, nil // Service is already gone
+					return resp.Response, nil // Service is already gone
 				}
-				return resp, err
+				if resp == nil {
+					return nil, err
+				}
+				return resp.Response, err
 			}, http.StatusInternalServerError)
 			if err != nil {
 				diags = append(diags, diag.FromErr(err)...)
@@ -322,13 +346,16 @@ func resourceIAMGroupDelete(ctx context.Context, d *schema.ResourceData, m inter
 	roles := tools.ExpandStringList(d.Get("roles").(*schema.Set).List())
 	if len(roles) > 0 {
 		for _, r := range roles {
-			err := tools.TryIAMCall(func() (*iam.Response, error) {
+			err := tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 				var role = iam.Role{ID: r}
 				_, resp, err := client.Groups.RemoveRole(group, role)
 				if resp != nil && resp.StatusCode == http.StatusUnprocessableEntity {
-					return resp, nil // Role is already gone
+					return resp.Response, nil // Role is already gone
 				}
-				return resp, err
+				if resp == nil {
+					return nil, err
+				}
+				return resp.Response, err
 			}, http.StatusInternalServerError)
 			if err != nil {
 				diags = append(diags, diag.FromErr(err)...)
@@ -343,11 +370,14 @@ func resourceIAMGroupDelete(ctx context.Context, d *schema.ResourceData, m inter
 	_ = resourceIAMGroupRead(ctx, d, m)
 
 	var ok bool
-	err = tools.TryIAMCall(func() (*iam.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var resp *iam.Response
 		var err error
 		ok, resp, err = client.Groups.DeleteGroup(group)
-		return resp, err
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	}, http.StatusInternalServerError)
 	if err != nil {
 		return diag.FromErr(err)

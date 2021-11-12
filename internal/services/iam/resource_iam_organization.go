@@ -90,13 +90,16 @@ func resourceIAMOrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 
 	var org *iam.Organization
 	var resp *iam.Response
-	err = tools.TryIAMCall(func() (*iam.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		org, resp, err = client.Organizations.CreateOrganization(newOrg)
 		if err != nil {
 			_ = client.TokenRefresh()
 		}
-		return resp, err
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	})
 	if err != nil {
 		return diag.FromErr(err)

@@ -3,6 +3,7 @@ package iam
 import (
 	"context"
 	"encoding/json"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -152,7 +153,7 @@ func resourceDataToToPasswordPolicy(d *schema.ResourceData, policy *iam.Password
 	}
 }
 
-func resourceIAMPasswordPolicyCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMPasswordPolicyCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -180,14 +181,17 @@ func resourceIAMPasswordPolicyCreate(_ context.Context, d *schema.ResourceData, 
 	}
 	var createdPolicy *iam.PasswordPolicy
 
-	err = tools.TryIAMCall(func() (*iam.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		var resp *iam.Response
 		createdPolicy, resp, err = policyFunc(policy)
 		if err != nil {
 			_ = client.TokenRefresh()
 		}
-		return resp, err
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	})
 	if err != nil {
 		return diag.FromErr(err)
