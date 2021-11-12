@@ -15,9 +15,9 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/org"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/subscription"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/ch"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/configuration"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/mdm"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/dicom"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/discovery"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/namespace"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/repository"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/service_key"
@@ -276,6 +276,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_device_type":           mdm.ResourceConnectMDMDeviceType(),
 			"hsdp_connect_mdm_oauth_client":          mdm.ResourceConnectMDMOAuthClient(),
 			"hsdp_connect_mdm_authentication_method": mdm.ResourceConnectMDMAuthenticationMethod(),
+			"hsdp_connect_mdm_service_reference":     mdm.ResourceConnectMDMServiceReference(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                    iam.DataSourceIAMIntrospect(),
@@ -287,7 +288,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_application":                   iam.DataSourceIAMApplication(),
 			"hsdp_s3creds_access":                    s3creds.DataSourceS3CredsAccess(),
 			"hsdp_s3creds_policy":                    s3creds.DataSourceS3CredsPolicy(),
-			"hsdp_config":                            discovery.DataSourceConfig(),
+			"hsdp_config":                            configuration.DataSourceConfig(),
 			"hsdp_container_host_subnet_types":       ch.DataSourceContainerHostSubnetTypes(),
 			"hsdp_cdr_fhir_store":                    fhir_store.DataSourceCDRFHIRStore(),
 			"hsdp_pki_root":                          pki.DataSourcePKIRoot(),

@@ -26,6 +26,7 @@ func ResourceConnectMDMAuthenticationMethod() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"description": {
@@ -151,7 +152,7 @@ func resourceConnectMDMAuthenticationMethodCreate(ctx context.Context, d *schema
 
 	var created *mdm.AuthenticationMethod
 	var resp *mdm.Response
-	err = tools.TryHTTPCall(10, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		created, resp, err = client.AuthenticationMethods.Create(resource)
 		if err != nil {

@@ -172,7 +172,7 @@ func resourceConnectMDMStandardServiceCreate(ctx context.Context, d *schema.Reso
 
 	var created *mdm.StandardService
 	var resp *mdm.Response
-	err = tools.TryHTTPCall(10, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		created, resp, err = client.StandardServices.CreateStandardService(service)
 		if err != nil {

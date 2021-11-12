@@ -26,6 +26,7 @@ func ResourceConnectMDMDeviceGroup() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"description": {
@@ -106,7 +107,7 @@ func resourceConnectMDMDeviceGroupCreate(ctx context.Context, d *schema.Resource
 
 	var created *mdm.DeviceGroup
 	var resp *mdm.Response
-	err = tools.TryHTTPCall(20, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 20, func() (*http.Response, error) {
 		var err error
 		created, resp, err = client.DeviceGroups.Create(resource)
 		if err != nil {

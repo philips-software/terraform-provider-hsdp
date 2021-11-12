@@ -6,6 +6,8 @@ subcategory: "Master Data Management (MDM)"
 
 Create and manage MDM Device Type resources
 
+
+
 ## Example Usage
 
 ```hcl
@@ -33,6 +35,8 @@ The following attributes are exported:
 * `description` - (Optional) A short description of the device group
 * `application_id` - (Required) Reference to the Application this group falls under
 * `default_iam_group_id` - (Optional) The IAM Group from which this group will inherit roles from
+
+~> The `name` maps to an AWS IoT thing type so this should be globally unique and not used (or re-used) across deployments
 
 ## Attributes reference
 

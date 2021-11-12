@@ -27,6 +27,7 @@ func ResourceConnectMDMDeviceType() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"commercial_type_number": {
@@ -39,6 +40,7 @@ func ResourceConnectMDMDeviceType() *schema.Resource {
 			},
 			"device_group_id": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"default_iam_group_id": {
@@ -134,7 +136,7 @@ func resourceConnectMDMDeviceTypeCreate(ctx context.Context, d *schema.ResourceD
 
 	var created *mdm.DeviceType
 	var resp *mdm.Response
-	err = tools.TryHTTPCall(20, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 20, func() (*http.Response, error) {
 		var err error
 		created, resp, err = client.DeviceTypes.Create(resource)
 		if err != nil {

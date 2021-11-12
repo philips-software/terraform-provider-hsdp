@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"net/http"
@@ -16,7 +17,7 @@ import (
 	"github.com/philips-software/go-hsdp-api/iam"
 )
 
-func TryHTTPCall(numberOfTries uint64, operation func() (*http.Response, error), retryOnCodes ...int) error {
+func TryHTTPCall(ctx context.Context, numberOfTries uint64, operation func() (*http.Response, error), retryOnCodes ...int) error {
 	if len(retryOnCodes) == 0 {
 		retryOnCodes = []int{http.StatusUnprocessableEntity, http.StatusInternalServerError, http.StatusTooManyRequests}
 	}
@@ -27,6 +28,11 @@ func TryHTTPCall(numberOfTries uint64, operation func() (*http.Response, error),
 		}
 		if resp == nil {
 			return backoff.Permanent(fmt.Errorf("response was nil: %w", err))
+		}
+		select {
+		case <-ctx.Done():
+			return backoff.Permanent(fmt.Errorf("context was cancelled"))
+		default:
 		}
 		shouldRetry := false
 		for _, c := range retryOnCodes {
