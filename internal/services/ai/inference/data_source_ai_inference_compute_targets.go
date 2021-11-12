@@ -2,6 +2,7 @@ package inference
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -33,7 +34,7 @@ func DataSourceAIInferenceComputeTargets() *schema.Resource {
 
 }
 
-func dataSourceAIInferenceComputeTargetsRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceAIInferenceComputeTargetsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	c := m.(*config.Config)
@@ -44,12 +45,15 @@ func dataSourceAIInferenceComputeTargetsRead(_ context.Context, d *schema.Resour
 	}
 
 	var targets []ai.ComputeTarget
-	err = tools.TryAICall(func() (*ai.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		var resp *ai.Response
 		_ = client.TokenRefresh()
 		targets, resp, err = client.ComputeTarget.GetComputeTargets(nil)
-		return resp, err
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	})
 	if err != nil {
 		return diag.FromErr(err)

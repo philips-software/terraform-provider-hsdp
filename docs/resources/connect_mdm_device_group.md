@@ -6,7 +6,6 @@ subcategory: "Master Data Management (MDM)"
 
 Create and manage MDM Device Group resources
 
-
 ## Example Usage
 
 ```hcl

@@ -2,6 +2,7 @@ package inference
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -33,7 +34,7 @@ func DataSourceAIInferenceJobs() *schema.Resource {
 
 }
 
-func dataSourceAIInferenceJobsRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func dataSourceAIInferenceJobsRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	c := m.(*config.Config)
@@ -45,12 +46,15 @@ func dataSourceAIInferenceJobsRead(_ context.Context, d *schema.ResourceData, m 
 
 	var jobs []ai.Job
 
-	err = tools.TryAICall(func() (*ai.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		var resp *ai.Response
 		_ = client.TokenRefresh()
 		jobs, resp, err = client.Job.GetJobs(nil)
-		return resp, err
+		if resp == nil {
+			resp = &ai.Response{}
+		}
+		return resp.Response, err
 	})
 	if err != nil {
 		return diag.FromErr(err)
