@@ -65,7 +65,7 @@ func dataSourceConnectMDMRegionsRead(_ context.Context, d *schema.ResourceData, 
 	var hsdpEnabled []bool
 
 	for _, r := range *resources {
-		ids = append(ids, r.Id)
+		ids = append(ids, r.ID)
 		names = append(names, r.Name)
 		descriptions = append(descriptions, r.Description)
 		categories = append(categories, r.Category)

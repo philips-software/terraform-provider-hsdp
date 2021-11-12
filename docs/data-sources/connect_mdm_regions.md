@@ -2,9 +2,9 @@
 subcategory: "Master Data Management (MDM)"
 ---
 
-# hsdp_connect_mdm_proposition
+# hsdp_connect_mdm_regions
 
-Retrieve details of an existing proposition
+Retrieve details of an existing regions
 
 ## Example Usage
 
