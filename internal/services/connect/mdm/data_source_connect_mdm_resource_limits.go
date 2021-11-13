@@ -2,7 +2,6 @@ package mdm
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -66,7 +65,7 @@ func dataSourceConnectMDMResourcesLimitsRead(_ context.Context, d *schema.Resour
 			overrideLimits = append(overrideLimits, v)
 		}
 	}
-	d.SetId(fmt.Sprintf("DefaultLimits"))
+	d.SetId("DefaultLimits")
 	_ = d.Set("resources", resources)
 	_ = d.Set("defaults", defaultLimits)
 	_ = d.Set("overrides", overrideLimits)
