@@ -279,6 +279,9 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_service_reference":     mdm.ResourceConnectMDMServiceReference(),
 			"hsdp_connect_mdm_bucket":                mdm.ResourceConnectMDMBucket(),
 			"hsdp_connect_mdm_data_type":             mdm.ResourceConnectMDMDataType(),
+			"hsdp_connect_mdm_blob_data_contract":    mdm.ResourceConnectMDMBlobDataContract(),
+			"hsdp_connect_mdm_blob_subscription":     mdm.ResourceConnectMDMBlobSubscription(),
+			"hsdp_connect_mdm_firwamre_component":    mdm.ResourceConnectMDMFirmwareComponent(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                    iam.DataSourceIAMIntrospect(),
@@ -331,6 +334,10 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_regions":               mdm.DataSourceConnectMDMRegions(),
 			"hsdp_connect_mdm_oauth_client_scopes":   mdm.DataSourceConnectMDMOauthClientScopes(),
 			"hsdp_connect_mdm_region":                mdm.DataSourceConnectMDMRegion(),
+			"hsdp_connect_mdm_resource_limits":       mdm.DataSourceResourceLimits(),
+			"hsdp_connect_mdm_subscriber_types":      mdm.DataSourceConnectMDMSubscriberTypes(),
+			"hsdp_connect_mdm_storage_classes":       mdm.DataSourceConnectMDMStorageClasses(),
+			"hsdp_connect_mdm_storage_class":         mdm.DataSourceConnectMDMStorageClass(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
