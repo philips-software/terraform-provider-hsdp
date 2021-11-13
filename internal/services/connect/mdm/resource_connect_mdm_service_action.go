@@ -36,6 +36,7 @@ func ResourceConnectMDMServiceAction() *schema.Resource {
 			},
 			"standard_service_id": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"organization_identifier": {

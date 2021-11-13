@@ -80,10 +80,11 @@ func schemaToBlobSubscription(d *schema.ResourceData) mdm.BlobSubscription {
 	return resource
 }
 
-func BlobSubscriptionToSchema(resource mdm.BlobSubscription, d *schema.ResourceData) {
+func blobSubscriptionToSchema(resource mdm.BlobSubscription, d *schema.ResourceData) {
 	_ = d.Set("description", resource.Description)
 	_ = d.Set("name", resource.Name)
 	_ = d.Set("data_type_id", resource.DataTypeId.Reference)
+	_ = d.Set("guid", resource.ID)
 	if resource.NotificationTopicGuid.Value != "" {
 		value := resource.NotificationTopicGuid.Value
 		if resource.NotificationTopicGuid.System != "" {
@@ -147,7 +148,7 @@ func resourceConnectMDMBlobSubscriptionRead(_ context.Context, d *schema.Resourc
 		}
 		return diag.FromErr(err)
 	}
-	BlobSubscriptionToSchema(*resource, d)
+	blobSubscriptionToSchema(*resource, d)
 	return diags
 }
 

@@ -75,7 +75,7 @@ func ResourceConnectMDMBucket() *schema.Resource {
 			"cache_control_age": {
 				Type:     schema.TypeInt,
 				Optional: true,
-				Default:  300,
+				Default:  0,
 			},
 			"version_id": {
 				Type:     schema.TypeString,

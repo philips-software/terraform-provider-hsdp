@@ -33,10 +33,12 @@ func ResourceConnectMDMServiceReference() *schema.Resource {
 			},
 			"application_id": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"standard_service_id": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"matching_rule": {
