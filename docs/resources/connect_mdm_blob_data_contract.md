@@ -28,10 +28,10 @@ resource "hsdp_connect_mdm_blob_data_contract" "contract" {
 The following attributes are exported:
 
 * `name` - (Required) The name of the device group
-* `data_type_id` - (Required) 
-* `bucket_id` - (Required) 
-* `storage_class_id` - (Required) 
-* `root_path_in_bucket` - (Required)
+* `data_type_id` - (Required) Reference to the DataType
+* `bucket_id` - (Required) Reference to the Bucket
+* `storage_class_id` - (Required) Reference to the StorageClass
+* `root_path_in_bucket` - (Required) The root path in the bucket
 * `logging_enabled` - (Optional) Enable logging (default: `true`)
 * `cross_region_replication_enabled` - (Optional) cross region replication active (default: `false`)
 
