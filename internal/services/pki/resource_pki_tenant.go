@@ -36,7 +36,7 @@ func ResourcePKITenant() *schema.Resource {
 				Type:     schema.TypeSet,
 				MinItems: 1,
 				Required: true,
-				Elem:     stringSchema(),
+				Elem:     tools.StringSchema(),
 			},
 			"role": {
 				Type:     schema.TypeSet,
@@ -83,10 +83,6 @@ func pkiCASchema() *schema.Resource {
 	}
 }
 
-func stringSchema() *schema.Schema {
-	return &schema.Schema{Type: schema.TypeString}
-}
-
 func pkiRoleSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -117,24 +113,24 @@ func pkiRoleSchema() *schema.Resource {
 			"allowed_domains": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				Elem:     stringSchema(),
+				Elem:     tools.StringSchema(),
 			},
 			"allowed_other_sans": {
 				Type:     schema.TypeSet,
 				Required: true,
 				MinItems: 1,
-				Elem:     stringSchema(),
+				Elem:     tools.StringSchema(),
 			},
 			"allowed_serial_numbers": {
 				Type:     schema.TypeSet,
 				Optional: true,
-				Elem:     stringSchema(),
+				Elem:     tools.StringSchema(),
 			},
 			"allowed_uri_sans": {
 				Type:     schema.TypeSet,
 				Required: true,
 				MinItems: 1,
-				Elem:     stringSchema(),
+				Elem:     tools.StringSchema(),
 			},
 			"client_flag": {
 				Type:     schema.TypeBool,
@@ -292,10 +288,10 @@ func tenantToSchema(tenant pki.Tenant, logicalPath string, d *schema.ResourceDat
 			roleDef["allow_any_name"] = role.AllowAnyName
 			roleDef["allow_ip_sans"] = role.AllowIPSans
 			roleDef["allow_subdomains"] = role.AllowSubdomains
-			roleDef["allowed_other_sans"] = schemaSetStrings(role.AllowedOtherSans)
-			roleDef["allowed_domains"] = schemaSetStrings(role.AllowedDomains)
-			roleDef["allowed_serial_numbers"] = schemaSetStrings(role.AllowedSerialNumbers)
-			roleDef["allowed_uri_sans"] = schemaSetStrings(role.AllowedURISans)
+			roleDef["allowed_other_sans"] = tools.SchemaSetStrings(role.AllowedOtherSans)
+			roleDef["allowed_domains"] = tools.SchemaSetStrings(role.AllowedDomains)
+			roleDef["allowed_serial_numbers"] = tools.SchemaSetStrings(role.AllowedSerialNumbers)
+			roleDef["allowed_uri_sans"] = tools.SchemaSetStrings(role.AllowedURISans)
 			_, _ = c.Debug("Adding role: %s\n", role.Name)
 			s.Add(roleDef)
 		}
@@ -312,14 +308,6 @@ func tenantToSchema(tenant pki.Tenant, logicalPath string, d *schema.ResourceDat
 	s.Add(caDef)
 	_ = d.Set("ca", s)
 	return nil
-}
-
-func schemaSetStrings(ss []string) *schema.Set {
-	s := &schema.Set{F: schema.HashSchema(stringSchema())}
-	for _, str := range ss {
-		s.Add(str)
-	}
-	return s
 }
 
 func resourcePKITenantCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

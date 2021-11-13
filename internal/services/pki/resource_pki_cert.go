@@ -54,19 +54,19 @@ func ResourcePKICert() *schema.Resource {
 				Type:     schema.TypeSet,
 				ForceNew: true,
 				Optional: true,
-				Elem:     stringSchema(),
+				Elem:     tools.StringSchema(),
 			},
 			"uri_sans": {
 				Type:     schema.TypeSet,
 				ForceNew: true,
 				Optional: true,
-				Elem:     stringSchema(),
+				Elem:     tools.StringSchema(),
 			},
 			"other_sans": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: true,
-				Elem:     stringSchema(),
+				Elem:     tools.StringSchema(),
 			},
 			"ttl": {
 				Type:     schema.TypeString,
@@ -186,6 +186,7 @@ func certToSchema(cert *pki.IssueResponse, d *schema.ResourceData, _ interface{}
 	if len(cert.Data.CaChain) > 0 {
 		_ = d.Set("ca_chain_pem", strings.Join(cert.Data.CaChain, "\n"))
 	}
+	// TODO: Missing fields
 	return nil
 }
 
