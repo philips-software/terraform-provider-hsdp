@@ -247,7 +247,8 @@ func resourceConnectMDMOAuthClientRead(_ context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 
-	id := d.Get("guid").(string)
+	var id string
+	_, _ = fmt.Sscanf(d.Id(), "OAuthClient/%s", &id)
 	resource, resp, err := client.OAuthClients.GetOAuthClientByID(id)
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {

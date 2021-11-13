@@ -278,6 +278,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_authentication_method": mdm.ResourceConnectMDMAuthenticationMethod(),
 			"hsdp_connect_mdm_service_reference":     mdm.ResourceConnectMDMServiceReference(),
 			"hsdp_connect_mdm_bucket":                mdm.ResourceConnectMDMBucket(),
+			"hsdp_connect_mdm_data_type":             mdm.ResourceConnectMDMDataType(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                    iam.DataSourceIAMIntrospect(),

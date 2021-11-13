@@ -186,7 +186,6 @@ func certToSchema(cert *pki.IssueResponse, d *schema.ResourceData, _ interface{}
 	if len(cert.Data.CaChain) > 0 {
 		_ = d.Set("ca_chain_pem", strings.Join(cert.Data.CaChain, "\n"))
 	}
-	// TODO: Missing fields
 	return nil
 }
 

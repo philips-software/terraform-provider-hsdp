@@ -2,20 +2,20 @@
 subcategory: "Master Data Management (MDM)"
 ---
 
-# hsdp_connect_mdm_device_group
+# hsdp_connect_mdm_data_type
 
-Create and manage MDM DeviceGroup resources
+Create and manage MDM DataType resources
 
 ## Example Usage
 
 ```hcl
-resource "hsdp_connect_mdm_device_group" "some_group" {
-  name        = "some-device-group"
-  description = "A device group"
+resource "hsdp_connect_mdm_data_type" "some_type" {
+  name        = "tf-some-data-type"
+  description = "A Terraform provisioned DataType"
   
-  application_id = data.hsdp_connect_mdm_application.app.id
+  tags = ["ONE", "TWO", "THREE"]
   
-  default_iam_group_id = data.hsdp_iam_group.device_group.id
+  proposition_id = data.hsdp_connect_mdm_proposition.first.id
 }
 ```
 

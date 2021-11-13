@@ -18,7 +18,6 @@ func ResourceConnectMDMStandardService() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		SchemaVersion: 3,
 		CreateContext: resourceConnectMDMStandardServiceCreate,
 		ReadContext:   resourceConnectMDMStandardServiceRead,
 		UpdateContext: resourceConnectMDMStandardServiceUpdate,
@@ -204,7 +203,8 @@ func resourceConnectMDMStandardServiceRead(_ context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	id := d.Get("guid").(string)
+	var id string
+	_, _ = fmt.Sscanf(d.Id(), "StandardService/%s", &id)
 	service, resp, err := client.StandardServices.GetStandardServiceByID(id)
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {

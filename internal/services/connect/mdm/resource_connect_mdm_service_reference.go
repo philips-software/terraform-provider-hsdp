@@ -150,7 +150,8 @@ func resourceConnectMDMServiceReferenceRead(_ context.Context, d *schema.Resourc
 		return diag.FromErr(err)
 	}
 
-	id := d.Get("guid").(string)
+	var id string
+	_, _ = fmt.Sscanf(d.Id(), "ServiceReference/%s", &id)
 	resource, resp, err := client.ServiceReferences.GetByID(id)
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {

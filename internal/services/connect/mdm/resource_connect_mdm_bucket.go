@@ -139,9 +139,6 @@ func schemaToBucket(d *schema.ResourceData) mdm.Bucket {
 	enableCDN := d.Get("enabled_cdn").(bool)
 	cacheControlAge := d.Get("cache_control_age").(int)
 
-	//redirectionURIs := tools.ExpandStringList(d.Get("redirection_uris").(*schema.Set).List())
-	//responseTypes := tools.ExpandStringList(d.Get("response_types").(*schema.Set).List())
-
 	resource := mdm.Bucket{
 		Name:              name,
 		Description:       description,
@@ -172,7 +169,7 @@ func schemaToBucket(d *schema.ResourceData) mdm.Bucket {
 	return resource
 }
 
-func BucketToSchema(resource mdm.Bucket, d *schema.ResourceData) {
+func bucketToSchema(resource mdm.Bucket, d *schema.ResourceData) {
 	_ = d.Set("description", resource.Description)
 	_ = d.Set("name", resource.Name)
 	_ = d.Set("proposition_id", resource.PropositionID)
@@ -255,7 +252,7 @@ func resourceConnectMDMBucketRead(_ context.Context, d *schema.ResourceData, m i
 		}
 		return diag.FromErr(err)
 	}
-	BucketToSchema(*resource, d)
+	bucketToSchema(*resource, d)
 	return diags
 }
 

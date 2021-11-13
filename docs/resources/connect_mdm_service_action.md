@@ -4,7 +4,7 @@ subcategory: "Master Data Management (MDM)"
 
 # hsdp_connect_mdm_service_action
 
-Create and manage MDM Service Action resources
+Create and manage MDM ServiceAction resources
 
 ## Example Usage
 

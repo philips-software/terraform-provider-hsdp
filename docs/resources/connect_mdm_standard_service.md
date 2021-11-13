@@ -4,7 +4,7 @@ subcategory: "Master Data Management (MDM)"
 
 # hsdp_connect_mdm_standard_service
 
-Create and manage MDM Standard Services resources
+Create and manage MDM StandardServices resources
 
 ## Example Usage
 

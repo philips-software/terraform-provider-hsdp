@@ -4,7 +4,7 @@ subcategory: "Master Data Management (MDM)"
 
 # hsdp_connect_mdm_service_reference
 
-Create and manage MDM Service Reference resources
+Create and manage MDM ServiceReference resources
 
 ## Example Usage
 

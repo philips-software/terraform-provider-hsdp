@@ -4,7 +4,7 @@ subcategory: "Master Data Management (MDM)"
 
 # hsdp_connect_mdm_device_type
 
-Create and manage MDM Device Type resources
+Create and manage MDM DeviceType resources
 
 ## Example Usage
 
