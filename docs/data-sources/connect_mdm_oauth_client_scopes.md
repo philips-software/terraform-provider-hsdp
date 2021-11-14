@@ -2,9 +2,9 @@
 subcategory: "Master Data Management (MDM)"
 ---
 
-# hsdp_connect_mdm_proposition
+# hsdp_connect_mdm_client_scopes
 
-Retrieve details of an existing proposition
+Retrieve client scope dictionary
 
 ## Example Usage
 
@@ -14,8 +14,8 @@ data "hsdp_connect_mdm_oauth_client_scopes" "all" {
 ```
 
 ```hcl
-output "mdm_oauth_client_scope_names" {
-   value = data.hsdp_connect_mdm_oauth_client_scopes.all.ids
+output "mdm_oauth_client_scopes" {
+   value = data.hsdp_connect_mdm_oauth_client_scopes.all.scopes
 }
 ```
 
@@ -24,7 +24,8 @@ output "mdm_oauth_client_scope_names" {
 The following attributes are exported:
 
 * `ids` - The client scope IDs
-* `names` - the client socpe names
+* `names` - the client dictionary entry names
+* `scopes` - The effective scopes
 * `actions` - The client scope actions
 * `propositions` - The client scope actions
 * `organizations` - The client organization list

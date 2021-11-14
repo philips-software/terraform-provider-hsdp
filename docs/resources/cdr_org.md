@@ -21,7 +21,10 @@ resource "hsdp_cdr_org" "hospital" {
   fhir_store = data.hsdp_cdr_fhir_store.sandbox.endpoint
   org_id = var.sub_org_id
 
-  name = "Hospital"
+  # Set up this org to use FHIR R4
+  version = "r4"
+  
+  name    = "Hospital"
   part_of = var.root_org_id
   
   purge_delete = false

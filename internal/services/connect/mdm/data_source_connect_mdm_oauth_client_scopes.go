@@ -48,6 +48,11 @@ func DataSourceConnectMDMOauthClientScopes() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"scopes": {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 			"bootstrap_enabled": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -79,6 +84,7 @@ func dataSourceConnectMDMOAuthClientScopesRead(_ context.Context, d *schema.Reso
 	var actions []string
 	var services []string
 	var resources []string
+	var scopes []string
 	var bootstrapEnabled []bool
 
 	for _, r := range *resourcesList {
@@ -89,6 +95,7 @@ func dataSourceConnectMDMOAuthClientScopesRead(_ context.Context, d *schema.Reso
 		actions = append(actions, r.Action)
 		organizations = append(organizations, r.Organization)
 		bootstrapEnabled = append(bootstrapEnabled, r.BootstrapEnabled)
+		scopes = append(scopes, r.Scope())
 	}
 	_ = d.Set("ids", ids)
 	_ = d.Set("organizations", organizations)
@@ -97,6 +104,7 @@ func dataSourceConnectMDMOAuthClientScopesRead(_ context.Context, d *schema.Reso
 	_ = d.Set("actions", actions)
 	_ = d.Set("resources", resources)
 	_ = d.Set("bootstrap_enabled", bootstrapEnabled)
+	_ = d.Set("scopes", scopes)
 
 	result, err := uuid.GenerateUUID()
 	if err != nil {

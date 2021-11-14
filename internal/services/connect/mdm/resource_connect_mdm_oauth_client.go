@@ -32,6 +32,7 @@ func ResourceConnectMDMOAuthClient() *schema.Resource {
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 			},
 			"application_id": {
 				Type:     schema.TypeString,
@@ -47,39 +48,44 @@ func ResourceConnectMDMOAuthClient() *schema.Resource {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				Required: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				ForceNew: true,
+				Elem:     tools.StringSchema(),
 			},
 			"response_types": {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				Required: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				ForceNew: true,
+				Elem:     tools.StringSchema(),
 			},
 			"scopes": {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				Required: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem:     tools.StringSchema(),
 			},
 			"default_scopes": {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				Required: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem:     tools.StringSchema(),
 			},
 			"user_client": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				ForceNew: true,
 				Default:  false,
 			},
 			"client_revoked": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				ForceNew: true,
 				Default:  false,
 			},
 			"client_guid": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 				DiffSuppressFunc: tools.SuppressMulti(
 					tools.SuppressWhenGenerated,
 					tools.SuppressDefaultSystemValue),
@@ -96,6 +102,7 @@ func ResourceConnectMDMOAuthClient() *schema.Resource {
 			"bootstrap_client_guid": {
 				Type:     schema.TypeString,
 				Optional: true,
+				ForceNew: true,
 				DiffSuppressFunc: tools.SuppressMulti(
 					tools.SuppressWhenGenerated,
 					tools.SuppressDefaultSystemValue),
@@ -119,6 +126,40 @@ func ResourceConnectMDMOAuthClient() *schema.Resource {
 			},
 		},
 	}
+}
+
+func setScopes(client *mdm.Client, d *schema.ResourceData) error {
+
+	scopes := tools.ExpandStringList(d.Get("scopes").(*schema.Set).List())
+	defaultScopes := tools.ExpandStringList(d.Get("default_scopes").(*schema.Set).List())
+	resourceId := d.Get("guid").(string)
+
+	resource, _, err := client.OAuthClients.GetOAuthClientByID(resourceId)
+	if err != nil {
+		return fmt.Errorf("read OAuth client: %w", err)
+	}
+	scopeDictionary, _, err := client.OAuthClientScopes.GetOAuthClientScopes(nil)
+	if err != nil {
+		return fmt.Errorf("retrieving scope dictionary: %w", err)
+	}
+	var allowedScopes []string
+	for _, s := range *scopeDictionary {
+		allowedScopes = append(allowedScopes, s.Scope())
+	}
+	for _, scope := range scopes {
+		if !tools.ContainsString(allowedScopes, scope) {
+			return fmt.Errorf("scope '%s' not allowed", scope)
+		}
+	}
+	_, _, err = client.OAuthClients.UpdateScopes(*resource, scopes, defaultScopes)
+	if err != nil {
+		return fmt.Errorf("updating scopes: %w", err)
+	}
+	return nil
+}
+
+func oAuthClientScopesToSchema(resource mdm.OAuthClient, d *schema.ResourceData) error {
+	return nil
 }
 
 func schemaToOAuthClient(d *schema.ResourceData) mdm.OAuthClient {
@@ -230,9 +271,19 @@ func resourceConnectMDMOAuthClientCreate(ctx context.Context, d *schema.Resource
 	_ = d.Set("guid", created.ID)
 	d.SetId(fmt.Sprintf("OAuthClient/%s", created.ID))
 
-	// TODO: set scopes
-	//scopes := tools.ExpandStringList(d.Get("scopes").(*schema.Set).List())
-	//defaultScopes := tools.ExpandStringList(d.Get("default_scopes").(*schema.Set).List())
+	if err := setScopes(client, d); err != nil {
+		// Clean up
+		//._, _, _ = client.OAuthClients.DeleteOAuthClient(*created)
+		//d.SetId("")
+		//return diag.FromErr(err)
+		diags := resourceConnectMDMOAuthClientRead(ctx, d, m)
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "failed to set scopes",
+			Detail:   err.Error(),
+		})
+		return diags
+	}
 
 	return resourceConnectMDMOAuthClientRead(ctx, d, m)
 }
@@ -258,30 +309,22 @@ func resourceConnectMDMOAuthClientRead(_ context.Context, d *schema.ResourceData
 		return diag.FromErr(err)
 	}
 	OAuthClientToSchema(*resource, d)
+	_ = oAuthClientScopesToSchema(*resource, d)
 	return diags
 }
 
 func resourceConnectMDMOAuthClientUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
-	var diags diag.Diagnostics
-
 	client, err := c.MDMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	id := d.Get("guid").(string)
-
-	resource := schemaToOAuthClient(d)
-	resource.ID = id
-
-	_, _, err = client.OAuthClients.Update(resource)
-	if err != nil {
-		diags = append(diags, diag.FromErr(err)...)
+	if !(d.HasChange("scopes") || d.HasChange("default_scopes")) {
+		return diag.FromErr(fmt.Errorf("only 'scopes' and 'default_scopes' can be updated. this is a bug"))
 	}
-	if len(diags) > 0 {
-		return diags
+	if err := setScopes(client, d); err != nil {
+		return diag.FromErr(err)
 	}
 	return resourceConnectMDMOAuthClientRead(ctx, d, m)
 }
