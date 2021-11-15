@@ -338,6 +338,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_subscriber_types":      mdm.DataSourceConnectMDMSubscriberTypes(),
 			"hsdp_connect_mdm_storage_classes":       mdm.DataSourceConnectMDMStorageClasses(),
 			"hsdp_connect_mdm_storage_class":         mdm.DataSourceConnectMDMStorageClass(),
+			"hsdp_connect_mdm_standard_service":      mdm.DataSourceConnectMDMStandardService(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
