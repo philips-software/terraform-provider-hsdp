@@ -31,7 +31,9 @@ func ResourceMDMProposition() *schema.Resource {
 				Type:         schema.TypeString,
 				Required:     true,
 				ValidateFunc: tools.ValidateUpperString,
-				ForceNew:     true,
+				DiffSuppressFunc: tools.SuppressMulti(
+					tools.SuppressCaseDiffs),
+				ForceNew: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -42,6 +44,9 @@ func ResourceMDMProposition() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				DiffSuppressFunc: tools.SuppressMulti(
+					tools.SuppressWhenGenerated,
+					tools.SuppressDefaultSystemValue),
 			},
 			"global_reference_id": {
 				Type:             schema.TypeString,
