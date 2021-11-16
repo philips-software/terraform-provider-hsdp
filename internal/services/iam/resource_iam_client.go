@@ -143,14 +143,17 @@ func resourceIAMClientCreate(ctx context.Context, d *schema.ResourceData, m inte
 
 	var createdClient *iam.ApplicationClient
 
-	err = tools.TryIAMCall(func() (*iam.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		var resp *iam.Response
 		createdClient, _, err = client.Clients.CreateClient(cl)
 		if err != nil {
 			_ = client.TokenRefresh()
 		}
-		return resp, err
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	})
 	if err != nil {
 		return diag.FromErr(err)

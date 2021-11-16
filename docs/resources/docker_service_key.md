@@ -11,16 +11,16 @@ Manages HSDP Docker Registry service keys
 ## Example usage
 
 ```hcl
-resource "hsdp_docker_registry_key" "cicd" {
+resource "hsdp_docker_service_key" "cicd" {
   description = "Terraform managed key"
 }
 
 output "docker_username" {
-  value = hsdp_docker_registry_key.cicd.username
+  value = hsdp_docker_service_key.cicd.username
 }
 
 output "docker_password" {
-  value = hsdp_docker_registry_key.cicd.password
+  value = hsdp_docker_service_key.cicd.password
 }
 ```
 

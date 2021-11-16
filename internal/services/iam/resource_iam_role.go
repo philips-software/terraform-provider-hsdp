@@ -77,13 +77,16 @@ func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, meta int
 	var role *iam.Role
 	var resp *iam.Response
 
-	err = tools.TryIAMCall(func() (*iam.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		role, resp, err = client.Roles.CreateRole(name, description, managingOrganization)
 		if err != nil {
 			_ = client.TokenRefresh()
 		}
-		return resp, err
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	})
 	if err != nil {
 		if resp == nil {

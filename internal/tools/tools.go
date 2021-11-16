@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"net/http"
@@ -12,38 +13,10 @@ import (
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/philips-software/go-hsdp-api/ai"
 	"github.com/philips-software/go-hsdp-api/iam"
 )
 
-func TryIAMCall(operation func() (*iam.Response, error), retryOnCodes ...int) error {
-	if len(retryOnCodes) == 0 {
-		retryOnCodes = []int{http.StatusUnprocessableEntity, http.StatusInternalServerError, http.StatusTooManyRequests}
-	}
-	doOp := func() error {
-		resp, err := operation()
-		if err == nil {
-			return nil
-		}
-		if resp == nil {
-			return backoff.Permanent(fmt.Errorf("response was nil: %w", err))
-		}
-		shouldRetry := false
-		for _, c := range retryOnCodes {
-			if c == resp.StatusCode {
-				shouldRetry = true
-				break
-			}
-		}
-		if shouldRetry {
-			return err
-		}
-		return backoff.Permanent(err)
-	}
-	return backoff.Retry(doOp, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
-}
-
-func TryAICall(operation func() (*ai.Response, error), retryOnCodes ...int) error {
+func TryHTTPCall(ctx context.Context, numberOfTries uint64, operation func() (*http.Response, error), retryOnCodes ...int) error {
 	if len(retryOnCodes) == 0 {
 		retryOnCodes = []int{http.StatusForbidden, http.StatusUnprocessableEntity, http.StatusInternalServerError, http.StatusTooManyRequests}
 	}
@@ -55,6 +28,11 @@ func TryAICall(operation func() (*ai.Response, error), retryOnCodes ...int) erro
 		if resp == nil {
 			return backoff.Permanent(fmt.Errorf("response was nil: %w", err))
 		}
+		select {
+		case <-ctx.Done():
+			return backoff.Permanent(fmt.Errorf("context was cancelled"))
+		default:
+		}
 		shouldRetry := false
 		for _, c := range retryOnCodes {
 			if c == resp.StatusCode {
@@ -67,7 +45,7 @@ func TryAICall(operation func() (*ai.Response, error), retryOnCodes ...int) erro
 		}
 		return backoff.Permanent(err)
 	}
-	return backoff.Retry(doOp, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+	return backoff.Retry(doOp, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), numberOfTries))
 }
 
 // Difference returns the elements in a that aren't in b
@@ -153,6 +131,18 @@ func ExpandStringList(configured []interface{}) []string {
 		}
 	}
 	return vs
+}
+
+func StringSchema() *schema.Schema {
+	return &schema.Schema{Type: schema.TypeString}
+}
+
+func SchemaSetStrings(ss []string) *schema.Set {
+	s := &schema.Set{F: schema.HashSchema(StringSchema())}
+	for _, str := range ss {
+		s.Add(str)
+	}
+	return s
 }
 
 func ContainsString(haystack []string, needle string) bool {

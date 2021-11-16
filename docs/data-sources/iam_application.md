@@ -32,5 +32,6 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - The GUID of the application
 * `description` - The description of the application
 * `global_reference_id` - The global reference ID of the application

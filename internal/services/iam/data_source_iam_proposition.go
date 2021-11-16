@@ -21,11 +21,11 @@ func DataSourceIAMProposition() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"description": &schema.Schema{
+			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"global_reference_id": &schema.Schema{
+			"global_reference_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -34,7 +34,7 @@ func DataSourceIAMProposition() *schema.Resource {
 
 }
 
-func dataSourceIAMPropositionRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIAMPropositionRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -83,7 +84,7 @@ func schemaReadSMSTemplate(d *schema.ResourceData) (*iam.SMSTemplate, error) {
 	return &template, nil
 }
 
-func resourceIAMSMSTemplateDelete(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIAMSMSTemplateDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	c := meta.(*config.Config)
@@ -95,10 +96,13 @@ func resourceIAMSMSTemplateDelete(_ context.Context, d *schema.ResourceData, met
 	}
 	var resp *iam.Response
 
-	err = tools.TryIAMCall(func() (*iam.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		_, resp, err = client.SMSTemplates.DeleteSMSTemplate(iam.SMSTemplate{ID: id})
-		return resp, err
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	})
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error deleting SMS template: %w", err))
@@ -107,7 +111,7 @@ func resourceIAMSMSTemplateDelete(_ context.Context, d *schema.ResourceData, met
 	return diags
 }
 
-func resourceIAMSMSTemplateRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceIAMSMSTemplateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	var resp *iam.Response
 	var template *iam.SMSTemplate
@@ -119,10 +123,13 @@ func resourceIAMSMSTemplateRead(_ context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	err = tools.TryIAMCall(func() (*iam.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		template, resp, err = client.SMSTemplates.GetSMSTemplateByID(id)
-		return resp, err
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	})
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error reading SMS template: %w", err))
@@ -158,10 +165,13 @@ func resourceIAMSMSTemplateCreate(ctx context.Context, d *schema.ResourceData, m
 	}
 	// Just in time base64 encoding
 	template.Message = base64.StdEncoding.EncodeToString([]byte(template.Message))
-	err = tools.TryIAMCall(func() (*iam.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		createdTemplate, resp, err = client.SMSTemplates.CreateSMSTemplate(*template)
-		return resp, err
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	})
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("error creating SMS template: %w", err))

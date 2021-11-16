@@ -183,7 +183,7 @@ func resourceFunctionUpdate(_ context.Context, d *schema.ResourceData, m interfa
 			return diag.FromErr(fmt.Errorf("CreateOrUpdateCode(%v): %w", code, err))
 		}
 		if resp.StatusCode != http.StatusOK {
-			return diag.FromErr(fmt.Errorf("failed to update code: %d", resp.StatusCode))
+			return diag.FromErr(fmt.Errorf("failed to update code '%s': %d", code.Image, resp.StatusCode))
 		}
 	}
 
@@ -467,7 +467,7 @@ func dockerLogin(ironClient *iron.Client, d *schema.ResourceData) (bool, error) 
 	dockerImage := d.Get("docker_image").(string)
 	ref, err := reference.ParseNormalizedNamed(dockerImage)
 	if err != nil {
-		return false, fmt.Errorf("error normalizing docker [%s]: %w", dockerImage, err)
+		return false, fmt.Errorf("error normalizing docker '%s': %w", dockerImage, err)
 	}
 	registry := ""
 	if str := strings.Split(ref.Name(), "/"); len(str) > 1 {
@@ -487,7 +487,7 @@ func dockerLogin(ironClient *iron.Client, d *schema.ResourceData) (bool, error) 
 		ServerAddress: registry,
 	})
 	if !ok {
-		return false, fmt.Errorf("invalid docker credentials: %w", err)
+		return false, fmt.Errorf("invalid docker credentials for '%s': %w", registry, err)
 	}
 	return true, nil
 }

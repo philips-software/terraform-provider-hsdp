@@ -61,3 +61,12 @@ func SuppressEqualTimeOrMissing(k, old, new string, d *schema.ResourceData) bool
 	}
 	return oldTime.Equal(newTime)
 }
+
+func SuppressDefaultSystemValue(k, old, new string, d *schema.ResourceData) bool {
+	partsOld := strings.Split(old, "|")
+	partsNew := strings.Split(new, "|")
+	if len(partsOld) == 2 && len(partsNew) == 1 {
+		return partsOld[1] == partsNew[0]
+	}
+	return false
+}

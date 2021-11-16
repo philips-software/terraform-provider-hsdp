@@ -32,5 +32,6 @@ The following arguments are supported:
 
 The following attributes are exported:
 
+* `id` - The GUID of the proposition
 * `description` - The description of the proposition
 * `global_reference_id` - The global reference ID of the proposition

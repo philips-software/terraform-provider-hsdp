@@ -9,14 +9,14 @@ To find out more about HSDP please visit [hsdp.io](https://www.hsdp.io/)
 
 ## Using the provider
 
-**Terraform 0.13+**: To install this provider, copy and paste this code into your Terraform configuration. Then, run terraform init.
+**Terraform 1.0.0+**: To install this provider, copy and paste this code into your Terraform configuration. Then, run terraform init.
 
 ```terraform
 terraform {
   required_providers {
     hsdp = {
       source = "philips-software/hsdp"
-      version = ">= 0.25.0"
+      version = ">= 0.27.0"
     }
   }
 }
@@ -24,7 +24,7 @@ terraform {
 
 ## Development requirements
 
--	[Terraform](https://www.terraform.io/downloads.html) 0.15.x or newer
+-	[Terraform](https://www.terraform.io/downloads.html) 1.0.0 or newer
 -	[Go](https://golang.org/doc/install) 1.17 or newer (to build the provider plugin)
 
 ## Building the provider

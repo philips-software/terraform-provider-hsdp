@@ -54,19 +54,19 @@ func ResourcePKICert() *schema.Resource {
 				Type:     schema.TypeSet,
 				ForceNew: true,
 				Optional: true,
-				Elem:     stringSchema(),
+				Elem:     tools.StringSchema(),
 			},
 			"uri_sans": {
 				Type:     schema.TypeSet,
 				ForceNew: true,
 				Optional: true,
-				Elem:     stringSchema(),
+				Elem:     tools.StringSchema(),
 			},
 			"other_sans": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				ForceNew: true,
-				Elem:     stringSchema(),
+				Elem:     tools.StringSchema(),
 			},
 			"ttl": {
 				Type:     schema.TypeString,
