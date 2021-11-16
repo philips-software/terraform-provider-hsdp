@@ -283,6 +283,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_blob_subscription":     mdm.ResourceConnectMDMBlobSubscription(),
 			"hsdp_connect_mdm_firmware_component":    mdm.ResourceConnectMDMFirmwareComponent(),
 			"hsdp_connect_mdm_proposition":           mdm.ResourceMDMProposition(),
+			"hsdp_connect_mdm_application":           mdm.ResourceMDMApplication(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                    iam.DataSourceIAMIntrospect(),
