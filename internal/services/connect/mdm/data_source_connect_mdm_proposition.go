@@ -3,6 +3,7 @@ package mdm
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -18,6 +19,15 @@ func DataSourceConnectMDMProposition() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"error_on_not_found": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+			},
+			"found": {
+				Type:     schema.TypeBool,
+				Computed: true,
+			},
 			"organization_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -27,6 +37,10 @@ func DataSourceConnectMDMProposition() *schema.Resource {
 				Computed: true,
 			},
 			"global_reference_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"status": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -50,18 +64,27 @@ func dataSourceConnectMDMPropositionRead(_ context.Context, d *schema.ResourceDa
 	}
 	orgId := d.Get("organization_id").(string)
 	name := d.Get("name").(string)
+	errorOnNotFound := d.Get("error_on_not_found").(bool)
 
-	prop, _, err := client.Propositions.GetProposition(&mdm.GetPropositionsOptions{
+	prop, resp, err := client.Propositions.GetProposition(&mdm.GetPropositionsOptions{
 		OrganizationID: &orgId,
 		Name:           &name,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		if resp == nil {
+			return diag.FromErr(err)
+		}
+		if resp.StatusCode != http.StatusNotFound || errorOnNotFound {
+			return diag.FromErr(err)
+		}
+		// Not found, but no error
+		_ = d.Set("found", false)
+		d.SetId("PropositionNotFound")
+		return diags
 	}
 
 	d.SetId(fmt.Sprintf("Proposition/%s", prop.ID))
-	_ = d.Set("guid", prop.ID)
-	_ = d.Set("description", prop.Description)
-	_ = d.Set("global_reference_id", prop.GlobalReferenceID)
+	propositionToSchema(*prop, d)
+	_ = d.Set("found", true)
 	return diags
 }
