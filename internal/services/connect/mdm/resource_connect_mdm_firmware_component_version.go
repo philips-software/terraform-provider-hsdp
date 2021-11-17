@@ -34,7 +34,6 @@ func ResourceConnectMDMFirmwareComponentVersion() *schema.Resource {
 			"description": {
 				Type:     schema.TypeString,
 				Optional: true,
-				Required: true,
 			},
 			"firmware_component_id": {
 				Type:     schema.TypeString,
