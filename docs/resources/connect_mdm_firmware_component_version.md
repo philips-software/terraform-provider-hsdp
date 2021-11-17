@@ -34,7 +34,7 @@ The following attributes are exported:
 * `effective_date` - (Required) The effective date of this firmware (Format: `yyyy-mm-dd`)
 * `description` - (Optional) A short description of the resource
 * `firmware_component_id` - (Required) Reference to Firmware Component resource
-* `blob_url` - (Optional) The path of the image on Blob storage 
+* `blob_url` - (Optional) The path of the image on Blob storage
 * `size` - (Optional, int) The size of the image
 * `component_required` - (Optional, bool) Is the component required (default: `false`)
 * `custom_resource` - (Optional, string) JSON string describing your custom resource
@@ -42,6 +42,7 @@ The following attributes are exported:
 * `fingerprint` - (Optional) Fingerprint information
   * `algorithm` - (Required) The algorithm used to calculate the fingerprint
   * `hash` - (Required) The fingerprint value
+
 ## Attributes reference
 
 In addition to all arguments above, the following attributes are exported:
