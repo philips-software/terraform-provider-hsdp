@@ -27,7 +27,7 @@ func ResourceConnectMDMFirmwareComponentVersion() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"effective_data": {
+			"effective_date": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -41,7 +41,7 @@ func ResourceConnectMDMFirmwareComponentVersion() *schema.Resource {
 				Required: true,
 			},
 			"blob_url": {
-				Type:     schema.TypeBool,
+				Type:     schema.TypeString,
 				Default:  true,
 				Optional: true,
 			},
