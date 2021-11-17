@@ -7,6 +7,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func DataSourceConnectMDMOauthClientScopes() *schema.Resource {
@@ -36,22 +37,22 @@ func DataSourceConnectMDMOauthClientScopes() *schema.Resource {
 			"actions": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem:     tools.StringSchema(),
 			},
 			"services": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem:     tools.StringSchema(),
 			},
 			"resources": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem:     tools.StringSchema(),
 			},
 			"scopes": {
 				Type:     schema.TypeList,
 				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem:     tools.StringSchema(),
 			},
 			"bootstrap_enabled": {
 				Type:     schema.TypeList,

@@ -122,13 +122,14 @@ func schemaToFirmwareComponentVersion(d *schema.ResourceData) mdm.FirmwareCompon
 		vL := v.(*schema.Set).List()
 		for _, entry := range vL {
 			mV := entry.(map[string]interface{})
-			resource.FingerPrint = mdm.Fingerprint{
+			resource.FingerPrint = &mdm.Fingerprint{
 				Algorithm: mV["algorithm"].(string),
 				Hash:      mV["hash"].(string),
 			}
 		}
 	}
 	resource.FirmwareComponentId.Reference = firmwareComponentId
+	// TODO: add encryption info
 
 	return resource
 }
