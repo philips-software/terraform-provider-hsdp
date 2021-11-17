@@ -172,7 +172,7 @@ func resourceConnectMDMDeviceTypeRead(_ context.Context, d *schema.ResourceData,
 	_, _ = fmt.Sscanf(d.Id(), "DeviceType/%s", &id)
 	resource, resp, err := client.DeviceTypes.GetByID(id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
 			return nil
 		}

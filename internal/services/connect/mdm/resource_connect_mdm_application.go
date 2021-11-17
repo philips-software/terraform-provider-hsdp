@@ -146,7 +146,7 @@ func resourceMDMApplicationRead(_ context.Context, d *schema.ResourceData, m int
 
 	prop, resp, err := client.Applications.GetApplicationByID(id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
 			return diags
 		}

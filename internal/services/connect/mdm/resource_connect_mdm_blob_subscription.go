@@ -142,7 +142,7 @@ func resourceConnectMDMBlobSubscriptionRead(_ context.Context, d *schema.Resourc
 	_, _ = fmt.Sscanf(d.Id(), "BlobSubscription/%s", &id)
 	resource, resp, err := client.BlobSubscriptions.GetByID(id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
 			return nil
 		}

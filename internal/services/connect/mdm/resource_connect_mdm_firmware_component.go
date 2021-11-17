@@ -125,7 +125,7 @@ func resourceConnectMDMFirmwareComponentRead(_ context.Context, d *schema.Resour
 	_, _ = fmt.Sscanf(d.Id(), "FirmwareComponent/%s", &id)
 	service, resp, err := client.FirmwareComponents.GetByID(id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
 			return nil
 		}

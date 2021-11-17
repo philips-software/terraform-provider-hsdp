@@ -142,7 +142,7 @@ func resourceConnectMDMServiceActionRead(_ context.Context, d *schema.ResourceDa
 	id := d.Get("guid").(string)
 	service, resp, err := client.ServiceActions.GetByID(id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
 			return nil
 		}

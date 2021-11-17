@@ -207,7 +207,7 @@ func resourceConnectMDMStandardServiceRead(_ context.Context, d *schema.Resource
 	_, _ = fmt.Sscanf(d.Id(), "StandardService/%s", &id)
 	service, resp, err := client.StandardServices.GetStandardServiceByID(id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
 			return nil
 		}

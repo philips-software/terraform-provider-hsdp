@@ -159,6 +159,7 @@ func setScopes(client *mdm.Client, d *schema.ResourceData) error {
 }
 
 func oAuthClientScopesToSchema(resource mdm.OAuthClient, d *schema.ResourceData) error {
+	// TODO
 	return nil
 }
 
@@ -209,7 +210,7 @@ func schemaToOAuthClient(d *schema.ResourceData) mdm.OAuthClient {
 	return resource
 }
 
-func OAuthClientToSchema(resource mdm.OAuthClient, d *schema.ResourceData) {
+func oAuthClientToSchema(resource mdm.OAuthClient, d *schema.ResourceData) {
 	_ = d.Set("description", resource.Description)
 	_ = d.Set("name", resource.Name)
 	_ = d.Set("application_id", resource.ApplicationId.Reference)
@@ -302,13 +303,13 @@ func resourceConnectMDMOAuthClientRead(_ context.Context, d *schema.ResourceData
 	_, _ = fmt.Sscanf(d.Id(), "OAuthClient/%s", &id)
 	resource, resp, err := client.OAuthClients.GetOAuthClientByID(id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
 			return nil
 		}
 		return diag.FromErr(err)
 	}
-	OAuthClientToSchema(*resource, d)
+	oAuthClientToSchema(*resource, d)
 	_ = oAuthClientScopesToSchema(*resource, d)
 	return diags
 }

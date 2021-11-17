@@ -187,7 +187,7 @@ func resourceConnectMDMAuthenticationMethodRead(_ context.Context, d *schema.Res
 	id := d.Get("guid").(string)
 	resource, resp, err := client.AuthenticationMethods.GetByID(id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
 			return nil
 		}

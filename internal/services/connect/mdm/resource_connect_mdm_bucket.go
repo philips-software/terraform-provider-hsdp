@@ -246,7 +246,7 @@ func resourceConnectMDMBucketRead(_ context.Context, d *schema.ResourceData, m i
 	_, _ = fmt.Sscanf(d.Id(), "Bucket/%s", &id)
 	resource, resp, err := client.Buckets.GetByID(id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
 			return nil
 		}
