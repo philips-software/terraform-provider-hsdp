@@ -23,9 +23,9 @@ resource "hsdp_connect_mdm_blob_data_contract" "contract" {
 }
 ```
 
-## Attributes Reference
+## Argument Reference
 
-The following attributes are exported:
+The following arguments are supported:
 
 * `name` - (Required) The name of the device group
 * `data_type_id` - (Required) Reference to the DataType

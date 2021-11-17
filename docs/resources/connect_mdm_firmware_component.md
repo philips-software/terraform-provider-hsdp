@@ -18,9 +18,9 @@ resource "hsdp_connect_mdm_firmware_component" "first" {
 }
 ```
 
-## Attributes Reference
+## Argument Reference
 
-The following attributes are exported:
+The following arguments are supported:
 
 * `name` - (Required) The name of the device group
 * `description` - (Optional) A short description of the device group

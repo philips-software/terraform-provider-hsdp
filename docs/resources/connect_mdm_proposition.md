@@ -19,9 +19,9 @@ resource "hsdp_connect_mdm_proposition" "app" {
 }
 ```
 
-## Attributes Reference
+## Argument Reference
 
-The following attributes are exported:
+The following arguments are supported:
 
 * `name` - (Required) The name of the Proposition
 * `description` - (Optional) A short description of the Proposition

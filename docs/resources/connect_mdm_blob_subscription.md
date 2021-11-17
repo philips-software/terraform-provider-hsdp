@@ -19,9 +19,9 @@ resource "hsdp_connect_mdm_blob_subscription" "first" {
 }
 ```
 
-## Attributes Reference
+## Argument Reference
 
-The following attributes are exported:
+The following arguments are supported:
 
 * `name` - (Required) The name of the Blob subscription
 * `description` - (Optional)

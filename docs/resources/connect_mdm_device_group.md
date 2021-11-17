@@ -19,9 +19,9 @@ resource "hsdp_connect_mdm_device_group" "some_group" {
 }
 ```
 
-## Attributes Reference
+## Argument Reference
 
-The following attributes are exported:
+The following arguments are supported:
 
 * `name` - (Required) The name of the device group
 * `description` - (Optional) A short description of the device group

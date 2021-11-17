@@ -17,9 +17,9 @@ resource "hsdp_connect_mdm_service_action" "some_action" {
 }
 ```
 
-## Attributes Reference
+## Argument Reference
 
-The following attributes are exported:
+The following arguments are supported:
 
 * `name` - (Required) The name of the service action
 * `description` - (Optional) A short description of the service action

@@ -27,9 +27,9 @@ resource "hsdp_connect_mdm_standard_service" "some_service" {
 }
 ```
 
-## Attributes Reference
+## Argument Reference
 
-The following attributes are exported:
+The following arguments are supported:
 
 * `name` - (Required) The name of the standard service
 * `tags` - (Required, list(string)) A tag associated with the service

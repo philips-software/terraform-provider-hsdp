@@ -26,9 +26,9 @@ resource "hsdp_connect_mdm_firmware_component_version" "one_dot_oh" {
 }
 ```
 
-## Attributes Reference
+## Argument Reference
 
-The following attributes are exported:
+The following arguments are supported:
 
 * `version` - (Required) The version of the Firmware Component image
 * `effective_date` - (Required) The effective date of this firmware (Format: `yyyy-mm-dd`)

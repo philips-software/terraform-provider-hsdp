@@ -19,9 +19,9 @@ resource "hsdp_connect_mdm_application" "app" {
 }
 ```
 
-## Attributes Reference
+## Argument Reference
 
-The following attributes are exported:
+The following arguments are supported:
 
 * `name` - (Required) The name of the Application
 * `description` - (Optional) A short description of the Application
