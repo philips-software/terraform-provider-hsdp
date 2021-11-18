@@ -17,10 +17,11 @@ func ResourceConnectMDMFirmwareDistributionRequest() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		CreateContext: resourceConnectMDMFirmwareDistributionRequestCreate,
-		ReadContext:   resourceConnectMDMFirmwareDistributionRequestRead,
-		UpdateContext: resourceConnectMDMFirmwareDistributionRequestUpdate,
-		DeleteContext: resourceConnectMDMFirmwareDistributionRequestDelete,
+		CreateContext:      resourceConnectMDMFirmwareDistributionRequestCreate,
+		ReadContext:        resourceConnectMDMFirmwareDistributionRequestRead,
+		UpdateContext:      resourceConnectMDMFirmwareDistributionRequestUpdate,
+		DeleteContext:      resourceConnectMDMFirmwareDistributionRequestDelete,
+		DeprecationMessage: "This will be replace by the Firmware v2 API. Only use it for test/demo purposes!",
 
 		Schema: map[string]*schema.Schema{
 			"firmware_version": {
@@ -28,27 +29,36 @@ func ResourceConnectMDMFirmwareDistributionRequest() *schema.Resource {
 				ForceNew: true,
 				Required: true,
 			},
+			"status": {
+				Type:     schema.TypeString,
+				Required: true,
+			},
 			"description": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Optional: true,
 			},
 			"orchestration_mode": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"user_consent_required": {
 				Type:     schema.TypeBool,
 				Optional: true,
+				ForceNew: true,
 				Default:  false,
 			},
 			"distribution_target_device_groups_ids": {
 				Type:     schema.TypeSet,
+				ForceNew: true,
 				Optional: true,
 				MaxItems: 10,
 				Elem:     tools.StringSchema(),
 			},
 			"firmware_component_version_ids": {
 				Type:     schema.TypeSet,
+				ForceNew: true,
 				Optional: true,
 				MaxItems: 5,
 				Elem:     tools.StringSchema(),
@@ -70,6 +80,7 @@ func schemaToFirmwareDistributionRequest(d *schema.ResourceData) mdm.FirmwareDis
 	description := d.Get("description").(string)
 	orchestrationMode := d.Get("orchestration_mode").(string)
 	userConsentRequired := d.Get("user_consent_required").(bool)
+	status := d.Get("status").(string)
 
 	targetDeviceGroupIds := tools.ExpandStringList(d.Get("distribution_target_device_groups_ids").(*schema.Set).List())
 	componentVersionIds := tools.ExpandStringList(d.Get("firmware_component_version_ids").(*schema.Set).List())
@@ -79,19 +90,20 @@ func schemaToFirmwareDistributionRequest(d *schema.ResourceData) mdm.FirmwareDis
 		Description:         description,
 		OrchestrationMode:   orchestrationMode,
 		UserConsentRequired: userConsentRequired,
+		Status:              status,
 	}
-	var dgs []mdm.DistributionTarget
+	var dgs []mdm.Reference
 	for _, g := range targetDeviceGroupIds {
-		dgs = append(dgs, mdm.DistributionTarget{
-			DeviceGroupId: g,
+		dgs = append(dgs, mdm.Reference{
+			Reference: g,
 		})
 	}
 	resource.DistributionTargets = dgs
 
-	var compVers []mdm.DistributionFirmwareComponentVersion
+	var compVers []mdm.Reference
 	for _, v := range componentVersionIds {
-		compVers = append(compVers, mdm.DistributionFirmwareComponentVersion{
-			FirmwareComponentVersionId: v,
+		compVers = append(compVers, mdm.Reference{
+			Reference: v,
 		})
 	}
 	resource.FirmwareComponentVersions = compVers
@@ -105,16 +117,17 @@ func firmwareDistributionRequestToSchema(resource mdm.FirmwareDistributionReques
 	_ = d.Set("orchestration_mode", resource.OrchestrationMode)
 	_ = d.Set("user_consent_required", resource.UserConsentRequired)
 	_ = d.Set("guid", resource.ID)
+	_ = d.Set("status", resource.Status)
 
 	var dts []string
 	for _, g := range resource.DistributionTargets {
-		dts = append(dts, g.DeviceGroupId)
+		dts = append(dts, g.Reference)
 	}
 	_ = d.Set("distribution_target_device_groups_ids", tools.SchemaSetStrings(dts))
 
 	var cvs []string
 	for _, v := range resource.FirmwareComponentVersions {
-		cvs = append(cvs, v.FirmwareComponentVersionId)
+		cvs = append(cvs, v.Reference)
 	}
 	_ = d.Set("firmware_component_version_ids", tools.SchemaSetStrings(cvs))
 }
@@ -192,6 +205,10 @@ func resourceConnectMDMFirmwareDistributionRequestUpdate(ctx context.Context, d 
 
 	resource := schemaToFirmwareDistributionRequest(d)
 	resource.ID = id
+
+	if !d.HasChange("status") {
+		return diag.FromErr(fmt.Errorf("only the 'status' can be updated"))
+	}
 
 	_, _, err = client.FirmwareDistributionRequests.Update(resource)
 	if err != nil {
