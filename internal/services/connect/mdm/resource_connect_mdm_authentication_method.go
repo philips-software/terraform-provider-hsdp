@@ -137,6 +137,8 @@ func AuthenticationMethodToSchema(resource mdm.AuthenticationMethod, d *schema.R
 			value = fmt.Sprintf("%s|%s", resource.OrganizationGuid.System, resource.OrganizationGuid.Value)
 		}
 		_ = d.Set("organization_id", value)
+	} else {
+		_ = d.Set("organization_id", nil)
 	}
 }
 

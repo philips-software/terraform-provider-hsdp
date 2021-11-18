@@ -222,6 +222,8 @@ func oAuthClientToSchema(resource mdm.OAuthClient, d *schema.ResourceData) {
 			value = fmt.Sprintf("%s|%s", resource.BootstrapClientGuid.System, resource.BootstrapClientGuid.Value)
 		}
 		_ = d.Set("bootstrap_client_guid", value)
+	} else {
+		_ = d.Set("bootstrap_client_guid", nil)
 	}
 	if resource.ClientGuid != nil && resource.ClientGuid.Value != "" {
 		value := resource.ClientGuid.Value
@@ -229,6 +231,8 @@ func oAuthClientToSchema(resource mdm.OAuthClient, d *schema.ResourceData) {
 			value = fmt.Sprintf("%s|%s", resource.ClientGuid.System, resource.ClientGuid.Value)
 		}
 		_ = d.Set("client_guid", value)
+	} else {
+		_ = d.Set("client_guid", nil)
 	}
 	_ = d.Set("client_revoked", resource.ClientRevoked)
 	_ = d.Set("user_client", resource.UserClient)

@@ -92,6 +92,8 @@ func serviceActionToSchema(service mdm.ServiceAction, d *schema.ResourceData) {
 			value = fmt.Sprintf("%s|%s", service.OrganizationGuid.System, service.OrganizationGuid.Value)
 		}
 		_ = d.Set("organization_identifier", value)
+	} else {
+		_ = d.Set("organization_identifier", nil)
 	}
 }
 

@@ -50,6 +50,12 @@ func ResourceConnectMDMFirmwareComponentVersion() *schema.Resource {
 				Default:  true,
 				Optional: true,
 			},
+			"encryption_info": {
+				Type:     schema.TypeSet,
+				MaxItems: 1,
+				Optional: true,
+				Elem:     encryptionInfoSchema(),
+			},
 			"fingerprint": {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
@@ -96,6 +102,25 @@ func fingerprintSchema() *schema.Resource {
 	}
 }
 
+func encryptionInfoSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"encrypted": {
+				Type:     schema.TypeBool,
+				Required: true,
+			},
+			"algorithm": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"decryption_key": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+		},
+	}
+}
+
 func schemaToFirmwareComponentVersion(d *schema.ResourceData) mdm.FirmwareComponentVersion {
 	version := d.Get("version").(string)
 	description := d.Get("description").(string)
@@ -129,12 +154,22 @@ func schemaToFirmwareComponentVersion(d *schema.ResourceData) mdm.FirmwareCompon
 		}
 	}
 	resource.FirmwareComponentId.Reference = firmwareComponentId
-	// TODO: add encryption info
 
+	if v, ok := d.GetOk("encryption_info"); ok {
+		vL := v.(*schema.Set).List()
+		for _, entry := range vL {
+			mV := entry.(map[string]interface{})
+			resource.EncryptionInfo = &mdm.EncryptionInfo{
+				Encrypted:     mV["encrypted"].(bool),
+				Algorithm:     mV["algorithm"].(string),
+				DecryptionKey: mV["decryption_key"].(string),
+			}
+		}
+	}
 	return resource
 }
 
-func FirmwareComponentVersionToSchema(resource mdm.FirmwareComponentVersion, d *schema.ResourceData) {
+func firmwareComponentVersionToSchema(resource mdm.FirmwareComponentVersion, d *schema.ResourceData) {
 	_ = d.Set("version", resource.Version)
 	_ = d.Set("description", resource.Description)
 	_ = d.Set("firmware_component_id", resource.FirmwareComponentId.Reference)
@@ -153,6 +188,18 @@ func FirmwareComponentVersionToSchema(resource mdm.FirmwareComponentVersion, d *
 	entry["hash"] = resource.FingerPrint.Hash
 	a.Add(entry)
 	_ = d.Set("fingerprint", a)
+
+	if resource.EncryptionInfo != nil {
+		b := &schema.Set{F: schema.HashResource(encryptionInfoSchema())}
+		entry := make(map[string]interface{})
+		entry["encrypted"] = resource.EncryptionInfo.Encrypted
+		entry["algorithm"] = resource.EncryptionInfo.Algorithm
+		entry["decryption_key"] = resource.EncryptionInfo.DecryptionKey
+		b.Add(entry)
+		_ = d.Set("encryption_info", b)
+	} else {
+		_ = d.Set("encryption_info", nil)
+	}
 }
 
 func resourceConnectMDMFirmwareComponentVersionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -209,7 +256,7 @@ func resourceConnectMDMFirmwareComponentVersionRead(_ context.Context, d *schema
 		}
 		return diag.FromErr(err)
 	}
-	FirmwareComponentVersionToSchema(*service, d)
+	firmwareComponentVersionToSchema(*service, d)
 	return diags
 }
 

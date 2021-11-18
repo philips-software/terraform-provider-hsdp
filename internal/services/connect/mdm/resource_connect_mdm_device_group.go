@@ -92,6 +92,8 @@ func deviceGroupToSchema(resource mdm.DeviceGroup, d *schema.ResourceData) {
 			value = fmt.Sprintf("%s|%s", resource.DefaultGroupGuid.System, resource.DefaultGroupGuid.Value)
 		}
 		_ = d.Set("default_iam_group_id", value)
+	} else {
+		_ = d.Set("default_iam_group_id", nil)
 	}
 }
 
