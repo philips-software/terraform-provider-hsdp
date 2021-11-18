@@ -23,6 +23,10 @@ resource "hsdp_connect_mdm_firmware_component_version" "one_dot_oh" {
     algorithm = "SHA-256"
     hash = "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
   }
+  
+  encryption_info {
+    encrypted = false
+  }
 }
 ```
 
@@ -42,6 +46,10 @@ The following arguments are supported:
 * `fingerprint` - (Optional) Fingerprint information
   * `algorithm` - (Required) The algorithm used to calculate the fingerprint
   * `hash` - (Required) The fingerprint value
+* `encryption_info` - (Optional) Specify encrypted related info
+  * `encrypted` - (Required, bool) If the component is encrypted
+  * `algorithm` - (Optional) The encryption algorithm that is used
+  * `decryption_key` - (Optional) The decryption key
 
 ## Attributes reference
 
