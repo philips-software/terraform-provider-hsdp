@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.27.1
+
+- MDM: Documentation fixes
+- MDM: Add hsdp_connect_mdm_firmware_distribution_request
+
 ## v0.27.0
 
 - NEW: Connect MDM support
