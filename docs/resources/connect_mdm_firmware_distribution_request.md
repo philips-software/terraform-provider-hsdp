@@ -49,4 +49,3 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID reference of the service action (format: `FirmwareDistributionRequest/${GUID}`)
 * `guid` - The GUID of the service action
-  
