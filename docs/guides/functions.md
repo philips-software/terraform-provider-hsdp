@@ -12,10 +12,10 @@ unlocks capabilities beyond the standard Iron services:
 - **CRON** compatible scheduling of Docker workloads using Terraform, leapfrogging Iron.io scheduling capabilities
 - Full control over the Docker container **ENVIRONMENT** variables, allowing easy workload configuration
 - Automatic encryption of workload payloads
-- Synchronously call a Docker workload running on an Iron Worker, with **streaming support**
+- Synchronously call a Docker workload running on an IronWorker, with **streaming support**
 - Asynchronously schedule a Docker workload with HTTP Callback support (POST output of workload)
 - Function Gateway can be configured with Token auth (default)
-- Optionally integrates with **HSDP IAM** for Organization RBAC access to functions
+- Optionally integrates with **HSDP IAM** for Organization Role Based Access Control (RBAC) to functions
 - Asynchronous jobs are scheduled and can take advantage of Iron autoscaling
 - Designed to be **Iron agnostic**
 
@@ -106,7 +106,7 @@ RUN go mod download
 COPY . .
 RUN go build -o server .
 
-FROM philipslabs/siderite:v0.11.3 AS siderite
+FROM philipslabs/siderite:v0.12.0 AS siderite
 
 FROM alpine:latest
 WORKDIR /app
@@ -222,7 +222,7 @@ The `hsdp_function` resource supports defining functions which are automatically
 periodically i.e. `Tasks`. A Docker image which defines a task should use the following `CMD`:
 
 ```dockerfile
-FROM philipslabs/siderite:debian-v0.11.3 as siderite
+FROM philipslabs/siderite:debian-v0.12.0 as siderite
 
 FROM minio/mc:latest
 COPY --from=siderite /app/siderite /usr/bin/siderite
@@ -287,14 +287,23 @@ which has the `LOG.CREATE` scope (recommended). Configuration can be done using 
 
 | environment | description | required |
 |-------------|-------------|----------|
-| SIDERITE_LOGINGESTOR_PRODUCT_KEY| The HSDP logging product key | Required |
-| SIDERITE_LOGINGESTOR_KEY | The HSDP logging shared key | Optional |
-| SIDERITE_LOGINGESTOR_SECRET | The HSDP logging shared secret | Optional |
-| SIDERITE_LOGINGESTOR_URL | The HSDP logging base URL | Required when not setting region and environment |
-| SIDERITE_LOGINGESTOR_SERVICE_ID | The HSDP service identity ID to use | Optional |
-| SIDERITE_LOGINGESTOR_SERVICE_PRIVATE_KEY | The private key belonging to the service identity | Optional |
-| SIDERITE_LOGINGESTOR_REGION | The HSDP region | Required for service identity |
-| SIDERITE_LOGINGESTOR_ENVIRONMENT | The HSDP environment (`client-test`, `prod`) | Required for service identity |
+| `SIDERITE_LOGINGESTOR_PRODUCT_KEY`| The HSDP logging product key | Required |
+| `SIDERITE_LOGINGESTOR_KEY` | The HSDP logging shared key | Optional |
+| `SIDERITE_LOGINGESTOR_SECRET` | The HSDP logging shared secret | Optional |
+| `SIDERITE_LOGINGESTOR_URL` | The HSDP logging base URL | Required when not setting region and environment |
+| `SIDERITE_LOGINGESTOR_SERVICE_ID` | The HSDP service identity ID to use | Optional |
+| `SIDERITE_LOGINGESTOR_SERVICE_PRIVATE_KEY` | The private key belonging to the service identity | Optional |
+| `SIDERITE_LOGINGESTOR_REGION` | The HSDP region | Required for service identity |
+| `SIDERITE_LOGINGESTOR_ENVIRONMENT` | The HSDP environment (`client-test`, `prod`) | Required for service identity |
+
+### Logging using Logdrainer URL
+
+If you have access to a Cloud foundry Logdrainer endpoint you can also leverage that for easy logging configuration. In that
+case you only need to specify the Logdrainer endpoint URL:
+
+| environment | description | required |
+|-------------|-------------|----------|
+| `SIDERITE_LOGDRAINER_URL` | The HSDP Logdrainer endpoint | Required |
 
 Below is an example of using logging in a task:
 
@@ -308,7 +317,7 @@ resource "hsdp_function" "request" {
     REQUEST_URL      = "https://go-hello-world.eu-west.philips-healthsuite.com/dump"
     
     SIDERITE_LOGINGESTOR_REGION              = var.region
-    SIDEIRTE_LOGINGESTOR_ENVIRONMENT         = var.environment
+    SIDERITE_LOGINGESTOR_ENVIRONMENT         = var.environment
     SIDERITE_LOGINGESTOR_PRODUCT_KEY         = var.logging_product_key
     SIDERITE_LOGINGESTOR_SERVICE_ID          = hsdp_iam_service.logger.id
     SIDERITE_LOGINGESTOR_SERVICE_PRIVATE_KEY = hsdp_iam_service.logger.private_key
