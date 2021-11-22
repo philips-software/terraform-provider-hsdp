@@ -14,7 +14,7 @@ require (
 	github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152
 	github.com/loafoe/easyssh-proxy/v2 v2.0.2
 	github.com/philips-labs/ferrite v0.1.2
-	github.com/philips-labs/siderite v0.11.3
+	github.com/philips-labs/siderite v0.12.0
 	github.com/philips-software/go-hsdp-api v0.50.2
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
