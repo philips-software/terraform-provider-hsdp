@@ -23,7 +23,7 @@ resource "hsdp_connect_mdm_bucket" "store" {
   cors_configuration {
     allowed_origins = ["https://foo.hsdp.io"]
     allowed_methods = ["GET"]
-    expose_headers  = ["X-Hsdp-*"]
+    expose_headers  = ["X-Hsdp-Signature"]
   }
 }
 ```

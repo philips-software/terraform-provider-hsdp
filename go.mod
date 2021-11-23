@@ -15,7 +15,7 @@ require (
 	github.com/loafoe/easyssh-proxy/v2 v2.0.2
 	github.com/philips-labs/ferrite v0.1.2
 	github.com/philips-labs/siderite v0.12.0
-	github.com/philips-software/go-hsdp-api v0.50.2
+	github.com/philips-software/go-hsdp-api v0.50.3-0.20211123153744-e4aa3bfbd69a
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.7.0
@@ -59,7 +59,7 @@ require (
 	github.com/hashicorp/terraform-json v0.13.0 // indirect
 	github.com/hashicorp/terraform-plugin-go v0.4.0 // indirect
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
-	github.com/hasura/go-graphql-client v0.4.0 // indirect
+	github.com/hasura/go-graphql-client v0.5.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/klauspost/compress v1.11.7 // indirect
