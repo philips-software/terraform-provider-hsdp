@@ -59,10 +59,8 @@ func ResourceIAMRole() *schema.Resource {
 	}
 }
 
-func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	c := meta.(*config.Config)
-
-	var diags diag.Diagnostics
+func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	c := m.(*config.Config)
 
 	client, err := c.IAMClient()
 	if err != nil {
@@ -111,18 +109,24 @@ func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, meta int
 		role = &(*roles)[0]
 	}
 	for _, p := range permissions {
-		_, _, _ = client.Roles.AddRolePermission(*role, p)
+		result, resp, err := client.Roles.AddRolePermission(*role, p)
+		if err != nil {
+			// Clean up
+			_, _, _ = client.Roles.DeleteRole(*role)
+			return diag.FromErr(fmt.Errorf("error adding permission '%s': %v", p, err))
+		}
+		if resp == nil || !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusMultiStatus) {
+			// Clean up
+			_, _, _ = client.Roles.DeleteRole(*role)
+			return diag.FromErr(fmt.Errorf("error adding permission '%s': %v", p, result))
+		}
 	}
 	d.SetId(role.ID)
-	readDiags := resourceIAMRoleRead(ctx, d, meta)
-	if readDiags != nil {
-		diags = append(diags, readDiags...)
-	}
-	return diags
+	return resourceIAMRoleRead(ctx, d, m)
 }
 
-func resourceIAMRoleRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	c := meta.(*config.Config)
+func resourceIAMRoleRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
 

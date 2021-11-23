@@ -191,3 +191,7 @@ func DisableFHIRValidation(request *http.Request) error {
 	request.Header.Set("X-Validate-Resource", "false")
 	return nil
 }
+
+func String(str string) *string {
+	return &str
+}

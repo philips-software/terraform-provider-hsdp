@@ -1,9 +1,11 @@
-package iam
+package group
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
@@ -16,11 +18,18 @@ func ResourceIAMGroup() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
+		SchemaVersion: 1,
 		CreateContext: resourceIAMGroupCreate,
 		ReadContext:   resourceIAMGroupRead,
 		UpdateContext: resourceIAMGroupUpdate,
 		DeleteContext: resourceIAMGroupDelete,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    ResourceIAMGroupV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: patchIAMGroupV0,
+				Version: 0,
+			},
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -40,21 +49,26 @@ func ResourceIAMGroup() *schema.Resource {
 			},
 			"roles": {
 				Type:     schema.TypeSet,
-				MaxItems: 100,
+				MaxItems: 1000,
 				Required: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem:     tools.StringSchema(),
 			},
 			"users": {
 				Type:     schema.TypeSet,
 				MaxItems: 2000,
 				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem:     tools.StringSchema(),
 			},
 			"services": {
 				Type:     schema.TypeSet,
 				MaxItems: 2000,
 				Optional: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
+				Elem:     tools.StringSchema(),
+			},
+			"drift_detection": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
 			},
 		},
 	}
@@ -62,8 +76,6 @@ func ResourceIAMGroup() *schema.Resource {
 
 func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
-
-	var diags diag.Diagnostics
 
 	client, err := c.IAMClient()
 	if err != nil {
@@ -91,7 +103,6 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 	}
 	roles := tools.ExpandStringList(d.Get("roles").(*schema.Set).List())
 
-	d.SetId(createdGroup.ID)
 	_ = d.Set("name", createdGroup.Name)
 	_ = d.Set("description", createdGroup.Description)
 	_ = d.Set("managing_organization", createdGroup.ManagingOrganization)
@@ -108,7 +119,10 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 				return resp.Response, err
 			})
 			if err != nil {
-				diags = append(diags, diag.FromErr(err)...)
+				// Cleanup
+				_ = purgeGroupContent(ctx, client, createdGroup.ID, d)
+				_, _, _ = client.Groups.DeleteGroup(*createdGroup)
+				return diag.FromErr(fmt.Errorf("error adding roles: %v", err))
 			}
 		}
 	}
@@ -117,14 +131,20 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 	users := tools.ExpandStringList(d.Get("users").(*schema.Set).List())
 	if len(users) > 0 {
 		err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
-			_, resp, err := client.Groups.AddMembers(*createdGroup, users...)
+			result, resp, err := client.Groups.AddMembers(*createdGroup, users...)
 			if resp == nil {
 				return nil, err
+			}
+			if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusMultiStatus) {
+				return resp.Response, backoff.Permanent(fmt.Errorf("failed to add members: %v", result))
 			}
 			return resp.Response, err
 		})
 		if err != nil {
-			diags = append(diags, diag.FromErr(err)...)
+			// Cleanup
+			_ = purgeGroupContent(ctx, client, createdGroup.ID, d)
+			_, _, _ = client.Groups.DeleteGroup(*createdGroup)
+			return diag.FromErr(fmt.Errorf("error adding users: %v", err))
 		}
 	}
 
@@ -132,17 +152,27 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 	services := tools.ExpandStringList(d.Get("services").(*schema.Set).List())
 	if len(services) > 0 {
 		err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
-			_, resp, err := client.Groups.AddServices(*createdGroup, services...)
+			result, resp, err := client.Groups.AddServices(*createdGroup, services...)
 			if resp == nil {
 				return nil, err
+			}
+			if err != nil {
+				return resp.Response, err
+			}
+			if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusMultiStatus) {
+				return resp.Response, backoff.Permanent(fmt.Errorf("failed to add services: %v", result))
 			}
 			return resp.Response, err
 		})
 		if err != nil {
-			diags = append(diags, diag.FromErr(err)...)
+			// Cleanup
+			_ = purgeGroupContent(ctx, client, createdGroup.ID, d)
+			_, _, _ = client.Groups.DeleteGroup(*createdGroup)
+			return diag.FromErr(fmt.Errorf("error adding services: %v", err))
 		}
 	}
-	return diags
+	d.SetId(createdGroup.ID)
+	return resourceIAMGroupRead(ctx, d, m)
 }
 
 func resourceIAMGroupRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -156,6 +186,8 @@ func resourceIAMGroupRead(_ context.Context, d *schema.ResourceData, m interface
 	}
 
 	id := d.Id()
+	driftDetection := d.Get("drift_detection").(bool)
+
 	group, resp, err := client.Groups.GetGroupByID(id)
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusNotFound {
@@ -171,11 +203,64 @@ func resourceIAMGroupRead(_ context.Context, d *schema.ResourceData, m interface
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	roleIDs := make([]string, len(*roles))
-	for i, r := range *roles {
-		roleIDs[i] = r.ID
+	var roleIDs []string
+	for _, r := range *roles {
+		roleIDs = append(roleIDs, r.ID)
 	}
-	_ = d.Set("roles", &roleIDs)
+	_ = d.Set("roles", tools.SchemaSetStrings(roleIDs))
+
+	if driftDetection { // Only do drift detection when explicitly enabled
+		// Users
+		users, _, err := client.Users.GetUsers(&iam.GetUserOptions{
+			GroupID: &group.ID,
+		})
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("error retrieving users from group: %v", err))
+		}
+		_ = d.Set("users", tools.SchemaSetStrings(users.UserUUIDs))
+
+		// Services
+		// We only deal with services we know
+		var verifiedServices []string
+		services := tools.ExpandStringList(d.Get("services").(*schema.Set).List())
+		for _, service := range services {
+			groups, _, err := client.Groups.GetGroups(&iam.GetGroupOptions{
+				MemberType: tools.String("SERVICE"),
+				MemberID:   &service,
+			})
+			if err != nil || groups == nil {
+				continue
+			}
+			for _, g := range *groups {
+				if g.ID == group.ID {
+					verifiedServices = append(verifiedServices, service)
+					continue
+				}
+			}
+		}
+		// Also check all services in this org
+		orgServices, _, err := client.Services.GetServices(&iam.GetServiceOptions{
+			OrganizationID: &group.ManagingOrganization,
+		})
+		if err == nil && orgServices != nil && len(*orgServices) > 0 {
+			for _, orgService := range *orgServices {
+				og, _, err := client.Groups.GetGroups(&iam.GetGroupOptions{
+					MemberType: tools.String("SERVICE"),
+					MemberID:   &orgService.ID,
+				})
+				if err != nil {
+					continue
+				}
+				for _, m := range *og {
+					if m.ID == group.ID && !tools.ContainsString(verifiedServices, m.ID) {
+						verifiedServices = append(verifiedServices, orgService.ID)
+					}
+				}
+			}
+		}
+
+		_ = d.Set("services", tools.SchemaSetStrings(verifiedServices))
+	}
 	return diags
 }
 
@@ -283,6 +368,64 @@ func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m inter
 	return diags
 }
 
+func purgeGroupContent(ctx context.Context, client *iam.Client, id string, d *schema.ResourceData) error {
+	var group iam.Group
+	group.ID = id
+
+	// Remove all users first before attempting delete
+	users := tools.ExpandStringList(d.Get("users").(*schema.Set).List())
+	if len(users) > 0 {
+		for _, u := range users {
+			_ = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+				_, resp, err := client.Groups.RemoveMembers(group, u)
+				if resp != nil && resp.StatusCode == http.StatusUnprocessableEntity {
+					return resp.Response, nil // User is already gone
+				}
+				if resp == nil {
+					return nil, err
+				}
+				return resp.Response, err
+			}, http.StatusInternalServerError, http.StatusTooManyRequests)
+		}
+	}
+
+	// Remove all services first before attempting delete
+	services := tools.ExpandStringList(d.Get("services").(*schema.Set).List())
+	if len(services) > 0 {
+		for _, s := range services {
+			_ = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+				_, resp, err := client.Groups.RemoveServices(group, s)
+				if resp != nil && resp.StatusCode == http.StatusUnprocessableEntity {
+					return resp.Response, nil // Service is already gone
+				}
+				if resp == nil {
+					return nil, err
+				}
+				return resp.Response, err
+			}, http.StatusInternalServerError, http.StatusTooManyRequests)
+		}
+	}
+
+	// Remove all associated roles
+	roles := tools.ExpandStringList(d.Get("roles").(*schema.Set).List())
+	if len(roles) > 0 {
+		for _, r := range roles {
+			_ = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+				var role = iam.Role{ID: r}
+				_, resp, err := client.Groups.RemoveRole(group, role)
+				if resp != nil && resp.StatusCode == http.StatusUnprocessableEntity {
+					return resp.Response, nil // Role is already gone
+				}
+				if resp == nil {
+					return nil, err
+				}
+				return resp.Response, err
+			}, http.StatusInternalServerError, http.StatusTooManyRequests)
+		}
+	}
+	return nil
+}
+
 func resourceIAMGroupDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
@@ -295,75 +438,8 @@ func resourceIAMGroupDelete(ctx context.Context, d *schema.ResourceData, m inter
 
 	var group iam.Group
 	group.ID = d.Id()
-
-	// Remove all users first before attempting delete
-	users := tools.ExpandStringList(d.Get("users").(*schema.Set).List())
-	if len(users) > 0 {
-		for _, u := range users {
-			err := tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
-				_, resp, err := client.Groups.RemoveMembers(group, u)
-				if resp != nil && resp.StatusCode == http.StatusUnprocessableEntity {
-					return resp.Response, nil // User is already gone
-				}
-				if resp == nil {
-					return nil, err
-				}
-				return resp.Response, err
-			}, http.StatusInternalServerError)
-			if err != nil {
-				diags = append(diags, diag.FromErr(err)...)
-			}
-		}
-		if len(diags) > 0 {
-			return diags
-		}
-	}
-
-	// Remove all services first before attempting delete
-	services := tools.ExpandStringList(d.Get("services").(*schema.Set).List())
-	if len(services) > 0 {
-		for _, s := range services {
-			err := tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
-				_, resp, err := client.Groups.RemoveServices(group, s)
-				if resp != nil && resp.StatusCode == http.StatusUnprocessableEntity {
-					return resp.Response, nil // Service is already gone
-				}
-				if resp == nil {
-					return nil, err
-				}
-				return resp.Response, err
-			}, http.StatusInternalServerError)
-			if err != nil {
-				diags = append(diags, diag.FromErr(err)...)
-			}
-		}
-		if len(diags) > 0 {
-			return diags
-		}
-	}
-
-	// Remove all associated roles
-	roles := tools.ExpandStringList(d.Get("roles").(*schema.Set).List())
-	if len(roles) > 0 {
-		for _, r := range roles {
-			err := tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
-				var role = iam.Role{ID: r}
-				_, resp, err := client.Groups.RemoveRole(group, role)
-				if resp != nil && resp.StatusCode == http.StatusUnprocessableEntity {
-					return resp.Response, nil // Role is already gone
-				}
-				if resp == nil {
-					return nil, err
-				}
-				return resp.Response, err
-			}, http.StatusInternalServerError)
-			if err != nil {
-				diags = append(diags, diag.FromErr(err)...)
-			}
-		}
-		if len(diags) > 0 {
-			return diags
-		}
+	if err := purgeGroupContent(ctx, client, group.ID, d); err != nil {
+		return diag.FromErr(fmt.Errorf("error purging group content: %v", err))
 	}
 
 	// Query group to sync it up (to force IAM sync?)
@@ -378,7 +454,7 @@ func resourceIAMGroupDelete(ctx context.Context, d *schema.ResourceData, m inter
 			return nil, err
 		}
 		return resp.Response, err
-	}, http.StatusInternalServerError)
+	}, http.StatusInternalServerError, http.StatusTooManyRequests)
 	if err != nil {
 		return diag.FromErr(err)
 	}

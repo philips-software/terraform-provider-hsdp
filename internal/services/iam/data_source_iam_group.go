@@ -44,7 +44,7 @@ func dataSourceIAMGroupRead(ctx context.Context, d *schema.ResourceData, meta in
 	orgId := d.Get("managing_organization_id").(string)
 	name := d.Get("name").(string)
 
-	group, resp, err := client.Groups.GetGroup(&iam.GetGroupOptions{
+	groups, resp, err := client.Groups.GetGroups(&iam.GetGroupOptions{
 		OrganizationID: &orgId,
 		Name:           &name,
 	})
@@ -52,18 +52,22 @@ func dataSourceIAMGroupRead(ctx context.Context, d *schema.ResourceData, meta in
 	if err != nil {
 		if resp != nil && resp.StatusCode != http.StatusOK {
 			switch resp.StatusCode {
-			case http.StatusNotFound:
-				err = fmt.Errorf("group '%s' not found in org '%s'", name, orgId)
 			case http.StatusForbidden:
 				err = fmt.Errorf("no permission to read groups in org '%s'", orgId)
+			default:
+				err = fmt.Errorf("group '%s' not found in org '%s' (code: %d)", name, orgId, resp.StatusCode)
 			}
 		}
 		return diag.FromErr(err)
 	}
+	if len(*groups) == 0 {
+		return diag.FromErr(fmt.Errorf("no group matches the search criteria"))
+	}
+	group := (*groups)[0]
 
 	d.SetId(group.ID)
-	_ = d.Set("name", group.Name)
-	_ = d.Set("description", group.Description)
+	_ = d.Set("name", group.GroupName)
+	_ = d.Set("description", group.GroupDescription)
 
 	return diags
 }
