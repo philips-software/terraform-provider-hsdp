@@ -4,11 +4,13 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/dicom"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func schemaApplicationEntity() *schema.Schema {
@@ -186,7 +188,7 @@ func resourceDICOMGatewayConfigDelete(_ context.Context, d *schema.ResourceData,
 	return diags
 }
 
-func resourceDICOMGatewayConfigRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDICOMGatewayConfigRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*config.Config)
 	configURL := d.Get("config_url").(string)
@@ -197,19 +199,37 @@ func resourceDICOMGatewayConfigRead(_ context.Context, d *schema.ResourceData, m
 	}
 	defer client.Close()
 
-	// Refresh token so we hopefully have DICOM permissions to proceed without error
-	_ = client.TokenRefresh()
-	storeConfig, _, err := client.Config.GetStoreService(&dicom.QueryOptions{
-		OrganizationID: &organizationID,
+	var storeConfig *dicom.BrokenSCPConfig
+	var resp *dicom.Response
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		// Refresh token, so we hopefully have DICOM permissions to proceed without error
+		_ = client.TokenRefresh()
+		storeConfig, resp, err = client.Config.GetStoreService(&dicom.QueryOptions{
+			OrganizationID: &organizationID,
+		})
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	})
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	_ = setBrokenSCPConfig(*storeConfig, d)
 
-	queryConfig, _, err := client.Config.GetQueryRetrieveService(&dicom.QueryOptions{
-		OrganizationID: &organizationID,
+	var queryConfig *dicom.BrokenSCPConfig
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		_ = client.TokenRefresh()
+		queryConfig, resp, err = client.Config.GetQueryRetrieveService(&dicom.QueryOptions{
+			OrganizationID: &organizationID,
+		})
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	})
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
