@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.27.3
+
+- IAM Group: refactor group handling (#147)
+- Docs: fix broken MDM bucket example
+- Core: Upgrade terraform-plugin-sdk to v.2.9.0
+
 ## v0.27.2
 
 - Function: update instructions for siderite v0.12.0
