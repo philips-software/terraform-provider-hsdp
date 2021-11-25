@@ -14,8 +14,7 @@ Create and manage MDM Application resources
 resource "hsdp_connect_mdm_application" "app" {
   name        = "mobile"
   description = "Terraform managed Application"
-  
-  organization_id = var.org_id
+  proposition_id = var.proposition_id
 }
 ```
 
