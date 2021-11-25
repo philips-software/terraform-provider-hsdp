@@ -78,8 +78,6 @@ func ResourceIAMUser() *schema.Resource {
 }
 
 func resourceIAMUserCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	var diags diag.Diagnostics
-
 	c := m.(*config.Config)
 	client, err := c.IAMClient()
 	if err != nil {
@@ -101,16 +99,13 @@ func resourceIAMUserCreate(ctx context.Context, d *schema.ResourceData, m interf
 	preferredCommunicationChannel := d.Get("preferred_communication_channel").(string)
 
 	// First check if this user already exists
-	uuid, _, err := client.Users.GetUserIDByLoginID(email)
-	if err == nil && uuid != "" {
-		user, _, _ := client.Users.GetUserByID(uuid)
-		if user != nil {
-			diags = resourceIAMUserRead(ctx, d, m)
-			if len(diags) == 0 {
-				d.SetId(user.ID)
-			}
-			return diags
+	foundUser, _, err := client.Users.GetUserByID(login)
+	if err == nil && (foundUser != nil && foundUser.ID != "") {
+		if foundUser.ManagingOrganization != organization {
+			return diag.FromErr(fmt.Errorf("user '%s' already exists but is managed by a different IAM organization", login))
 		}
+		d.SetId(foundUser.ID)
+		return resourceIAMUserRead(ctx, d, m)
 	}
 	person := iam.Person{
 		ResourceType: "Person",
@@ -138,12 +133,12 @@ func resourceIAMUserCreate(ctx context.Context, d *schema.ResourceData, m interf
 				Value:  mobile,
 			})
 	}
-	user, _, err := client.Users.CreateUser(person)
+	user, resp, err := client.Users.CreateUser(person)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	if user == nil {
-		return diag.FromErr(fmt.Errorf("error creating user '%s': %w", login, err))
+		return diag.FromErr(fmt.Errorf("error creating user '%s': %v %w", login, resp, err))
 	}
 	d.SetId(user.ID)
 	return resourceIAMUserRead(ctx, d, m)
