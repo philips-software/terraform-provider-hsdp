@@ -151,7 +151,7 @@ func (c *Config) SetupIAMClient() {
 	c.iamClient = nil
 	client, err := iam.NewClient(standardClient, &c.Config)
 	if err != nil {
-		c.iamClientErr = fmt.Errorf("possible invalid region/environment: %w", err)
+		c.iamClientErr = fmt.Errorf("possible invalid environment/region: %w", err)
 		return
 	}
 	if c.ServiceID != "" && c.ServicePrivateKey != "" {
@@ -160,7 +160,7 @@ func (c *Config) SetupIAMClient() {
 			PrivateKey: c.ServicePrivateKey,
 		})
 		if err != nil {
-			c.iamClientErr = err
+			c.iamClientErr = fmt.Errorf("invalid IAM Service Identity credentials: %w", err)
 			return
 		}
 	}
@@ -171,7 +171,7 @@ func (c *Config) SetupIAMClient() {
 		}
 		err = client.Login(c.OrgAdminUsername, c.OrgAdminPassword)
 		if err != nil {
-			c.iamClientErr = err
+			c.iamClientErr = fmt.Errorf("invalid IAM Org Admin credentials: %w", err)
 			return
 		}
 	}
@@ -279,8 +279,13 @@ func (c *Config) SetupMDMClient() {
 		}
 		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(env))
 		if err == nil {
-			if url := ac.Service("connect-mdm").URL; url != "" {
+			url := ac.Service("connect-mdm").URL
+			if url != "" {
 				c.MDMURL = url
+			} else {
+				c.mdmClient = nil
+				c.mdmClientErr = fmt.Errorf("missing MDM URL (%s/%s), you can set a custom value using 'mdm_url'", env, c.Region)
+				return
 			}
 		}
 	}
@@ -290,7 +295,7 @@ func (c *Config) SetupMDMClient() {
 	})
 	if err != nil {
 		c.mdmClient = nil
-		c.mdmClientErr = err
+		c.mdmClientErr = fmt.Errorf("configuration error (%s/%s): %w", c.Environment, c.Region, err)
 		return
 	}
 	c.mdmClient = client
@@ -305,6 +310,11 @@ func (c *Config) SetupCartelClient() {
 				c.CartelHost = host
 			}
 		}
+	}
+	if c.CartelToken == "" || c.CartelSecret == "" {
+		c.cartelClient = nil
+		c.cartelClientErr = fmt.Errorf("missing Cartel token or secret, set 'cartel_token' and 'cartel_secret'")
+		return
 	}
 	client, err := cartel.NewClient(nil, &cartel.Config{
 		Region:     c.Region,
