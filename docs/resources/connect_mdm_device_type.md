@@ -12,7 +12,7 @@ Create and manage MDM DeviceType resources
 resource "hsdp_connect_mdm_device_type" "some_device_type" {
   name                   = "some-device-type"
   description            = "WEARABLE0001"
-  device_commercial_type = "WATCH1"
+  commercial_type_number = "WATCH1"
   
   device_group_id = hsdp_connect_mdm_device_group.some_group.id
   
