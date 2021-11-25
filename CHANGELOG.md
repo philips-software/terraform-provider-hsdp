@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.27.4
+
+- IAM User: fix create user handling if the account already exists
+- DICOM Gateway: retry read calls
+
 ## v0.27.3
 
 - IAM Group: refactor group handling (#147)
