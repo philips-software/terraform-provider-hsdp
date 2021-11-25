@@ -29,10 +29,12 @@ resource "hsdp_connect_mdm_device_type" "some_device_type" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the device group
-* `description` - (Optional) A short description of the device group
-* `application_id` - (Required) Reference to the Application this group falls under
+* `name` - (Required) The name of the device type
+* `description` - (Optional) A short description of the device type
+* `device_group_id` - (Required) Reference to the Device Group this type falls under
+* `commercial_type_number` - (Required) Commercial Type Number
 * `default_iam_group_id` - (Optional) The IAM Group from which this group will inherit roles from
+* `custom_type_attributes` - (Optional) Type attributes for all devices under this type.
 
 ~> The `name` maps to an AWS IoT thing type so this should be globally unique and not used (or re-used) across deployments
 
