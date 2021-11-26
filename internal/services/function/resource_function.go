@@ -183,7 +183,7 @@ func resourceFunctionUpdate(_ context.Context, d *schema.ResourceData, m interfa
 			return diag.FromErr(fmt.Errorf("CreateOrUpdateCode(%v): %w", code, err))
 		}
 		if resp.StatusCode != http.StatusOK {
-			return diag.FromErr(fmt.Errorf("failed to update code '%s': %d", code.Image, resp.StatusCode))
+			return diag.FromErr(fmt.Errorf("failed to update code '%s': got HTTP %d", code.Image, resp.StatusCode))
 		}
 	}
 
@@ -225,7 +225,7 @@ func resourceFunctionRead(_ context.Context, d *schema.ResourceData, m interface
 		return diag.FromErr(fmt.Errorf("resourceFunctionRead.GetCode: %w", err))
 	}
 	if code == nil || code.ID != codeID {
-		_, _ = c.Debug("could not find code with ID: %s. marking resource as gone\n", codeID)
+		_, _ = c.Debug("could not find code with ID '%s'. marking resource as gone\n", codeID)
 		_ = d.Set("docker_image", "")
 	} else {
 		_ = d.Set("docker_image", code.Image)
@@ -255,13 +255,13 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 	dockerImage := d.Get("docker_image").(string)
 	if _, ok := d.GetOk("docker_credentials"); ok {
 		if _, err := dockerLogin(ironClient, d); err != nil {
-			return diag.FromErr(err)
+			return diag.FromErr(fmt.Errorf("invalid or missing Docker credentials: %w", err))
 		}
 	}
 	signature := strings.Replace(uuid.New().String(), "-", "", -1)
 
 	if ironConfig == nil || len(ironConfig.ClusterInfo) == 0 {
-		return diag.FromErr(fmt.Errorf("invalid iron discovery: %v", ironConfig))
+		return diag.FromErr(fmt.Errorf("invalid Iron.io discovery: %v", ironConfig))
 	}
 	codeName := fmt.Sprintf("%s-%s", name, signature)
 	createdCode, resp, err := ironClient.Codes.CreateOrUpdateCode(iron.Code{
@@ -273,7 +273,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(err)
 	}
 	if resp.StatusCode == http.StatusNotFound {
-		return diag.FromErr(fmt.Errorf("code %s not found", dockerImage))
+		return diag.FromErr(fmt.Errorf("code '%s' not found", dockerImage))
 	}
 	diags := createSchedules(ironClient, ironConfig, *modConfig, d, codeName, createdCode.ID, signature)
 	if len(diags) > 0 {
