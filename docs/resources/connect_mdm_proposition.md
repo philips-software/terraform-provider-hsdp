@@ -25,7 +25,7 @@ The following arguments are supported:
 
 * `name` - (Required) The name of the Proposition
 * `description` - (Optional) A short description of the Proposition
-* `organization_id` - (Required) The organization ID this Proposition should fall under
+* `organization_id` - (Required) The ID of the IAM organization this Proposition should fall under
 * `status` - (Required) The status of the Proposition [`DRAFT`, `ACTIVE`]
 
 ## Attributes reference

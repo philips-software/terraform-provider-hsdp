@@ -14,7 +14,7 @@ Create and manage MDM Application resources
 resource "hsdp_connect_mdm_application" "app" {
   name        = "mobile"
   description = "Terraform managed Application"
-  proposition_id = var.proposition_id
+  proposition_id = data.hsdp_connect_mdm_proposition.prop.id
 }
 ```
 
@@ -26,6 +26,8 @@ The following arguments are supported:
 * `description` - (Optional) A short description of the Application
 * `proposition_id` - (Required) The ID of the Proposition this Application should fall under
 * `global_reference_id` - (Optional) A global reference ID for this application
+
+~> The `proposition_id` only accept MDM Proposition IDs. Using an IAM Proposition ID will not work, even though they might look similar.
 
 ## Attributes reference
 

@@ -66,6 +66,7 @@ In addition to generic provider arguments (e.g. alias and version), the followin
 * `uaa_username` - (Optional) The HSDP CF UAA username.
 * `uaa_password` - (Optional) The HSDP CF UAA password.
 * `uaa_url` - (Optional) The URL of the UAA authentication service. Auto-discovered from region.
+* `mdm_url` - (Optional) The base URL of the MDM service. Auto-discovered from region and environment.
 * `shared_key` - (Optional) The shared key as provided by HSDP. Actions which require API signing will not work if this value is missing.
 * `secret_key` - (Optional) The secret key as provided by HSDP. Actions which require API signing will not work if this value is missing.
 * `cartel_host` - (Optional) The cartel host as provided by HSDP. Auto-discovered from region.
