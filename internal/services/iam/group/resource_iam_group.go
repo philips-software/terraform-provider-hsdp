@@ -136,7 +136,7 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 				return nil, err
 			}
 			if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusMultiStatus) {
-				return resp.Response, backoff.Permanent(fmt.Errorf("failed to add members: %v", result))
+				return resp.Response, backoff.Permanent(fmt.Errorf("failed to add members: %v %w", result, err))
 			}
 			return resp.Response, err
 		})
@@ -144,7 +144,7 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 			// Cleanup
 			_ = purgeGroupContent(ctx, client, createdGroup.ID, d)
 			_, _, _ = client.Groups.DeleteGroup(*createdGroup)
-			return diag.FromErr(fmt.Errorf("error adding users: %v", err))
+			return diag.FromErr(fmt.Errorf("error adding users: %w", err))
 		}
 	}
 
