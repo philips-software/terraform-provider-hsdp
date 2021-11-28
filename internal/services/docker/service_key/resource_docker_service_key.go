@@ -78,7 +78,9 @@ func resourceDockerServiceKeyRead(ctx context.Context, d *schema.ResourceData, m
 
 	key, err := client.ServiceKeys.GetServiceKeyByID(ctx, resourceID)
 	if err != nil {
-		return diag.FromErr(err)
+		// Assume service key was deleted
+		d.SetId("")
+		return diags
 	}
 	_ = d.Set("description", key.Description)
 	_ = d.Set("username", key.Username)
