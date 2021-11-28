@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.27.6
+
+- MDM Application: support description and default_group_guid arguments
+- Docker Service Key: support drift detection
+- IAM Group: display server error message
+- Documentation: update MDM docs
+- Core: update go-hsdp-api
+- Function: more error message improvements
+- Core: more informative error message on missing credentials
+
 ## v0.27.5
 
 - IAM User: fix heuristics for auto importing existing users
