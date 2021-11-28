@@ -26,9 +26,12 @@ The following arguments are supported:
 * `description` - (Optional) A short description of the Application
 * `proposition_id` - (Required) The ID of the Proposition this Application should fall under
 * `global_reference_id` - (Optional) A global reference ID for this application
+* `default_group_guid` - (Optional) The GUID of the IAM Group to assign by default
 
 ~> The `proposition_id` only accept MDM Proposition IDs. Using an IAM Proposition ID will not work, even though they might look similar.
 
+~> The `default_group_guid` takes an IAM Group ID i.e. from an `hsdp_iam_group` resource or data source element
+ 
 ## Attributes reference
 
 In addition to all arguments above, the following attributes are exported:

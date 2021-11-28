@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -18,7 +19,7 @@ func ResourceMDMApplication() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
+		SchemaVersion: 1,
 		CreateContext: resourceMDMApplicationCreate,
 		ReadContext:   resourceMDMApplicationRead,
 		UpdateContext: resourceMDMApplicationUpdate,
@@ -33,6 +34,10 @@ func ResourceMDMApplication() *schema.Resource {
 					tools.SuppressCaseDiffs),
 				ForceNew: true,
 			},
+			"description": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"proposition_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -41,6 +46,11 @@ func ResourceMDMApplication() *schema.Resource {
 					tools.SuppressDefaultSystemValue),
 			},
 			"global_reference_id": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				DiffSuppressFunc: tools.SuppressWhenGenerated,
+			},
+			"default_group_guid": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				DiffSuppressFunc: tools.SuppressWhenGenerated,
@@ -57,11 +67,25 @@ func schemaToApplication(d *schema.ResourceData) mdm.Application {
 	name := d.Get("name").(string)
 	globalReferenceId := d.Get("global_reference_id").(string)
 	propositionId := d.Get("proposition_id").(string)
+	description := d.Get("description").(string)
+	defaultGroupGUID := d.Get("default_group_guid").(string)
 
 	resource := mdm.Application{
 		Name:              name,
+		Description:       description,
 		PropositionID:     mdm.Reference{Reference: propositionId},
 		GlobalReferenceID: globalReferenceId,
+	}
+	if len(defaultGroupGUID) > 0 {
+		groupGuid := mdm.Identifier{}
+		parts := strings.Split(defaultGroupGUID, "|")
+		if len(parts) > 1 {
+			groupGuid.System = parts[0]
+			groupGuid.Value = parts[1]
+		} else {
+			groupGuid.Value = defaultGroupGUID
+		}
+		resource.DefaultGroupGuid = &groupGuid
 	}
 	return resource
 }
@@ -69,8 +93,18 @@ func schemaToApplication(d *schema.ResourceData) mdm.Application {
 func applicationToSchema(resource mdm.Application, d *schema.ResourceData) {
 	_ = d.Set("name", resource.Name)
 	_ = d.Set("guid", resource.ID)
+	_ = d.Set("description", resource.Description)
 	_ = d.Set("global_reference_id", resource.GlobalReferenceID)
 	_ = d.Set("proposition_id", resource.PropositionID.Reference)
+	if resource.DefaultGroupGuid != nil && resource.DefaultGroupGuid.Value != "" {
+		value := resource.DefaultGroupGuid.Value
+		if resource.DefaultGroupGuid.System != "" {
+			value = fmt.Sprintf("%s|%s", resource.DefaultGroupGuid.System, resource.DefaultGroupGuid.Value)
+		}
+		_ = d.Set("default_group_guid", value)
+	} else {
+		_ = d.Set("default_group_guid", nil)
+	}
 }
 
 func resourceMDMApplicationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -174,8 +208,18 @@ func resourceMDMApplicationUpdate(_ context.Context, d *schema.ResourceData, m i
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	resource := schemaToApplication(d)
-	updated, _, err := client.Applications.UpdateApplication(resource)
+	current := schemaToApplication(d)
+	var id string
+	_, _ = fmt.Sscanf(d.Id(), "Application/%s", &id)
+	resource, _, err := client.Applications.GetApplicationByID(id)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("read during update: %v", err))
+	}
+	// Only description
+	resource.Description = current.Description
+	// And defaultGroupGuid
+	resource.DefaultGroupGuid = current.DefaultGroupGuid
+	updated, _, err := client.Applications.UpdateApplication(*resource)
 	if err != nil {
 		return diag.FromErr(err)
 	}
