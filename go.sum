@@ -962,8 +962,8 @@ github.com/peterbourgon/diskv v2.0.1+incompatible/go.mod h1:uqqh8zWWbv1HBMNONnaR
 github.com/philhofer/fwd v1.0.0/go.mod h1:gk3iGcWd9+svBvR0sR+KPcfE+RNWozjowpeBVG3ZVNU=
 github.com/philips-labs/ferrite v0.1.2 h1:Ki7foFvHGcD7/VTAfGc2/oabJXDWFcpvJMmHY5Xmb80=
 github.com/philips-labs/ferrite v0.1.2/go.mod h1:Yrba6vPii8QgrWcJUyy0LOm8LMsUiaUkfwZwjLdVAQY=
-github.com/philips-labs/siderite v0.12.0 h1:IcLkoA9G7WCgzauifbgobNClDJkSkOWJel9S2f53GLA=
-github.com/philips-labs/siderite v0.12.0/go.mod h1:wDjyR2ecI8z9S/uw4v7XCtgYK1Vr/eNE1Dnqmxr0wzo=
+github.com/philips-labs/siderite v0.12.2 h1:V8v3Dcn/TUZvqfcCZ9EZ/E1aWXfcckayAuFwEYVzpvU=
+github.com/philips-labs/siderite v0.12.2/go.mod h1:wDjyR2ecI8z9S/uw4v7XCtgYK1Vr/eNE1Dnqmxr0wzo=
 github.com/philips-software/gautocloud-connectors v0.4.0/go.mod h1:k5VG78BLnDI75Ra5HzdkM8eYk0Sc7bLuwlOEn++j2Ic=
 github.com/philips-software/go-hsdp-api v0.20.0/go.mod h1:agJtsgjb1W4xq5cVUdk06uUVETKO1nKZAZJ4Y1Dumg4=
 github.com/philips-software/go-hsdp-api v0.38.1-0.20210428141703-9f4371331e80/go.mod h1:vzZX4kCmgVwuJcAmd75Yeh/tNu1dNnBRbyau7CFWsuQ=
