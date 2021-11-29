@@ -47,7 +47,6 @@ The following arguments are supported:
 
 ~> The `application_id` only accept MDM Application IDs. Using an IAM Proposition ID will not work, even though they might look similar.
 
-
 ## Attributes Reference
 
 The following attributes are exported:
