@@ -21,7 +21,7 @@ resource "hsdp_iam_group" "tdr_users" {
 }
 ```
 
-This assumes a role definition exists example:
+This assumes a role definition exists:
 
 ```hcl
 resource "hsdp_iam_role" "TDRALL" {
@@ -54,7 +54,7 @@ The following arguments are supported:
 * `users` - (Optional) The list of user IDs to include in this group. The provider only manages this list of users. Existing users added by others means to the group by the provider. It is not practical to manage hundreds or thousands of users this way of course.
 * `services` - (Optional) The list of service identity IDs to include in this group. See `hsdp_iam_service`
 * `drift_detection` - (Optional, bool) While most resources do automatic drift detection, we are opting to make this
-  opt-in feature for IAM Groups due to insufficient IAM API capabilities to perform this operation efficiently.
+  opt-in for IAM Groups due to insufficient IAM API capabilities to perform this operation efficiently.
   A future version might change this to be always-on. When enabled, the provider will perform additional API calls
   to determine if any changes were made outside of Terraform to user and service assignments of this Group. Default: `false`
 
