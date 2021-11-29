@@ -18,7 +18,7 @@ import (
 
 func TryHTTPCall(ctx context.Context, numberOfTries uint64, operation func() (*http.Response, error), retryOnCodes ...int) error {
 	if len(retryOnCodes) == 0 {
-		retryOnCodes = []int{http.StatusForbidden, http.StatusUnprocessableEntity, http.StatusInternalServerError, http.StatusTooManyRequests}
+		retryOnCodes = []int{http.StatusForbidden, http.StatusInternalServerError, http.StatusTooManyRequests}
 	}
 	doOp := func() error {
 		resp, err := operation()
