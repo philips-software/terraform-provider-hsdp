@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.9.0
 	github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152
-	github.com/loafoe/easyssh-proxy/v2 v2.0.2
+	github.com/loafoe/easyssh-proxy/v2 v2.0.4
 	github.com/philips-labs/ferrite v0.1.2
 	github.com/philips-labs/siderite v0.12.2
 	github.com/philips-software/go-hsdp-api v0.51.2
