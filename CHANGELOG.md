@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.27.7
+
+- MDM: show more details in HTTP 422 flow handling
+
 ## v0.27.6
 
 - MDM Application: support description and default_group_guid arguments
