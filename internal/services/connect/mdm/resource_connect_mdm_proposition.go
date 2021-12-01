@@ -141,26 +141,24 @@ func resourceMDMPropositionCreate(ctx context.Context, d *schema.ResourceData, m
 		if resp == nil {
 			return diag.FromErr(err)
 		}
-		if resp.StatusCode == http.StatusUnprocessableEntity {
-			return diag.FromErr(fmt.Errorf("unprocessable error creating Proposition: %w", err))
-		}
-		if resp.StatusCode != http.StatusConflict {
+		if !(resp.StatusCode == http.StatusConflict || resp.StatusCode == http.StatusUnprocessableEntity) {
 			return diag.FromErr(fmt.Errorf("error creating Proposition (%d): %w", resp.StatusCode, err))
 		}
-		created, _, err = client.Propositions.GetProposition(&mdm.GetPropositionsOptions{
+		found, _, getErr := client.Propositions.GetProposition(&mdm.GetPropositionsOptions{
 			Name:           &resource.Name,
 			OrganizationID: &resource.OrganizationGuid.Value,
 		})
-		if err != nil {
+		if getErr != nil {
 			return diag.FromErr(fmt.Errorf("CreateProposition 409/422 confict, but no match found: %w", err))
 		}
-		if created.Description != resource.Description {
-			return diag.FromErr(fmt.Errorf("existing proposition found but description mismatch: '%s' != '%s'", created.Description, resource.Description))
+		if found.Description != resource.Description {
+			return diag.FromErr(fmt.Errorf("existing proposition found but description mismatch: '%s' != '%s'", found.Description, resource.Description))
 		}
-		if created.OrganizationGuid.Value != resource.OrganizationGuid.Value {
-			return diag.FromErr(fmt.Errorf("existing proposition found but organization_id mismatch: '%s' != '%s'", created.OrganizationGuid.Value, resource.OrganizationGuid.Value))
+		if found.OrganizationGuid.Value != resource.OrganizationGuid.Value {
+			return diag.FromErr(fmt.Errorf("existing proposition found but organization_id mismatch: '%s' != '%s'", found.OrganizationGuid.Value, resource.OrganizationGuid.Value))
 		}
 		// We found a matching existing proposition, go with it
+		created = found
 	}
 	if created == nil {
 		return diag.FromErr(fmt.Errorf("unexpected error creating proposition: %v", resp))

@@ -142,17 +142,14 @@ func resourceMDMApplicationCreate(ctx context.Context, d *schema.ResourceData, m
 		if resp == nil {
 			return diag.FromErr(err)
 		}
-		if resp.StatusCode == http.StatusUnprocessableEntity {
-			return diag.FromErr(fmt.Errorf("unprocessable error creating Application: %w", err))
-		}
-		if resp.StatusCode != http.StatusConflict {
+		if !(resp.StatusCode == http.StatusConflict || resp.StatusCode == http.StatusUnprocessableEntity) {
 			return diag.FromErr(fmt.Errorf("error creating Application (%d): %w", resp.StatusCode, err))
 		}
-		found, _, err := client.Applications.GetApplications(&mdm.GetApplicationsOptions{
+		found, _, foundErr := client.Applications.GetApplications(&mdm.GetApplicationsOptions{
 			Name:          &resource.Name,
 			PropositionID: &resource.PropositionID.Reference,
 		})
-		if err != nil || len(*found) == 0 {
+		if foundErr != nil || len(*found) == 0 {
 			return diag.FromErr(fmt.Errorf("CreateApplication 409/422 confict, but no match found: %w", err))
 		}
 		created = &(*found)[0]
