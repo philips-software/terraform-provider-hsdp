@@ -141,8 +141,11 @@ func resourceMDMPropositionCreate(ctx context.Context, d *schema.ResourceData, m
 		if resp == nil {
 			return diag.FromErr(err)
 		}
-		if !(resp.StatusCode == http.StatusConflict || resp.StatusCode == http.StatusUnprocessableEntity) {
-			return diag.FromErr(fmt.Errorf("error creating Proposition: %w", err))
+		if resp.StatusCode == http.StatusUnprocessableEntity {
+			return diag.FromErr(fmt.Errorf("unprocessable error creating Proposition: %w", err))
+		}
+		if resp.StatusCode != http.StatusConflict {
+			return diag.FromErr(fmt.Errorf("error creating Proposition (%d): %w", resp.StatusCode, err))
 		}
 		created, _, err = client.Propositions.GetProposition(&mdm.GetPropositionsOptions{
 			Name:           &resource.Name,
