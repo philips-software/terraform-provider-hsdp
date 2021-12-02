@@ -209,7 +209,7 @@ func resourceConnectMDMBucketCreate(ctx context.Context, d *schema.ResourceData,
 
 	var created *mdm.Bucket
 	var resp *mdm.Response
-	err = tools.TryHTTPCall(ctx, 20, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		created, resp, err = client.Buckets.Create(resource)
 		if err != nil {

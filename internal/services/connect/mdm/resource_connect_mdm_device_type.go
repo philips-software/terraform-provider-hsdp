@@ -136,7 +136,7 @@ func resourceConnectMDMDeviceTypeCreate(ctx context.Context, d *schema.ResourceD
 
 	var created *mdm.DeviceType
 	var resp *mdm.Response
-	err = tools.TryHTTPCall(ctx, 20, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		created, resp, err = client.DeviceTypes.Create(resource)
 		if err != nil {

@@ -256,7 +256,7 @@ func resourceConnectMDMOAuthClientCreate(ctx context.Context, d *schema.Resource
 
 	var created *mdm.OAuthClient
 	var resp *mdm.Response
-	err = tools.TryHTTPCall(ctx, 20, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		created, resp, err = client.OAuthClients.CreateOAuthClient(resource)
 		if err != nil {
