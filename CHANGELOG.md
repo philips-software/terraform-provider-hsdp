@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.27.9
+
+- MDM: add retry calls to read operations as well. Fixes on-the-fly permission assignment runs
+
 ## v0.27.8
 
 - MDM: minor performance improvement in resource creation
