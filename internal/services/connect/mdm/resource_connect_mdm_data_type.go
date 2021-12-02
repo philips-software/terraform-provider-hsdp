@@ -113,7 +113,7 @@ func resourceConnectMDMDataTypeCreate(ctx context.Context, d *schema.ResourceDat
 	return resourceConnectMDMDataTypeRead(ctx, d, m)
 }
 
-func resourceConnectMDMDataTypeRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectMDMDataTypeRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -125,7 +125,19 @@ func resourceConnectMDMDataTypeRead(_ context.Context, d *schema.ResourceData, m
 
 	var id string
 	_, _ = fmt.Sscanf(d.Id(), "DataType/%s", &id)
-	service, resp, err := client.DataTypes.GetByID(id)
+	var resource *mdm.DataType
+	var resp *mdm.Response
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		resource, resp, err = client.DataTypes.GetByID(id)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
@@ -133,7 +145,7 @@ func resourceConnectMDMDataTypeRead(_ context.Context, d *schema.ResourceData, m
 		}
 		return diag.FromErr(err)
 	}
-	dataTypeToSchema(*service, d)
+	dataTypeToSchema(*resource, d)
 	return diags
 }
 

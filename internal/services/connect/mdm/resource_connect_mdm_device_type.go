@@ -158,7 +158,7 @@ func resourceConnectMDMDeviceTypeCreate(ctx context.Context, d *schema.ResourceD
 	return resourceConnectMDMDeviceTypeRead(ctx, d, m)
 }
 
-func resourceConnectMDMDeviceTypeRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectMDMDeviceTypeRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -170,7 +170,16 @@ func resourceConnectMDMDeviceTypeRead(_ context.Context, d *schema.ResourceData,
 
 	var id string
 	_, _ = fmt.Sscanf(d.Id(), "DeviceType/%s", &id)
-	resource, resp, err := client.DeviceTypes.GetByID(id)
+	var resource *mdm.DeviceType
+	var resp *mdm.Response
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		resource, resp, err = client.DeviceTypes.GetByID(id)
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")

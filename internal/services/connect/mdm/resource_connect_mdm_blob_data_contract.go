@@ -132,7 +132,7 @@ func resourceConnectMDMBlobDataContractCreate(ctx context.Context, d *schema.Res
 	return resourceConnectMDMBlobDataContractRead(ctx, d, m)
 }
 
-func resourceConnectMDMBlobDataContractRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectMDMBlobDataContractRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -144,7 +144,19 @@ func resourceConnectMDMBlobDataContractRead(_ context.Context, d *schema.Resourc
 
 	var id string
 	_, _ = fmt.Sscanf(d.Id(), "BlobDataContract/%s", &id)
-	resource, resp, err := client.BlobDataContracts.GetByID(id)
+	var resource *mdm.BlobDataContract
+	var resp *mdm.Response
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		resource, resp, err = client.BlobDataContracts.GetByID(id)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")

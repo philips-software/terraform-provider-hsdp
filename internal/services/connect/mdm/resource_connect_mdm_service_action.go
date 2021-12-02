@@ -131,7 +131,7 @@ func resourceConnectMDMServiceActionCreate(ctx context.Context, d *schema.Resour
 	return resourceConnectMDMServiceActionRead(ctx, d, m)
 }
 
-func resourceConnectMDMServiceActionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectMDMServiceActionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -141,8 +141,21 @@ func resourceConnectMDMServiceActionRead(_ context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	id := d.Get("guid").(string)
-	service, resp, err := client.ServiceActions.GetByID(id)
+	var id string
+	_, _ = fmt.Sscanf(d.Id(), "ServiceAction/%s", &id)
+	var resource *mdm.ServiceAction
+	var resp *mdm.Response
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		resource, resp, err = client.ServiceActions.GetByID(id)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
@@ -150,7 +163,7 @@ func resourceConnectMDMServiceActionRead(_ context.Context, d *schema.ResourceDa
 		}
 		return diag.FromErr(err)
 	}
-	serviceActionToSchema(*service, d)
+	serviceActionToSchema(*resource, d)
 	return diags
 }
 

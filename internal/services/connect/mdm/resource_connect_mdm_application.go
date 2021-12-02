@@ -166,7 +166,7 @@ func resourceMDMApplicationCreate(ctx context.Context, d *schema.ResourceData, m
 	return resourceMDMApplicationRead(ctx, d, m)
 }
 
-func resourceMDMApplicationRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceMDMApplicationRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	c := m.(*config.Config)
@@ -177,8 +177,19 @@ func resourceMDMApplicationRead(_ context.Context, d *schema.ResourceData, m int
 
 	var id string
 	_, _ = fmt.Sscanf(d.Id(), "Application/%s", &id)
-
-	prop, resp, err := client.Applications.GetApplicationByID(id)
+	var resource *mdm.Application
+	var resp *mdm.Response
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		resource, resp, err = client.Applications.GetApplicationByID(id)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
@@ -186,7 +197,7 @@ func resourceMDMApplicationRead(_ context.Context, d *schema.ResourceData, m int
 		}
 		return diag.FromErr(err)
 	}
-	applicationToSchema(*prop, d)
+	applicationToSchema(*resource, d)
 	return diags
 }
 

@@ -232,7 +232,7 @@ func resourceConnectMDMBucketCreate(ctx context.Context, d *schema.ResourceData,
 	return resourceConnectMDMBucketRead(ctx, d, m)
 }
 
-func resourceConnectMDMBucketRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectMDMBucketRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -244,7 +244,19 @@ func resourceConnectMDMBucketRead(_ context.Context, d *schema.ResourceData, m i
 
 	var id string
 	_, _ = fmt.Sscanf(d.Id(), "Bucket/%s", &id)
-	resource, resp, err := client.Buckets.GetByID(id)
+	var resource *mdm.Bucket
+	var resp *mdm.Response
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		resource, resp, err = client.Buckets.GetByID(id)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")

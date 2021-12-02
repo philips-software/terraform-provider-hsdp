@@ -131,7 +131,7 @@ func resourceConnectMDMDeviceGroupCreate(ctx context.Context, d *schema.Resource
 	return resourceConnectMDMDeviceGroupRead(ctx, d, m)
 }
 
-func resourceConnectMDMDeviceGroupRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectMDMDeviceGroupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -143,7 +143,19 @@ func resourceConnectMDMDeviceGroupRead(_ context.Context, d *schema.ResourceData
 
 	var id string
 	_, _ = fmt.Sscanf(d.Id(), "DeviceGroup/%s", &id)
-	resource, resp, err := client.DeviceGroups.GetByID(id)
+	var resource *mdm.DeviceGroup
+	var resp *mdm.Response
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		resource, resp, err = client.DeviceGroups.GetByID(id)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")

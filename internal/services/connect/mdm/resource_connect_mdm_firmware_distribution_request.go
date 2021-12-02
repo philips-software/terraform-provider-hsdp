@@ -167,7 +167,7 @@ func resourceConnectMDMFirmwareDistributionRequestCreate(ctx context.Context, d 
 	return resourceConnectMDMFirmwareDistributionRequestRead(ctx, d, m)
 }
 
-func resourceConnectMDMFirmwareDistributionRequestRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectMDMFirmwareDistributionRequestRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -179,7 +179,19 @@ func resourceConnectMDMFirmwareDistributionRequestRead(_ context.Context, d *sch
 
 	var id string
 	_, _ = fmt.Sscanf(d.Id(), "FirmwareDistributionRequest/%s", &id)
-	resource, resp, err := client.FirmwareDistributionRequests.GetByID(id)
+	var resource *mdm.FirmwareDistributionRequest
+	var resp *mdm.Response
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		resource, resp, err = client.FirmwareDistributionRequests.GetByID(id)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")

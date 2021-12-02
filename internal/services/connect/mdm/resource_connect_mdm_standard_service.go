@@ -195,7 +195,7 @@ func resourceConnectMDMStandardServiceCreate(ctx context.Context, d *schema.Reso
 	return resourceConnectMDMStandardServiceRead(ctx, d, m)
 }
 
-func resourceConnectMDMStandardServiceRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectMDMStandardServiceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -207,7 +207,19 @@ func resourceConnectMDMStandardServiceRead(_ context.Context, d *schema.Resource
 
 	var id string
 	_, _ = fmt.Sscanf(d.Id(), "StandardService/%s", &id)
-	service, resp, err := client.StandardServices.GetStandardServiceByID(id)
+	var resource *mdm.StandardService
+	var resp *mdm.Response
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		resource, resp, err = client.StandardServices.GetStandardServiceByID(id)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
@@ -215,7 +227,7 @@ func resourceConnectMDMStandardServiceRead(_ context.Context, d *schema.Resource
 		}
 		return diag.FromErr(err)
 	}
-	standardServiceToSchema(*service, d)
+	standardServiceToSchema(*resource, d)
 	return diags
 }
 

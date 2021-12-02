@@ -168,7 +168,7 @@ func resourceMDMPropositionCreate(ctx context.Context, d *schema.ResourceData, m
 	return resourceMDMPropositionRead(ctx, d, m)
 }
 
-func resourceMDMPropositionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceMDMPropositionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	c := m.(*config.Config)
@@ -179,8 +179,19 @@ func resourceMDMPropositionRead(_ context.Context, d *schema.ResourceData, m int
 
 	var id string
 	_, _ = fmt.Sscanf(d.Id(), "Proposition/%s", &id)
-
-	prop, resp, err := client.Propositions.GetPropositionByID(id)
+	var resource *mdm.Proposition
+	var resp *mdm.Response
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		resource, resp, err = client.Propositions.GetPropositionByID(id)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
@@ -188,7 +199,7 @@ func resourceMDMPropositionRead(_ context.Context, d *schema.ResourceData, m int
 		}
 		return diag.FromErr(err)
 	}
-	propositionToSchema(*prop, d)
+	propositionToSchema(*resource, d)
 	return diags
 }
 

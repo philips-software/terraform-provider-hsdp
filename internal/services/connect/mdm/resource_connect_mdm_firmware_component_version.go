@@ -236,7 +236,7 @@ func resourceConnectMDMFirmwareComponentVersionCreate(ctx context.Context, d *sc
 	return resourceConnectMDMFirmwareComponentVersionRead(ctx, d, m)
 }
 
-func resourceConnectMDMFirmwareComponentVersionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectMDMFirmwareComponentVersionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -248,7 +248,19 @@ func resourceConnectMDMFirmwareComponentVersionRead(_ context.Context, d *schema
 
 	var id string
 	_, _ = fmt.Sscanf(d.Id(), "FirmwareComponentVersion/%s", &id)
-	service, resp, err := client.FirmwareComponentVersions.GetByID(id)
+	var resource *mdm.FirmwareComponentVersion
+	var resp *mdm.Response
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		resource, resp, err = client.FirmwareComponentVersions.GetByID(id)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
@@ -256,7 +268,7 @@ func resourceConnectMDMFirmwareComponentVersionRead(_ context.Context, d *schema
 		}
 		return diag.FromErr(err)
 	}
-	firmwareComponentVersionToSchema(*service, d)
+	firmwareComponentVersionToSchema(*resource, d)
 	return diags
 }
 

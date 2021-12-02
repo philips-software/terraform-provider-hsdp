@@ -293,7 +293,7 @@ func resourceConnectMDMOAuthClientCreate(ctx context.Context, d *schema.Resource
 	return resourceConnectMDMOAuthClientRead(ctx, d, m)
 }
 
-func resourceConnectMDMOAuthClientRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectMDMOAuthClientRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -305,7 +305,19 @@ func resourceConnectMDMOAuthClientRead(_ context.Context, d *schema.ResourceData
 
 	var id string
 	_, _ = fmt.Sscanf(d.Id(), "OAuthClient/%s", &id)
-	resource, resp, err := client.OAuthClients.GetOAuthClientByID(id)
+	var resource *mdm.OAuthClient
+	var resp *mdm.Response
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		resource, resp, err = client.OAuthClients.GetOAuthClientByID(id)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")

@@ -142,7 +142,7 @@ func resourceConnectMDMServiceReferenceCreate(ctx context.Context, d *schema.Res
 	return resourceConnectMDMServiceReferenceRead(ctx, d, m)
 }
 
-func resourceConnectMDMServiceReferenceRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceConnectMDMServiceReferenceRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -154,7 +154,19 @@ func resourceConnectMDMServiceReferenceRead(_ context.Context, d *schema.Resourc
 
 	var id string
 	_, _ = fmt.Sscanf(d.Id(), "ServiceReference/%s", &id)
-	resource, resp, err := client.ServiceReferences.GetByID(id)
+	var resource *mdm.ServiceReference
+	var resp *mdm.Response
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		resource, resp, err = client.ServiceReferences.GetByID(id)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
