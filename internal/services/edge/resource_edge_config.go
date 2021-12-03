@@ -98,13 +98,13 @@ func firewallExceptionsSchema() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				MaxItems: 1024,
-				Elem:     &schema.Schema{Type: schema.TypeInt},
+				Elem:     tools.IntSchema(),
 			},
 			"udp": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				MaxItems: 1024,
-				Elem:     &schema.Schema{Type: schema.TypeInt},
+				Elem:     tools.IntSchema(),
 			},
 			"clear_on_destroy": {
 				Description: "Clear ports on resource destroy",
@@ -116,13 +116,13 @@ func firewallExceptionsSchema() *schema.Resource {
 				Type:     schema.TypeSet,
 				Optional: true,
 				MaxItems: 1024,
-				Elem:     &schema.Schema{Type: schema.TypeInt},
+				Elem:     tools.IntSchema(),
 			},
 			"ensure_udp": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				MaxItems: 1024,
-				Elem:     &schema.Schema{Type: schema.TypeInt},
+				Elem:     tools.IntSchema(),
 			},
 		},
 	}
@@ -213,10 +213,10 @@ func resourceDataToInput(ctx context.Context, client *stl.Client, fwExceptions *
 	if err := validateFirewallExceptions(d); err != nil {
 		return err
 	}
-	tcp := []int{}
-	udp := []int{}
-	ensureTCP := []int{}
-	ensureUDP := []int{}
+	var tcp []int
+	var udp []int
+	var ensureTCP []int
+	var ensureUDP []int
 
 	if v, ok := d.GetOk("firewall_exceptions"); ok {
 		vL := v.(*schema.Set).List()
@@ -321,28 +321,28 @@ func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.
 
 		// Determine actual TCP/UDP settings
 		ensureTCP := getPortList(d, "ensure_tcp")
-		actualTCP := []int{}
+		var actualTCP []int
 		for _, p := range ensureTCP {
 			if containsInt(fwExceptions.TCP, p) {
 				actualTCP = append(actualTCP, p)
 			}
 		}
-		fwExceptionsDef["ensure_tcp"] = actualTCP
+		fwExceptionsDef["ensure_tcp"] = tools.SchemaSetInts(actualTCP)
 		ensureUDP := getPortList(d, "ensure_udp")
-		actualUDP := []int{}
+		var actualUDP []int
 		for _, p := range ensureUDP {
 			if containsInt(fwExceptions.UDP, p) {
 				actualUDP = append(actualUDP, p)
 			}
 		}
-		fwExceptionsDef["ensure_udp"] = actualUDP
+		fwExceptionsDef["ensure_udp"] = tools.SchemaSetInts(actualUDP)
 
 		// This is explicit TCP/UDP port list mode
 		if !hasFirewallExceptionField(d, "ensure_tcp") {
-			fwExceptionsDef["tcp"] = fwExceptions.TCP
+			fwExceptionsDef["tcp"] = tools.SchemaSetInts(fwExceptions.TCP)
 		}
 		if !hasFirewallExceptionField(d, "ensure_udp") {
-			fwExceptionsDef["udp"] = fwExceptions.UDP
+			fwExceptionsDef["udp"] = tools.SchemaSetInts(fwExceptions.UDP)
 		}
 		fwExceptionsDef["clear_on_destroy"] = clearFirewallExceptionsOnDestroy(d)
 		s.Add(fwExceptionsDef)

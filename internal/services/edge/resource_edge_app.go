@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -124,6 +125,10 @@ func resourceEdgeAppRead(ctx context.Context, d *schema.ResourceData, m interfac
 	_, _ = fmt.Sscanf(d.Id(), "%d", &resourceID)
 	resource, err := client.Apps.GetAppResourceByID(ctx, resourceID)
 	if err != nil {
+		if strings.Contains(err.Error(), "resource not found") { // GraphQL downside
+			d.SetId("")
+			return diags
+		}
 		return diag.FromErr(fmt.Errorf("edge_app: read Edge device: %w", err))
 	}
 	_ = d.Set("name", resource.Name)
@@ -131,7 +136,7 @@ func resourceEdgeAppRead(ctx context.Context, d *schema.ResourceData, m interfac
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("edge_app: decode content: %w", err))
 	}
-	_ = d.Set("content", content)
+	_ = d.Set("content", string(content))
 	_ = d.Set("device_id", resource.DeviceID)
 	device, err := client.Devices.GetDeviceByID(ctx, resource.DeviceID)
 	if err == nil {
@@ -142,7 +147,6 @@ func resourceEdgeAppRead(ctx context.Context, d *schema.ResourceData, m interfac
 
 func resourceEdgeAppCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
-	var diags diag.Diagnostics
 	var client *stl.Client
 	var err error
 
@@ -168,5 +172,5 @@ func resourceEdgeAppCreate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 	d.SetId(fmt.Sprintf("%d", resource.ID))
 	syncSTLIfNeeded(ctx, client, d, m)
-	return diags
+	return resourceEdgeAppRead(ctx, d, m)
 }

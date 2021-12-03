@@ -133,18 +133,6 @@ func ExpandStringList(configured []interface{}) []string {
 	return vs
 }
 
-func StringSchema() *schema.Schema {
-	return &schema.Schema{Type: schema.TypeString}
-}
-
-func SchemaSetStrings(ss []string) *schema.Set {
-	s := &schema.Set{F: schema.HashSchema(StringSchema())}
-	for _, str := range ss {
-		s.Add(str)
-	}
-	return s
-}
-
 func ContainsString(haystack []string, needle string) bool {
 	for _, a := range haystack {
 		if strings.EqualFold(a, needle) {

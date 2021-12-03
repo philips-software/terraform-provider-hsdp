@@ -35,6 +35,9 @@ func ValidateUpperString(val interface{}, key string) (warns []string, errs []er
 
 func ValidateRegion(i interface{}, k string) (warns []string, es []error) {
 	r := i.(string)
+	if r == "dev" { // dev is special case region so don't complain
+		return
+	}
 	d, err := cfg.New(cfg.WithRegion(r))
 	if err != nil {
 		es = append(es, err)
