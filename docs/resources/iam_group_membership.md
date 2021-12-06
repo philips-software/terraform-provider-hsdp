@@ -8,7 +8,7 @@ Provides a resource for managing IAM Group membership of users and services.
 This resource is useful when the IAM Group is defined or managed elsewhere and
 you want to manage membership of a subset of users or services.
 
-~> Use this resource sparingly and carefully, it's easy to create perma-diffs if Terraform declarations conflict. If the IAM group is managed in Terraform make sure `drift_detection` is disabled in its declaration.
+~> Use this resource sparingly and carefully, it's easy to create perma-diffs if Terraform declarations conflict. If the IAM group is managed in Terraform make sure `drift_detection` is disabled in its declaration. Also note that the calling identity needs `GROUP.WRITE` access in the groups' managing organization.
 
 ## Example Usage
 
