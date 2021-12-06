@@ -76,6 +76,9 @@ func resourceIAMGroupMembershipCreate(ctx context.Context, d *schema.ResourceDat
 	if len(users) > 0 {
 		err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 			result, resp, err := client.Groups.AddMembers(*group, users...)
+			if err != nil {
+				_ = client.TokenRefresh()
+			}
 			if resp == nil {
 				return nil, err
 			}
@@ -94,6 +97,9 @@ func resourceIAMGroupMembershipCreate(ctx context.Context, d *schema.ResourceDat
 	if len(services) > 0 {
 		err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 			result, resp, err := client.Groups.AddServices(*group, services...)
+			if err != nil {
+				_ = client.TokenRefresh()
+			}
 			if resp == nil {
 				return nil, err
 			}
@@ -266,6 +272,7 @@ func resourceIAMGroupMembershipRead(_ context.Context, d *schema.ResourceData, m
 	}
 
 	// Users
+	// We only deal with users we know
 	users, _, err := client.Users.GetUsers(&iam.GetUserOptions{
 		GroupID: &group.ID,
 	})
