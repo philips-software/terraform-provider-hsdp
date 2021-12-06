@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.27.11
+
+- IAM: Add hsdp_iam_group_membership (#152)
+
 ## v0.27.10
 
 - Edge: fix crashing bug and app state handling
