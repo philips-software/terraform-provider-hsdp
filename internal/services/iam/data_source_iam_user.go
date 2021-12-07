@@ -52,10 +52,11 @@ func dataSourceUserRead(_ context.Context, d *schema.ResourceData, meta interfac
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
 				Summary:  "user not found",
-				Detail:   fmt.Sprintf("user '%s' not found", username),
+				Detail:   fmt.Sprintf("user '%s' not found or you don't have 'USER.READ' permission in this users' IAM hierarchy", username),
 			})
 			d.SetId(fmt.Sprintf("%s-404", username))
 			_ = d.Set("uuid", "")
+			_ = d.Set("email_address", "")
 			return diags
 		}
 	}
