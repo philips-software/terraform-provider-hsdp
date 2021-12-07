@@ -1,5 +1,5 @@
 ---
-subcategory: "Master Data Management (MDM)"
+subcategory: "Identity and Access Management (IAM)"
 ---
 
 # hsdp_iam_email_templates
