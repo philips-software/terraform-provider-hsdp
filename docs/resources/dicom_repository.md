@@ -27,6 +27,6 @@ resource "hsdp_dicom_repository" "repo1" {
 * `object_store_id` - (Required) the Object store ID
 * `repository_organization_id` - (Optional) The organization ID attached to this repository.
   When not specified, the root organization is used.
-* `notification` (Block, Optional) 
+* `notification` (Block, Optional)
   * `enabled` - (Required) Enable notifications or not. Default: `true`
   * `organization_id` - (Required) the tenant IAM Organization ID
