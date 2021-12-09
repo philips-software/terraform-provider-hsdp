@@ -386,11 +386,14 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	if err != nil {
 		// Do not clean up existing hosts
 		if err == cartel.ErrHostnameAlreadyExists {
-			return diag.FromErr(fmt.Errorf("the host '%s' already exists", tagName))
+			return diag.FromErr(fmt.Errorf("the host '%s' already exists: %w", tagName, err))
 		}
 		if resp == nil {
-			_, _, _ = client.Destroy(tagName)
-			diags = append(diags, diag.FromErr(fmt.Errorf("'keep_failed_instances' is enabled so not removing '%s', remember to destroy it manually", tagName))...)
+			if keepFailedInstances {
+				diags = append(diags, diag.FromErr(fmt.Errorf("'keep_failed_instances' is enabled so not removing '%s', remember to destroy it manually", tagName))...)
+			} else {
+				_, _, _ = client.Destroy(tagName)
+			}
 			diags = append(diags, diag.FromErr(fmt.Errorf("create error (resp=nil): %w", err))...)
 			return diags
 		}
@@ -399,17 +402,19 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 				instanceID = details.InstanceID
 				ipAddress = details.PrivateAddress
 			} else {
-				if !keepFailedInstances {
-					_, _, _ = client.Destroy(tagName)
+				if keepFailedInstances {
 					diags = append(diags, diag.FromErr(fmt.Errorf("'keep_failed_instances' is enabled so not removing '%s', remember to destroy it manually", tagName))...)
+				} else {
+					_, _, _ = client.Destroy(tagName)
 				}
 				diags = append(diags, diag.FromErr(fmt.Errorf("create error (status=%d): %w", resp.StatusCode, err))...)
 				return diags
 			}
 		} else {
-			if !keepFailedInstances {
-				_, _, _ = client.Destroy(tagName)
+			if keepFailedInstances {
 				diags = append(diags, diag.FromErr(fmt.Errorf("'keep_failed_instances' is enabled so not removing '%s', remember to destroy it manually", tagName))...)
+			} else {
+				_, _, _ = client.Destroy(tagName)
 			}
 			diags = append(diags, diag.FromErr(fmt.Errorf("create error (description=[%s], code=[%d]): %w", ch.Description, resp.StatusCode, err))...)
 			return diags
