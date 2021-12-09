@@ -288,6 +288,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_firmware_component_version":    mdm.ResourceConnectMDMFirmwareComponentVersion(),
 			"hsdp_connect_mdm_firmware_distribution_request": mdm.ResourceConnectMDMFirmwareDistributionRequest(),
 			"hsdp_iam_group_membership":                      iam.ResourceIAMGroupMembership(),
+			"hsdp_dicom_notification":                        dicom.ResourceDICOMNotification(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                    iam.DataSourceIAMIntrospect(),
