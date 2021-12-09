@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.27.14
+
+- Container Host: fix keep_failed_instances notifications
+- Core: upgrade Terraform plugin SDK to v2.10.0
+
 ## v0.27.13
 
 - IAM: Fix documentation link
