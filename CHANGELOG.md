@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.28.3
+
+- DICOM: Fix JSON issue
+
 ## v0.28.2
 
 - DICOM: Fix notification implementation
