@@ -23,4 +23,4 @@ resource "hsdp_dicom_notification" "topic" {
 * `config_url` - (Required) The base config URL of the DICOM Store instance
 * `organization_id` - (Required) The organization ID
 * `endpoint_url` - (Required) The notification endpoint URL. Example: `https://notification-dev.us-east.philips-healthsuite.com`
-* `default_organization_id` - (Required) The default organization ID
+* `default_organization_id` - (Optional) The default organization ID

@@ -32,7 +32,7 @@ func ResourceDICOMNotification() *schema.Resource {
 			},
 			"endpoint_url": {
 				Type:     schema.TypeString,
-				Optional: true,
+				Required: true,
 				ForceNew: true,
 			},
 			"default_organization_id": {
