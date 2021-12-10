@@ -80,7 +80,6 @@ func resourceDICOMNotificationCreate(ctx context.Context, d *schema.ResourceData
 	c := m.(*config.Config)
 	configURL := d.Get("config_url").(string)
 	orgID := d.Get("organization_id").(string)
-	repositoryOrgID := d.Get("repository_organization_id").(string)
 	client, err := c.GetDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
@@ -90,9 +89,7 @@ func resourceDICOMNotificationCreate(ctx context.Context, d *schema.ResourceData
 		OrganizationID:      orgID,
 		ActiveObjectStoreID: d.Get("object_store_id").(string),
 	}
-	if repositoryOrgID != "" {
-		repo.OrganizationID = repositoryOrgID
-	}
+	repo.OrganizationID = orgID
 	if v, ok := d.GetOk("notification"); ok {
 		vL := v.(*schema.Set).List()
 		repoNotification := dicom.RepositoryNotification{}
