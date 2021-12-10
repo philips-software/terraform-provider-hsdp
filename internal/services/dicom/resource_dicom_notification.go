@@ -2,6 +2,7 @@ package dicom
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -30,6 +31,12 @@ func ResourceDICOMNotification() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"enabled": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
+				ForceNew: true,
+			},
 			"endpoint_url": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -44,9 +51,33 @@ func ResourceDICOMNotification() *schema.Resource {
 	}
 }
 
-func resourceDICOMNotificationDelete(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+func resourceDICOMNotificationDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
-	// This is a NOOP for now
+	c := m.(*config.Config)
+	configURL := d.Get("config_url").(string)
+	orgID := d.Get("organization_id").(string)
+	id := d.Id()
+	client, err := c.GetDICOMConfigClient(configURL)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	defer client.Close()
+	var notification *dicom.Notification
+	operation := func() error {
+		var resp *dicom.Response
+		notification, resp, err = client.Config.GetNotification(&dicom.QueryOptions{OrganizationID: &orgID})
+		return checkForPermissionErrors(client, resp, err)
+	}
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+	if err != nil {
+		// TODO: Possibly check for HTTP 404, in which case we should not error but just forget and return
+		return diag.FromErr(err)
+	}
+	if notification.ID != id {
+		return diag.FromErr(fmt.Errorf("unexpected ID mismatch: '%s' != '%s'", notification.ID, id))
+	}
+	notification.Enabled = false
+	_, _, _ = client.Config.CreateNotification(*notification, &dicom.QueryOptions{OrganizationID: &orgID})
 	d.SetId("")
 	return diags
 }
@@ -73,6 +104,7 @@ func resourceDICOMNotificationRead(_ context.Context, d *schema.ResourceData, m 
 	}
 	_ = d.Set("endpoint_url", notification.Endpoint)
 	_ = d.Set("default_organization_id", notification.DefaultOrganizationID)
+	_ = d.Set("enabled", notification.Enabled)
 	return diags
 }
 
@@ -80,31 +112,25 @@ func resourceDICOMNotificationCreate(ctx context.Context, d *schema.ResourceData
 	c := m.(*config.Config)
 	configURL := d.Get("config_url").(string)
 	orgID := d.Get("organization_id").(string)
+	endpointURL := d.Get("endpoint_url").(string)
+	defaultOrganizationID := d.Get("default_organization_id").(string)
+	enabled := d.Get("enabled").(bool)
+
 	client, err := c.GetDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 	defer client.Close()
-	repo := dicom.Repository{
-		OrganizationID:      orgID,
-		ActiveObjectStoreID: d.Get("object_store_id").(string),
-	}
-	repo.OrganizationID = orgID
-	if v, ok := d.GetOk("notification"); ok {
-		vL := v.(*schema.Set).List()
-		repoNotification := dicom.RepositoryNotification{}
-		for _, vi := range vL {
-			mVi := vi.(map[string]interface{})
-			repoNotification.Enabled = mVi["enabled"].(bool)
-			repoNotification.OrganizationID = mVi["organization_id"].(string)
-		}
-		repo.Notification = &repoNotification
+	resource := dicom.Notification{
+		Enabled:               enabled,
+		Endpoint:              endpointURL,
+		DefaultOrganizationID: defaultOrganizationID,
 	}
 
-	var created *dicom.Repository
+	var created *dicom.Notification
 	operation := func() error {
 		var resp *dicom.Response
-		created, resp, err = client.Config.CreateRepository(repo, &dicom.QueryOptions{OrganizationID: &orgID})
+		created, resp, err = client.Config.CreateNotification(resource, &dicom.QueryOptions{OrganizationID: &orgID})
 		return checkForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
