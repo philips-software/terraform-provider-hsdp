@@ -3,6 +3,7 @@ package dicom
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -63,15 +64,17 @@ func resourceDICOMNotificationDelete(_ context.Context, d *schema.ResourceData, 
 	}
 	defer client.Close()
 	var notification *dicom.Notification
+	var resp *dicom.Response
 	operation := func() error {
-		var resp *dicom.Response
 		notification, resp, err = client.Config.GetNotification(&dicom.QueryOptions{OrganizationID: &orgID})
 		return checkForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
-		// TODO: Possibly check for HTTP 404, in which case we should not error but just forget and return
-		return diag.FromErr(err)
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			d.SetId("")
+			return diags
+		}
 	}
 	if notification.ID != id {
 		return diag.FromErr(fmt.Errorf("unexpected ID mismatch: '%s' != '%s'", notification.ID, id))
