@@ -108,7 +108,7 @@ func resourceIAMApplicationCreate(ctx context.Context, d *schema.ResourceData, m
 		// We found a matching existing application, go with it
 	}
 	if createdApp == nil {
-		return diag.FromErr(fmt.Errorf("Unexpected failure creating '%s': [%v] [%v]", app.Name, err, resp))
+		return diag.FromErr(fmt.Errorf("unexpected failure creating '%s': [%v] [%v]", app.Name, err, resp))
 	}
 	d.SetId(createdApp.ID)
 	return resourceIAMApplicationRead(ctx, d, m)

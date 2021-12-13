@@ -108,7 +108,7 @@ func resourceIAMPropositionCreate(ctx context.Context, d *schema.ResourceData, m
 		// We found a matching existing proposition, go with it
 	}
 	if createdProp == nil {
-		return diag.FromErr(fmt.Errorf("Unexpected error creating proposition: %v", resp))
+		return diag.FromErr(fmt.Errorf("unexpected error creating proposition: %v", resp))
 	}
 	d.SetId(createdProp.ID)
 	return resourceIAMPropositionRead(ctx, d, m)
