@@ -140,6 +140,6 @@ func resourceDICOMNotificationCreate(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(created.ID)
+	d.SetId(created.ID) // TODO: this is blank currently, so need to fix it
 	return resourceDICOMNotificationRead(ctx, d, m)
 }

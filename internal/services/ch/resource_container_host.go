@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/cenkalti/backoff/v4"
+	"github.com/google/uuid"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -366,64 +367,83 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		}
 	}
 
-	ch, resp, err := client.Create(tagName,
-		cartel.SecurityGroups(securityGroups...),
-		cartel.UserGroups(userGroups...),
-		cartel.VolumeType(volumeType),
-		cartel.IOPs(iops),
-		cartel.InstanceType(instanceType),
-		cartel.VolumesAndSize(numberOfVolumes, volumeSize),
-		cartel.VolumeEncryption(encryptVolumes),
-		cartel.Protect(protect),
-		cartel.InstanceRole(instanceRole),
-		cartel.SubnetType(subnetType),
-		cartel.Tags(tags),
-		cartel.InSubnet(subnet),
-		cartel.Image(image),
-	)
 	instanceID := ""
 	ipAddress := ""
-	if err != nil {
-		// Do not clean up existing hosts
-		if err == cartel.ErrHostnameAlreadyExists {
-			return diag.FromErr(fmt.Errorf("the host '%s' already exists: %w", tagName, err))
+	needCreate := true
+	// First, check if the instance already exists for whatever reason. Cartel / AWS are flaky sometimes
+	if details := findInstanceByName(client, tagName); details != nil {
+		testTag := uuid.NewString()
+		// Next, try to set and unset a tag, to ensure we can own/control it
+		_, _, err := client.AddTags([]string{tagName}, map[string]string{
+			"tf-crud-check": testTag,
+		})
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("no write access to instance '%s', giving up", tagName))
 		}
-		if resp == nil {
-			if keepFailedInstances {
-				diags = append(diags, diag.FromErr(fmt.Errorf("'keep_failed_instances' is enabled so not removing '%s', remember to destroy it manually", tagName))...)
-			} else {
-				_, _, _ = client.Destroy(tagName)
+		details.Tags["tf-crud-check"] = ""
+		_, _, _ = client.AddTags([]string{tagName}, details.Tags)
+		needCreate = false
+		instanceID = details.InstanceID
+		ipAddress = details.PrivateAddress
+	}
+
+	if needCreate {
+		ch, resp, err := client.Create(tagName,
+			cartel.SecurityGroups(securityGroups...),
+			cartel.UserGroups(userGroups...),
+			cartel.VolumeType(volumeType),
+			cartel.IOPs(iops),
+			cartel.InstanceType(instanceType),
+			cartel.VolumesAndSize(numberOfVolumes, volumeSize),
+			cartel.VolumeEncryption(encryptVolumes),
+			cartel.Protect(protect),
+			cartel.InstanceRole(instanceRole),
+			cartel.SubnetType(subnetType),
+			cartel.Tags(tags),
+			cartel.InSubnet(subnet),
+			cartel.Image(image),
+		)
+		if err != nil {
+			// Do not clean up existing hosts
+			if err == cartel.ErrHostnameAlreadyExists {
+				return diag.FromErr(fmt.Errorf("the host '%s' already exists: %w", tagName, err))
 			}
-			diags = append(diags, diag.FromErr(fmt.Errorf("create error (resp=nil): %w", err))...)
-			return diags
-		}
-		if ch == nil || resp.StatusCode >= 500 { // Possible 504, or other timeout, try to recover!
-			if details := findInstanceByName(client, tagName); details != nil {
-				instanceID = details.InstanceID
-				ipAddress = details.PrivateAddress
+			if resp == nil {
+				if keepFailedInstances {
+					diags = append(diags, diag.FromErr(fmt.Errorf("'keep_failed_instances' is enabled so not removing '%s', remember to destroy it manually", tagName))...)
+				} else {
+					_, _, _ = client.Destroy(tagName)
+				}
+				diags = append(diags, diag.FromErr(fmt.Errorf("create error (resp=nil): %w", err))...)
+				return diags
+			}
+			if ch == nil || resp.StatusCode >= 500 { // Possible 504, or other timeout, try to recover!
+				if details := findInstanceByName(client, tagName); details != nil {
+					instanceID = details.InstanceID
+					ipAddress = details.PrivateAddress
+				} else {
+					if keepFailedInstances {
+						diags = append(diags, diag.FromErr(fmt.Errorf("'keep_failed_instances' is enabled so not removing '%s', remember to destroy it manually", tagName))...)
+					} else {
+						_, _, _ = client.Destroy(tagName)
+					}
+					diags = append(diags, diag.FromErr(fmt.Errorf("create error (status=%d): %w", resp.StatusCode, err))...)
+					return diags
+				}
 			} else {
 				if keepFailedInstances {
 					diags = append(diags, diag.FromErr(fmt.Errorf("'keep_failed_instances' is enabled so not removing '%s', remember to destroy it manually", tagName))...)
 				} else {
 					_, _, _ = client.Destroy(tagName)
 				}
-				diags = append(diags, diag.FromErr(fmt.Errorf("create error (status=%d): %w", resp.StatusCode, err))...)
+				diags = append(diags, diag.FromErr(fmt.Errorf("create error (description=[%s], code=[%d]): %w", ch.Description, resp.StatusCode, err))...)
 				return diags
 			}
 		} else {
-			if keepFailedInstances {
-				diags = append(diags, diag.FromErr(fmt.Errorf("'keep_failed_instances' is enabled so not removing '%s', remember to destroy it manually", tagName))...)
-			} else {
-				_, _, _ = client.Destroy(tagName)
-			}
-			diags = append(diags, diag.FromErr(fmt.Errorf("create error (description=[%s], code=[%d]): %w", ch.Description, resp.StatusCode, err))...)
-			return diags
+			instanceID = ch.InstanceID()
+			ipAddress = ch.IPAddress()
 		}
-	} else {
-		instanceID = ch.InstanceID()
-		ipAddress = ch.IPAddress()
 	}
-
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"provisioning", "indeterminate"},
 		Target:     []string{"succeeded"},
