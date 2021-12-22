@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"math/rand"
 	"os"
 
 	"github.com/cenkalti/backoff/v4"
@@ -84,9 +85,9 @@ func ResourceContainerHost() *schema.Resource {
 		DeleteContext: resourceContainerHostDelete,
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(30 * time.Minute),
-			Update: schema.DefaultTimeout(15 * time.Minute),
-			Delete: schema.DefaultTimeout(30 * time.Minute),
+			Create: schema.DefaultTimeout(25 * time.Minute),
+			Update: schema.DefaultTimeout(10 * time.Minute),
+			Delete: schema.DefaultTimeout(25 * time.Minute),
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -281,7 +282,7 @@ func fileFieldSchema() *schema.Resource {
 		},
 	}
 }
-func InstanceStateRefreshFunc(client *cartel.Client, nameTag string, failStates []string) resource.StateRefreshFunc {
+func instanceStateRefreshFunc(client *cartel.Client, nameTag string, failStates []string) resource.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		state, resp, err := client.GetDeploymentState(nameTag)
 		if err != nil {
@@ -380,6 +381,9 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("no write access to instance '%s', giving up", tagName))
 		}
+		if details.Tags == nil {
+			details.Tags = make(map[string]string)
+		}
 		details.Tags["tf-crud-check"] = ""
 		_, _, _ = client.AddTags([]string{tagName}, details.Tags)
 		needCreate = false
@@ -444,13 +448,20 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 			ipAddress = ch.IPAddress()
 		}
 	}
+
+	// Randomize checks a bit in case of many concurrent creates
+	rand.Seed(time.Now().UnixNano())
+	min := 5
+	max := 15
+	minTimeout := rand.Intn(max-min+1) + min
+
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"provisioning", "indeterminate"},
 		Target:     []string{"succeeded"},
-		Refresh:    InstanceStateRefreshFunc(client, tagName, []string{"failed", "terminated", "shutting-down"}),
+		Refresh:    instanceStateRefreshFunc(client, tagName, []string{"failed", "terminated", "shutting-down"}),
 		Timeout:    d.Timeout(schema.TimeoutCreate),
 		Delay:      10 * time.Second,
-		MinTimeout: 3 * time.Second,
+		MinTimeout: time.Duration(minTimeout) * time.Second,
 	}
 	_, err = stateConf.WaitForStateContext(ctx)
 	if err != nil {
