@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.28.5
+
+- DICOM Notification: add workaround for broken API design
+- Container Host: try to recover from flaky salt failures
+
 ## v0.28.4
 
 - Core: upgrade go-hsdp-api
