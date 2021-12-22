@@ -102,8 +102,9 @@ func resourceDICOMNotificationRead(_ context.Context, d *schema.ResourceData, m 
 		return checkForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
-	if err != nil {
-		return diag.FromErr(err)
+	if err != nil { // For now just declare the notification not there in case of error
+		d.SetId("")
+		return diags
 	}
 	_ = d.Set("endpoint_url", notification.Endpoint)
 	_ = d.Set("default_organization_id", notification.DefaultOrganizationID)
@@ -140,6 +141,6 @@ func resourceDICOMNotificationCreate(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(created.ID) // TODO: this is blank currently, so need to fix it
+	d.SetId(created.ID)
 	return resourceDICOMNotificationRead(ctx, d, m)
 }
