@@ -19,7 +19,7 @@ resource "hsdp_edge_app" "myapp" {
 
 ## Argument reference
 
-* `serial_numbe` - (Required) The serial number of the device to deploy this app resource on
+* `serial_number` - (Required) The serial number of the device to deploy this app resource on
 * `name` - (Required) The name of the resource
 * `content` - (Required) The content of the resource
 * `sync` - (Optional, boolean) Sync the resource after mutation. Current default behaviour at system level is to sync immediately, but this might change in future updates.
