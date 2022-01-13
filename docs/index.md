@@ -34,6 +34,7 @@ arguments in its provider block. The following environment variables are recogni
 |-------------|------------------|----------------------|---------|
 | HSDP_REGION | region           | Optional             | us-east     |
 | HSDP_ENVIRONMENT | environment | Optional             | client-test |
+| HSDP_CARTEL_HOST | cartel_host | Optional | |
 | HSDP_CARTEL_SECRET | cartel_secret | Optional | |
 | HSDP_CARTEL_TOKEN | cartel_token | Optional | |
 | HSDP_IAM_SERVICE_ID | service_id | Optional | |

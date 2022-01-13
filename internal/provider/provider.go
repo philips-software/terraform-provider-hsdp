@@ -37,6 +37,7 @@ const (
 	Environment      = "HSDP_ENVIRONMENT"
 	CartelSecret     = "HSDP_CARTEL_SECRET"
 	CartelToken      = "HSDP_CARTEL_TOKEN"
+	CartelHost       = "HSDP_CARTEL_HOST"
 	ServiceID        = "HSDP_IAM_SERVICE_ID"
 	ServicePK        = "HSDP_IAM_SERVICE_PRIVATE_KEY"
 	OrgAdminUsername = "HSDP_IAM_ORG_ADMIN_USERNAME"
@@ -176,6 +177,7 @@ func Provider(build string) *schema.Provider {
 			"cartel_host": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc(CartelHost, nil),
 				Description: descriptions["cartel_host"],
 			},
 			"cartel_token": {
