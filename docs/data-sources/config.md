@@ -55,26 +55,26 @@ Availability of services varies across regions. The following services are disco
 
 The following regions are recognized:
 
-| Region | Description |
-|--------|-------------|
-| apac2 | [Japan](https://en.wikipedia.org/wiki/Japan) |
-| apac3 | [Asia-Pacific](https://en.wikipedia.org/wiki/Asia-Pacific) |
-| ca1 | [Canada](https://en.wikipedia.org/wiki/Canada) |
-| cn1 | [China](https://en.wikipedia.org/wiki/China) |
-| dev | Development (US) |
-| eu-west | [European Union](https://en.wikipedia.org/wiki/European_Union) |
-| sa1 | [South America](https://en.wikipedia.org/wiki/South_America) (Sao Paulo) |
-| us-east | [United States](https://en.wikipedia.org/wiki/United_States) |
+| Region  | Description                                                              |
+|---------|--------------------------------------------------------------------------|
+| apac2   | [Japan](https://en.wikipedia.org/wiki/Japan) (Tokyo)                     |
+| apac3   | [Asia-Pacific](https://en.wikipedia.org/wiki/Asia-Pacific)               |
+| ca1     | [Canada](https://en.wikipedia.org/wiki/Canada)                           |
+| cn1     | [China](https://en.wikipedia.org/wiki/China)                             |
+| dev     | Development (US)                                                         |
+| eu-west | [European Union](https://en.wikipedia.org/wiki/European_Union)           |
+| sa1     | [South America](https://en.wikipedia.org/wiki/South_America) (Sao Paulo) |
+| us-east | [United States](https://en.wikipedia.org/wiki/United_States)             |
 
 * `environment` - (Optional) The HSDP environment. If not set, defaults to provider level config
 
 Environments vary across regions. The following environemnts are valid
 
-| Environment | Description |
-|-------------|-------------|
-| dev | Development. Only in region `us-east` |
+| Environment | Description                           |
+|-------------|---------------------------------------|
+| dev         | Development. Only in region `us-east` |
 | client-test | Client Test / Development environment |
-| prod | Production |
+| prod        | Production                            |
 
 ## Attributes Reference
 
