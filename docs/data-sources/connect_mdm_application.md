@@ -32,6 +32,11 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The GUID of the application
+* `id` - The ID of the application
+* `guid` - The raw GUID of the application (MDM reference)
 * `description` - The description of the application
 * `global_reference_id` - The global reference ID of the application
+* `application_guid_system` - The external system associated with resource (this would point to an IAM deployment)
+* `application_guid_value` - The external value associated with this resource (this would be an underlying IAM application ID)
+* `default_group_guid_system` - The default group guid system set for this resource
+* `default_group_guid_value` - The default group guid value set for this resource (IAM group ID)

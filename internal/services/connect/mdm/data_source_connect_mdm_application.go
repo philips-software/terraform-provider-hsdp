@@ -34,6 +34,22 @@ func DataSourceConnectMDMApplication() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"application_guid_system": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"application_guid_value": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"default_group_guid_system": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"default_group_guid_value": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 
@@ -65,6 +81,14 @@ func dataSourceConnectMDMApplicationRead(_ context.Context, d *schema.ResourceDa
 
 	d.SetId(fmt.Sprintf("Application/%s", app.ID))
 	_ = d.Set("guid", app.ID)
+	if app.ApplicationGuid != nil {
+		_ = d.Set("application_guid_system", app.ApplicationGuid.System)
+		_ = d.Set("application_guid_value", app.ApplicationGuid.Value)
+	}
+	if app.DefaultGroupGuid != nil {
+		_ = d.Set("default_group_guid_system", app.DefaultGroupGuid.System)
+		_ = d.Set("default_group_guid_value", app.DefaultGroupGuid.Value)
+	}
 	_ = d.Set("description", app.Description)
 	_ = d.Set("global_reference_id", app.GlobalReferenceID)
 	return diags
