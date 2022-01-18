@@ -9,7 +9,7 @@ Retrieve details on a MDM Bucket resource
 ## Example Usage
 
 ```hcl
-resource "hsdp_connect_mdm_bucket" "store" {
+data "hsdp_connect_mdm_bucket" "store" {
   name        = "bucket-store-1"
   proposition_id    = data.hsdp_connect_mdm_proposition.prop.id
 }
