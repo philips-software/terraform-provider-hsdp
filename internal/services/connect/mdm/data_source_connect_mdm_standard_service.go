@@ -77,6 +77,7 @@ func dataSourceConnectMDMStandardServiceRead(_ context.Context, d *schema.Resour
 	_ = d.Set("guid", resource.ID)
 	_ = d.Set("name", resource.Name)
 	_ = d.Set("description", resource.Description)
+	_ = d.Set("tags", resource.Tags)
 	if resource.OrganizationGuid != nil && resource.OrganizationGuid.Value != "" {
 		value := resource.OrganizationGuid.Value
 		if resource.OrganizationGuid.System != "" {

@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.29.3
+
+- Connect MDM: add DataType datasource
+
 ## v0.29.2
 
 - Connect MDM: Add MDM Bucket data source

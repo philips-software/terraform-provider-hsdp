@@ -34,5 +34,5 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
-* `id` - The ID reference of the service action (format: `Group/${GUID}`)
+* `id` - The ID reference of the service action (format: `DataType/${GUID}`)
 * `guid` - The GUID of the service action

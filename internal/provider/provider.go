@@ -352,6 +352,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_data_adapters":         mdm.DataSourceConnectMDMDataAdapters(),
 			"hsdp_iam_email_templates":               iam.DataSourceIAMEmailTemplates(),
 			"hsdp_connect_mdm_bucket":                mdm.DataSourceConnectMDMBucket(),
+			"hsdp_connect_mdm_data_type":             mdm.DataSourceConnectMDMDataType(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
