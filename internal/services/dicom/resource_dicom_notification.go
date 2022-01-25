@@ -2,7 +2,6 @@ package dicom
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/cenkalti/backoff/v4"
@@ -57,7 +56,6 @@ func resourceDICOMNotificationDelete(_ context.Context, d *schema.ResourceData, 
 	c := m.(*config.Config)
 	configURL := d.Get("config_url").(string)
 	orgID := d.Get("organization_id").(string)
-	id := d.Id()
 	client, err := c.GetDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
@@ -76,10 +74,8 @@ func resourceDICOMNotificationDelete(_ context.Context, d *schema.ResourceData, 
 			return diags
 		}
 	}
-	if notification.ID != id {
-		return diag.FromErr(fmt.Errorf("unexpected ID mismatch: '%s' != '%s'", notification.ID, id))
-	}
 	notification.Enabled = false
+	notification.ID = ""
 	_, _, _ = client.Config.CreateNotification(*notification, &dicom.QueryOptions{OrganizationID: &orgID})
 	d.SetId("")
 	return diags

@@ -31,6 +31,6 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID reference of the service action (format: `DataType/${GUID}`)
-* `guid` - The GUID of the service action
+* `guid` - The GUID of the data type
 * `description` - A short description of the device group
 * `tags` - (list(string)) Tags associated with this data type
