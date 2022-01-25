@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.29.4
+
+- DICOM Notification: fix destroy call (#160)
+
 ## v0.29.3
 
 - Connect MDM: add DataType datasource
