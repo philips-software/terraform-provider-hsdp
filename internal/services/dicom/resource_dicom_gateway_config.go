@@ -279,6 +279,7 @@ func setBrokenSCPConfig(scpConfig dicom.BrokenSCPConfig, d *schema.ResourceData)
 func setQueryRetrieveConfig(queryConfig dicom.BrokenSCPConfig, d *schema.ResourceData) error {
 	queryService := make(map[string]interface{})
 	queryService["title"] = queryConfig.Title
+	queryService["description"] = queryConfig.Description
 	if queryConfig.SecureNetworkConnection != nil {
 		queryService["port"] = queryConfig.SecureNetworkConnection.Port
 		queryService["is_secure"] = true
