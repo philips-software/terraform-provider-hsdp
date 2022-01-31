@@ -38,3 +38,5 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID reference (format: `Application/${GUID}`)
 * `guid` - The GUID of this resource
+* `application_guid_system` - The external system associated with resource (this would point to an IAM deployment)
+* `application_guid_value` - The external value associated with this resource (this would be an underlying IAM application ID)

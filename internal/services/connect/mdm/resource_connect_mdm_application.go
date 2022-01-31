@@ -55,6 +55,14 @@ func ResourceMDMApplication() *schema.Resource {
 				Optional:         true,
 				DiffSuppressFunc: tools.SuppressWhenGenerated,
 			},
+			"application_guid_system": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"application_guid_value": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"guid": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -96,6 +104,10 @@ func applicationToSchema(resource mdm.Application, d *schema.ResourceData) {
 	_ = d.Set("description", resource.Description)
 	_ = d.Set("global_reference_id", resource.GlobalReferenceID)
 	_ = d.Set("proposition_id", resource.PropositionID.Reference)
+	if resource.ApplicationGuid != nil && resource.ApplicationGuid.Value != "" {
+		_ = d.Set("application_guid_system", resource.ApplicationGuid.System)
+		_ = d.Set("application_guid_value", resource.ApplicationGuid.Value)
+	}
 	if resource.DefaultGroupGuid != nil && resource.DefaultGroupGuid.Value != "" {
 		value := resource.DefaultGroupGuid.Value
 		if resource.DefaultGroupGuid.System != "" {
