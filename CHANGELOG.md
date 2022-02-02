@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.29.7
+
+- Container Host: Fix add/remove user groups API calls
+- Container Host: Initial guide published
+- Container Host: Add security group data sources
+
 ## v0.29.6
 
 - Connect MDM: add IAM application GUID attribtes
