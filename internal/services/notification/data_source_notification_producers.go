@@ -2,7 +2,9 @@ package notification
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -58,7 +60,7 @@ func dataSourceNotificationProducersRead(_ context.Context, d *schema.ResourceDa
 	for _, p := range list {
 		producers = append(producers, p.ID)
 	}
-	d.SetId("producers")
+	d.SetId(fmt.Sprintf("notification-producers-%s", strings.Join(producers, "-")))
 	_ = d.Set("producer_ids", producers)
 
 	return diags

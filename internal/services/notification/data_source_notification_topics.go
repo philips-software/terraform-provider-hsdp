@@ -2,7 +2,9 @@ package notification
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -57,7 +59,7 @@ func dataSourceNotificationTopicsRead(_ context.Context, d *schema.ResourceData,
 	for _, p := range list {
 		topicIDs = append(topicIDs, p.ID)
 	}
-	d.SetId("notification_topics")
+	d.SetId(fmt.Sprintf("notification-topics-%s", strings.Join(topicIDs, "-")))
 	_ = d.Set("topic_ids", topicIDs)
 
 	return diags
