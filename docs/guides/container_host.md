@@ -82,7 +82,7 @@ but focus of this guide will be on leveraging Terraform.
 
 The Cartel CLI is installed on the [HSP SSH regional jump gates](https://www.hsdp.io/develop/get-started-healthsuite/set-up-ssh-access/access-services-behind-ssh-gateway/connect-to-gateway).
 
-Listening all your instances:
+Listing all your instances:
 
 ```shell
 cartel --get-all-instances -y
@@ -255,7 +255,7 @@ resource "hsdp_container_host" "tynan" {
 There are two subnet types available:
 
 * `public` - Your instance will be assigned a public IP address as well as a private one.
-* `private` - Your instance be assigned a private IP only
+* `private` - Your instance will be assigned a private IP only
 
 You can instruct Terraform to pick a specific subnet by just specifying 
 the type only:
@@ -292,7 +292,7 @@ resource "hsdp_container_host" "tynan" {
 }
 ```
 
-~> Using `public` subnets increases your costs slightly as you will pay extra for the public IP
+~> Using `public` subnets increases your costs slightly as you will pay extra for the public IP address
 
 ### Volumes
 
@@ -325,3 +325,130 @@ your private key is loaded in your local SSH agent you can access your instance 
 ```shell
 ssh -A -C -J cdrummer@gw-na1.phsdp.com cdrummer@tynan-server.dev
 ```
+
+## Bootstrapping Container Host instances
+
+To fully automate provisioning and deployment of software on Container Host you can leverage the `hsdp_container_host_exec` resource.
+While it is possibly to specify `file` and `commands` in the `hsdp_container_host` resource directly we highly recommend splitting off
+bootstrapping steps to a `hsdp_container_host_exec` resource. This decouples your software bootstrapping from the Container Host instance provisioning, which 
+can take between 7 and 10 minutes on average. 
+
+We'll break down the example below:
+
+```hcl
+resource "hsdp_container_host_exec" "nomad_server_init" {
+  # Use the private_ip from a provisioned hsdp_container_host resource
+  # This ensures the exec resource is only executed after the Container Host is up and running
+  host  = hsdp_container_host.nomad_server.private_ip
+  user  = var.ldap_user
+  agent = true
+
+  # Render template and copy it to the Container Host instance
+  file {
+    content = templatefile("${path.module}/templates/server.hcl", {
+      advertise_ip   = hsdp_container_host.nomad_server.private_ip
+      region         = "global"
+      datacenter     = "dc1"
+      name           = "server"
+      docker_runtime = var.docker_runtime
+    })
+    destination = "/home/${var.ldap_user}/server.hcl"
+    permissions = "0755"
+  }
+
+  # Execute a sequence of commands, using the copied files as input
+  commands = [
+    "docker stop nomad-server || true",
+    "docker rm nomad-server || true",
+    "docker rm alpine || true",
+    "docker volume rm nomad-server-config || true",
+    "docker volume create nomad-server-config",
+    "docker create -v nomad-server-config:/config --name alpine alpine",
+    "docker cp /home/${var.ldap_user}/server.hcl alpine:/config",
+    "docker run -d --restart on-failure --name nomad-server -v nomad-server-config:/config ${var.nomad_image} nomad agent -server -bind=0.0.0.0 -acl-enabled -plugin-dir=/plugins -config=/config/server.hcl -data-dir=/tmp/nomad",
+    "sleep 5",
+    "docker exec nomad-server nomad acl bootstrap"
+  ]
+}
+```
+
+### host
+
+The `host` parameter should be set to the private IP address of the Container Host instance. The `hsdp_container_exec` will use
+an embedded SSH agent which supports tunneling (and proxy traversal!) to establish a connection to your Container Host.
+
+### file
+
+Use `file {}` blocks to prepare and copy content from your Terraform deployment all the way to the Container Host instances
+
+### commands
+
+Finally, you can specify one or more `commands` which will be executed in sequence on the Container Host. You can use this to 
+create volumes, networks and spin up containers. The output of the last command will exported under the `result` attribute. This allows
+you to capture data / state from the Container Host and make it available to other Terraform resources.
+
+## Forwarding Internet traffic to Container Host
+
+Ingress traffic to the platform needs to flow through the Cloud foundry Load balancers. A reverse proxy can be deployed
+on CF which then forwards traffic to your Container Host. Make sure the proper `security groups` are in place to allow 
+traffic from the Cloud foundry VPC (examples: `http-from-cloud-foundry`, `http-8080`)
+
+```shell
+/----------\     /-------------\     /-------------\
+| Internet | --> | Proxy on CF | --> | CH instance |
+\----------/     \-------------/     \-------------/
+```
+
+Below is an example on how to use [Caddy](https://caddyserver.com/) as a reverse proxy for your Container Host:
+
+```hcl
+resource "cloudfoundry_app" "superset_proxy" {
+  name         = "caddy"
+  space        = data.cloudfoundry_space.space.id
+  memory       = 128
+  disk_quota   = 512
+
+  # Use Caddy from Docker Hub, optionally pull from HSDP Docker Registry to prevent limits 
+  docker_image = "caddy:2.4.6"
+  docker_credentials = {
+    username = var.docker_username
+    password = var.docker_password
+  }
+
+  # Render the template and inject the Container Host private IP address
+  environment = merge({
+    CADDYFILE_BASE64 = base64encode(templatefile("${path.module}/templates/Caddyfile", {
+      upstream_url = "http://${hsdp_container_host.server.private_ip}:8080"
+    }))
+  }, {})
+
+  # Override the Docker command to render the config from ENV in the container and let Caddy use it
+  command           = "echo $CADDYFILE_BASE64 | base64 -d > /etc/caddy/Caddyfile && cat /etc/caddy/Caddyfile && caddy run -config /etc/caddy/Caddyfile"
+  health_check_type = "process"
+
+  routes {
+    route = cloudfoundry_route.proxy.id
+  }
+}
+
+resource "cloudfoundry_route" "proxy" {
+  domain   = data.cloudfoundry_domain.domain.id
+  space    = data.cloudfoundry_space.space.id
+  hostname = "caddy-proxy"
+}
+```
+
+The Caddy template in `templates/Caddyfile` would look like:
+
+```caddy
+:80 {
+  @insecure {
+    header X-Forwarded-Proto http
+  }
+  redir @insecure https://{host}{uri} permanent
+
+  reverse_proxy ${upstream_url}
+}
+```
+
+~> The above resource uses the [Cloud foundry Terraform provider](https://registry.terraform.io/providers/cloudfoundry-community/cloudfoundry/0.15.0)
