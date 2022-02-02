@@ -12,9 +12,9 @@ Cartel is designed to deploy the managed services over generic server instances.
 Create request is the type of role to assign to the Cartel instance (really, an EC2 instance). While there are quite a few roles defined the only
 supported role today is `container-host`. This is why Cartel and Container Host are effectively interchangeable in conversations.
 
-> Takeway: The Cartel REST API is used to provision Container-Host instances
+~> Takeway: The Cartel REST API is used to provision Container-Host instances
 
-> In the remainder of this guide when referring to `Container Host` we mean a Cartel instance provisioned with the `container-host` role 
+~> In the remainder of this guide when referring to `Container Host` we mean a Cartel instance provisioned with the `container-host` role 
 
 ## The Container Host role
 
@@ -32,7 +32,7 @@ further questions. Common reasons include:
 - Applications which require dedicated CPU (compute) resources
 - Off-The-Shelf software which does not fit well on Cloud foundry
 
-> Rule of thumb: treat Container Host as an escape hatch (last resort) i.e. when your workload absolutely cannot be accommodated on Cloud foundry
+~> Rule of thumb: treat Container Host as an escape hatch (last resort) i.e. when your workload absolutely cannot be accommodated on Cloud foundry
  
 ## When not to use Container Host
 
@@ -292,7 +292,7 @@ resource "hsdp_container_host" "tynan" {
 }
 ```
 
-> Using `public` subnets increases your costs slightly as you will pay extra for the public IP
+~> Using `public` subnets increases your costs slightly as you will pay extra for the public IP
 
 ### Volumes
 
