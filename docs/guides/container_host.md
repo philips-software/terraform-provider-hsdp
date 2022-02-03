@@ -3,18 +3,18 @@ page_title: "Working with Container Host"
 ---
 # Working with Container Host
 
-The Cartel `container-host` role provides a shared responsibility and security-enhanced host for running Docker containers within HSDP. 
+The Cartel `container-host` role provides a shared responsibility and security-enhanced host for running Docker containers within HSDP.
 
 ## Cartel vs Container Host
 
-Cartel is a simple REST like JSON API which provides orchestration and provisioning capabilities to the environment. 
-Cartel is designed to deploy the managed services over generic server instances. One of the key arguments of the Cartel 
+Cartel is a simple REST like JSON API which provides orchestration and provisioning capabilities to the environment.
+Cartel is designed to deploy the managed services over generic server instances. One of the key arguments of the Cartel
 Create request is the type of role to assign to the Cartel instance (really, an EC2 instance). While there are quite a few roles defined the only
 supported role today is `container-host`. This is why Cartel and Container Host are effectively interchangeable in conversations.
 
 ~> Takeway: The Cartel REST API is used to provision Container-Host instances
 
-~> In the remainder of this guide when referring to `Container Host` we mean a Cartel instance provisioned with the `container-host` role 
+~> In the remainder of this guide when referring to `Container Host` we mean a Cartel instance provisioned with the `container-host` role
 
 ## The Container Host role
 
@@ -33,7 +33,7 @@ further questions. Common reasons include:
 - Off-The-Shelf software which does not fit well on Cloud foundry
 
 ~> Rule of thumb: treat Container Host as an escape hatch (last resort) i.e. when your workload absolutely cannot be accommodated on Cloud foundry
- 
+
 ## When not to use Container Host
 
 - If your app works fine on Cloud foundry
@@ -44,7 +44,7 @@ further questions. Common reasons include:
 
 If your workload does not fit on either Cloud foundry or Container Host then HSP also
 offers [HSDP Hosting Services](https://www.hsdp.io/documentation/hsdp-hosting-services). This is a more traditional hosting environment where you
-will have to specify the resources up front (limited elasticity) and will need to provide a runbook for operations. This is 
+will have to specify the resources up front (limited elasticity) and will need to provide a runbook for operations. This is
 typically the landing zone for lift-and-shift operations and is in general not self-serviceable. Use this service if your
 workload is not Cloud Native and you need time for refactoring.
 
@@ -52,12 +52,12 @@ workload is not Cloud Native and you need time for refactoring.
 
 You'll need to request one-time onboarding onto the Cartel service
 via a `ServiceNow` ticket. Please contact your Technical Account Manager for
-assistance with this if needed. 
+assistance with this if needed.
 
 ### Cartel keys
 
-As part of the onboarding procedure you will receive a set of credentials via SDT (Secure Digital Transfer) 
-consisting of a `Cartel Key` and a `Cartel Secret`. These will be used to sign the Cartel API calls e.g. to 
+As part of the onboarding procedure you will receive a set of credentials via SDT (Secure Digital Transfer)
+consisting of a `Cartel Key` and a `Cartel Secret`. These will be used to sign the Cartel API calls e.g. to
 provision instances or modify running instances.
 
 ### LDAP account
@@ -69,7 +69,7 @@ as part of your onboarding onto the HSP platform.
 
 The `SSH public key` which is associate to your `LDAP` account is used to authenticate and gain
 access to Container Host instances. The associated `SSH private key` should be
-loaded in your local SSH agent and agent forwarding should be enabled (recommended). Alternatively, you 
+loaded in your local SSH agent and agent forwarding should be enabled (recommended). Alternatively, you
 can pass the private key as an argument to the HSP Terraform provider configuration
 
 ## Provisioning your first instance
@@ -183,7 +183,7 @@ resource "hsdp_container_host" "server" {
 ### User and user groups
 
 You'll want to assign one or more `user groups` to your instance. The assigned user groups determine
-which LDAP accounts have access to the instance via SSH. The best practice is to at least add 
+which LDAP accounts have access to the instance via SSH. The best practice is to at least add
 your own LDAP group which has the name same as your LDAP `login`. So, a user with LDAP `cdrummer` would
 add the following arguments:
 
@@ -232,7 +232,7 @@ output "all_security_groups" {
 ```
 
 You can also request creation of custom security groups via ServiceNOW. Requests will go through
-an approval process so might take a while, so it's best to check weather a 
+an approval process so might take a while, so it's best to check weather a
 pre-approved security group will fit your needs.
 
 Once you find a suitable security group you can assign it:
@@ -254,10 +254,10 @@ resource "hsdp_container_host" "tynan" {
 
 There are two subnet types available:
 
-* `public` - Your instance will be assigned a public IP address as well as a private one.
-* `private` - Your instance will be assigned a private IP only
+- `public` - Your instance will be assigned a public IP address as well as a private one.
+- `private` - Your instance will be assigned a private IP only
 
-You can instruct Terraform to pick a specific subnet by just specifying 
+You can instruct Terraform to pick a specific subnet by just specifying
 the type only:
 
 ```hcl
@@ -276,7 +276,7 @@ resource "hsdp_container_host" "tynan" {
 The assigned subnet name will be followed by a letter in the name.
 The letter corresponds to the availability zone that the instance is deployed in.
 
-You also have the option to specify the exact subnet and availability zone you want to 
+You also have the option to specify the exact subnet and availability zone you want to
 deploy your instance to:
 
 ```hcl
@@ -299,8 +299,8 @@ resource "hsdp_container_host" "tynan" {
 Persisting data on Container Host requires attaching (EBS) volumes to your instance. Use the following attributes
 to configure this:
 
-* `volumes` - The number of EBS volumes to attach
-* `volume_size` - The size (in `GB`) of each volume
+- `volumes` - The number of EBS volumes to attach
+- `volume_size` - The size (in `GB`) of each volume
 
 ```hcl
 resource "hsdp_container_host" "tynan" {
@@ -330,8 +330,8 @@ ssh -A -C -J cdrummer@gw-na1.phsdp.com cdrummer@tynan-server.dev
 
 To fully automate provisioning and deployment of software on Container Host you can leverage the `hsdp_container_host_exec` resource.
 While it is possibly to specify `file` and `commands` in the `hsdp_container_host` resource directly we highly recommend splitting off
-bootstrapping steps to a `hsdp_container_host_exec` resource. This decouples your software bootstrapping from the Container Host instance provisioning, which 
-can take between 7 and 10 minutes on average. 
+bootstrapping steps to a `hsdp_container_host_exec` resource. This decouples your software bootstrapping from the Container Host instance provisioning, which
+can take between 7 and 10 minutes on average.
 
 We'll break down the example below:
 
@@ -383,14 +383,14 @@ Use `file {}` blocks to prepare and copy content from your Terraform deployment 
 
 ### commands
 
-Finally, you can specify one or more `commands` which will be executed in sequence on the Container Host. You can use this to 
+Finally, you can specify one or more `commands` which will be executed in sequence on the Container Host. You can use this to
 create volumes, networks and spin up containers. The output of the last command will exported under the `result` attribute. This allows
 you to capture data / state from the Container Host and make it available to other Terraform resources.
 
 ## Forwarding Internet traffic to Container Host
 
 Ingress traffic to the platform needs to flow through the Cloud foundry Load balancers. A reverse proxy can be deployed
-on CF which then forwards traffic to your Container Host. Make sure the proper `security groups` are in place to allow 
+on CF which then forwards traffic to your Container Host. Make sure the proper `security groups` are in place to allow
 traffic from the Cloud foundry VPC (examples: `http-from-cloud-foundry`, `http-8080`)
 
 ```shell
