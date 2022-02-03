@@ -38,9 +38,7 @@ func dataSourceContainerHostSecurityGroupsRead(_ context.Context, d *schema.Reso
 	}
 
 	names := make([]string, 0)
-	for _, name := range *details {
-		names = append(names, name)
-	}
+	names = append(names, *details...)
 	_ = d.Set("names", names)
 	d.SetId("names")
 	return diags
