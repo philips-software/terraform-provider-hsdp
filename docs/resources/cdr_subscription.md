@@ -58,6 +58,7 @@ The following arguments are supported:
 
 The following attributes are exported:
 
+* `id` - The ID of the CDR subscription
 * `status` - The status of the subscription (requested | active | error  | off)
 
 ## Import
