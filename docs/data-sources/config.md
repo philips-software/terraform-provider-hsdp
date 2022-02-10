@@ -58,13 +58,13 @@ The following regions are recognized:
 | Region  | Description                                                              |
 |---------|--------------------------------------------------------------------------|
 | apac2   | [Japan](https://en.wikipedia.org/wiki/Japan) (Tokyo)                     |
-| apac3   | [Asia-Pacific](https://en.wikipedia.org/wiki/Asia-Pacific)               |
-| ca1     | [Canada](https://en.wikipedia.org/wiki/Canada)                           |
-| cn1     | [China](https://en.wikipedia.org/wiki/China)                             |
+| apac3   | [Asia-Pacific](https://en.wikipedia.org/wiki/Asia-Pacific) (Sydney)      |
+| ca1     | [Canada](https://en.wikipedia.org/wiki/Canada) (Central Canada)          |
+| cn1     | [China](https://en.wikipedia.org/wiki/China) (Beijing)                   |
 | dev     | Development (US)                                                         |
-| eu-west | [European Union](https://en.wikipedia.org/wiki/European_Union)           |
+| eu-west | [European Union](https://en.wikipedia.org/wiki/European_Union) (Ireland) |
 | sa1     | [South America](https://en.wikipedia.org/wiki/South_America) (Sao Paulo) |
-| us-east | [United States](https://en.wikipedia.org/wiki/United_States)             |
+| us-east | [United States](https://en.wikipedia.org/wiki/United_States) (Virginia)  |
 
 * `environment` - (Optional) The HSDP environment. If not set, defaults to provider level config
 
