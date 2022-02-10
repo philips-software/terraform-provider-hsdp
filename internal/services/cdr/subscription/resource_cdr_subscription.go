@@ -109,6 +109,10 @@ func resourceCDRSubscriptionRead(ctx context.Context, d *schema.ResourceData, m 
 	fhirStore := d.Get("fhir_store").(string)
 	version := d.Get("version").(string)
 
+	if fhirStore == "" {
+		return diag.FromErr(fmt.Errorf("subscription read: the 'fhir_store' attribute is blank"))
+	}
+
 	client, err := c.GetFHIRClientFromEndpoint(fhirStore)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("subscription read: %w", err))
