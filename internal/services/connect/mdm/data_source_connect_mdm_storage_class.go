@@ -38,7 +38,7 @@ func dataSourceConnectMDMStorageClassRead(_ context.Context, d *schema.ResourceD
 
 	client, err := c.MDMClient()
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("get MDMClient error: %w", err))
 	}
 
 	name := d.Get("name").(string)
@@ -47,7 +47,7 @@ func dataSourceConnectMDMStorageClassRead(_ context.Context, d *schema.ResourceD
 		Name: &name,
 	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("get StorageClasses error: %w", err))
 	}
 
 	if len(*resources) == 0 {
