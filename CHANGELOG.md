@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.30.0
+
+- IAM: improve token handling
+
 ## v0.29.9
 
 - IAM: Add hsdp_iam_token data source (#167)

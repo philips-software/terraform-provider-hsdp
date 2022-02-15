@@ -35,7 +35,7 @@ func DataSourceIAMIntrospect() *schema.Resource {
 
 }
 
-func dataSourceIAMIntrospectRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIAMIntrospectRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -58,7 +58,11 @@ func dataSourceIAMIntrospectRead(ctx context.Context, d *schema.ResourceData, me
 	d.SetId(resp.Username)
 	_ = d.Set("managing_organization", resp.Organizations.ManagingOrganization)
 	_ = d.Set("username", resp.Username)
-	_ = d.Set("token", client.Token())
+	token, err := client.Token()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	_ = d.Set("token", token)
 	_ = d.Set("introspect", string(introspectJSON))
 
 	return diags

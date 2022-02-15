@@ -646,6 +646,8 @@ github.com/hasura/go-graphql-client v0.2.0/go.mod h1:ovhXpnBL/+pYmmdYHndovgAc/wm
 github.com/hasura/go-graphql-client v0.4.0/go.mod h1:ovhXpnBL/+pYmmdYHndovgAc/wmhaXKvKwJETjtMomQ=
 github.com/hasura/go-graphql-client v0.6.2 h1:G0dREfk+rfrRECqGvomhV0bHOr+1nsVipmdlMgUq8iA=
 github.com/hasura/go-graphql-client v0.6.2/go.mod h1:kvaJsDhxGbkIJ1jgebkrnt9EDIELZHpsAMint56v+2I=
+github.com/hasura/go-graphql-client v0.6.3 h1:WO9iSR79LA6y/lEgwCvGcOxGxsNBmIBqV7aE2WaClos=
+github.com/hasura/go-graphql-client v0.6.3/go.mod h1:kvaJsDhxGbkIJ1jgebkrnt9EDIELZHpsAMint56v+2I=
 github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152 h1:GITUy7r2Eijl7u/Xe5AOs3HBV3Gt/3+l0j2bTh2UO5Y=
 github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152/go.mod h1:bRtCxY0f88xmUw+Y0Xfl/uGaCWMUy04wUGSKbnQdsJs=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
@@ -977,6 +979,10 @@ github.com/philips-software/go-hsdp-api v0.38.1-0.20210428141703-9f4371331e80/go
 github.com/philips-software/go-hsdp-api v0.50.2/go.mod h1:+/oOyI8Equm7/YcUHJ+PO3HO4U92JcAAoOs5DYRRkIc=
 github.com/philips-software/go-hsdp-api v0.60.1 h1:Hp3qVD2tCU91fAhLYh1S06KypD4K2K4U/3PuOhFA9J4=
 github.com/philips-software/go-hsdp-api v0.60.1/go.mod h1:RgvTtgmmce+hzJh3dP2RfIrr9ySThHcTu0MC10F3VMg=
+github.com/philips-software/go-hsdp-api v0.61.0 h1:zIEqieedrP6JaJ1EPX5a0Pxf3pngsUmdkWITOq+pfYE=
+github.com/philips-software/go-hsdp-api v0.61.0/go.mod h1:kQjabMa0ilLkFz+L5+zqqL19TocibkJVki3mQSXhlss=
+github.com/philips-software/go-hsdp-api v0.61.1 h1:XkqWuN5fohZihZiwYzbUSFtjbpKu5kUMP0MfLvYXGD8=
+github.com/philips-software/go-hsdp-api v0.61.1/go.mod h1:kQjabMa0ilLkFz+L5+zqqL19TocibkJVki3mQSXhlss=
 github.com/philips-software/go-hsdp-signer v1.3.0/go.mod h1:/QehZ/+Aks2t1TFpjhF/7ZSB8PJIIJHzLc03rOqwLw0=
 github.com/philips-software/go-hsdp-signer v1.4.0 h1:yg7UILhmI4xJhr/tQiAiQwJL0EZFvLuMqpH2GZ9ygY4=
 github.com/philips-software/go-hsdp-signer v1.4.0/go.mod h1:/QehZ/+Aks2t1TFpjhF/7ZSB8PJIIJHzLc03rOqwLw0=

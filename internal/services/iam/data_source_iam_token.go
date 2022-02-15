@@ -29,7 +29,7 @@ func DataSourceIAMToken() *schema.Resource {
 
 }
 
-func dataSourceIAMTokenRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIAMTokenRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -40,7 +40,11 @@ func dataSourceIAMTokenRead(ctx context.Context, d *schema.ResourceData, meta in
 	}
 
 	d.SetId("token-" + client.BaseIAMURL().Host)
-	_ = d.Set("access_token", client.Token())
+	token, err := client.Token()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	_ = d.Set("access_token", token)
 	_ = d.Set("expires_at", client.Expires())
 	_ = d.Set("id_token", client.IDToken())
 

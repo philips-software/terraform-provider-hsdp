@@ -92,7 +92,8 @@ func dataSourceIAMClientRead(_ context.Context, d *schema.ResourceData, m interf
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if client.Token() == "" {
+	token, err := client.Token()
+	if err != nil || token == "" {
 		return diag.FromErr(config.ErrMissingIAMCredentials)
 	}
 

@@ -119,7 +119,11 @@ func resourceIAMClientCreate(ctx context.Context, d *schema.ResourceData, m inte
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if client.Token() == "" {
+	token, err := client.Token()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if token == "" {
 		return diag.FromErr(config.ErrMissingIAMCredentials)
 	}
 
@@ -172,7 +176,11 @@ func resourceIAMClientRead(_ context.Context, d *schema.ResourceData, m interfac
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if client.Token() == "" {
+	token, err := client.Token()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if token == "" {
 		return diag.FromErr(config.ErrMissingIAMCredentials)
 	}
 
@@ -213,7 +221,11 @@ func resourceIAMClientUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if client.Token() == "" {
+	token, err := client.Token()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if token == "" {
 		return diag.FromErr(config.ErrMissingIAMCredentials)
 	}
 
@@ -272,7 +284,11 @@ func resourceIAMClientDelete(_ context.Context, d *schema.ResourceData, m interf
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if client.Token() == "" {
+	token, err := client.Token()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if token == "" {
 		return diag.FromErr(config.ErrMissingIAMCredentials)
 	}
 
