@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.30.1
+
+- Connect MDM: workaround for StandardService query issue
+
 ## v0.30.0
 
 - IAM: improve token handling
