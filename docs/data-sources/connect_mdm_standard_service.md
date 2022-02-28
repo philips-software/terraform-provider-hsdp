@@ -6,6 +6,8 @@ subcategory: "Master Data Management (MDM)"
 
 Retrieve details of a StandardService
 
+-> The `MDM-STANDARDSERVICE.READ` IAM permissions is required to use this data source
+
 ## Example Usage
 
 ```hcl
@@ -20,9 +22,15 @@ output "my_first_service_id" {
 }
 ```
 
+## Argument Reference
+
+The following arguments are supports:
+
+* `name` - (Required) The name standard service to look up
+
 ## Attributes Reference
 
-The following attributes are exported:
+In addition to all arguments above, the following attributes are exported:
 
 * `id` - The StandardService ID
 * `description` - The StandardService descriptions

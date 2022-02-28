@@ -12,14 +12,14 @@ Cartel is designed to deploy the managed services over generic server instances.
 Create request is the type of role to assign to the Cartel instance (really, an EC2 instance). While there are quite a few roles defined the only
 supported role today is `container-host`. This is why Cartel and Container Host are effectively interchangeable in conversations.
 
-~> Takeway: The Cartel REST API is used to provision Container-Host instances
-
-~> In the remainder of this guide when referring to `Container Host` we mean a Cartel instance provisioned with the `container-host` role
+-> Takeaway: The Cartel REST API is used to provision Container-Host instances
 
 ## The Container Host role
 
 The `container-host` role is not intended to replace Cloud Foundry for application deployment, but as a complement to Cloud Foundry.
 It can be used to deploy services not supported by HSDP Service Brokers, custom applications that do not work well on Cloud Foundry, or for administrative purposes.
+
+-> In the remainder of this guide when referring to `Container Host` we mean a Cartel instance provisioned with the `container-host` role
 
 ## When to use Container Host
 
@@ -32,7 +32,7 @@ further questions. Common reasons include:
 - Applications which require dedicated CPU (compute) resources
 - Off-The-Shelf software which does not fit well on Cloud foundry
 
-~> Rule of thumb: treat Container Host as an escape hatch (last resort) i.e. when your workload absolutely cannot be accommodated on Cloud foundry
+-> Rule of thumb: treat Container Host as an escape hatch (last resort) i.e. when your workload absolutely cannot be accommodated on Cloud foundry
 
 ## When not to use Container Host
 
@@ -394,9 +394,7 @@ on CF which then forwards traffic to your Container Host. Make sure the proper `
 traffic from the Cloud foundry VPC (examples: `http-from-cloud-foundry`, `http-8080`)
 
 ```shell
-/----------\     /-------------\     /-------------\
-| Internet | --> | Proxy on CF | --> | CH instance |
-\----------/     \-------------/     \-------------/
+Internet --> Proxy on CF --> Container Hhost instance
 ```
 
 Below is an example on how to use [Caddy](https://caddyserver.com/) as a reverse proxy for your Container Host:
@@ -451,4 +449,4 @@ The Caddy template in `templates/Caddyfile` would look like:
 }
 ```
 
-~> The above resource uses the [Cloud foundry Terraform provider](https://registry.terraform.io/providers/cloudfoundry-community/cloudfoundry/0.15.0)
+-> The above resource uses the [Cloud foundry Terraform provider](https://registry.terraform.io/providers/cloudfoundry-community/cloudfoundry/0.15.0)
