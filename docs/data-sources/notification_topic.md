@@ -10,18 +10,22 @@ Look up a HSDP Notification Topic resource
 
 ```hcl
 data "hsdp_notification_topic" "topic" {
-  topic_id =  "036c8a21-6906-4485-b2e7-e31883d8f9ed"
+  name =  "some-topic"
 }
 ```
 
 ## Argument reference
 
-* `topic_id` - (Required) The GUID of the topic to look up.
+* `topic_id` - (Optional) The GUID of the topic to look up.
+* `name` - (Optional) The name of the topic look up.
+
+-> Specify either a `topic_id` or a `name`, not both.
 
 ## Attribute reference
 
 In addition to all arguments above, the following attributes are exported:
 
+* `id` - The GUID of the found topic
 * `producer_id` - The UUID of the producer associated with this topic
 * `scope` - The scope of this topic. Can be either `public` or `private`
 * `allowed_scopes` - The list of allowed scopes

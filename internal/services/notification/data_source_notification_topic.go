@@ -2,6 +2,7 @@ package notification
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -16,11 +17,11 @@ func DataSourceNotificationTopic() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"topic_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
-				Computed: true,
+				Optional: true,
 			},
 			"producer_id": {
 				Type:     schema.TypeString,
@@ -51,6 +52,9 @@ func dataSourceNotificationTopicRead(_ context.Context, d *schema.ResourceData, 
 	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics
+	var topic *notification.Topic
+	var resp *notification.Response
+	var err error
 
 	client, err := c.NotificationClient()
 	if err != nil {
@@ -59,16 +63,47 @@ func dataSourceNotificationTopicRead(_ context.Context, d *schema.ResourceData, 
 	defer client.Close()
 
 	topicID := d.Get("topic_id").(string)
+	name := d.Get("name").(string)
 
-	topic, resp, err := client.Topic.GetTopic(topicID) // Get all producers
+	if topicID == "" && name == "" {
+		return diag.FromErr(fmt.Errorf("need either a topic_id or a name to query"))
+	}
+	if topicID != "" && name != "" {
+		return diag.FromErr(fmt.Errorf("specify either a topic_id or a name, not both"))
+	}
 
-	if err != nil {
-		if resp == nil || resp.StatusCode != http.StatusForbidden { // Do not error on permission issues
+	if topicID != "" {
+		topic, resp, err = client.Topic.GetTopic(topicID) // Get topic
+		if err != nil {
+			if resp == nil || resp.StatusCode != http.StatusForbidden { // Do not error on permission issues
+				return diag.FromErr(err)
+			}
 			return diag.FromErr(err)
 		}
-		topic = &notification.Topic{}
 	}
-	d.SetId(topicID)
+	if name != "" {
+		opts := &notification.GetOptions{
+			Name: &name,
+		}
+		list, resp, err := client.Topic.GetTopics(opts) // Get all topics
+		if err != nil {
+			if resp == nil || resp.StatusCode != http.StatusForbidden { // Do not error on permission issues
+				return diag.FromErr(err)
+			}
+			list = []notification.Topic{} // empty list
+		}
+		if len(list) == 0 {
+			return diag.FromErr(fmt.Errorf("no matching topic found"))
+		}
+		topic, resp, err = client.Topic.GetTopic(list[0].ID) // Get topic
+		if err != nil {
+			if resp == nil || resp.StatusCode != http.StatusForbidden { // Do not error on permission issues
+				return diag.FromErr(err)
+			}
+			return diag.FromErr(err)
+		}
+	}
+	d.SetId(topic.ID)
 	_ = d.Set("name", topic.Name)
 	_ = d.Set("producer_id", topic.ProducerID)
 	_ = d.Set("scope", topic.Scope)
