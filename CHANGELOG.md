@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.30.3
+
+- IAM: Fix user fetch calls in IAM Grousp (#170)
+- Connect MDM: Fix empty secrets issue (#169)
+
 ## v0.30.2
 
 - Notification: support querying for topic by name (#165)
