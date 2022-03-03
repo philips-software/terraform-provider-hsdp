@@ -239,9 +239,13 @@ func oAuthClientToSchema(resource mdm.OAuthClient, d *schema.ResourceData) {
 	_ = d.Set("redirection_uris", resource.RedirectionURIs)
 	_ = d.Set("response_types", resource.ResponseTypes)
 	_ = d.Set("client_id", resource.ClientID)
-	_ = d.Set("client_secret", resource.ClientSecret)
 	_ = d.Set("bootstrap_client_id", resource.BootstrapClientID)
-	_ = d.Set("bootstrap_client_secret", resource.BootstrapClientSecret)
+	if resource.BootstrapClientSecret != "" {
+		_ = d.Set("bootstrap_client_secret", resource.BootstrapClientSecret)
+	}
+	if resource.ClientSecret != "" {
+		_ = d.Set("client_secret", resource.ClientSecret)
+	}
 }
 
 func resourceConnectMDMOAuthClientCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -273,8 +277,10 @@ func resourceConnectMDMOAuthClientCreate(ctx context.Context, d *schema.Resource
 	if created == nil {
 		return diag.FromErr(fmt.Errorf("failed to create resource: %d", resp.StatusCode))
 	}
-	_ = d.Set("guid", created.ID)
 	d.SetId(fmt.Sprintf("OAuthClient/%s", created.ID))
+	_ = d.Set("guid", created.ID)
+	_ = d.Set("bootstrap_client_secret", created.BootstrapClientSecret)
+	_ = d.Set("client_secret", created.ClientSecret)
 
 	if err := setScopes(client, d); err != nil {
 		// Clean up
