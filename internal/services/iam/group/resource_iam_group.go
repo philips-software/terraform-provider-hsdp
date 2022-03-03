@@ -211,13 +211,13 @@ func resourceIAMGroupRead(_ context.Context, d *schema.ResourceData, m interface
 
 	if driftDetection { // Only do drift detection when explicitly enabled
 		// Users
-		users, _, err := client.Users.GetUsers(&iam.GetUserOptions{
+		users, _, err := client.Users.GetAllUsers(&iam.GetUserOptions{
 			GroupID: &group.ID,
 		})
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("error retrieving users from group: %v", err))
 		}
-		_ = d.Set("users", tools.SchemaSetStrings(users.UserUUIDs))
+		_ = d.Set("users", tools.SchemaSetStrings(users))
 
 		// Services
 		// We only deal with services we know

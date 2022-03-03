@@ -273,7 +273,7 @@ func resourceIAMGroupMembershipRead(_ context.Context, d *schema.ResourceData, m
 
 	// Users
 	// We only deal with users we know
-	users, _, err := client.Users.GetUsers(&iam.GetUserOptions{
+	users, _, err := client.Users.GetAllUsers(&iam.GetUserOptions{
 		GroupID: &group.ID,
 	})
 	if err != nil {
@@ -282,7 +282,7 @@ func resourceIAMGroupMembershipRead(_ context.Context, d *schema.ResourceData, m
 	var presentUsers []string
 	knownUsers := tools.ExpandStringList(d.Get("users").(*schema.Set).List())
 	for _, u := range knownUsers {
-		if tools.ContainsString(users.UserUUIDs, u) {
+		if tools.ContainsString(users, u) {
 			presentUsers = append(presentUsers, u)
 		}
 	}
