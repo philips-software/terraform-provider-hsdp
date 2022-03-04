@@ -41,6 +41,8 @@ The following arguments are supported:
 * `global_reference_id` - (Required) Reference identifier defined by the provisioning user. This reference Identifier will be carried over to identify the provisioned resource across deployment instances (ClientTest, Production). Invalid Characters:- "[&+’";=?()\[\]<>]
 * `scopes` - (Optional) Array. List of supported scopes for this client
 * `default_scopes` - (Optional) Array. Default scopes. You do not have to specify these explicitly when requesting a token
+* `iam_scopes` - (Optional) Array. List of supported scopes for this client's IAM instance
+* `iam_default_scopes` - (Optional) Array. Default scopes to set for this client's IAM instance
 * `redirection_uris` - (Optional) Array of valid RedirectionURIs for this client
 * `user_client` - (Optional, bool)
 * `client_revoked` - (Optional, bool)
@@ -55,6 +57,12 @@ The following attributes are exported:
 * `disabled` - True if the client is disabled e.g. because the Org is disabled
 * `client_id` -  The client id
 * `password` - The password
+* `bootstrap_client_id` - The bootstrap client ID
+* `bootstrap_client_secret` - The boostrap client secret
+* `bootstrap_client_guid_system` - The external system bootstrap client associated with resource (this would point to an IAM deployment)
+* `bootstrap_client_guid_value` - The external value of the bootstrap client associated with this resource (this would be an underlying IAM OAuth2 client GUID)
+* `client_guid_system` - The external system client associated with resource (this would point to an IAM deployment)
+* `client_guid_value` - The external value client associated with this resource (this would be an underlying IAM OAuth2 client GUID)
 
 ## Import
 
