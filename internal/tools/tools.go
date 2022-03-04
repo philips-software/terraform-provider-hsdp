@@ -54,7 +54,7 @@ func Difference(a, b []string) []string {
 	for _, x := range b {
 		mb[x] = true
 	}
-	ab := []string{}
+	var ab []string
 	for _, x := range a {
 		if _, ok := mb[x]; !ok {
 			ab = append(ab, x)
@@ -92,7 +92,7 @@ func SSHAgentReachable() bool {
 	if err != nil {
 		return false
 	}
-	defer conn.Close()
+	_ = conn.Close()
 	return true
 }
 
@@ -120,7 +120,7 @@ func PrunePorts(i []int, pruneList []int) []int {
 	return ports[:j]
 }
 
-// Takes the result of flatmap.Expand for an array of strings
+// ExpandStringList takes the result of flatmap.Expand for an array of strings
 // and returns a []string
 func ExpandStringList(configured []interface{}) []string {
 	vs := make([]string, 0, len(configured))

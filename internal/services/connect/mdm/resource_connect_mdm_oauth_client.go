@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/connect/mdm"
+	"github.com/philips-software/go-hsdp-api/iam"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
@@ -18,6 +18,7 @@ func ResourceConnectMDMOAuthClient() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		SchemaVersion: 1,
 		CreateContext: resourceConnectMDMOAuthClientCreate,
 		ReadContext:   resourceConnectMDMOAuthClientRead,
 		UpdateContext: resourceConnectMDMOAuthClientUpdate,
@@ -70,6 +71,18 @@ func ResourceConnectMDMOAuthClient() *schema.Resource {
 				Required: true,
 				Elem:     tools.StringSchema(),
 			},
+			"iam_scopes": {
+				Type:     schema.TypeSet,
+				MaxItems: 100,
+				Optional: true,
+				Elem:     tools.StringSchema(),
+			},
+			"iam_default_scopes": {
+				Type:     schema.TypeSet,
+				MaxItems: 100,
+				Optional: true,
+				Elem:     tools.StringSchema(),
+			},
 			"user_client": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -83,12 +96,17 @@ func ResourceConnectMDMOAuthClient() *schema.Resource {
 				Default:  false,
 			},
 			"client_guid": {
+				Type:       schema.TypeString,
+				Computed:   true,
+				Deprecated: "Will be removed",
+			},
+			"client_guid_system": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				DiffSuppressFunc: tools.SuppressMulti(
-					tools.SuppressWhenGenerated,
-					tools.SuppressDefaultSystemValue),
+				Computed: true,
+			},
+			"client_guid_value": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"client_id": {
 				Type:     schema.TypeString,
@@ -100,12 +118,17 @@ func ResourceConnectMDMOAuthClient() *schema.Resource {
 				Sensitive: true,
 			},
 			"bootstrap_client_guid": {
+				Type:       schema.TypeString,
+				Computed:   true,
+				Deprecated: "Will be removed",
+			},
+			"bootstrap_client_guid_system": {
 				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				DiffSuppressFunc: tools.SuppressMulti(
-					tools.SuppressWhenGenerated,
-					tools.SuppressDefaultSystemValue),
+				Computed: true,
+			},
+			"bootstrap_client_guid_value": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"bootstrap_client_id": {
 				Type:     schema.TypeString,
@@ -128,7 +151,7 @@ func ResourceConnectMDMOAuthClient() *schema.Resource {
 	}
 }
 
-func setScopes(client *mdm.Client, d *schema.ResourceData) error {
+func setScopes(client *mdm.Client, iamClient *iam.Client, d *schema.ResourceData) error {
 
 	scopes := tools.ExpandStringList(d.Get("scopes").(*schema.Set).List())
 	defaultScopes := tools.ExpandStringList(d.Get("default_scopes").(*schema.Set).List())
@@ -137,6 +160,9 @@ func setScopes(client *mdm.Client, d *schema.ResourceData) error {
 	resource, _, err := client.OAuthClients.GetOAuthClientByID(resourceId)
 	if err != nil {
 		return fmt.Errorf("read OAuth client: %w", err)
+	}
+	if resource == nil || resource.ClientGuid == nil {
+		return fmt.Errorf("setScopes: missing IAM client GUID")
 	}
 	scopeDictionary, _, err := client.OAuthClientScopes.GetOAuthClientScopes(nil)
 	if err != nil {
@@ -155,11 +181,39 @@ func setScopes(client *mdm.Client, d *schema.ResourceData) error {
 	if err != nil {
 		return fmt.Errorf("updating scopes: %w", err)
 	}
-	return nil
+	// Set IAM scopes
+	iamScopes := tools.ExpandStringList(d.Get("iam_scopes").(*schema.Set).List())
+	iamDefaultScopes := tools.ExpandStringList(d.Get("iam_default_scopes").(*schema.Set).List())
+	iamResource, _, err := iamClient.Clients.GetClientByID(resource.ClientGuid.Value)
+	if err != nil {
+		return fmt.Errorf("get IAM OAuth client: %v", err)
+	}
+	// Merge MDM scopes and IAM scopes
+	combinedDefaultScopes := append(defaultScopes, iamDefaultScopes...)
+	combinedScopes := append(scopes, iamScopes...)
+	_, _, err = iamClient.Clients.UpdateScopes(*iamResource, combinedScopes, combinedDefaultScopes)
+
+	return err
 }
 
-func oAuthClientScopesToSchema(resource mdm.OAuthClient, d *schema.ResourceData) error {
-	// TODO
+func oAuthClientScopesToSchema(iamClient *iam.Client, resource mdm.OAuthClient, d *schema.ResourceData) error {
+	if resource.ClientGuid == nil {
+		return fmt.Errorf("missing IAM client GUID")
+	}
+	iamResource, _, err := iamClient.Clients.GetClientByID(resource.ClientGuid.Value)
+	if err != nil {
+		return fmt.Errorf("error retrieving IAM client: %v", err)
+	}
+	mdmScopes := tools.ExpandStringList(d.Get("scopes").(*schema.Set).List())
+	mdmDefaultScopes := tools.ExpandStringList(d.Get("default_scopes").(*schema.Set).List())
+
+	prunedIAMScopes := tools.Difference(iamResource.Scopes, mdmScopes)
+	prunedIAMDefaultScopes := tools.Difference(iamResource.DefaultScopes, mdmDefaultScopes)
+
+	_ = d.Set("iam_scopes", prunedIAMScopes)
+	_ = d.Set("iam_default_scopes", prunedIAMDefaultScopes)
+	_ = d.Set("scopes", tools.Difference(mdmScopes, prunedIAMScopes))
+	_ = d.Set("default_scopes", tools.Difference(mdmDefaultScopes, prunedIAMDefaultScopes))
 	return nil
 }
 
@@ -168,8 +222,6 @@ func schemaToOAuthClient(d *schema.ResourceData) mdm.OAuthClient {
 	description := d.Get("description").(string)
 	applicationId := d.Get("application_id").(string)
 	globalReferenceId := d.Get("global_reference_id").(string)
-	bootstrapClientGuid := d.Get("bootstrap_client_guid").(string)
-	clientGuid := d.Get("client_guid").(string)
 	clientRevoked := d.Get("client_revoked").(bool)
 	userClient := d.Get("user_client").(bool)
 	redirectionURIs := tools.ExpandStringList(d.Get("redirection_uris").(*schema.Set).List())
@@ -185,28 +237,6 @@ func schemaToOAuthClient(d *schema.ResourceData) mdm.OAuthClient {
 		ResponseTypes:     responseTypes,
 		RedirectionURIs:   redirectionURIs,
 	}
-	if len(bootstrapClientGuid) > 0 {
-		identifier := mdm.Identifier{}
-		parts := strings.Split(bootstrapClientGuid, "|")
-		if len(parts) > 1 {
-			identifier.System = parts[0]
-			identifier.Value = parts[1]
-		} else {
-			identifier.Value = bootstrapClientGuid
-		}
-		resource.BootstrapClientGuid = &identifier
-	}
-	if len(clientGuid) > 0 {
-		identifier := mdm.Identifier{}
-		parts := strings.Split(clientGuid, "|")
-		if len(parts) > 1 {
-			identifier.System = parts[0]
-			identifier.Value = parts[1]
-		} else {
-			identifier.Value = clientGuid
-		}
-		resource.ClientGuid = &identifier
-	}
 	return resource
 }
 
@@ -217,22 +247,12 @@ func oAuthClientToSchema(resource mdm.OAuthClient, d *schema.ResourceData) {
 	_ = d.Set("global_reference_id", resource.GlobalReferenceID)
 	_ = d.Set("guid", resource.ID)
 	if resource.BootstrapClientGuid != nil && resource.BootstrapClientGuid.Value != "" {
-		value := resource.BootstrapClientGuid.Value
-		if resource.BootstrapClientGuid.System != "" {
-			value = fmt.Sprintf("%s|%s", resource.BootstrapClientGuid.System, resource.BootstrapClientGuid.Value)
-		}
-		_ = d.Set("bootstrap_client_guid", value)
-	} else {
-		_ = d.Set("bootstrap_client_guid", nil)
+		_ = d.Set("bootstrap_client_guid_system", resource.BootstrapClientGuid.System)
+		_ = d.Set("bootstrap_client_guid_value", resource.BootstrapClientGuid.Value)
 	}
 	if resource.ClientGuid != nil && resource.ClientGuid.Value != "" {
-		value := resource.ClientGuid.Value
-		if resource.ClientGuid.System != "" {
-			value = fmt.Sprintf("%s|%s", resource.ClientGuid.System, resource.ClientGuid.Value)
-		}
-		_ = d.Set("client_guid", value)
-	} else {
-		_ = d.Set("client_guid", nil)
+		_ = d.Set("client_guid_system", resource.ClientGuid.System)
+		_ = d.Set("client_guid_value", resource.ClientGuid.Value)
 	}
 	_ = d.Set("client_revoked", resource.ClientRevoked)
 	_ = d.Set("user_client", resource.UserClient)
@@ -252,6 +272,10 @@ func resourceConnectMDMOAuthClientCreate(ctx context.Context, d *schema.Resource
 	c := m.(*config.Config)
 
 	client, err := c.MDMClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	iamClient, err := c.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -282,7 +306,7 @@ func resourceConnectMDMOAuthClientCreate(ctx context.Context, d *schema.Resource
 	_ = d.Set("bootstrap_client_secret", created.BootstrapClientSecret)
 	_ = d.Set("client_secret", created.ClientSecret)
 
-	if err := setScopes(client, d); err != nil {
+	if err := setScopes(client, iamClient, d); err != nil {
 		// Clean up
 		//._, _, _ = client.OAuthClients.DeleteOAuthClient(*created)
 		//d.SetId("")
@@ -305,6 +329,10 @@ func resourceConnectMDMOAuthClientRead(ctx context.Context, d *schema.ResourceDa
 	var diags diag.Diagnostics
 
 	client, err := c.MDMClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	iamClient, err := c.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -332,7 +360,9 @@ func resourceConnectMDMOAuthClientRead(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 	oAuthClientToSchema(*resource, d)
-	_ = oAuthClientScopesToSchema(*resource, d)
+	if err := oAuthClientScopesToSchema(iamClient, *resource, d); err != nil {
+		return diag.FromErr(fmt.Errorf("oAuthClientScopesToSchema: %v", err))
+	}
 	return diags
 }
 
@@ -343,10 +373,14 @@ func resourceConnectMDMOAuthClientUpdate(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if !(d.HasChange("scopes") || d.HasChange("default_scopes")) {
-		return diag.FromErr(fmt.Errorf("only 'scopes' and 'default_scopes' can be updated. this is a bug"))
+	iamClient, err := c.IAMClient()
+	if err != nil {
+		return diag.FromErr(err)
 	}
-	if err := setScopes(client, d); err != nil {
+	if !(d.HasChange("scopes") || d.HasChange("default_scopes") || d.HasChange("iam_scopes") || d.HasChange("iam_default_scopes")) {
+		return diag.FromErr(fmt.Errorf("only 'scopes', 'default_scopes', 'iam_scopes' or 'iam_default_scopes' can be updated. this is a bug"))
+	}
+	if err := setScopes(client, iamClient, d); err != nil {
 		return diag.FromErr(err)
 	}
 	return resourceConnectMDMOAuthClientRead(ctx, d, m)
