@@ -356,6 +356,8 @@ func Provider(build string) *schema.Provider {
 			"hsdp_container_host_security_groups":        ch.DataSourceContainerHostSecurityGroups(),
 			"hsdp_container_host_security_group_details": ch.DataSourceContainerHostSecurityGroupDetails(),
 			"hsdp_iam_token":                             iam.DataSourceIAMToken(),
+			"hsdp_connect_mdm_service_agent":             mdm.DataSourceConnectMDMServiceAgent(),
+			"hsdp_connect_mdm_service_agents":            mdm.DataSourceConnectMDMServiceAgents(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}

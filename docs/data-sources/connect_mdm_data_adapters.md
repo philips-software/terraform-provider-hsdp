@@ -23,7 +23,7 @@ output "data_adapters_names" {
 
 The following attributes are exported:
 
-* `ids` - The DataAdaoter IDs
+* `ids` - The DataAdapter IDs
 * `names` - The DataAdapter names
 * `descriptions` - The DataAdapter descriptions
 * `service_agent_ids` - The service agent IDs
