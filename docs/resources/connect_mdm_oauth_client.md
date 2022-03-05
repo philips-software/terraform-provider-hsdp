@@ -16,9 +16,28 @@ resource "hsdp_connect_mdm_oauth_client" "testclient" {
   description         = "Test client"
   application_id      = data.hsdp_connect_mdm_application.test_app.id
   global_reference_id = "some-ref-here"
-  
-  scopes         = [ "cn", "introspect", "email", "profile" ]
-  default_scopes = [ "cn", "introspect" ]
+
+  scopes = [
+    "?.?.dsc.service.readAny",
+    "?.?.prf.profile-custom.UpdateAny",
+    "?.*.prf.profile-firmware.UpdateAny",
+    "?.?.prf.profile-firmware.UpdateAny",
+    "?.?.prf.profile-firmware.UpdateOwn"
+  ]
+  default_scopes = [
+    "?.?.dsc.service.readAny",
+    "?.?.prf.profile-custom.UpdateAny",
+    "?.*.prf.profile-firmware.UpdateAny",
+    "?.?.prf.profile-firmware.UpdateAny",
+    "?.?.prf.profile-firmware.UpdateOwn"
+  ]
+
+  iam_scopes = [
+    "tdr.contract"
+  ]
+  iam_default_scopes = [
+    "tdr.contract"
+  ]
   
   redirection_uris = [
     "https://foo.bar/auth",
