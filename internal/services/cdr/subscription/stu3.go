@@ -51,6 +51,12 @@ func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sc
 	operation := func() error {
 		var resp *cdr.Response
 		contained, resp, err = client.OperationsSTU3.Post("Subscription", jsonSubscription)
+		if resp == nil {
+			if err != nil {
+				return err
+			}
+			return fmt.Errorf("OperationsSTU3.Post: response is nil")
+		}
 		return tools.CheckForIAMPermissionErrors(client, resp.Response, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))

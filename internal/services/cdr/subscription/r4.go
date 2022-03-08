@@ -51,6 +51,12 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 	operation := func() error {
 		var resp *cdr.Response
 		contained, resp, err = client.OperationsR4.Post("Subscription", jsonSubscription)
+		if resp == nil {
+			if err != nil {
+				return err
+			}
+			return fmt.Errorf("OperationsR4.Post: response is nil")
+		}
 		return tools.CheckForIAMPermissionErrors(client, resp.Response, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
