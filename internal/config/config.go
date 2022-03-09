@@ -154,6 +154,7 @@ func (c *Config) SetupIAMClient() {
 		c.iamClientErr = fmt.Errorf("possible invalid environment/region: %w", err)
 		return
 	}
+	usingServiceIdentity := false
 	if c.ServiceID != "" && c.ServicePrivateKey != "" {
 		err = client.ServiceLogin(iam.Service{
 			ServiceID:  c.ServiceID,
@@ -163,8 +164,10 @@ func (c *Config) SetupIAMClient() {
 			c.iamClientErr = fmt.Errorf("invalid IAM Service Identity credentials: %w", err)
 			return
 		}
+		usingServiceIdentity = true
 	}
-	if c.OrgAdminUsername != "" && c.OrgAdminPassword != "" {
+	usingOrgAdmin := false
+	if !usingServiceIdentity && c.OrgAdminUsername != "" && c.OrgAdminPassword != "" {
 		if c.OAuth2ClientID == "" {
 			c.iamClientErr = ErrMissingClientID
 			return
@@ -174,6 +177,11 @@ func (c *Config) SetupIAMClient() {
 			c.iamClientErr = fmt.Errorf("invalid IAM Org Admin credentials: %w", err)
 			return
 		}
+		usingOrgAdmin = true
+	}
+	if !(usingServiceIdentity || usingOrgAdmin) {
+		c.iamClientErr = fmt.Errorf("invalid / missing IAM Service Identity or IAM Org Admin credentials")
+		return
 	}
 	c.iamClient = client
 }
