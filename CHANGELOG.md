@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.30.8
+
+- CDR ORG: fix crashing bug (#173)
+
 ## v0.30.7
 
 - CDR Subscription: fix crashing bug (#173)
