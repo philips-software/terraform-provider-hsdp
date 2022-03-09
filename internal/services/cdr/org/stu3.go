@@ -52,6 +52,12 @@ func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sc
 	operation := func() error {
 		var resp *cdr.Response
 		onboardedOrg, resp, err = client.TenantSTU3.Onboard(org)
+		if resp == nil {
+			if err != nil {
+				return err
+			}
+			return fmt.Errorf("TenantSTU3.Onboard: response is nil")
+		}
 		return tools.CheckForIAMPermissionErrors(client, resp.Response, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))

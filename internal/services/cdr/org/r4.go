@@ -50,6 +50,13 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 	operation := func() error {
 		var resp *cdr.Response
 		onboardedOrg, resp, err = client.TenantR4.Onboard(org)
+		if resp == nil {
+			if err != nil {
+				return err
+			}
+			return fmt.Errorf("TenantR4.Onboard: response is nil")
+		}
+		// TODO: refactor this check so we don't have to check for nil resp above
 		return tools.CheckForIAMPermissionErrors(client, resp.Response, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))

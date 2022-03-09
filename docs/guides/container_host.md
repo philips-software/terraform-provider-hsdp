@@ -394,7 +394,7 @@ on CF which then forwards traffic to your Container Host. Make sure the proper `
 traffic from the Cloud foundry VPC (examples: `http-from-cloud-foundry`, `http-8080`)
 
 ```shell
-Internet --> Proxy on CF --> Container Hhost instance
+Internet --> Proxy on CF --> Container Host instance
 ```
 
 Below is an example on how to use [Caddy](https://caddyserver.com/) as a reverse proxy for your Container Host:
