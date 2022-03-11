@@ -41,10 +41,14 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 		}
 	}
 	var onboardedOrg *r4pb.Organization
-	onboardedOrg, _, err = client.TenantR4.GetOrganizationByID(orgID)
-	if err == nil && onboardedOrg != nil {
-		d.SetId(onboardedOrg.Id.Value)
-		return resourceCDROrgUpdate(ctx, d, m)
+	var resp *cdr.Response
+
+	onboardedOrg, resp, err = client.TenantR4.GetOrganizationByID(orgID)
+	if err == nil && onboardedOrg != nil && resp != nil {
+		if resp.StatusCode != http.StatusGone {
+			d.SetId(onboardedOrg.Id.Value)
+			return resourceCDROrgUpdate(ctx, d, m)
+		}
 	}
 	// Do initial boarding
 	operation := func() error {
@@ -74,7 +78,7 @@ func r4Read(_ context.Context, client *cdr.Client, d *schema.ResourceData) diag.
 	orgID := d.Get("org_id").(string)
 	org, resp, err := client.TenantR4.GetOrganizationByID(orgID)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
 			return diags
 		}

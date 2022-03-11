@@ -42,11 +42,14 @@ func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sc
 	}
 	// Check if already onboarded
 	var onboardedOrg *resources_go_proto.Organization
+	var resp *cdr.Response
 
-	onboardedOrg, _, err = client.TenantSTU3.GetOrganizationByID(orgID)
-	if err == nil && onboardedOrg != nil {
-		d.SetId(onboardedOrg.Id.Value)
-		return resourceCDROrgUpdate(ctx, d, m)
+	onboardedOrg, resp, err = client.TenantSTU3.GetOrganizationByID(orgID)
+	if err == nil && onboardedOrg != nil && resp != nil {
+		if resp.StatusCode != http.StatusGone { // Only import if not soft-deleted
+			d.SetId(onboardedOrg.Id.Value)
+			return resourceCDROrgUpdate(ctx, d, m)
+		}
 	}
 	// Do initial boarding
 	operation := func() error {
@@ -74,7 +77,7 @@ func stu3Read(_ context.Context, client *cdr.Client, d *schema.ResourceData) dia
 	orgID := d.Get("org_id").(string)
 	org, resp, err := client.TenantSTU3.GetOrganizationByID(orgID)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
 			return diags
 		}
