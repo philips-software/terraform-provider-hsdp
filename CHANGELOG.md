@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.30.10
+
+- CDR: better handling of soft-deleted ORGs (#175)
+
 ## v0.30.9
 
 - IAM: prevent uninitialized IAM client from being used (#173)
