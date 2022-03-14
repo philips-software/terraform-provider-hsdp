@@ -1,14 +1,11 @@
 package main
 
 import (
-	"context"
 	"flag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 	"github.com/philips-software/terraform-provider-hsdp/internal/provider"
-
-	"log"
 )
 
 var commit = "deadbeef"
@@ -27,11 +24,8 @@ func main() {
 		return provider.Provider(buildVersion)
 	}}
 	if debugMode {
-		err := plugin.Debug(context.Background(), "registry.terraform.io/philips-software/hsdp", opts)
-		if err != nil {
-			log.Fatal(err.Error())
-		}
-		return
+		opts.Debug = true
+		opts.ProviderAddr = "registry.terraform.io/philips-software/hsdp"
 	}
 	plugin.Serve(opts)
 }
