@@ -61,7 +61,7 @@ The following arguments are supported:
   the time of day when the Terraform script was run, it can take up to 24 hours for the first run to happen.
   Use `schedule` for more accurate scheduling behaviour.
 * `timeout` - (Optional, int) When set, limits the execution time (seconds) to this value. Default: `1800` (30 minutes)
-* `backend` - (Required) The backend to use for scheduling your functions.
+* `backend` - (Required) Use this block to specify backend details
   * `credentials` - (Required, map) The backend credentials. Must be iron configuration details at this time.
 
 ## Attribute reference
