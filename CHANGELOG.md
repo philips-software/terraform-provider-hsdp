@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.30.11
+
+- Container Host: new Container Host data source (#180)
+- Container Host: fix filed in hsdp_container_host_instances data source (#180)
+
 ## v0.30.10
 
 - CDR: better handling of soft-deleted ORGs (#175)
