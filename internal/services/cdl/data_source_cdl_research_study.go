@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/cdl"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func DataSourceCDLResearchStudy() *schema.Resource {
@@ -126,10 +127,10 @@ func dataSourceCDLResearchStudyRead(_ context.Context, d *schema.ResourceData, m
 	_ = d.Set("ends_at", study.Period.End)
 	_ = d.Set("study_owner", study.StudyOwner)
 
-	_ = d.Set("monitors", monitors)
-	_ = d.Set("data_scientists", dataScientists)
-	_ = d.Set("uploaders", uploaders)
-	_ = d.Set("study_managers", studyManagers)
+	_ = d.Set("monitors", tools.SchemaSetStrings(monitors))
+	_ = d.Set("data_scientists", tools.SchemaSetStrings(dataScientists))
+	_ = d.Set("uploaders", tools.SchemaSetStrings(uploaders))
+	_ = d.Set("study_managers", tools.SchemaSetStrings(studyManagers))
 	_ = d.Set("data_protected_from_deletion", study.DataProtectedFromDeletion)
 
 	return diags
