@@ -32,7 +32,7 @@ func DataSourceContainerHostInstances() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"private_addresses": {
+			"private_ips": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
