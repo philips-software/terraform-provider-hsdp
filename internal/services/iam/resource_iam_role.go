@@ -18,7 +18,7 @@ func ResourceIAMRole() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
+		SchemaVersion: 1,
 		CreateContext: resourceIAMRoleCreate,
 		ReadContext:   resourceIAMRoleRead,
 		UpdateContext: resourceIAMRoleUpdate,
@@ -50,10 +50,6 @@ func ResourceIAMRole() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
-			},
-			"_id": {
-				Type:     schema.TypeString,
-				Computed: true,
 			},
 		},
 	}
