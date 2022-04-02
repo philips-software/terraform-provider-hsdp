@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.30.13
+
+- IAM: Fix for CDKTF support
+
 ## v0.30.12
 
 - Container Host: bump hsdp_container_host_instances version (#180)
