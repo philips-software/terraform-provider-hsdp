@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.31.0
+
+- IAM Service: Support new token_validity argument (#184)
+
 ## v0.30.13
 
 - IAM: Fix for CDKTF support
