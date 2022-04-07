@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.31.1
+
+- Connect MDM: Fix standard service data source (#185)
+
 ## v0.31.0
 
 - IAM Service: Support new token_validity argument (#184)
