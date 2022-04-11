@@ -12,7 +12,7 @@ import (
 func ResourceCDROrg() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: importFHIROrgContext,
 		},
 
 		CreateContext: resourceCDROrgCreate,

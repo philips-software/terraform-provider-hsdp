@@ -92,12 +92,13 @@ func r4Read(_ context.Context, client *cdr.Client, d *schema.ResourceData) diag.
 	}
 	_ = d.Set("name", org.Name.Value)
 	if org.PartOf != nil {
-		_ = d.Set("part_of", org.PartOf.GetOrganizationId())
+		partOfOrgID := org.PartOf.GetOrganizationId()
+		_ = d.Set("part_of", partOfOrgID.Value)
 	}
 	return diags
 }
 
-func r4Update(ctx context.Context, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func r4Update(_ context.Context, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*config.Config)
 
@@ -176,7 +177,7 @@ func r4PurgeStateRefreshFunc(client *cdr.Client, purgeStatusURL, id string) reso
 	}
 }
 
-func r4Delete(ctx context.Context, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func r4Delete(ctx context.Context, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	id := d.Id()
 	purgeDelete := d.Get("purge_delete").(bool)

@@ -1,6 +1,6 @@
 module github.com/philips-software/terraform-provider-hsdp
 
-go 1.17
+go 1.18
 
 require (
 	github.com/cenkalti/backoff/v4 v4.1.3
@@ -19,6 +19,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.7.1
+	golang.org/x/exp v0.0.0-20220407100705-7b9b53b0aca4
 )
 
 require (
@@ -82,7 +83,7 @@ require (
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3 // indirect
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	golang.org/x/oauth2 v0.0.0-20210819190943-2bc19b11175f // indirect
-	golang.org/x/sys v0.0.0-20210823070655-63515b42dcdf // indirect
+	golang.org/x/sys v0.0.0-20211019181941-9d821ace8654 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20210828152312-66f60bf46e71 // indirect

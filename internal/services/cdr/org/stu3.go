@@ -91,12 +91,13 @@ func stu3Read(_ context.Context, client *cdr.Client, d *schema.ResourceData) dia
 	}
 	_ = d.Set("name", org.Name.Value)
 	if org.PartOf != nil {
-		_ = d.Set("part_of", org.PartOf.GetOrganizationId())
+		partOfOrgID := org.PartOf.GetOrganizationId()
+		_ = d.Set("part_of", partOfOrgID.Value)
 	}
 	return diags
 }
 
-func stu3Update(ctx context.Context, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func stu3Update(_ context.Context, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*config.Config)
 
@@ -176,7 +177,7 @@ func stu3PurgeStateRefreshFunc(client *cdr.Client, purgeStatusURL, id string) re
 	}
 }
 
-func stu3Delete(ctx context.Context, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func stu3Delete(ctx context.Context, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	id := d.Id()
 	purgeDelete := d.Get("purge_delete").(bool)

@@ -54,8 +54,10 @@ The following attributes are exported:
 
 ## Import
 
-An existing Organization can be imported using `terraform import hsdp_cdr_org`, e.g.
+An existing Organization can be imported using `terraform import fhir_store,org_id,fhir_version`, e.g.
 
 ```bash
-terraform import hsdp_cdr_org.myorg a-guid
+terraform import hsdp_cdr_org.myorg https://cdr-stu3-sandbox.domain.com/store/fhir/fhir-root-org-guid,fhir-org-guid,r4
 ```
+
+~> The import string must consist of 3 comma separated values
