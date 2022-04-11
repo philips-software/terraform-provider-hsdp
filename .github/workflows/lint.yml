@@ -9,16 +9,6 @@ on:
       - main
   pull_request:
 jobs:
-  staticcheck:
-    name: staticcheck
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v3
-        with:
-          go-version: '^1.18.0'
-      - name: staticcheck
-        uses: dominikh/staticcheck-action@v1.1.0
   golangci:
     name: golint
     runs-on: ubuntu-latest
