@@ -18,7 +18,7 @@ func ResourceIAMRole() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
+		SchemaVersion: 1,
 		CreateContext: resourceIAMRoleCreate,
 		ReadContext:   resourceIAMRoleRead,
 		UpdateContext: resourceIAMRoleUpdate,
@@ -51,15 +51,13 @@ func ResourceIAMRole() *schema.Resource {
 				Optional: true,
 				Default:  true,
 			},
-			"_id": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
 		},
 	}
 }
 
 func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	c := m.(*config.Config)
 
 	client, err := c.IAMClient()
@@ -120,9 +118,18 @@ func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, m interf
 			_, _, _ = client.Roles.DeleteRole(*role)
 			return diag.FromErr(fmt.Errorf("error adding permission '%s': %v", p, result))
 		}
+		if resp != nil && resp.StatusCode == http.StatusNotFound {
+			diags = append(diags, diag.Diagnostic{
+				Severity: diag.Warning,
+				Summary:  "invalid permission",
+				Detail:   fmt.Sprintf("permission '%s' is invalid", p),
+			})
+		}
 	}
 	d.SetId(role.ID)
-	return resourceIAMRoleRead(ctx, d, m)
+	res := resourceIAMRoleRead(ctx, d, m)
+	diags = append(diags, res...)
+	return diags
 }
 
 func resourceIAMRoleRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -159,7 +166,7 @@ func resourceIAMRoleRead(_ context.Context, d *schema.ResourceData, m interface{
 	return diags
 }
 
-func resourceIAMRoleUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMRoleUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -186,28 +193,46 @@ func resourceIAMRoleUpdate(_ context.Context, d *schema.ResourceData, m interfac
 		toAdd := tools.Difference(newList, oldList)
 		toRemove := tools.Difference(oldList, newList)
 
-		// Additions
-		if len(toAdd) > 0 {
-			for _, v := range toAdd {
-				_, _, err := client.Roles.AddRolePermission(*role, v)
-				if err != nil {
-					return diag.FromErr(err)
-				}
-			}
-		}
+		res := addAndRemovePermissions(ctx, *role, toAdd, toRemove, client)
+		diags = append(diags, res...)
+	}
+	return diags
+}
 
-		// Removals
-		for _, v := range toRemove {
-			ticketProtection := d.Get("ticket_protection").(bool)
-			if ticketProtection && v == "CLIENT.SCOPES" {
-				return diag.FromErr(fmt.Errorf("refusing to remove CLIENT.SCOPES permission, set ticket_protection to `false` to override"))
-			}
-			_, _, err := client.Roles.RemoveRolePermission(*role, v)
+func addAndRemovePermissions(_ context.Context, role iam.Role, toAdd, toRemove []string, client *iam.Client) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	// Additions
+	if len(toAdd) > 0 {
+		for _, v := range toAdd {
+			_, resp, err := client.Roles.AddRolePermission(role, v)
 			if err != nil {
+				if resp != nil && resp.StatusCode == http.StatusNotFound {
+					diags = append(diags, diag.Diagnostic{
+						Severity: diag.Warning,
+						Summary:  "invalid permission",
+						Detail:   fmt.Sprintf("permission '%s' is invalid", v),
+					})
+					continue
+				}
 				return diag.FromErr(err)
 			}
 		}
-
+	}
+	// Removals
+	for _, v := range toRemove {
+		_, resp, err := client.Roles.RemoveRolePermission(role, v)
+		if err != nil {
+			if resp != nil && resp.StatusCode == http.StatusNotFound {
+				diags = append(diags, diag.Diagnostic{
+					Severity: diag.Warning,
+					Summary:  "invalid permission",
+					Detail:   fmt.Sprintf("permission '%s' is invalid", v),
+				})
+				continue // Accept 404 in case of invalid permissions
+			}
+			return diag.FromErr(err)
+		}
 	}
 	return diags
 }

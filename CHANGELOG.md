@@ -4,6 +4,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.31.3
+
+- IAM Role: better handling of invalid permissions (#190)
+
+## v0.31.2
+
+- CDR Org: fix importing of CDR ORGs
+
+## v0.31.1
+
+- Connect MDM: Fix standard service data source (#185)
+
+## v0.31.0
+
+- IAM Service: Support new token_validity argument (#184)
+
+## v0.30.13
+
+- IAM: Fix for CDKTF support
+
+## v0.30.12
+
+- Container Host: bump hsdp_container_host_instances version (#180)
+
+## v0.30.11
+
+- Container Host: new Container Host data source (#180)
+- Container Host: fix fields in hsdp_container_host_instances data source (#180)
+
 ## v0.30.10
 
 - CDR: better handling of soft-deleted ORGs (#175)

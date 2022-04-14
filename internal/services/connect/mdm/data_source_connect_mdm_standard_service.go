@@ -69,10 +69,18 @@ func dataSourceConnectMDMStandardServiceRead(_ context.Context, d *schema.Resour
 		return diag.FromErr(err)
 	}
 
-	if len(*resources) == 0 {
+	var resource *mdm.StandardService
+	// Match specific name
+	for _, r := range *resources {
+		if r.Name == name {
+			resource = &r
+			break
+		}
+	}
+	if len(*resources) == 0 || resource == nil {
 		return diag.FromErr(fmt.Errorf("StandardService '%s' not found", name))
 	}
-	resource := (*resources)[0]
+
 	d.SetId(fmt.Sprintf("StandardService/%s", resource.ID))
 	_ = d.Set("guid", resource.ID)
 	_ = d.Set("name", resource.Name)
