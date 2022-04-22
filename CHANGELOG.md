@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.32.0
+
+- IAM: various fixes for handling with managing_organization changes
+- MDM: support for Bootstrap client scope management
+
 ## v0.31.3
 
 - IAM Role: better handling of invalid permissions (#190)
