@@ -62,6 +62,7 @@ func ResourceIAMUser() *schema.Resource {
 			"organization_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"preferred_language": {
 				Type:             schema.TypeString,

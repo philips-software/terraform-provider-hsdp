@@ -46,6 +46,7 @@ func ResourceIAMGroup() *schema.Resource {
 			"managing_organization": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"roles": {
 				Type:     schema.TypeSet,

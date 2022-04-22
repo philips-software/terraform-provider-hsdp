@@ -27,7 +27,6 @@ func ResourceIAMPasswordPolicy() *schema.Resource {
 			"managing_organization": {
 				Type:     schema.TypeString,
 				Required: true,
-
 				ForceNew: true,
 			},
 			"expiry_period_in_days": {

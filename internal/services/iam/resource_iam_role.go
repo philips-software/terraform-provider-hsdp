@@ -39,6 +39,7 @@ func ResourceIAMRole() *schema.Resource {
 			"managing_organization": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"permissions": {
 				Type:     schema.TypeSet,
