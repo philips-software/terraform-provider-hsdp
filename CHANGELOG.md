@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.32.2
+
+- Doc: fix a typo
+
 ## v0.32.1
 
 - IAM: support for synchronous IAM organization deletes
