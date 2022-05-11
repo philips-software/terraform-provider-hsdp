@@ -37,7 +37,7 @@ The following arguments are supported:
 * `parent_org_id` - (Required if not root org) The parent Org ID (GUID)
 * `is_root_org` - (Optional) Marks the Org as a root organization (boolean)
 * `wait_for_delete` - (Optional) Blocks until the organization delete has completed. Default: `false`.
-  The organization delete process can take some as all its associated resources like
+  The organization delete process can take some time as all its associated resources like
   users, groups, roles etc. are removed recursively. This option is useful for ephemeral environments
   where the same organization might be recreated shortly after a destroy operation.
 
