@@ -150,6 +150,14 @@ func resourceIAMRoleRead(_ context.Context, d *schema.ResourceData, m interface{
 			d.SetId("")
 			return diags
 		}
+		if resp != nil && resp.StatusCode == http.StatusForbidden { // See INC0080073
+			orgId := d.Get("managing_organization").(string)
+			if client.HasPermissions(orgId, "ROLE.WRITE") {
+				// If we have ROLE.WRITE permission and get HTTP 403 we conclude the Role is gone
+				d.SetId("")
+				return diags
+			}
+		}
 		return diag.FromErr(err)
 	}
 	_ = d.Set("description", role.Description)
