@@ -133,7 +133,6 @@ func resourceIAMActivationEmailCreate(_ context.Context, d *schema.ResourceData,
 	}
 	_ = d.Set("verified", user.AccountStatus.EmailVerified)
 	_ = d.Set("last_sent", time.Now().UTC().Format(time.RFC3339))
-	_ = d.Set("email_address", user.EmailAddress)
 
 	d.SetId(userID)
 	return diags

@@ -1,17 +1,16 @@
 package acctest
 
 import (
-	"context"
+	"os"
 	"sync"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/philips-software/terraform-provider-hsdp/internal/provider"
 )
 
 const (
-	// Provider name for single configuration testing
+	// ProviderName for single configuration testing
 	ProviderName = "hsdp"
 
 	ResourcePrefix = "tf-acc-test"
@@ -56,31 +55,6 @@ func init() {
 	ProviderFactories = map[string]func() (*schema.Provider, error){
 		ProviderName: func() (*schema.Provider, error) { return provider.Provider("test"), nil }, //nolint:unparam
 	}
-
-	// Always allocate a new provider instance each invocation, otherwise gRPC
-	// ProviderConfigure() can overwrite configuration during concurrent testing.
-	ProviderFactories = map[string]func() (*schema.Provider, error){
-		ProviderName: func() (*schema.Provider, error) { return provider.Provider("test"), nil }, //nolint:unparam
-	}
-}
-
-// FactoriesInit creates ProviderFactories for the provider under testing.
-func FactoriesInit(providers *[]*schema.Provider, providerNames []string) map[string]func() (*schema.Provider, error) {
-	var factories = make(map[string]func() (*schema.Provider, error), len(providerNames))
-
-	for _, name := range providerNames {
-		p := provider.Provider("test")
-
-		factories[name] = func() (*schema.Provider, error) { //nolint:unparam
-			return p, nil
-		}
-
-		if providers != nil {
-			*providers = append(*providers, p)
-		}
-	}
-
-	return factories
 }
 
 // PreCheck verifies and sets required provider testing configuration
@@ -96,10 +70,13 @@ func PreCheck(t *testing.T) {
 	// call Configure() to properly initialize the provider configuration.
 	testAccProviderConfigure.Do(func() {
 		// TODO: add additional pre-checks here
-
-		err := Provider.Configure(context.Background(), terraform.NewResourceConfigRaw(nil))
-		if err != nil {
-			t.Fatal(err)
-		}
 	})
+}
+
+func AccUserGUID() string {
+	return os.Getenv("HSDP_IAM_ACC_USER_GUID")
+}
+
+func AccIAMOrgGUID() string {
+	return os.Getenv("HSDP_IAM_ACC_ORG_GUID")
 }

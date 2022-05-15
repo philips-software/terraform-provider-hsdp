@@ -8,11 +8,13 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/acctest"
 )
 
-func TestResourceIAMActivationEmail_basic(t *testing.T) {
-	resourceName := "hsdp_iam_activation_email.test"
-	userID := "foo"
+func TestAccResourceIAMActivationEmail_basic(t *testing.T) {
+	t.Parallel()
 
-	resource.ParallelTest(t, resource.TestCase{
+	resourceName := "hsdp_iam_activation_email.test"
+	userID := acctest.AccUserGUID()
+
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { acctest.PreCheck(t) },
 		ProviderFactories: acctest.ProviderFactories,
 		Steps: []resource.TestStep{
@@ -21,11 +23,6 @@ func TestResourceIAMActivationEmail_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "user_id", userID),
 				),
-			},
-			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
 			},
 		},
 	})
