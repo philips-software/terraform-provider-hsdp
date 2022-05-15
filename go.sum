@@ -372,8 +372,8 @@ github.com/go-playground/validator/v10 v10.2.0/go.mod h1:uOYAAleCW8F/7oMFd6aG0GO
 github.com/go-playground/validator/v10 v10.4.1/go.mod h1:nlOn6nFhuKACm19sB/8EGNn9GlaMV7XkbRSipzJ0Ii4=
 github.com/go-playground/validator/v10 v10.5.0/go.mod h1:xm76BBt941f7yWdGnI2DVPFFg1UK3YY04qifoXU3lOk=
 github.com/go-playground/validator/v10 v10.9.0/go.mod h1:74x4gJWsvQexRdW8Pn3dXSGrTK4nAUsbPlLADvpJkos=
-github.com/go-playground/validator/v10 v10.10.1 h1:uA0+amWMiglNZKZ9FJRKUAe9U3RX91eVn1JYXMWt7ig=
-github.com/go-playground/validator/v10 v10.10.1/go.mod h1:i+3WkQ1FvaUjjxh1kSvIA4dMGDBiPU55YFDl0WbKdWU=
+github.com/go-playground/validator/v10 v10.11.0 h1:0W+xRM511GY47Yy3bZUbJVitCNg2BOGlCyvTqsp/xIw=
+github.com/go-playground/validator/v10 v10.11.0/go.mod h1:i+3WkQ1FvaUjjxh1kSvIA4dMGDBiPU55YFDl0WbKdWU=
 github.com/go-redis/redis/v7 v7.2.0/go.mod h1:JDNMw23GTyLNC4GZu9njt15ctBQVn7xjRfnwdHj/Dcg=
 github.com/go-resty/resty/v2 v2.6.0/go.mod h1:PwvJS6hvaPkjtjNg9ph+VrSD92bi5Zq73w/BIH7cC3Q=
 github.com/go-sql-driver/mysql v1.4.0/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
@@ -625,8 +625,8 @@ github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d h1:kJCB4vdITiW1eC1
 github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d/go.mod h1:+NfK9FKeTrX5uv1uIXGdwYDTeHna2qgaIlx54MXqjAM=
 github.com/hasura/go-graphql-client v0.2.0/go.mod h1:ovhXpnBL/+pYmmdYHndovgAc/wmhaXKvKwJETjtMomQ=
 github.com/hasura/go-graphql-client v0.4.0/go.mod h1:ovhXpnBL/+pYmmdYHndovgAc/wmhaXKvKwJETjtMomQ=
-github.com/hasura/go-graphql-client v0.6.5 h1:2l7awV5eCRnxEIOTanIWiFz4klq3UWplWn/spD2wpKE=
-github.com/hasura/go-graphql-client v0.6.5/go.mod h1:kvaJsDhxGbkIJ1jgebkrnt9EDIELZHpsAMint56v+2I=
+github.com/hasura/go-graphql-client v0.7.0 h1:MIlTqJAZ0f8mM73WeseiWyssCbkBMX589F0fRegi0tw=
+github.com/hasura/go-graphql-client v0.7.0/go.mod h1:kvaJsDhxGbkIJ1jgebkrnt9EDIELZHpsAMint56v+2I=
 github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152 h1:GITUy7r2Eijl7u/Xe5AOs3HBV3Gt/3+l0j2bTh2UO5Y=
 github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152/go.mod h1:bRtCxY0f88xmUw+Y0Xfl/uGaCWMUy04wUGSKbnQdsJs=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
@@ -948,8 +948,8 @@ github.com/philips-software/gautocloud-connectors v0.4.0/go.mod h1:k5VG78BLnDI75
 github.com/philips-software/go-hsdp-api v0.20.0/go.mod h1:agJtsgjb1W4xq5cVUdk06uUVETKO1nKZAZJ4Y1Dumg4=
 github.com/philips-software/go-hsdp-api v0.38.1-0.20210428141703-9f4371331e80/go.mod h1:vzZX4kCmgVwuJcAmd75Yeh/tNu1dNnBRbyau7CFWsuQ=
 github.com/philips-software/go-hsdp-api v0.50.2/go.mod h1:+/oOyI8Equm7/YcUHJ+PO3HO4U92JcAAoOs5DYRRkIc=
-github.com/philips-software/go-hsdp-api v0.63.1 h1:2v4uOY0qpTZv9IEeX+lg+v9y/MkkzodRvUU7sjso2vk=
-github.com/philips-software/go-hsdp-api v0.63.1/go.mod h1:RzCfZSgdHxgkvr1eNKTyRtCA/SI9TvM9cdHNqNqdMAg=
+github.com/philips-software/go-hsdp-api v0.63.5 h1:J5wqjgRC0XBJ1QLDgo8imavDey2Dc3gdNhX5J9wC6KM=
+github.com/philips-software/go-hsdp-api v0.63.5/go.mod h1:P1SCylOQoGNYVTN83J9g42jpohUijtEvQu65SQOqJ14=
 github.com/philips-software/go-hsdp-signer v1.3.0/go.mod h1:/QehZ/+Aks2t1TFpjhF/7ZSB8PJIIJHzLc03rOqwLw0=
 github.com/philips-software/go-hsdp-signer v1.4.0 h1:yg7UILhmI4xJhr/tQiAiQwJL0EZFvLuMqpH2GZ9ygY4=
 github.com/philips-software/go-hsdp-signer v1.4.0/go.mod h1:/QehZ/+Aks2t1TFpjhF/7ZSB8PJIIJHzLc03rOqwLw0=

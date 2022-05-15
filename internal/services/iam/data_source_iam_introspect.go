@@ -5,9 +5,10 @@ import (
 	"encoding/json"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/philips-software/terraform-provider-hsdp/internal/config"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/philips-software/go-hsdp-api/iam"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func DataSourceIAMIntrospect() *schema.Resource {
@@ -15,6 +16,10 @@ func DataSourceIAMIntrospect() *schema.Resource {
 		ReadContext: dataSourceIAMIntrospectRead,
 		Schema: map[string]*schema.Schema{
 			"token": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"organization_context": {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
@@ -30,6 +35,11 @@ func DataSourceIAMIntrospect() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"effective_permissions": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
 		},
 	}
 
@@ -44,9 +54,14 @@ func dataSourceIAMIntrospectRead(_ context.Context, d *schema.ResourceData, meta
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	orgContext := d.Get("organization_context").(string)
 
-	resp, _, err := client.Introspect()
-
+	var resp *iam.IntrospectResponse
+	if orgContext != "" {
+		resp, _, err = client.Introspect(iam.WithOrgContext(orgContext))
+	} else {
+		resp, _, err = client.Introspect()
+	}
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -64,6 +79,14 @@ func dataSourceIAMIntrospectRead(_ context.Context, d *schema.ResourceData, meta
 	}
 	_ = d.Set("token", token)
 	_ = d.Set("introspect", string(introspectJSON))
-
+	if orgContext != "" {
+		for _, org := range resp.Organizations.OrganizationList {
+			if org.OrganizationID != orgContext {
+				continue
+			}
+			_ = d.Set("effective_permissions", tools.SchemaSetStrings(org.EffectivePermissions))
+			break
+		}
+	}
 	return diags
 }
