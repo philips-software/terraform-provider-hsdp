@@ -49,6 +49,7 @@ const (
 	SecretKey        = "HSDP_SECRET_KEY"
 	UAAUsername      = "HSDP_UAA_USERNAME"
 	UAAPassword      = "HSDP_UAA_PASSWORD"
+	DebugLog         = "HSDP_DEBUG_LOG"
 )
 
 // Provider returns an instance of the HSDP provider
@@ -216,6 +217,7 @@ func Provider(build string) *schema.Provider {
 			"debug_log": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc(DebugLog, nil),
 				Description: descriptions["debug_log"],
 			},
 			"ai_inference_endpoint": {
