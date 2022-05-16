@@ -4,25 +4,27 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/philips-software/terraform-provider-hsdp/internal/acctest"
+	"github.com/philips-software/terraform-provider-hsdp/internal/acc"
 )
 
 func TestAccResourceIAMOrganization_basic(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "hsdp_iam_org.test"
-	parentOrgID := acctest.AccIAMOrgGUID()
+	parentOrgID := acc.AccIAMOrgGUID()
+	randomOrgName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			acctest.PreCheck(t)
+			acc.PreCheck(t)
 		},
-		ProviderFactories: acctest.ProviderFactories,
+		ProviderFactories: acc.ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccResourceIAMOrganization(parentOrgID),
+				Config:       testAccResourceIAMOrganization(parentOrgID, randomOrgName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "parent_org_id", parentOrgID),
 				),
@@ -31,12 +33,13 @@ func TestAccResourceIAMOrganization_basic(t *testing.T) {
 	})
 }
 
-func testAccResourceIAMOrganization(parentOrgID string) string {
+func testAccResourceIAMOrganization(parentOrgID, name string) string {
 	return fmt.Sprintf(`
 resource "hsdp_iam_org" "test" {
-    name = "ACCTestORG"
-    description = "ACCTestORG"
-	parent_org_id = %[1]q
-    wait_for_delete = true
-}`, parentOrgID)
+    name = "ACCTest-%s"
+    description = "ACCTestORG %s"
+
+	parent_org_id = "%s"
+    wait_for_delete = false
+}`, name, name, parentOrgID)
 }

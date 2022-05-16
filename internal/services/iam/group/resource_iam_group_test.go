@@ -5,20 +5,20 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/philips-software/terraform-provider-hsdp/internal/acctest"
+	"github.com/philips-software/terraform-provider-hsdp/internal/acc"
 )
 
 func TestAccResourceIAMGroup_basic(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "hsdp_iam_group.test"
-	parentOrgID := acctest.AccIAMOrgGUID()
+	parentOrgID := acc.AccIAMOrgGUID()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
-			acctest.PreCheck(t)
+			acc.PreCheck(t)
 		},
-		ProviderFactories: acctest.ProviderFactories,
+		ProviderFactories: acc.ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,

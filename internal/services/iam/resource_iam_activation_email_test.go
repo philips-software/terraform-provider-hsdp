@@ -5,18 +5,18 @@ import (
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/philips-software/terraform-provider-hsdp/internal/acctest"
+	"github.com/philips-software/terraform-provider-hsdp/internal/acc"
 )
 
 func TestAccResourceIAMActivationEmail_basic(t *testing.T) {
 	t.Parallel()
 
 	resourceName := "hsdp_iam_activation_email.test"
-	userID := acctest.AccUserGUID()
+	userID := acc.AccUserGUID()
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { acctest.PreCheck(t) },
-		ProviderFactories: acctest.ProviderFactories,
+		PreCheck:          func() { acc.PreCheck(t) },
+		ProviderFactories: acc.ProviderFactories,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccResourceIAMActivationEmailConfig(userID),

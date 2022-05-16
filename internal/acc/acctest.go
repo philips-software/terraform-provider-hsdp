@@ -1,4 +1,4 @@
-package acctest
+package acc
 
 import (
 	"os"
