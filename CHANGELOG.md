@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.33.0
+
+- IAM: workaround for HTTP 403/403 issue (#199)
+- IAM: add preliminary acceptances tests
+
 ## v0.32.2
 
 - Doc: fix a typo
