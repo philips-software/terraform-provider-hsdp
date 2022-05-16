@@ -31,6 +31,6 @@ func TestAccResourceIAMActivationEmail_basic(t *testing.T) {
 func testAccResourceIAMActivationEmailConfig(id string) string {
 	return fmt.Sprintf(`
 resource "hsdp_iam_activation_email" "test" {
-	user_id = %[1]q
+	user_id = "%s"
 }`, id)
 }
