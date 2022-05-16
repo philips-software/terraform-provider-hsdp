@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/philips-software/terraform-provider-hsdp/internal/acc"
 )
@@ -13,6 +14,7 @@ func TestAccResourceIAMGroup_basic(t *testing.T) {
 
 	resourceName := "hsdp_iam_group.test"
 	parentOrgID := acc.AccIAMOrgGUID()
+	randomName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -22,7 +24,7 @@ func TestAccResourceIAMGroup_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccResourceIAMGroup(parentOrgID),
+				Config:       testAccResourceIAMGroup(parentOrgID, randomName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "managing_organization", parentOrgID),
 				),
@@ -31,18 +33,18 @@ func TestAccResourceIAMGroup_basic(t *testing.T) {
 	})
 }
 
-func testAccResourceIAMGroup(parentOrgID string) string {
+func testAccResourceIAMGroup(parentOrgID, name string) string {
 	return fmt.Sprintf(`
 resource "hsdp_iam_group" "test" {
-  name        = "TESTGROUP"
-  description = "Acceptance Test Group"
+  name        = "%s"
+  description = "Acceptance Test Group %s"
 
   roles    = []
   users    = []
   services = []
 
-  managing_organization = %[1]q
+  managing_organization = "%s"
  
   drift_detection = true
-}`, parentOrgID)
+}`, name, name, parentOrgID)
 }
