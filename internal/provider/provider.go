@@ -362,6 +362,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_service_agent":             mdm.DataSourceConnectMDMServiceAgent(),
 			"hsdp_connect_mdm_service_agents":            mdm.DataSourceConnectMDMServiceAgents(),
 			"hsdp_container_host":                        ch.DataSourceContainerHost(),
+			"hsdp_iam_permission":                        iam.DataSourceIAMPermission(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
