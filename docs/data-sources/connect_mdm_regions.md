@@ -24,6 +24,6 @@ output "regions" {
 The following attributes are exported:
 
 * `ids` - The region IDs
-* `regions` - the region names
+* `names` - the region names
 * `descriptions` - The region descriptions
 * `hsdp_enabled` - Enabled list
