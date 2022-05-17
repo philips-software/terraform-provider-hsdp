@@ -42,7 +42,5 @@ func TestAccDataSourceIAMPermissions_basic(t *testing.T) {
 }
 
 func testAccDataSourceIAMPermissions() string {
-	return fmt.Sprintf(`
-data "hsdp_iam_permissions" "test" {
-}`)
+	return `data "hsdp_iam_permissions" "test" {}`
 }
