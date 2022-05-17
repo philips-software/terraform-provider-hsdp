@@ -10,7 +10,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/acc"
 )
 
-func TestAccResourceIAMGroup_basic(t *testing.T) {
+func TestAccResourceIAMService_basic(t *testing.T) {
 	t.Parallel()
 
 	randomName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
