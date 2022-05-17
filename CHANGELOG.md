@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.33.1
+
+- IAM: update hsdp_iam_permissions data source
+- IAM: add hsdp_iam_permission data source
+
 ## v0.33.0
 
 - IAM: workaround for HTTP 403/403 issue (#199)
