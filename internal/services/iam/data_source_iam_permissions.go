@@ -68,7 +68,6 @@ func dataSourceIAMPermissionsRead(ctx context.Context, d *schema.ResourceData, m
 	var types []string
 	var categories []string
 	var descriptions []string
-	var permissions []string
 
 	for _, p := range *resp {
 		ids = append(ids, p.ID)
@@ -79,7 +78,7 @@ func dataSourceIAMPermissionsRead(ctx context.Context, d *schema.ResourceData, m
 	}
 	d.SetId("permissions")
 	_ = d.Set("names", names)
-	_ = d.Set("permissions", permissions)
+	_ = d.Set("permissions", names)
 	_ = d.Set("types", types)
 	_ = d.Set("categories", categories)
 	_ = d.Set("descriptions", descriptions)
