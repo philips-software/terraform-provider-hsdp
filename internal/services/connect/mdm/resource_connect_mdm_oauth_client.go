@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -201,13 +202,13 @@ func setScopes(client *mdm.Client, iamClient *iam.Client, d *schema.ResourceData
 	}
 	for _, scope := range scopes {
 		if !tools.ContainsString(allowedScopes, scope) {
-			return fmt.Errorf("scope '%s' not allowed", scope)
+			return fmt.Errorf("scope '%s' not allowed. allow list is [%s]", scope, strings.Join(allowedScopes, ", "))
 		}
 	}
 
 	for _, scope := range bootstrapScopes {
 		if !tools.ContainsString(allowedScopes, scope) {
-			return fmt.Errorf("bootstrap scope '%s' not allowed", scope)
+			return fmt.Errorf("bootstrap scope '%s' not allowed. allow list is [%s]", scope, strings.Join(allowedScopes, ", "))
 		}
 	}
 
@@ -216,9 +217,11 @@ func setScopes(client *mdm.Client, iamClient *iam.Client, d *schema.ResourceData
 		return fmt.Errorf("updating scopes: %w", err)
 	}
 
-	_, _, err = client.OAuthClients.UpdateScopesByFlag(*resource, bootstrapScopes, bootstrapDefaultScopes, true)
-	if err != nil {
-		return fmt.Errorf("updating bootstrap client scopes: %w", err)
+	if len(bootstrapDefaultScopes) != 0 && len(bootstrapScopes) != 0 { // Only update if we have a list of bootstrap default scopes
+		_, _, err = client.OAuthClients.UpdateScopesByFlag(*resource, bootstrapScopes, bootstrapDefaultScopes, true)
+		if err != nil {
+			return fmt.Errorf("updating bootstrap client scopes: %w", err)
+		}
 	}
 	// Set IAM scopes
 	iamScopes := tools.ExpandStringList(d.Get("iam_scopes").(*schema.Set).List())
@@ -335,14 +338,14 @@ func resourceConnectMDMOAuthClientCreate(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
-	user_client := d.Get("user_client").(bool)
-	bootstrap_client_scopes := tools.ExpandStringList(d.Get("bootstrap_client_scopes").(*schema.Set).List())
-	bootstrap_client_default_scopes := tools.ExpandStringList(d.Get("bootstrap_client_default_scopes").(*schema.Set).List())
-	bootstrap_client_iam_scopes := tools.ExpandStringList(d.Get("bootstrap_client_iam_scopes").(*schema.Set).List())
-	bootstrap_client_iam_default_scopes := tools.ExpandStringList(d.Get("bootstrap_client_iam_default_scopes").(*schema.Set).List())
+	userClient := d.Get("user_client").(bool)
+	bootstrapClientScopes := tools.ExpandStringList(d.Get("bootstrap_client_scopes").(*schema.Set).List())
+	bootstrapClientDefaultScopes := tools.ExpandStringList(d.Get("bootstrap_client_default_scopes").(*schema.Set).List())
+	bootstrapClientIamScopes := tools.ExpandStringList(d.Get("bootstrap_client_iam_scopes").(*schema.Set).List())
+	bootstrapClientIamDefaultScopes := tools.ExpandStringList(d.Get("bootstrap_client_iam_default_scopes").(*schema.Set).List())
 
-	if user_client && (len(bootstrap_client_scopes) > 0 || len(bootstrap_client_default_scopes) > 0 ||
-		len(bootstrap_client_iam_scopes) > 0 || len(bootstrap_client_iam_default_scopes) > 0) {
+	if userClient && (len(bootstrapClientScopes) > 0 || len(bootstrapClientDefaultScopes) > 0 ||
+		len(bootstrapClientIamScopes) > 0 || len(bootstrapClientIamDefaultScopes) > 0) {
 		return diag.FromErr(fmt.Errorf("bootstrap client scopes are only allowed for non user clients"))
 	}
 
