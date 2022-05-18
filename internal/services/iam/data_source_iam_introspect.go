@@ -70,7 +70,7 @@ func dataSourceIAMIntrospectRead(_ context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(err)
 	}
 
-	d.SetId(resp.Username)
+	d.SetId(resp.Sub)
 	_ = d.Set("managing_organization", resp.Organizations.ManagingOrganization)
 	_ = d.Set("username", resp.Username)
 	token, err := client.Token()
