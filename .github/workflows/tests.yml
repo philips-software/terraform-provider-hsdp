@@ -37,6 +37,8 @@ jobs:
           HSDP_IAM_ACC_USER_GUID: ${{ secrets.HSDP_IAM_ACC_USER_GUID }}
           HSDP_IAM_SERVICE_ID: ${{ secrets.HSDP_IAM_SERVICE_ID }}
           HSDP_IAM_SERVICE_PRIVATE_KEY: ${{ secrets.HSDP_IAM_SERVICE_PRIVATE_KEY }}
+          HSDP_IAM_OAUTH2_CLIENT_ID: ${{ secrets.HSDP_IAM_OAUTH2_CLIENT_ID }}
+          HSDP_IAM_OAUTH2_PASSWORD: ${{ secrets.HSDP_IAM_OAUTH2_PASSWORD }}
 
   unit:
     name: Unit Tests
