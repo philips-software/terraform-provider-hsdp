@@ -48,6 +48,10 @@ func DataSourceDockerRepository() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"latest_tag": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"updated_at": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -100,6 +104,8 @@ func dataSourceDockerRepositoryRead(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(fmt.Errorf("reading tags: %w", err))
 	}
 
+	latestTag, _ := client.Repositories.GetLatestTag(ctx, repo.ID)
+
 	var ids []int
 	var tags []string
 	var updatedAt []string
@@ -128,6 +134,9 @@ func dataSourceDockerRepositoryRead(ctx context.Context, d *schema.ResourceData,
 	_ = d.Set("total_tags", repo.NumTags)
 	_ = d.Set("short_description", repo.Details.ShortDescription)
 	_ = d.Set("full_description", repo.Details.FullDescription)
+	if latestTag != nil {
+		_ = d.Set("latest_tag", latestTag.Name)
+	}
 	d.SetId(repo.ID)
 	return diags
 }

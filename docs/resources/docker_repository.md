@@ -45,3 +45,4 @@ In addition to all arguments above, the following attributes are exported:
 * `image_ids` - The image ids of the tags
 * `num_pulls` - The pulls per tag
 * `total_pulls` - The total number of pulls for this repo
+* `latest_tag` - The latest tag, if available, based on the updated field
