@@ -23,6 +23,10 @@ data "hsdp_docker_repository" "caddy" {
 output "tags" {
   value = data.hsdp_docker_repository.caddy.tags
 }
+
+output "caddy_latest_image" {
+  value = "${data.hsdp_docker_repository.caddy.full_name}:${data.hsdp_docker_repository.caddy.latest_tag}"
+}
 ```
 
 ## Argument Reference
@@ -36,6 +40,7 @@ The following arguments are supported:
 
 In addition to all arguments above, the following attributes are exported:
 
+* `full_name` - The full name to use to pull and push images, includes Docker host and namespace
 * `short_description` - A short description of the repository
 * `full_description` - A longer description, supporting markdown
 * `ids` - The ids of the tags

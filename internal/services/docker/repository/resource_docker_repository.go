@@ -86,6 +86,10 @@ func ResourceDockerRepository() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeInt},
 			},
+			"full_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }

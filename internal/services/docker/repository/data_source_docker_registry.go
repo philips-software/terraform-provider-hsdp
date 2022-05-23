@@ -77,6 +77,10 @@ func DataSourceDockerRepository() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeInt},
 			},
+			"full_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 
@@ -137,6 +141,7 @@ func dataSourceDockerRepositoryRead(ctx context.Context, d *schema.ResourceData,
 	if latestTag != nil {
 		_ = d.Set("latest_tag", latestTag.Name)
 	}
+	_ = d.Set("full_name", fmt.Sprintf("%s/%s", client.Host(), repo.ID))
 	d.SetId(repo.ID)
 	return diags
 }
