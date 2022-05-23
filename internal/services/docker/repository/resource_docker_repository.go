@@ -47,6 +47,10 @@ func ResourceDockerRepository() *schema.Resource {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
+			"latest_tag": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"ids": {
 				Type:     schema.TypeList,
 				Computed: true,
@@ -81,6 +85,10 @@ func ResourceDockerRepository() *schema.Resource {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeInt},
+			},
+			"full_name": {
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 		},
 	}
