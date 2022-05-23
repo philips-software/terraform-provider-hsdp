@@ -193,7 +193,7 @@ func resourceMDMPropositionRead(ctx context.Context, d *schema.ResourceData, m i
 		return resp.Response, err
 	})
 	if err != nil {
-		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
+		if err == mdm.ErrEmptyResults || (resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone)) {
 			d.SetId("")
 			return diags
 		}
