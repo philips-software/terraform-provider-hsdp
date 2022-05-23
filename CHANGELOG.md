@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.33.3
+
+- Docker: add latest_tag and full_name attributes (#201)
+
 ## v0.33.2
 
 - IAM: fix introspect data source bug
