@@ -33,3 +33,5 @@ The following attributes are exported:
 * `token` - The current session token
 * `effective_permissions` - When an `organization_context` GUID is provided this
   contains the list of effective permissions
+* `token_type` - The type of token
+* `identity_type` - The identity type, example: `Service`
