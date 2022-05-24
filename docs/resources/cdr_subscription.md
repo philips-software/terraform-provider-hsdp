@@ -14,6 +14,7 @@ The following example creates a subscription that calls a REST endpoint whenever
 ```hcl
 data "hsdp_cdr_fhir_store" "sandbox" {
   base_url = "https://cdr-stu3-sandbox.hsdp.io"
+  fhir_org_id = var.org_id
 }
 
 resource "hsdp_cdr_subscription" "patient_changes" {
