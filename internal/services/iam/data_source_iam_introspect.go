@@ -3,6 +3,7 @@ package iam
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -69,6 +70,9 @@ func dataSourceIAMIntrospectRead(_ context.Context, d *schema.ResourceData, meta
 	client, err := c.IAMClient()
 	if err != nil {
 		return diag.FromErr(err)
+	}
+	if !client.HasOAuth2Credentials() {
+		return diag.FromErr(fmt.Errorf("provider is not configured with OAuth2 credentials, please add 'oauth2_client_id' and 'oauth2_client_password'"))
 	}
 	orgContext := d.Get("organization_context").(string)
 
