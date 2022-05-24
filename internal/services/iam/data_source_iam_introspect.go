@@ -31,6 +31,10 @@ func DataSourceIAMIntrospect() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"issuer": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"identity_type": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -93,6 +97,7 @@ func dataSourceIAMIntrospectRead(_ context.Context, d *schema.ResourceData, meta
 	_ = d.Set("token_type", resp.TokenType)
 	_ = d.Set("identity_type", resp.IdentityType)
 	_ = d.Set("subject", resp.Sub)
+	_ = d.Set("issuer", resp.ISS)
 	_ = d.Set("introspect", string(introspectJSON))
 	if orgContext != "" {
 		for _, org := range resp.Organizations.OrganizationList {

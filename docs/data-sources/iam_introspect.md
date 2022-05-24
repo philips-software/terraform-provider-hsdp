@@ -29,6 +29,9 @@ output "admins_org" {
 The following attributes are exported:
 
 * `managing_organization` - The managing organization of the Org admin user
+* `subject` - The subject of the token, as defined in JWT RFC7519.
+  Usually a machine-readable identifier of the resource owner who authorized this token.
+* `issuer` - String representing the issuer of this token, as defined in JWT
 * `username` - The username (email) of the Org admin user
 * `token` - The current session token
 * `effective_permissions` - When an `organization_context` GUID is provided this
