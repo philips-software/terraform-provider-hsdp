@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.33.5
+
+- IAM: detect missing OAuth2 credentials
+- IAM: update hsdp_iam_role docs (#204)
+- Docker: report warning in case GraphQL query for all repositories fails
+- CDR: fix subscription example
+- IAM: add additional fields to introspect
+
 ## v0.33.4
 
 - MDM: remove extra read in Proposition create setup
