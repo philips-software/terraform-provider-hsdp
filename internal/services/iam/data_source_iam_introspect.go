@@ -72,7 +72,7 @@ func dataSourceIAMIntrospectRead(_ context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(err)
 	}
 	if !client.HasOAuth2Credentials() {
-		return diag.FromErr(fmt.Errorf("provider is not configured with OAuth2 credentials, please add 'oauth2_client_id' and 'oauth2_client_password'"))
+		return diag.FromErr(fmt.Errorf("provider is missing OAuth2 credentials, please add 'oauth2_client_id' and 'oauth2_password'"))
 	}
 	orgContext := d.Get("organization_context").(string)
 

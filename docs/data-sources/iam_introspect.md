@@ -6,7 +6,7 @@ subcategory: "Identity and Access Management (IAM)"
 
 Introspects the ORG admin account in use by the provider
 
-~> This data source only works if the provider is configured with OAuth2 client credentials (`oauth2_client_id` and `oauth2_client_password`)
+~> This data source only works if the provider is configured with OAuth2 client credentials (`oauth2_client_id` and `oauth2_password`)
 
 ## Example Usage
 
