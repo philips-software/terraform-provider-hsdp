@@ -377,16 +377,16 @@ func resourceConnectMDMOAuthClientCreate(ctx context.Context, d *schema.Resource
 
 	if err := setScopes(client, iamClient, d); err != nil {
 		// Clean up
-		//._, _, _ = client.OAuthClients.DeleteOAuthClient(*created)
-		//d.SetId("")
-		//return diag.FromErr(err)
-		diags := resourceConnectMDMOAuthClientRead(ctx, d, m)
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Warning,
-			Summary:  "failed to set scopes",
-			Detail:   err.Error(),
-		})
-		return diags
+		_, _, _ = client.OAuthClients.DeleteOAuthClient(*created)
+		d.SetId("")
+		return diag.FromErr(err)
+		//diags := resourceConnectMDMOAuthClientRead(ctx, d, m)
+		//diags = append(diags, diag.Diagnostic{
+		//	Severity: diag.Warning,
+		//	Summary:  "failed to set scopes",
+		//	Detail:   err.Error(),
+		//})
+		//return diags
 	}
 
 	return resourceConnectMDMOAuthClientRead(ctx, d, m)
