@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -71,6 +72,18 @@ func ResourceConnectMDMOAuthClient() *schema.Resource {
 				Required: true,
 				Elem:     tools.StringSchema(),
 			},
+			"bootstrap_client_scopes": {
+				Type:     schema.TypeSet,
+				MaxItems: 100,
+				Optional: true,
+				Elem:     tools.StringSchema(),
+			},
+			"bootstrap_client_default_scopes": {
+				Type:     schema.TypeSet,
+				MaxItems: 100,
+				Optional: true,
+				Elem:     tools.StringSchema(),
+			},
 			"iam_scopes": {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
@@ -78,6 +91,18 @@ func ResourceConnectMDMOAuthClient() *schema.Resource {
 				Elem:     tools.StringSchema(),
 			},
 			"iam_default_scopes": {
+				Type:     schema.TypeSet,
+				MaxItems: 100,
+				Optional: true,
+				Elem:     tools.StringSchema(),
+			},
+			"bootstrap_client_iam_scopes": {
+				Type:     schema.TypeSet,
+				MaxItems: 100,
+				Optional: true,
+				Elem:     tools.StringSchema(),
+			},
+			"bootstrap_client_iam_default_scopes": {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
 				Optional: true,
@@ -155,6 +180,9 @@ func setScopes(client *mdm.Client, iamClient *iam.Client, d *schema.ResourceData
 
 	scopes := tools.ExpandStringList(d.Get("scopes").(*schema.Set).List())
 	defaultScopes := tools.ExpandStringList(d.Get("default_scopes").(*schema.Set).List())
+
+	bootstrapScopes := tools.ExpandStringList(d.Get("bootstrap_client_scopes").(*schema.Set).List())
+	bootstrapDefaultScopes := tools.ExpandStringList(d.Get("bootstrap_client_default_scopes").(*schema.Set).List())
 	resourceId := d.Get("guid").(string)
 
 	resource, _, err := client.OAuthClients.GetOAuthClientByID(resourceId)
@@ -174,12 +202,26 @@ func setScopes(client *mdm.Client, iamClient *iam.Client, d *schema.ResourceData
 	}
 	for _, scope := range scopes {
 		if !tools.ContainsString(allowedScopes, scope) {
-			return fmt.Errorf("scope '%s' not allowed", scope)
+			return fmt.Errorf("scope '%s' not allowed. allow list is [%s]", scope, strings.Join(allowedScopes, ", "))
 		}
 	}
+
+	for _, scope := range bootstrapScopes {
+		if !tools.ContainsString(allowedScopes, scope) {
+			return fmt.Errorf("bootstrap scope '%s' not allowed. allow list is [%s]", scope, strings.Join(allowedScopes, ", "))
+		}
+	}
+
 	_, _, err = client.OAuthClients.UpdateScopes(*resource, scopes, defaultScopes)
 	if err != nil {
 		return fmt.Errorf("updating scopes: %w", err)
+	}
+
+	if len(bootstrapDefaultScopes) != 0 && len(bootstrapScopes) != 0 { // Only update if we have a list of bootstrap default scopes
+		_, _, err = client.OAuthClients.UpdateScopesByFlag(*resource, bootstrapScopes, bootstrapDefaultScopes, true)
+		if err != nil {
+			return fmt.Errorf("updating bootstrap client scopes: %w", err)
+		}
 	}
 	// Set IAM scopes
 	iamScopes := tools.ExpandStringList(d.Get("iam_scopes").(*schema.Set).List())
@@ -192,6 +234,22 @@ func setScopes(client *mdm.Client, iamClient *iam.Client, d *schema.ResourceData
 	combinedDefaultScopes := append(defaultScopes, iamDefaultScopes...)
 	combinedScopes := append(scopes, iamScopes...)
 	_, _, err = iamClient.Clients.UpdateScopes(*iamResource, combinedScopes, combinedDefaultScopes)
+
+	if err != nil {
+		return fmt.Errorf("updating IAM OAuth client scopes: %v", err)
+	}
+
+	bootstrapIamScopes := tools.ExpandStringList(d.Get("bootstrap_client_iam_scopes").(*schema.Set).List())
+	bootstrapIamDefaultScopes := tools.ExpandStringList(d.Get("bootstrap_client_iam_default_scopes").(*schema.Set).List())
+	bootstrapIamResource, _, err := iamClient.Clients.GetClientByID(resource.BootstrapClientGuid.Value)
+	if err != nil {
+		return fmt.Errorf("get IAM OAuth bootstrap client: %v", err)
+	}
+
+	// Merge MDM scopes and IAM scopes
+	combinedBootstrapDefaultScopes := append(bootstrapDefaultScopes, bootstrapIamDefaultScopes...)
+	combinedBootstrapScopes := append(bootstrapScopes, bootstrapIamScopes...)
+	_, _, err = iamClient.Clients.UpdateScopes(*bootstrapIamResource, combinedBootstrapScopes, combinedBootstrapDefaultScopes)
 
 	return err
 }
@@ -280,6 +338,17 @@ func resourceConnectMDMOAuthClientCreate(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
+	userClient := d.Get("user_client").(bool)
+	bootstrapClientScopes := tools.ExpandStringList(d.Get("bootstrap_client_scopes").(*schema.Set).List())
+	bootstrapClientDefaultScopes := tools.ExpandStringList(d.Get("bootstrap_client_default_scopes").(*schema.Set).List())
+	bootstrapClientIamScopes := tools.ExpandStringList(d.Get("bootstrap_client_iam_scopes").(*schema.Set).List())
+	bootstrapClientIamDefaultScopes := tools.ExpandStringList(d.Get("bootstrap_client_iam_default_scopes").(*schema.Set).List())
+
+	if userClient && (len(bootstrapClientScopes) > 0 || len(bootstrapClientDefaultScopes) > 0 ||
+		len(bootstrapClientIamScopes) > 0 || len(bootstrapClientIamDefaultScopes) > 0) {
+		return diag.FromErr(fmt.Errorf("bootstrap client scopes are only allowed for non user clients"))
+	}
+
 	resource := schemaToOAuthClient(d)
 
 	var created *mdm.OAuthClient
@@ -308,16 +377,16 @@ func resourceConnectMDMOAuthClientCreate(ctx context.Context, d *schema.Resource
 
 	if err := setScopes(client, iamClient, d); err != nil {
 		// Clean up
-		//._, _, _ = client.OAuthClients.DeleteOAuthClient(*created)
-		//d.SetId("")
-		//return diag.FromErr(err)
-		diags := resourceConnectMDMOAuthClientRead(ctx, d, m)
-		diags = append(diags, diag.Diagnostic{
-			Severity: diag.Warning,
-			Summary:  "failed to set scopes",
-			Detail:   err.Error(),
-		})
-		return diags
+		_, _, _ = client.OAuthClients.DeleteOAuthClient(*created)
+		d.SetId("")
+		return diag.FromErr(err)
+		//diags := resourceConnectMDMOAuthClientRead(ctx, d, m)
+		//diags = append(diags, diag.Diagnostic{
+		//	Severity: diag.Warning,
+		//	Summary:  "failed to set scopes",
+		//	Detail:   err.Error(),
+		//})
+		//return diags
 	}
 
 	return resourceConnectMDMOAuthClientRead(ctx, d, m)
@@ -377,8 +446,12 @@ func resourceConnectMDMOAuthClientUpdate(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if !(d.HasChange("scopes") || d.HasChange("default_scopes") || d.HasChange("iam_scopes") || d.HasChange("iam_default_scopes")) {
-		return diag.FromErr(fmt.Errorf("only 'scopes', 'default_scopes', 'iam_scopes' or 'iam_default_scopes' can be updated. this is a bug"))
+	if !(d.HasChange("scopes") || d.HasChange("default_scopes") || d.HasChange("iam_scopes") || d.HasChange("iam_default_scopes") ||
+		d.HasChange("bootstrap_client_scopes") || d.HasChange("bootstrap_client_default_scopes") ||
+		d.HasChange("bootstrap_client_iam_scopes") || d.HasChange("bootstrap_client_iam_default_scopes")) {
+		return diag.FromErr(fmt.Errorf("only 'scopes', 'default_scopes', 'iam_scopes', 'iam_default_scopes', " +
+			"'bootstrap_client_scopes', 'bootstrap_client_default_scopes', 'bootstrap_client_iam_scopes' " +
+			"or 'bootstrap_client_iam_default_scopes' can be updated. this is a bug"))
 	}
 	if err := setScopes(client, iamClient, d); err != nil {
 		return diag.FromErr(err)

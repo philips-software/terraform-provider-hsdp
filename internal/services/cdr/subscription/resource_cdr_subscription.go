@@ -12,7 +12,7 @@ import (
 func ResourceCDRSubscription() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: importSubscriptionContext,
 		},
 
 		CreateContext: resourceCDRSubscriptionCreate,

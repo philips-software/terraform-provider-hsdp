@@ -46,6 +46,7 @@ func ResourceIAMGroup() *schema.Resource {
 			"managing_organization": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"roles": {
 				Type:     schema.TypeSet,
@@ -373,7 +374,12 @@ func purgeGroupContent(ctx context.Context, client *iam.Client, id string, d *sc
 	group.ID = id
 
 	// Remove all users first before attempting delete
-	users := tools.ExpandStringList(d.Get("users").(*schema.Set).List())
+	users, _, err := client.Users.GetAllUsers(&iam.GetUserOptions{
+		GroupID: &group.ID,
+	})
+	if err != nil {
+		return fmt.Errorf("retrieving user list of group %s: %w", group.ID, err)
+	}
 	if len(users) > 0 {
 		for _, u := range users {
 			_ = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
@@ -407,11 +413,16 @@ func purgeGroupContent(ctx context.Context, client *iam.Client, id string, d *sc
 	}
 
 	// Remove all associated roles
-	roles := tools.ExpandStringList(d.Get("roles").(*schema.Set).List())
-	if len(roles) > 0 {
-		for _, r := range roles {
+	roles, _, err := client.Roles.GetRoles(&iam.GetRolesOptions{
+		GroupID: &group.ID,
+	})
+	if err != nil || roles == nil {
+		return fmt.Errorf("retrieving roles of group %s: %w", group.ID, err)
+	}
+	if len(*roles) > 0 {
+		for _, r := range *roles {
 			_ = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
-				var role = iam.Role{ID: r}
+				var role = iam.Role{ID: r.ID}
 				_, resp, err := client.Groups.RemoveRole(group, role)
 				if resp != nil && resp.StatusCode == http.StatusUnprocessableEntity {
 					return resp.Response, nil // Role is already gone

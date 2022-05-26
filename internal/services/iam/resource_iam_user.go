@@ -62,6 +62,7 @@ func ResourceIAMUser() *schema.Resource {
 			"organization_id": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"preferred_language": {
 				Type:             schema.TypeString,
@@ -252,7 +253,7 @@ func resourceIAMUserDelete(_ context.Context, d *schema.ResourceData, m interfac
 	person.ID = user.ID
 	_, resp, err := client.Users.DeleteUser(person)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("DeleteUser error: %w", err))
+		return diag.FromErr(fmt.Errorf("DeleteUser '%s' error: %w", person.ID, err))
 	}
 	if resp != nil && resp.StatusCode == http.StatusConflict {
 		return diag.FromErr(fmt.Errorf("DeleteUser return HTTP 409 Conflict: %w", err))

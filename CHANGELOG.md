@@ -4,10 +4,80 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.33.5
+
+- IAM: detect missing OAuth2 credentials
+- IAM: update hsdp_iam_role docs (#204)
+- Docker: report warning in case GraphQL query for all repositories fails
+- CDR: fix subscription example
+- IAM: add additional fields to introspect
+
+## v0.33.4
+
+- MDM: remove extra read in Proposition create setup
+- MDM: add more acceptances tests
+
+## v0.33.3
+
+- Docker: add latest_tag and full_name attributes (#201)
+
+## v0.33.2
+
+- IAM: fix introspect data source bug
+- IAM: add more acceptance tests
+
+## v0.33.1
+
+- IAM: update hsdp_iam_permissions data source
+- IAM: add hsdp_iam_permission data source
+
+## v0.33.0
+
+- IAM: workaround for HTTP 403/403 issue (#199)
+- IAM: add preliminary acceptances tests
+
+## v0.32.2
+
+- Doc: fix a typo
+
+## v0.32.1
+
+- IAM: support for synchronous IAM organization deletes
+- CDR: fix subscription importing (#188)
+
+## v0.32.0
+
+- IAM: various fixes for handling with managing_organization changes
+- MDM: support for Bootstrap client scope management
+
+## v0.31.3
+
+- IAM Role: better handling of invalid permissions (#190)
+
+## v0.31.2
+
+- CDR Org: fix importing of CDR ORGs
+
+## v0.31.1
+
+- Connect MDM: Fix standard service data source (#185)
+
+## v0.31.0
+
+- IAM Service: Support new token_validity argument (#184)
+
+## v0.30.13
+
+- IAM: Fix for CDKTF support
+
+## v0.30.12
+
+- Container Host: bump hsdp_container_host_instances version (#180)
+
 ## v0.30.11
 
 - Container Host: new Container Host data source (#180)
-- Container Host: fix filed in hsdp_container_host_instances data source (#180)
+- Container Host: fix fields in hsdp_container_host_instances data source (#180)
 
 ## v0.30.10
 

@@ -3,11 +3,13 @@ package iam
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/philips-software/terraform-provider-hsdp/internal/config"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/philips-software/go-hsdp-api/iam"
+	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func DataSourceIAMIntrospect() *schema.Resource {
@@ -18,7 +20,27 @@ func DataSourceIAMIntrospect() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"organization_context": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"username": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"subject": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"issuer": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"identity_type": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"token_type": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -29,6 +51,11 @@ func DataSourceIAMIntrospect() *schema.Resource {
 			"introspect": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"effective_permissions": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
@@ -44,9 +71,17 @@ func dataSourceIAMIntrospectRead(_ context.Context, d *schema.ResourceData, meta
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	if !client.HasOAuth2Credentials() {
+		return diag.FromErr(fmt.Errorf("provider is missing OAuth2 credentials, please add 'oauth2_client_id' and 'oauth2_password'"))
+	}
+	orgContext := d.Get("organization_context").(string)
 
-	resp, _, err := client.Introspect()
-
+	var resp *iam.IntrospectResponse
+	if orgContext != "" {
+		resp, _, err = client.Introspect(iam.WithOrgContext(orgContext))
+	} else {
+		resp, _, err = client.Introspect()
+	}
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -55,7 +90,7 @@ func dataSourceIAMIntrospectRead(_ context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(err)
 	}
 
-	d.SetId(resp.Username)
+	d.SetId(resp.Sub)
 	_ = d.Set("managing_organization", resp.Organizations.ManagingOrganization)
 	_ = d.Set("username", resp.Username)
 	token, err := client.Token()
@@ -63,7 +98,19 @@ func dataSourceIAMIntrospectRead(_ context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(err)
 	}
 	_ = d.Set("token", token)
+	_ = d.Set("token_type", resp.TokenType)
+	_ = d.Set("identity_type", resp.IdentityType)
+	_ = d.Set("subject", resp.Sub)
+	_ = d.Set("issuer", resp.ISS)
 	_ = d.Set("introspect", string(introspectJSON))
-
+	if orgContext != "" {
+		for _, org := range resp.Organizations.OrganizationList {
+			if org.OrganizationID != orgContext {
+				continue
+			}
+			_ = d.Set("effective_permissions", tools.SchemaSetStrings(org.EffectivePermissions))
+			break
+		}
+	}
 	return diags
 }

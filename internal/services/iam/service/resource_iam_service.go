@@ -1,4 +1,4 @@
-package iam
+package service
 
 import (
 	"context"
@@ -21,11 +21,18 @@ func ResourceIAMService() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		SchemaVersion: 3,
+		SchemaVersion: 4,
 		CreateContext: resourceIAMServiceCreate,
 		ReadContext:   resourceIAMServiceRead,
 		UpdateContext: resourceIAMServiceUpdate,
 		DeleteContext: resourceIAMServiceDelete,
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    ResourceIAMServiceV3().CoreConfigSchema().ImpliedType(),
+				Upgrade: patchIAMServiceV3,
+				Version: 3,
+			},
+		},
 
 		Schema: map[string]*schema.Schema{
 			"name": {
@@ -50,6 +57,12 @@ func ResourceIAMService() *schema.Resource {
 				Default:      12,
 				ForceNew:     true,
 				ValidateFunc: validation.IntBetween(1, 600),
+			},
+			"token_validity": {
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      1800,
+				ValidateFunc: validation.IntBetween(0, 2592000),
 			},
 			"self_managed_private_key": {
 				Type:      schema.TypeString,
@@ -156,11 +169,17 @@ func resourceIAMServiceCreate(ctx context.Context, d *schema.ResourceData, m int
 	if err != nil {
 		diags = append(diags, diag.FromErr(err)...)
 	}
+	// Set token validity
+	tokenValidity := d.Get("token_validity").(int)
+	createdService.AccessTokenLifetime = tokenValidity
+	_, _, err = client.Services.UpdateService(*createdService)
+	if err != nil {
+		diags = append(diags, diag.FromErr(err)...)
+	}
 	if len(diags) > 0 {
 		_, _, _ = client.Services.DeleteService(*createdService) // Cleanup
 		return diags
 	}
-
 	d.SetId(createdService.ID)
 	return resourceIAMServiceRead(ctx, d, m)
 }
@@ -208,6 +227,17 @@ func resourceIAMServiceUpdate(ctx context.Context, d *schema.ResourceData, m int
 	var s iam.Service
 	s.ID = d.Id()
 	s.ServiceID = d.Get("service_id").(string)
+
+	if d.HasChange("token_validity") || d.HasChange("description") {
+		tokenValidity := d.Get("token_validity").(int)
+		description := d.Get("description").(string)
+		s.Description = description
+		s.AccessTokenLifetime = tokenValidity
+		_, _, err = client.Services.UpdateService(s)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	}
 
 	if d.HasChange("scopes") {
 		o, n := d.GetChange("scopes")

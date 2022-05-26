@@ -4,8 +4,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/philips-software/go-hsdp-api/iam"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
@@ -18,7 +20,7 @@ func ResourceIAMOrg() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		SchemaVersion: 3,
+		SchemaVersion: 4,
 		CreateContext: resourceIAMOrgCreate,
 		ReadContext:   resourceIAMOrgRead,
 		UpdateContext: resourceIAMOrgUpdate,
@@ -53,6 +55,10 @@ func ResourceIAMOrg() *schema.Resource {
 			},
 			"parent_org_id": {
 				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"wait_for_delete": {
+				Type:     schema.TypeBool,
 				Optional: true,
 			},
 			"active": {
@@ -171,7 +177,7 @@ func resourceIAMOrgUpdate(_ context.Context, d *schema.ResourceData, m interface
 	return diags
 }
 
-func resourceIAMOrgDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMOrgDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -186,6 +192,7 @@ func resourceIAMOrgDelete(_ context.Context, d *schema.ResourceData, m interface
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	waitForDelete := d.Get("wait_for_delete").(bool)
 
 	ok, _, err := client.Organizations.DeleteOrganization(*org)
 	if err != nil {
@@ -194,5 +201,33 @@ func resourceIAMOrgDelete(_ context.Context, d *schema.ResourceData, m interface
 	if !ok {
 		return diag.FromErr(config.ErrInvalidResponse)
 	}
+	if waitForDelete {
+		stateConf := &resource.StateChangeConf{
+			Pending:    []string{"IN_PROGRESS", "QUEUED", "indeterminate"},
+			Target:     []string{"SUCCESS"},
+			Refresh:    checkOrgDeleteStatus(client, id),
+			Timeout:    d.Timeout(schema.TimeoutCreate),
+			Delay:      5 * time.Second,
+			MinTimeout: time.Duration(5) * time.Second,
+		}
+		_, err = stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("waiting for delete: %w", err))
+		}
+	}
 	return diags
+}
+
+func checkOrgDeleteStatus(client *iam.Client, id string) resource.StateRefreshFunc {
+	return func() (result interface{}, state string, err error) {
+		orgStatus, resp, err := client.Organizations.DeleteStatus(id)
+		if err != nil {
+			return resp, "FAILED", err
+		}
+		if orgStatus != nil {
+			return resp, orgStatus.Status, nil
+		}
+		// We may need to return an error here
+		return resp, "IN_PROGRESS", nil
+	}
 }

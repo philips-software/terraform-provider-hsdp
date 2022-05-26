@@ -25,6 +25,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/function"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/group"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/service"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/metrics"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/notification"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/pki"
@@ -48,6 +49,7 @@ const (
 	SecretKey        = "HSDP_SECRET_KEY"
 	UAAUsername      = "HSDP_UAA_USERNAME"
 	UAAPassword      = "HSDP_UAA_PASSWORD"
+	DebugLog         = "HSDP_DEBUG_LOG"
 )
 
 // Provider returns an instance of the HSDP provider
@@ -215,6 +217,7 @@ func Provider(build string) *schema.Provider {
 			"debug_log": {
 				Type:        schema.TypeString,
 				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc(DebugLog, nil),
 				Description: descriptions["debug_log"],
 			},
 			"ai_inference_endpoint": {
@@ -230,7 +233,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_application":                           iam.ResourceIAMApplication(),
 			"hsdp_iam_user":                                  iam.ResourceIAMUser(),
 			"hsdp_iam_client":                                iam.ResourceIAMClient(),
-			"hsdp_iam_service":                               iam.ResourceIAMService(),
+			"hsdp_iam_service":                               service.ResourceIAMService(),
 			"hsdp_iam_mfa_policy":                            iam.ResourceIAMMFAPolicy(),
 			"hsdp_iam_password_policy":                       iam.ResourceIAMPasswordPolicy(),
 			"hsdp_iam_email_template":                        iam.ResourceIAMEmailTemplate(),
@@ -359,6 +362,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_service_agent":             mdm.DataSourceConnectMDMServiceAgent(),
 			"hsdp_connect_mdm_service_agents":            mdm.DataSourceConnectMDMServiceAgents(),
 			"hsdp_container_host":                        ch.DataSourceContainerHost(),
+			"hsdp_iam_permission":                        iam.DataSourceIAMPermission(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}

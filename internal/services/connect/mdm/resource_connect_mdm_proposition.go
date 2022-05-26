@@ -107,6 +107,8 @@ func propositionToSchema(resource mdm.Proposition, d *schema.ResourceData) {
 }
 
 func resourceMDMPropositionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	c := m.(*config.Config)
 
 	client, err := c.MDMClient()
@@ -164,8 +166,8 @@ func resourceMDMPropositionCreate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(fmt.Errorf("unexpected error creating proposition: %v", resp))
 	}
 	d.SetId(fmt.Sprintf("Proposition/%s", created.ID))
-	_ = d.Set("guid", created.ID)
-	return resourceMDMPropositionRead(ctx, d, m)
+	propositionToSchema(*created, d)
+	return diags
 }
 
 func resourceMDMPropositionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -193,7 +195,7 @@ func resourceMDMPropositionRead(ctx context.Context, d *schema.ResourceData, m i
 		return resp.Response, err
 	})
 	if err != nil {
-		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
+		if err == mdm.ErrEmptyResults || (resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone)) {
 			d.SetId("")
 			return diags
 		}

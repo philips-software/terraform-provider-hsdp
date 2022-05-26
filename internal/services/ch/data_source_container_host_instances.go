@@ -10,7 +10,8 @@ import (
 
 func DataSourceContainerHostInstances() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceContainerHostInstancesRead,
+		ReadContext:   dataSourceContainerHostInstancesRead,
+		SchemaVersion: 1,
 		Schema: map[string]*schema.Schema{
 			"names": {
 				Type:     schema.TypeList,
@@ -22,17 +23,12 @@ func DataSourceContainerHostInstances() *schema.Resource {
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"types": {
-				Type:     schema.TypeList,
-				Computed: true,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-			},
 			"owners": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"private_ips": {
+			"roles": {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -45,8 +41,8 @@ func DataSourceContainerHostInstances() *schema.Resource {
 func dataSourceContainerHostInstancesRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
-	config := m.(*config.Config)
-	client, err := config.CartelClient()
+	cfg := m.(*config.Config)
+	client, err := cfg.CartelClient()
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -60,22 +56,19 @@ func dataSourceContainerHostInstancesRead(_ context.Context, d *schema.ResourceD
 
 	var names []string
 	var ids []string
-	var types []string
-	var privateIPs []string
+	var roles []string
 	var owners []string
 
 	for _, instance := range *instances {
 		names = append(names, instance.NameTag)
 		ids = append(ids, instance.InstanceID)
-		types = append(types, instance.InstanceType)
-		privateIPs = append(privateIPs, instance.PrivateAddress)
+		roles = append(roles, instance.Role)
 		owners = append(owners, instance.Owner)
 	}
 	_ = d.Set("names", names)
 	_ = d.Set("ids", ids)
-	_ = d.Set("types", types)
 	_ = d.Set("owners", owners)
-	_ = d.Set("private_ips", privateIPs)
+	_ = d.Set("roles", roles)
 
 	return diags
 }

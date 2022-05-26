@@ -2,7 +2,6 @@ package namespace
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -61,13 +60,19 @@ func dataSourceDockerNamespaceRead(ctx context.Context, d *schema.ResourceData, 
 	_ = d.Set("is_public", ns.IsPublic)
 	repos, err := client.Namespaces.GetRepositories(ctx, ns.ID)
 	if err != nil {
-		return diag.FromErr(fmt.Errorf("reading repositories: %w", err))
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "failed to read repositories",
+			Detail:   err.Error(),
+		})
 	}
-	var repositories []string
-	for _, r := range *repos {
-		repositories = append(repositories, r.Name)
-	}
-	_ = d.Set("repositories", repositories)
 
+	if repos != nil {
+		var repositories []string
+		for _, r := range *repos {
+			repositories = append(repositories, r.Name)
+		}
+		_ = d.Set("repositories", repositories)
+	}
 	return diags
 }

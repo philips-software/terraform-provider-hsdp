@@ -38,6 +38,7 @@ The following arguments are supported:
 In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ids of the repository
+* `full_name` - The full name to use to pull and push images, includes Docker host and namespace
 * `tags` - The list of tag names
 * `updated_at` - The update timestamp
 * `compressed_sizes` - The compressed size of the tags
@@ -45,3 +46,4 @@ In addition to all arguments above, the following attributes are exported:
 * `image_ids` - The image ids of the tags
 * `num_pulls` - The pulls per tag
 * `total_pulls` - The total number of pulls for this repo
+* `latest_tag` - The latest tag, if available, based on the updated field

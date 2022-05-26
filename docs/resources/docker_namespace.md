@@ -13,8 +13,6 @@ Manage HSDP Docker registry namespaces
 ```hcl
 resource "hsdp_docker_namespace" "project1" {
   name = "project1"
-  description = "project1 namespace"
-  full_description = ""
 }
 ```
 
