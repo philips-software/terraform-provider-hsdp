@@ -8,7 +8,6 @@ import (
 	"path"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
 	"github.com/google/fhir/go/proto/google/fhir/proto/stu3/datatypes_go_proto"
 	"github.com/google/fhir/go/proto/google/fhir/proto/stu3/resources_go_proto"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -45,6 +44,7 @@ func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sc
 	var resp *cdr.Response
 
 	onboardedOrg, resp, err = client.TenantSTU3.GetOrganizationByID(orgID)
+
 	if err == nil && onboardedOrg != nil && resp != nil {
 		if resp.StatusCode != http.StatusGone { // Only import if not soft-deleted
 			d.SetId(onboardedOrg.Id.Value)
@@ -52,18 +52,16 @@ func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sc
 		}
 	}
 	// Do initial boarding
-	operation := func() error {
+	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
 		var resp *cdr.Response
+		var err error
 		onboardedOrg, resp, err = client.TenantSTU3.Onboard(org)
 		if resp == nil {
-			if err != nil {
-				return err
-			}
-			return fmt.Errorf("TenantSTU3.Onboard: response is nil")
+			return nil, fmt.Errorf("TenantSTU3.Onboard: response is nil")
 		}
-		return tools.CheckForIAMPermissionErrors(client, resp.Response, err)
-	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+		return resp.Response, err
+	})
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -71,11 +69,21 @@ func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sc
 	return diags
 }
 
-func stu3Read(_ context.Context, client *cdr.Client, d *schema.ResourceData) diag.Diagnostics {
+func stu3Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) diag.Diagnostics {
 	var diags diag.Diagnostics
+	var err error
+	var resp *cdr.Response
+	var org *resources_go_proto.Organization
 
 	orgID := d.Get("org_id").(string)
-	org, resp, err := client.TenantSTU3.GetOrganizationByID(orgID)
+
+	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+		org, resp, err = client.TenantSTU3.GetOrganizationByID(orgID)
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")

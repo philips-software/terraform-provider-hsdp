@@ -2,6 +2,7 @@ package iam
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -127,7 +128,7 @@ func resourceIAMPropositionRead(_ context.Context, d *schema.ResourceData, m int
 	id := d.Id()
 	prop, resp, err := client.Propositions.GetPropositionByID(id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if errors.Is(err, iam.ErrEmptyResults) || (resp != nil && resp.StatusCode == http.StatusNotFound) {
 			d.SetId("")
 			return diags
 		}

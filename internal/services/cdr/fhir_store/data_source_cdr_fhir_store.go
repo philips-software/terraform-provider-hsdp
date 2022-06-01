@@ -43,8 +43,17 @@ func dataSourceCDRFHIRStoreRead(_ context.Context, d *schema.ResourceData, meta 
 	baseURL := d.Get("base_url").(string)
 	fhirOrgID := d.Get("fhir_org_id").(string)
 
-	if strings.Contains(baseURL, "/store/fhir") {
-		return diag.FromErr(fmt.Errorf("the base_url argument should not have `/store/fhir/` at the end"))
+	if strings.HasSuffix(baseURL, "/") {
+		return diag.FromErr(fmt.Errorf("the base_url should not end with a '/'"))
+	}
+
+	if !strings.HasSuffix(baseURL, "/store/fhir") {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "the 'base_url' should include the /store/fhir path",
+			Detail:   "Please append '/store/fhir' to the base_url to remove this warning",
+		})
+		baseURL += "/store/fhir"
 	}
 
 	client, err := c.GetFHIRClient(baseURL, fhirOrgID)
