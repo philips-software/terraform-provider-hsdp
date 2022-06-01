@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.34.0
+
+- CDR: refactor hsdp_cdr_fhir_store data source, including '/store/fhir' is mandatory but not breaking
+- CDR: add basic acceptance tests
+- IAM: Proposition state drift detection fix
+
 ## v0.33.6
 
 - CDR: fix subscription read for STU3
