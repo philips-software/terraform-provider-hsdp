@@ -56,6 +56,9 @@ func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sc
 		var resp *cdr.Response
 		var err error
 		onboardedOrg, resp, err = client.TenantSTU3.Onboard(org)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
 		if resp == nil {
 			return nil, fmt.Errorf("TenantSTU3.Onboard: response is nil")
 		}
@@ -79,6 +82,9 @@ func stu3Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) d
 
 	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
 		org, resp, err = client.TenantSTU3.GetOrganizationByID(orgID)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
 		if resp == nil {
 			return nil, err
 		}

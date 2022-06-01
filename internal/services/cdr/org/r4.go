@@ -54,6 +54,9 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 		var resp *cdr.Response
 		var err error
 		onboardedOrg, resp, err = client.TenantR4.Onboard(org)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
 		if resp == nil {
 			return nil, err
 		}
@@ -78,6 +81,9 @@ func r4Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) dia
 
 	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
 		org, resp, err = client.TenantR4.GetOrganizationByID(orgID)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
 		if resp == nil {
 			return nil, err
 		}
