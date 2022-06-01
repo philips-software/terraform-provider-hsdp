@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.33.6
+
+- CDR: fix subscription read for STU3
+
 ## v0.33.5
 
 - IAM: detect missing OAuth2 credentials
