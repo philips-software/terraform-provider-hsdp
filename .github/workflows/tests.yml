@@ -41,6 +41,7 @@ jobs:
           HSDP_IAM_OAUTH2_PASSWORD: ${{ secrets.HSDP_IAM_OAUTH2_PASSWORD }}
           HSDP_UAA_USERNAME: ${{ secrets.HSDP_UAA_USERNAME }}
           HSDP_UAA_PASSWORD: ${{ secrets.HSDP_UAA_PASSWORD }}
+          HSDP_CDR_ACC_URL: ${{ secrets.HSDP_CDR_ACC_URL }}
   unit:
     name: Unit Tests
     runs-on: ubuntu-latest

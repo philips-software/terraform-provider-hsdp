@@ -74,7 +74,7 @@ func stu3Read(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 
 	contained, resp, err := client.OperationsSTU3.Get("Subscription/" + d.Id())
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
 			return diags
 		}

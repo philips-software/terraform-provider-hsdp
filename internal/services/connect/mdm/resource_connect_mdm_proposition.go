@@ -2,6 +2,7 @@ package mdm
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strings"
@@ -195,7 +196,7 @@ func resourceMDMPropositionRead(ctx context.Context, d *schema.ResourceData, m i
 		return resp.Response, err
 	})
 	if err != nil {
-		if err == mdm.ErrEmptyResults || (resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone)) {
+		if errors.Is(err, mdm.ErrEmptyResult) || (resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone)) {
 			d.SetId("")
 			return diags
 		}

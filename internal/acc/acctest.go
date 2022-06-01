@@ -70,6 +70,15 @@ func PreCheck(t *testing.T) {
 	// call Configure() to properly initialize the provider configuration.
 	testAccProviderConfigure.Do(func() {
 		// TODO: add additional pre-checks here
+		if AccUserGUID() == "" {
+			t.Fatalf("HSDP_IAM_ACC_USER_GUID must be set")
+		}
+		if AccIAMOrgGUID() == "" {
+			t.Fatalf("HSDP_IAM_ACC_ORG_GUID must be set")
+		}
+		if AccCDRURL() == "" {
+			t.Fatalf("HSDP_CDR_ACC_URL must be set")
+		}
 	})
 }
 
@@ -79,4 +88,8 @@ func AccUserGUID() string {
 
 func AccIAMOrgGUID() string {
 	return os.Getenv("HSDP_IAM_ACC_ORG_GUID")
+}
+
+func AccCDRURL() string {
+	return os.Getenv("HSDP_CDR_ACC_URL")
 }

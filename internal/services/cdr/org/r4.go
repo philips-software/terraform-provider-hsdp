@@ -8,7 +8,6 @@ import (
 	"path"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
 	r4dt "github.com/google/fhir/go/proto/google/fhir/proto/r4/core/datatypes_go_proto"
 	r4pb "github.com/google/fhir/go/proto/google/fhir/proto/r4/core/resources/organization_go_proto"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -50,20 +49,20 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 			return resourceCDROrgUpdate(ctx, d, m)
 		}
 	}
-	// Do initial boarding
-	operation := func() error {
+
+	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
 		var resp *cdr.Response
+		var err error
 		onboardedOrg, resp, err = client.TenantR4.Onboard(org)
-		if resp == nil {
-			if err != nil {
-				return err
-			}
-			return fmt.Errorf("TenantR4.Onboard: response is nil")
+		if err != nil {
+			_ = client.TokenRefresh()
 		}
-		// TODO: refactor this check so we don't have to check for nil resp above
-		return tools.CheckForIAMPermissionErrors(client, resp.Response, err)
-	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -72,11 +71,25 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 	return diags
 }
 
-func r4Read(_ context.Context, client *cdr.Client, d *schema.ResourceData) diag.Diagnostics {
+func r4Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) diag.Diagnostics {
 	var diags diag.Diagnostics
+	var org *r4pb.Organization
+	var resp *cdr.Response
+	var err error
 
 	orgID := d.Get("org_id").(string)
-	org, resp, err := client.TenantR4.GetOrganizationByID(orgID)
+
+	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+		org, resp, err = client.TenantR4.GetOrganizationByID(orgID)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
+
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
