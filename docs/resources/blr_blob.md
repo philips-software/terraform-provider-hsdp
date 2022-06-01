@@ -4,15 +4,16 @@ subcategory: "Blob Repository (BLR)"
 
 # hsdp_blr_blob
 
-Provides a resource for managing [Blob Repository](https://www.hsdp.io/documentation/blob-repository) objects.
+Provides a resource for managing [Blob](https://www.hsdp.io/documentation/blob-repository) metadata objects
 
 ## Example Usage
 
-The following example creates a Blob
+The following example creates a Blob metadata object
 
 ```hcl
 resource "hsdp_blr_blob" "firmware" {
-  data_type_id = data.hsdp_mdm_data_type.firmware.id
+  data_type_name = data.hsdp_mdm_data_type.firmware.name
+
   blob_path    = "/fw/1.0"
   blob_name    = "firmware-1.0"
 
@@ -24,6 +25,16 @@ resource "hsdp_blr_blob" "firmware" {
     content_type = "application/firmware"  
     data = filebase64(var.firmware_file)
   }
+  
+  policy {
+    statement {
+      principal {
+        hsdp = ["string"]
+      }
+      effect = "Allow"
+      action = ["GET", "PUT"] 
+    }
+  }
 }
 ```
 
@@ -31,7 +42,7 @@ resource "hsdp_blr_blob" "firmware" {
 
 The following arguments are supported:
 
-* `data_type_id` - (Required) The data type ID 
+* `data_type_name` - (Required) The data type name. 
 * `blob_path` - (Required) The blob path to use
 * `blob_name` - (Required) The blob name to use
 * `virtual_path` - (Required) The virtual path to use
@@ -40,7 +51,14 @@ The following arguments are supported:
 * `attachment` - (Optional, block) Use this block to define an attachment
   * `content_type` - (Required) The content type of the attachment
   * `data` - (Required) The base64 encoded data
-  
+* `policy` - (Optional) Block describing access policy
+  * `statement` - (Optional) The policy statement
+    * `principal` - (Required) The principal block
+      * `hsdp` - (Required, list) The list of `hsdp` principal resource list
+    * `effect` - (Required) The Effect element is required and specifies whether
+      the statement results in an allow or an explicit deny. The only valid value for Effect is `Allow`.
+      Deny is not supported in this API yet.
+    * `action` - (Required, list) Specifies the list of actions e.g. s3:GetObject
 
 
 ## Attributes Reference

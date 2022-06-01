@@ -7,9 +7,11 @@ import (
 
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/go-retryablehttp"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/ai"
 	"github.com/philips-software/go-hsdp-api/ai/inference"
 	"github.com/philips-software/go-hsdp-api/ai/workspace"
+	"github.com/philips-software/go-hsdp-api/blr"
 	"github.com/philips-software/go-hsdp-api/cartel"
 	"github.com/philips-software/go-hsdp-api/cdl"
 	"github.com/philips-software/go-hsdp-api/cdr"
@@ -44,6 +46,7 @@ type Config struct {
 	UAAUsername         string
 	UAAPassword         string
 	UAAURL              string
+	BLRURL              string
 	AIInferenceEndpoint string
 	AIWorkspaceEndpoint string
 
@@ -55,6 +58,8 @@ type Config struct {
 	stlClient             *stl.Client
 	notificationClient    *notification.Client
 	mdmClient             *mdm.Client
+	blrClient             *blr.Client
+	blrClientErr          error
 	DebugFile             *os.File
 	credsClientErr        error
 	cartelClientErr       error
@@ -72,7 +77,44 @@ type Config struct {
 	R4UM   *jsonformat.Unmarshaller
 }
 
-func (c *Config) IAMClient() (*iam.Client, error) {
+func (c *Config) IAMClient(principal ...Principal) (*iam.Client, error) {
+	if len(principal) > 0 {
+		p := principal[0]
+		cfg := c.Config
+		if p.OAuth2ClientID != "" {
+			cfg.OAuth2ClientID = p.OAuth2ClientID
+		}
+		if p.OAuth2Password != "" {
+			cfg.OAuth2Secret = p.OAuth2Password
+		}
+		if p.Environment != "" {
+			cfg.Environment = p.Environment
+		}
+		if p.Region != "" {
+			cfg.Region = p.Region
+		}
+		iamClient, err := iam.NewClient(nil, &cfg)
+		if err != nil {
+			return nil, err
+		}
+		if p.Username != "" {
+			err := iamClient.Login(p.Username, p.Password)
+			if err != nil {
+				return nil, err
+			}
+			return iamClient, nil
+		}
+		if p.ServiceID != "" {
+			err := iamClient.ServiceLogin(iam.Service{
+				ServiceID:  p.ServiceID,
+				PrivateKey: p.ServicePrivateKey,
+			})
+			if err != nil {
+				return nil, err
+			}
+		}
+		return iamClient, nil
+	}
 	return c.iamClient, c.iamClientErr
 }
 
@@ -92,14 +134,31 @@ func (c *Config) MDMClient() (*mdm.Client, error) {
 	return c.mdmClient, c.mdmClientErr
 }
 
-func (c *Config) STLClient(_ ...string) (*stl.Client, error) {
+func (c *Config) BLRClient(s ...*schema.ResourceData) (*blr.Client, error) {
+	if len(s) == 0 || s[0] == nil {
+		return c.blrClient, c.blrClientErr
+	}
+	principal := SchemaToPrincipal(s[0])
+	// Use principal
+	iamClient, err := c.IAMClient(*principal)
+	if err != nil {
+		return nil, err
+	}
+	return blr.NewClient(iamClient, &blr.Config{
+		Region:      c.Region,
+		Environment: c.Environment,
+		DebugLog:    c.DebugLog,
+	})
+}
+
+func (c *Config) STLClient(_ ...Principal) (*stl.Client, error) {
 	return c.stlClient, c.stlClientErr
 }
 
-func (c *Config) DockerClient(region ...string) (*docker.Client, error) {
+func (c *Config) DockerClient(principal ...Principal) (*docker.Client, error) {
 	r := c.Region
-	if len(region) > 0 {
-		r = region[0]
+	if len(principal) > 0 {
+		r = principal[0].Region
 	}
 	if c.consoleClientErr != nil {
 		return nil, c.consoleClientErr
@@ -109,10 +168,10 @@ func (c *Config) DockerClient(region ...string) (*docker.Client, error) {
 	})
 }
 
-func (c *Config) PKIClient(regionEnvironment ...string) (*pki.Client, error) {
-	if len(regionEnvironment) == 2 && c.consoleClient != nil && c.iamClient != nil {
-		region := regionEnvironment[0]
-		environment := regionEnvironment[1]
+func (c *Config) PKIClient(principal ...Principal) (*pki.Client, error) {
+	if len(principal) > 0 && c.consoleClient != nil && c.iamClient != nil {
+		region := principal[0].Region
+		environment := principal[0].Environment
 		return pki.NewClient(c.consoleClient, c.iamClient, &pki.Config{
 			Region:      region,
 			Environment: environment,
@@ -272,6 +331,41 @@ func (c *Config) SetupNotificationClient() {
 		return
 	}
 	c.notificationClient = client
+}
+
+func (c *Config) SetupBLRClient() {
+	if c.iamClientErr != nil {
+		c.blrClient = nil
+		c.blrClientErr = c.iamClientErr
+		return
+	}
+	if c.BLRURL == "" {
+		env := c.Environment
+		if env == "" {
+			env = "prod"
+		}
+		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(env))
+		if err == nil {
+			url := ac.Service("blr").URL
+			if url != "" {
+				c.BLRURL = url
+			} else {
+				c.blrClient = nil
+				c.blrClientErr = fmt.Errorf("missing BLR URL (%s/%s), you can set a custom value using 'blr_url'", env, c.Region)
+				return
+			}
+		}
+	}
+	client, err := blr.NewClient(c.iamClient, &blr.Config{
+		BaseURL:  c.BLRURL,
+		DebugLog: c.DebugLog,
+	})
+	if err != nil {
+		c.blrClient = nil
+		c.blrClientErr = fmt.Errorf("configuration error (%s/%s): %w", c.Environment, c.Region, err)
+		return
+	}
+	c.blrClient = client
 }
 
 func (c *Config) SetupMDMClient() {
