@@ -22,7 +22,7 @@ The following arguments are supported:
 * `base_url` - (Required) the base URL of the CDR instances. This is provided by HSDP.
 * `fhir_org_id` - (Required) the FHIR Org ID (GUID)
 
-~> Earlier versions of this data source required the `base_url` to be specified without the `/store/fhir` path component. 
+~> Earlier versions of this data source required the `base_url` to be specified without the `/store/fhir` path component.
    This is now mandatory, but the data source will append this internally and emit a warning for now if it is missing.
    When upgrading to this or newer versions of the provider please add the path component.
 
