@@ -2,6 +2,7 @@ package notification
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/cenkalti/backoff/v4"
@@ -96,7 +97,7 @@ func resourceNotificationTopicRead(_ context.Context, d *schema.ResourceData, m 
 	defer client.Close()
 	topic, _, err := client.Topic.GetTopic(d.Id())
 	if err != nil {
-		if err == notification.ErrEmptyResult { // Removed
+		if errors.Is(err, notification.ErrEmptyResult) { // Removed
 			d.SetId("")
 			return diags
 		}

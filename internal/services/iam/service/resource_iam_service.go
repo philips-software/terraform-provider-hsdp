@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/x509"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -197,7 +198,7 @@ func resourceIAMServiceRead(_ context.Context, d *schema.ResourceData, m interfa
 	id := d.Id()
 	s, resp, err := client.Services.GetServiceByID(id)
 	if err != nil {
-		if err == iam.ErrEmptyResults || (resp != nil && resp.StatusCode == http.StatusNotFound) {
+		if errors.Is(err, iam.ErrEmptyResults) || (resp != nil && resp.StatusCode == http.StatusNotFound) {
 			d.SetId("")
 			return diags
 		}

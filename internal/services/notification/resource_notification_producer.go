@@ -2,6 +2,7 @@ package notification
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/cenkalti/backoff/v4"
@@ -115,7 +116,7 @@ func resourceNotificationProducerRead(_ context.Context, d *schema.ResourceData,
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
 	if err != nil {
-		if err == notification.ErrEmptyResult { // Removed
+		if errors.Is(err, notification.ErrEmptyResult) { // Removed
 			d.SetId("")
 			return diags
 		}
