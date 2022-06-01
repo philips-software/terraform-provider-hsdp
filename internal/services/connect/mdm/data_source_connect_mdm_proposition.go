@@ -75,7 +75,7 @@ func dataSourceConnectMDMPropositionRead(_ context.Context, d *schema.ResourceDa
 		if resp == nil {
 			return diag.FromErr(err)
 		}
-		if (errors.Is(err, mdm.ErrEmptyResults) || resp.StatusCode == http.StatusNotFound) && errorOnNotFound {
+		if (errors.Is(err, mdm.ErrEmptyResult) || resp.StatusCode == http.StatusNotFound) && errorOnNotFound {
 			return diag.FromErr(err)
 		}
 		// Not found, but no error
