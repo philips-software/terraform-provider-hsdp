@@ -9,7 +9,7 @@ This resource provides limited management of the Practioner resource.
 
 ## Example Usage
 
-The following example creates a FHIR Organisation and a Practitioner associated with it. 
+The following example creates a FHIR Organisation and a Practitioner associated with it.
 
 ```hcl
 data "hsdp_cdr_fhir_store" "sandbox" {
