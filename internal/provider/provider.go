@@ -13,6 +13,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdl"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/fhir_store"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/org"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/practitioner"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/subscription"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/ch"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/configuration"
@@ -294,6 +295,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_firmware_distribution_request": mdm.ResourceConnectMDMFirmwareDistributionRequest(),
 			"hsdp_iam_group_membership":                      iam.ResourceIAMGroupMembership(),
 			"hsdp_dicom_notification":                        dicom.ResourceDICOMNotification(),
+			"hsdp_cdr_practitioner":                          practitioner.ResourceCDRPractitioner(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                        iam.DataSourceIAMIntrospect(),

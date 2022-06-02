@@ -1,4 +1,4 @@
-package subscription_test
+package practitioner_test
 
 import (
 	"fmt"
@@ -9,10 +9,10 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/acc"
 )
 
-func TestAccResourceCDRSubscription_basic(t *testing.T) {
+func TestAccResourceCDRPractitioner_basic(t *testing.T) {
 	t.Parallel()
 
-	resourceName := "hsdp_cdr_subscription.test"
+	resourceName := "hsdp_cdr_practitioner.test"
 	parentOrgID := acc.AccIAMOrgGUID()
 	cdrURL := acc.AccCDRURL()
 
@@ -28,9 +28,9 @@ func TestAccResourceCDRSubscription_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccResourceCDRSubscription(cdrURL, parentOrgID, randomNameSTU3, "stu3"),
+				Config:       testAccResourceCDRPractitioner(cdrURL, parentOrgID, randomNameSTU3, "stu3"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "status", "REQUESTED"),
+					resource.TestCheckResourceAttr(resourceName, "identifier.#", "1"),
 				),
 			},
 		},
@@ -45,16 +45,16 @@ func TestAccResourceCDRSubscription_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccResourceCDRSubscription(cdrURL, parentOrgID, randomNameR4, "r4"),
+				Config:       testAccResourceCDRPractitioner(cdrURL, parentOrgID, randomNameR4, "r4"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "status", "REQUESTED"),
+					resource.TestCheckResourceAttr(resourceName, "identifier.#", "1"),
 				),
 			},
 		},
 	})
 }
 
-func testAccResourceCDRSubscription(cdrURL, parentOrgID, name, version string) string {
+func testAccResourceCDRPractitioner(cdrURL, parentOrgID, name, version string) string {
 	return fmt.Sprintf(`
 
 data "hsdp_cdr_fhir_store" "sandbox" {
@@ -104,23 +104,21 @@ resource "hsdp_cdr_org" "test" {
   depends_on = [hsdp_iam_group.cdr_admins]
 }
 
-resource "hsdp_cdr_subscription" "test" {
+resource "hsdp_cdr_practitioner" "test" {
   fhir_store  = hsdp_cdr_org.test.fhir_store
 
-  criteria        = "Patient"
-  reason          = "Acceptance test %s"
-  endpoint        = "https://webhook.myapp.io/patient"
-  delete_endpoint = "https://webhook.myapp.io/patient_deleted"
-  headers = [
-    "Authorization: Basic cm9uOnN3YW5zb24="
-  ]
+  identifier {
+    system = "https://iam-client-test.us-east.philips-healthsuite.com/oauth2/access_token"
+    value  = "ron.swanson@hsdp.io"
+  }
 
-  version = "%s"
-
-  end = "2099-12-31T23:59:59Z"
-}
-
-`,
+  name {
+     text   = "Ron Swanson"
+     family = "Swanson"
+     given  = ["Ron", "%s"]
+  }
+ version = "%s"
+}`,
 		// DATA SOURCE
 		cdrURL,
 
@@ -135,7 +133,7 @@ resource "hsdp_cdr_subscription" "test" {
 		name,
 		version,
 
-		// CDR SUBSCRIPTION
+		// CDR PRACTITIONER
 		name,
 		version,
 	)
