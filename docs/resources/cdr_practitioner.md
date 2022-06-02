@@ -41,10 +41,6 @@ resource "hsdp_cdr_practitioner" "practitioner" {
     given = ["Ron"]
     family = "Swanson"
   }
-  
-  meta = {
-    profile = ["StructureDefinition/Practitioner"]
-  }
 }
 ```
 
