@@ -58,7 +58,7 @@ The following arguments are supported:
 
 * `fhir_store` - (Required) The CDR FHIR store endpoint to use
 
-~> It is highly recommended refer to the `fhir_store` attribute of the CDR Organization.
+~> It is highly recommended to refer to the `fhir_store` attribute of the CDR Organization.
    This creates an explicit dependency between the subscription and the FHIR organization,
    ensuring proper lifecycle handling by Terraform
 
