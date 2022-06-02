@@ -3,6 +3,7 @@ package org_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/google/fhir/go/jsonformat"
 	stu3pb "github.com/google/fhir/go/proto/google/fhir/proto/stu3/resources_go_proto"
@@ -66,6 +67,7 @@ func TestAccResourceCDROrg_basic(t *testing.T) {
 
 	randomNameSTU3 := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 	randomNameR4 := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	now := time.Now().Format(time.RFC3339)
 
 	// STU3
 	resource.Test(t, resource.TestCase{
@@ -76,9 +78,9 @@ func TestAccResourceCDROrg_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccResourceCDROrg(cdrURL, parentOrgID, randomNameSTU3, "stu3"),
+				Config:       testAccResourceCDROrg(cdrURL, parentOrgID, randomNameSTU3, "stu3", now),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", randomNameSTU3),
+					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("%s %s", randomNameSTU3, now)),
 				),
 			},
 		},
@@ -93,16 +95,16 @@ func TestAccResourceCDROrg_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccResourceCDROrg(cdrURL, parentOrgID, randomNameR4, "r4"),
+				Config:       testAccResourceCDROrg(cdrURL, parentOrgID, randomNameR4, "r4", now),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", randomNameR4),
+					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("%s %s", randomNameR4, now)),
 				),
 			},
 		},
 	})
 }
 
-func testAccResourceCDROrg(cdrURL, parentOrgID, name, version string) string {
+func testAccResourceCDROrg(cdrURL, parentOrgID, name, version, now string) string {
 	return fmt.Sprintf(`
 
 data "hsdp_cdr_fhir_store" "sandbox" {
@@ -119,7 +121,7 @@ data "hsdp_iam_service" "service" {
 
 resource "hsdp_iam_org" "test" {
   name  = "%s"
-  description = "Acceptance Test CDR %s"
+  description = "%s Acceptance Test CDR %s"
   parent_org_id = "%s"
 }
 
@@ -135,7 +137,7 @@ resource "hsdp_iam_role" "cdr_admin" {
 resource "hsdp_iam_group" "cdr_admins" {
   managing_organization = hsdp_iam_org.test.id
   name                  = "TF_CDR_ADMIN"
-  description           = "CDR Admins"
+  description           = "CDR Admins %s"
   roles                 = [hsdp_iam_role.cdr_admin.id]
   users                 = []
   services              = [data.hsdp_iam_service.service.id]
@@ -144,7 +146,7 @@ resource "hsdp_iam_group" "cdr_admins" {
 resource "hsdp_cdr_org" "test" {
   fhir_store  = data.hsdp_cdr_fhir_store.sandbox.endpoint
 
-  name        = "%s"
+  name        = "%s %s"
   org_id      = hsdp_iam_org.test.id
 
   version     = "%s"
@@ -155,11 +157,14 @@ resource "hsdp_cdr_org" "test" {
 		// IAM ORG
 		name,
 		name,
+		now,
 		parentOrgID,
 
 		// IAM GROUP
+		now,
 
 		// CDR ORG
 		name,
+		now,
 		version)
 }
