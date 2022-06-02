@@ -18,7 +18,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
-func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func r4Create(_ context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	endpoint := d.Get("endpoint").(string)
@@ -69,7 +69,7 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 	return diags
 }
 
-func r4Read(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func r4Read(_ context.Context, _ *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	contained, resp, err := client.OperationsR4.Get("Subscription/" + d.Id())
@@ -90,7 +90,7 @@ func r4Read(ctx context.Context, c *config.Config, client *cdr.Client, d *schema
 	_ = d.Set("endpoint", sub.Channel.Endpoint.Value)
 	_ = d.Set("reason", sub.Reason.Value)
 	_ = d.Set("criteria", sub.Criteria.Value)
-	_ = d.Set("status", sub.Status.Value)
+	_ = d.Set("status", sub.Status.Value.String())
 	_ = d.Set("delete_endpoint", r4.DeleteEndpointValue()(sub))
 	headers := make([]string, 0)
 	for _, h := range sub.Channel.Header {
@@ -100,7 +100,7 @@ func r4Read(ctx context.Context, c *config.Config, client *cdr.Client, d *schema
 	return diags
 }
 
-func r4Update(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func r4Update(_ context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	id := d.Id()
@@ -167,7 +167,7 @@ func r4Update(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 	return diags
 }
 
-func r4Delete(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func r4Delete(_ context.Context, _ *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	// TODO: Check HTTP 500 issue
