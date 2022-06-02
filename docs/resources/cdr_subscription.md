@@ -27,7 +27,7 @@ resource "hsdp_cdr_org" "test" {
 
 resource "hsdp_cdr_subscription" "patient_changes" {
   # Refer to the fhir_store through the CDR Organization
-  fhir_store = hsdp_cdr_org.test.endpoint
+  fhir_store = hsdp_cdr_org.test.fhir_store
   version    = "r4"
   
   criteria        = "Patient"
