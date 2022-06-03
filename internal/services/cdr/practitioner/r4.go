@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/cenkalti/backoff"
 	r4pb "github.com/google/fhir/go/proto/google/fhir/proto/r4/core/resources/bundle_and_contained_resource_go_proto"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -85,19 +84,14 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 	}
 	var contained *r4pb.ContainedResource
 
-	operation := func() error {
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var resp *cdr.Response
 		contained, resp, err = client.OperationsR4.Post("Practitioner", jsonResource)
 		if resp == nil {
-			if err != nil {
-				return err
-			}
-			return fmt.Errorf("OperationsR4.Post: response is nil")
+			return nil, fmt.Errorf("OperationsR4.Post: response is nil")
 		}
-		return tools.CheckForIAMPermissionErrors(client, resp.Response, err)
-	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
-
+		return resp.Response, err
+	})
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("create practitioner: %w", err))
 	}
