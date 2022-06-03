@@ -119,6 +119,8 @@ resource "hsdp_cdr_practitioner" "test" {
      given  = ["Ron", "%s"]
   }
  version = "%s"
+
+ depends_on = [hsdp_iam_group.cdr_admins]
 }`,
 		// DATA SOURCE
 		cdrURL,
