@@ -2,11 +2,14 @@ package namespace
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hasura/go-graphql-client"
 	"github.com/philips-software/go-hsdp-api/console/docker"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
@@ -87,6 +90,7 @@ func resourceDockerNamespaceRead(ctx context.Context, d *schema.ResourceData, m 
 func resourceDockerNamespaceCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 	var client *docker.Client
+	var ns *docker.Namespace
 	var err error
 
 	client, err = c.DockerClient()
@@ -95,10 +99,22 @@ func resourceDockerNamespaceCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 	name := d.Get("name").(string)
 
-	ns, err := client.Namespaces.CreateNamespace(ctx, name)
+	operation := func() error {
+		ns, err = client.Namespaces.CreateNamespace(ctx, name)
+		if err != nil {
+			if !errors.As(err, &graphql.Errors{}) {
+				return backoff.Permanent(err)
+			}
+			//gqlErr := err.(graphql.Errors)
+			return err
+		}
+		return nil
+	}
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("createNamespace: %w", err))
 	}
+
 	d.SetId(ns.ID)
 	return resourceDockerNamespaceRead(ctx, d, m)
 }
