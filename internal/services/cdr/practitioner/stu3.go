@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/cenkalti/backoff"
 	"github.com/google/fhir/go/proto/google/fhir/proto/stu3/resources_go_proto"
@@ -27,7 +28,7 @@ func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sc
 		return diag.FromErr(err)
 	}
 	for _, i := range identifiers {
-		if pr.WithIdentifier(i.System, i.Value)(resource) != nil {
+		if pr.WithIdentifier(i.System, i.Value, i.Use)(resource) != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -85,8 +86,15 @@ func stu3Read(_ context.Context, _ *config.Config, client *cdr.Client, d *schema
 	a := &schema.Set{F: schema.HashResource(identifierSchema())}
 	for _, cc := range resource.Identifier {
 		entry := make(map[string]interface{})
-		entry["system"] = cc.System.String()
-		entry["value"] = cc.Value.String()
+		if cc.System != nil {
+			entry["system"] = cc.System.String()
+		}
+		if cc.Value != nil {
+			entry["value"] = cc.Value.String()
+		}
+		if cc.Use != nil {
+			entry["use"] = strings.ToLower(cc.Use.Value.String())
+		}
 		a.Add(entry)
 	}
 
@@ -98,8 +106,12 @@ func stu3Read(_ context.Context, _ *config.Config, client *cdr.Client, d *schema
 		for _, g := range cc.Given {
 			gg = append(gg, g.Value)
 		}
-		entry["family"] = cc.Family.String()
-		entry["text"] = cc.Text.String()
+		if cc.Family != nil {
+			entry["family"] = cc.Family.String()
+		}
+		if cc.Text != nil {
+			entry["text"] = cc.Text.String()
+		}
 		entry["given"] = tools.SchemaSetStrings(gg)
 		n.Add(entry)
 	}
@@ -133,9 +145,10 @@ func stu3Update(_ context.Context, c *config.Config, client *cdr.Client, d *sche
 
 	if d.HasChange("identifier") {
 		identifiers := schemaToIdentifier(d)
+		// TODO: preserve external identifiers
 		resource.Identifier = nil
 		for _, i := range identifiers {
-			if pr.WithIdentifier(i.System, i.Value)(resource) != nil {
+			if pr.WithIdentifier(i.System, i.Value, i.Use)(resource) != nil {
 				return diag.FromErr(err)
 			}
 		}

@@ -110,6 +110,7 @@ resource "hsdp_cdr_practitioner" "test" {
   identifier {
     system = "https://iam-client-test.us-east.philips-healthsuite.com/oauth2/access_token"
     value  = "ron.swanson@hsdp.io"
+    use    = "temp"
   }
 
   name {

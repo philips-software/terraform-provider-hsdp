@@ -89,6 +89,11 @@ func identifierSchema() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"use": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 }

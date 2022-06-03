@@ -57,11 +57,16 @@ ensuring proper lifecycle handling by Terraform
 * `identifier` - (Required) The FHIR identifier block
   * `system` - (Required) The system of the identifier e.g. HSP IAM
   * `value` - (Required) the identifier value e.g. the IAM GUID of the practitioner
+  * `use` - (Optional) the use value. Can be `usual`, `temp`, `secondary`, `official`
+
+!> `FHIR` Identifiers might contain PII data which will be stored in the Terraform state.
+   Please take this into consideration when using this and other FHIR resources of the provider.
+
 * `name` - (Required) The FHIR name block
   * `text` - (Required) The text representation of the name
   * `given` - (Required, list(string)) The list of given names
   * `first` - (Required) The first name
-* `version` - (Optional) The FHIR version to use. Options [ `stu3` | `r4` ]. Default is `stu3`
+  * `version` - (Optional) The FHIR version to use. Options [ `stu3` | `r4` ]. Default is `stu3`
 
 !> Switching FHIR versions causes the resource to be replaced, so be careful with this.
 

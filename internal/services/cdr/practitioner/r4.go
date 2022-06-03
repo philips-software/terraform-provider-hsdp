@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/cenkalti/backoff"
 	r4pb "github.com/google/fhir/go/proto/google/fhir/proto/r4/core/resources/bundle_and_contained_resource_go_proto"
@@ -19,6 +20,7 @@ import (
 type identifier struct {
 	System string
 	Value  string
+	Use    string
 }
 
 type name struct {
@@ -52,6 +54,7 @@ func schemaToIdentifier(d *schema.ResourceData) []identifier {
 			resources = append(resources, identifier{
 				System: mVi["system"].(string),
 				Value:  mVi["value"].(string),
+				Use:    mVi["use"].(string),
 			})
 		}
 	}
@@ -67,7 +70,7 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 		return diag.FromErr(err)
 	}
 	for _, i := range identifiers {
-		if pr.WithIdentifier(i.System, i.Value)(resource) != nil {
+		if pr.WithIdentifier(i.System, i.Value, i.Use)(resource) != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -126,8 +129,15 @@ func r4Read(_ context.Context, _ *config.Config, client *cdr.Client, d *schema.R
 	a := &schema.Set{F: schema.HashResource(identifierSchema())}
 	for _, cc := range resource.Identifier {
 		entry := make(map[string]interface{})
-		entry["system"] = cc.System.String()
-		entry["value"] = cc.Value.String()
+		if cc.System != nil {
+			entry["system"] = cc.System.String()
+		}
+		if cc.Value != nil {
+			entry["value"] = cc.Value.String()
+		}
+		if cc.Use != nil {
+			entry["use"] = strings.ToLower(cc.Use.String())
+		}
 		a.Add(entry)
 	}
 
@@ -139,8 +149,12 @@ func r4Read(_ context.Context, _ *config.Config, client *cdr.Client, d *schema.R
 		for _, g := range cc.Given {
 			gg = append(gg, g.String())
 		}
-		entry["family"] = cc.Family.String()
-		entry["text"] = cc.Text.String()
+		if cc.Family != nil {
+			entry["family"] = cc.Family.String()
+		}
+		if cc.Text != nil {
+			entry["text"] = cc.Text.String()
+		}
 		entry["given"] = tools.SchemaSetStrings(gg)
 		n.Add(entry)
 	}
@@ -176,7 +190,7 @@ func r4Update(_ context.Context, c *config.Config, client *cdr.Client, d *schema
 		identifiers := schemaToIdentifier(d)
 		resource.Identifier = nil
 		for _, i := range identifiers {
-			if pr.WithIdentifier(i.System, i.Value)(resource) != nil {
+			if pr.WithIdentifier(i.System, i.Value, i.Use)(resource) != nil {
 				return diag.FromErr(err)
 			}
 		}
