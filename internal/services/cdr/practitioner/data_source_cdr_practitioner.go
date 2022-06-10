@@ -86,6 +86,9 @@ func dataSourceCDRPropositionRead(_ context.Context, d *schema.ResourceData, m i
 		}
 		resource := contained.GetPractitioner()
 		jsonResource, err := c.R4MA.MarshalResource(resource)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("R4.MarshalResource: %w", err))
+		}
 		_ = d.Set("fhir_json", string(jsonResource))
 	case "stu3", "":
 		contained, resp, err := client.OperationsSTU3.Get("Practitioner/" + d.Id())
@@ -104,6 +107,9 @@ func dataSourceCDRPropositionRead(_ context.Context, d *schema.ResourceData, m i
 		}
 		resource := contained.GetPractitioner()
 		jsonResource, err := c.STU3MA.MarshalResource(resource)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("STU3.MarshalResource: %w", err))
+		}
 		_ = d.Set("fhir_json", string(jsonResource))
 	default:
 		return diag.FromErr(fmt.Errorf("unsupported FHIR version '%s'", version))
