@@ -226,31 +226,34 @@ func setScopes(client *mdm.Client, iamClient *iam.Client, d *schema.ResourceData
 	// Set IAM scopes
 	iamScopes := tools.ExpandStringList(d.Get("iam_scopes").(*schema.Set).List())
 	iamDefaultScopes := tools.ExpandStringList(d.Get("iam_default_scopes").(*schema.Set).List())
-	iamResource, _, err := iamClient.Clients.GetClientByID(resource.ClientGuid.Value)
-	if err != nil {
-		return fmt.Errorf("get IAM OAuth client: %v", err)
-	}
-	// Merge MDM scopes and IAM scopes
-	combinedDefaultScopes := append(defaultScopes, iamDefaultScopes...)
-	combinedScopes := append(scopes, iamScopes...)
-	_, _, err = iamClient.Clients.UpdateScopes(*iamResource, combinedScopes, combinedDefaultScopes)
+	if resource.ClientGuid != nil {
+		iamResource, _, err := iamClient.Clients.GetClientByID(resource.ClientGuid.Value)
+		if err != nil {
+			return fmt.Errorf("get IAM OAuth client: %v", err)
+		}
+		// Merge MDM scopes and IAM scopes
+		combinedDefaultScopes := append(defaultScopes, iamDefaultScopes...)
+		combinedScopes := append(scopes, iamScopes...)
+		_, _, err = iamClient.Clients.UpdateScopes(*iamResource, combinedScopes, combinedDefaultScopes)
 
-	if err != nil {
-		return fmt.Errorf("updating IAM OAuth client scopes: %v", err)
+		if err != nil {
+			return fmt.Errorf("updating IAM OAuth client scopes: %v", err)
+		}
 	}
-
 	bootstrapIamScopes := tools.ExpandStringList(d.Get("bootstrap_client_iam_scopes").(*schema.Set).List())
 	bootstrapIamDefaultScopes := tools.ExpandStringList(d.Get("bootstrap_client_iam_default_scopes").(*schema.Set).List())
-	bootstrapIamResource, _, err := iamClient.Clients.GetClientByID(resource.BootstrapClientGuid.Value)
-	if err != nil {
-		return fmt.Errorf("get IAM OAuth bootstrap client: %v", err)
+
+	if resource.BootstrapClientGuid != nil {
+		bootstrapIamResource, _, err := iamClient.Clients.GetClientByID(resource.BootstrapClientGuid.Value)
+		if err != nil {
+			return fmt.Errorf("get IAM OAuth bootstrap client: %v", err)
+		}
+
+		// Merge MDM scopes and IAM scopes
+		combinedBootstrapDefaultScopes := append(bootstrapDefaultScopes, bootstrapIamDefaultScopes...)
+		combinedBootstrapScopes := append(bootstrapScopes, bootstrapIamScopes...)
+		_, _, err = iamClient.Clients.UpdateScopes(*bootstrapIamResource, combinedBootstrapScopes, combinedBootstrapDefaultScopes)
 	}
-
-	// Merge MDM scopes and IAM scopes
-	combinedBootstrapDefaultScopes := append(bootstrapDefaultScopes, bootstrapIamDefaultScopes...)
-	combinedBootstrapScopes := append(bootstrapScopes, bootstrapIamScopes...)
-	_, _, err = iamClient.Clients.UpdateScopes(*bootstrapIamResource, combinedBootstrapScopes, combinedBootstrapDefaultScopes)
-
 	return err
 }
 
