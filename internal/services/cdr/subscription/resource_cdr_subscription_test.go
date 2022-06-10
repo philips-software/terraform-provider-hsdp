@@ -100,6 +100,8 @@ resource "hsdp_cdr_org" "test" {
   org_id      = hsdp_iam_org.test.id
 
   version     = "%s"
+
+  depends_on = [hsdp_iam_group.cdr_admins]
 }
 
 resource "hsdp_cdr_subscription" "test" {
