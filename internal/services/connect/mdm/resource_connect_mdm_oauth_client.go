@@ -244,9 +244,9 @@ func setScopes(client *mdm.Client, iamClient *iam.Client, d *schema.ResourceData
 	bootstrapIamDefaultScopes := tools.ExpandStringList(d.Get("bootstrap_client_iam_default_scopes").(*schema.Set).List())
 
 	if resource.BootstrapClientGuid != nil {
-		bootstrapIamResource, _, err := iamClient.Clients.GetClientByID(resource.BootstrapClientGuid.Value)
-		if err != nil {
-			return fmt.Errorf("get IAM OAuth bootstrap client: %v", err)
+		bootstrapIamResource, _, intErr := iamClient.Clients.GetClientByID(resource.BootstrapClientGuid.Value)
+		if intErr != nil {
+			return fmt.Errorf("get IAM OAuth bootstrap client: %v", intErr)
 		}
 
 		// Merge MDM scopes and IAM scopes
