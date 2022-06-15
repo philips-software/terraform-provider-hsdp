@@ -37,17 +37,17 @@ func DataSourceCDRPractitioner() *schema.Resource {
 				Computed: true,
 			},
 			"identity_systems": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     tools.StringSchema(),
 			},
 			"identity_values": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     tools.StringSchema(),
 			},
 			"identity_uses": {
-				Type:     schema.TypeSet,
+				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     tools.StringSchema(),
 			},
@@ -109,10 +109,16 @@ func dataSourceCDRPropositionRead(ctx context.Context, d *schema.ResourceData, m
 		_ = d.Set("fhir_json", string(jsonResource))
 		if resource.Identifier != nil && len(resource.Identifier) > 0 {
 			var uses []string
+			var systems []string
+			var values []string
 			for _, i := range resource.Identifier {
 				uses = append(uses, r4idhelper.UseToString(i.Use))
+				systems = append(systems, i.System.GetValue())
+				values = append(values, i.Value.GetValue())
 			}
-			_ = d.Set("identity_uses", tools.SchemaSetStrings(uses))
+			_ = d.Set("identity_uses", uses)
+			_ = d.Set("identity_systems", systems)
+			_ = d.Set("identity_values", values)
 		}
 	case "stu3", "":
 		var contained *resources_go_proto.ContainedResource
@@ -149,10 +155,16 @@ func dataSourceCDRPropositionRead(ctx context.Context, d *schema.ResourceData, m
 		_ = d.Set("fhir_json", string(jsonResource))
 		if resource.Identifier != nil && len(resource.Identifier) > 0 {
 			var uses []string
+			var systems []string
+			var values []string
 			for _, i := range resource.Identifier {
 				uses = append(uses, stu3idhelper.UseToString(i.Use))
+				systems = append(systems, i.System.String())
+				values = append(values, i.Value.String())
 			}
-			_ = d.Set("identity_uses", tools.SchemaSetStrings(uses))
+			_ = d.Set("identity_uses", uses)
+			_ = d.Set("identity_systems", systems)
+			_ = d.Set("identity_values", values)
 		}
 	default:
 		return diag.FromErr(fmt.Errorf("unsupported FHIR version '%s'", version))

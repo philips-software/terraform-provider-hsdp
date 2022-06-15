@@ -31,6 +31,10 @@ func TestAccDatasourceCDRPractitioner_basic(t *testing.T) {
 				Config:       testAccDatasourceCDRPractitioner(cdrURL, parentOrgID, randomNameSTU3, "stu3"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "identifier.#", "1"),
+					resource.TestCheckResourceAttr("data.hsdp_cdr_practitioner.test", "identity_uses.#", "1"),
+					resource.TestCheckResourceAttr("data.hsdp_cdr_practitioner.test", "identity_values.#", "1"),
+					resource.TestCheckResourceAttr("data.hsdp_cdr_practitioner.test", "identity_systems.#", "1"),
+					resource.TestCheckResourceAttr("data.hsdp_cdr_practitioner.test", "identity_systems.#", "1"),
 				),
 			},
 		},
@@ -48,6 +52,9 @@ func TestAccDatasourceCDRPractitioner_basic(t *testing.T) {
 				Config:       testAccDatasourceCDRPractitioner(cdrURL, parentOrgID, randomNameR4, "r4"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "identifier.#", "1"),
+					resource.TestCheckResourceAttr("data.hsdp_cdr_practitioner.test", "identity_uses.#", "1"),
+					resource.TestCheckResourceAttr("data.hsdp_cdr_practitioner.test", "identity_values.#", "1"),
+					resource.TestCheckResourceAttr("data.hsdp_cdr_practitioner.test", "identity_values.0", "amos.burton@hsdp.io"),
 				),
 			},
 		},

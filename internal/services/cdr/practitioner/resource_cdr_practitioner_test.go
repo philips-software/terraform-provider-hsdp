@@ -31,6 +31,7 @@ func TestAccResourceCDRPractitioner_basic(t *testing.T) {
 				Config:       testAccResourceCDRPractitioner(cdrURL, parentOrgID, randomNameSTU3, "stu3"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "identifier.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "identifier.0.value", "ron.swanson@hsdp.io"),
 				),
 			},
 		},
@@ -48,6 +49,7 @@ func TestAccResourceCDRPractitioner_basic(t *testing.T) {
 				Config:       testAccResourceCDRPractitioner(cdrURL, parentOrgID, randomNameR4, "r4"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "identifier.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "identifier.0.value", "ron.swanson@hsdp.io"),
 				),
 			},
 		},
