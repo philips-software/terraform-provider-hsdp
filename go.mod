@@ -13,12 +13,12 @@ require (
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.17.0
-	github.com/hasura/go-graphql-client v0.7.0
+	github.com/hasura/go-graphql-client v0.7.1
 	github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152
 	github.com/loafoe/easyssh-proxy/v2 v2.0.4
 	github.com/philips-labs/ferrite v0.1.2
 	github.com/philips-labs/siderite v0.12.2
-	github.com/philips-software/go-hsdp-api v0.70.2
+	github.com/philips-software/go-hsdp-api v0.70.3-0.20220615204032-672c85fb5303
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.7.2
