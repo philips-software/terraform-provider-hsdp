@@ -65,7 +65,7 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 		return diag.FromErr(err)
 	}
 
-	d.SetId(onboardedOrg.Id.Value)
+	d.SetId(onboardedOrg.Id.GetValue())
 	return r4Read(ctx, client, d)
 }
 
@@ -75,7 +75,7 @@ func r4Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) dia
 	var resp *cdr.Response
 	var err error
 
-	orgID := d.Get("org_id").(string)
+	orgID := d.Id()
 
 	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
 		org, resp, err = client.TenantR4.GetOrganizationByID(orgID)

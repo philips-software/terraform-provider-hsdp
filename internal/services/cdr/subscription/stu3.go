@@ -65,7 +65,7 @@ func stu3Create(_ context.Context, c *config.Config, client *cdr.Client, d *sche
 		return diag.FromErr(fmt.Errorf("create subscription: %w", err))
 	}
 	createdSub := contained.GetSubscription()
-	d.SetId(createdSub.Id.Value)
+	d.SetId(createdSub.Id.GetValue())
 	return diags
 }
 

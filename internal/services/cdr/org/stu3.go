@@ -66,7 +66,7 @@ func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sc
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	d.SetId(onboardedOrg.Id.Value)
+	d.SetId(onboardedOrg.Id.GetValue())
 	return stu3Read(ctx, client, d)
 }
 
@@ -76,7 +76,7 @@ func stu3Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) d
 	var resp *cdr.Response
 	var org *resources_go_proto.Organization
 
-	orgID := d.Get("org_id").(string)
+	orgID := d.Id()
 
 	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
 		org, resp, err = client.TenantSTU3.GetOrganizationByID(orgID)
