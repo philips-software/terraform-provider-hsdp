@@ -88,6 +88,8 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 
 	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
 		var resp *cdr.Response
+		var err error
+
 		contained, resp, err = client.OperationsR4.Post("Practitioner", jsonResource)
 		if err != nil {
 			_ = client.TokenRefresh()
@@ -105,21 +107,33 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 	return diags
 }
 
-func r4Read(_ context.Context, _ *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+func r4Read(ctx context.Context, _ *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
+	var contained *r4pb.ContainedResource
+	var resp *cdr.Response
 
-	contained, resp, err := client.OperationsR4.Get("Practitioner/" + d.Id())
+	err := tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+		var err error
+
+		contained, resp, err = client.OperationsR4.Get("Practitioner/" + d.Id())
+
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, fmt.Errorf("OperationsR4.Get: response is nil")
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
 			return diags
 		}
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  fmt.Errorf("practitioner read: %w", err).Error(),
-			})
-		}
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  fmt.Errorf("practitioner read: %w", err).Error(),
+		})
 		return diags
 	}
 	resource := contained.GetPractitioner()
