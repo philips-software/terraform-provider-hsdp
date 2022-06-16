@@ -21,6 +21,8 @@ import (
 )
 
 func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	orgID := d.Get("org_id").(string)
 	name := d.Get("name").(string)
 	partOf := d.Get("part_of").(string)
@@ -66,7 +68,7 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 	}
 
 	d.SetId(onboardedOrg.Id.GetValue())
-	return r4Read(ctx, client, d)
+	return diags
 }
 
 func r4Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) diag.Diagnostics {

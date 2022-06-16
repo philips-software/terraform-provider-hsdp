@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/cenkalti/backoff"
 	"github.com/google/fhir/go/proto/google/fhir/proto/stu3/resources_go_proto"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -17,7 +16,8 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
-func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
 	var contained *resources_go_proto.ContainedResource
 
 	names := schemaToName(d)
@@ -42,25 +42,25 @@ func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sc
 		return diag.FromErr(err)
 	}
 
-	operation := func() error {
+	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
 		var resp *cdr.Response
-		contained, resp, err = client.OperationsSTU3.Post("Practitioner", jsonResource)
-		if resp == nil {
-			if err != nil {
-				return err
-			}
-			return fmt.Errorf("OperationsSTU3.Post: response is nil")
-		}
-		return tools.CheckForIAMPermissionErrors(client, resp.Response, err)
-	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+		var err error
 
+		contained, resp, err = client.OperationsSTU3.Post("Practitioner", jsonResource)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, fmt.Errorf("OperationsSTU3.Post: response is nil")
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("create practitioner: %w", err))
 	}
 	createdResource := contained.GetPractitioner()
-	d.SetId(createdResource.Id.Value)
-	return stu3Read(ctx, c, client, d, m)
+	d.SetId(createdResource.Id.GetValue())
+	return diags
 }
 
 func stu3Read(_ context.Context, _ *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {

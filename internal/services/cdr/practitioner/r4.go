@@ -60,7 +60,9 @@ func schemaToIdentifier(d *schema.ResourceData) []identifier {
 	return resources
 }
 
-func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	names := schemaToName(d)
 	identifiers := schemaToIdentifier(d)
 
@@ -84,9 +86,12 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 	}
 	var contained *r4pb.ContainedResource
 
-	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
 		var resp *cdr.Response
 		contained, resp, err = client.OperationsR4.Post("Practitioner", jsonResource)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
 		if resp == nil {
 			return nil, fmt.Errorf("OperationsR4.Post: response is nil")
 		}
@@ -96,8 +101,8 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 		return diag.FromErr(fmt.Errorf("create practitioner: %w", err))
 	}
 	createdResource := contained.GetPractitioner()
-	d.SetId(createdResource.Id.Value)
-	return r4Read(ctx, c, client, d, m)
+	d.SetId(createdResource.Id.GetValue())
+	return diags
 }
 
 func r4Read(_ context.Context, _ *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {

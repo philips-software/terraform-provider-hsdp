@@ -21,6 +21,8 @@ import (
 )
 
 func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
 	orgID := d.Get("org_id").(string)
 	name := d.Get("name").(string)
 	partOf := d.Get("part_of").(string)
@@ -67,7 +69,7 @@ func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sc
 		return diag.FromErr(err)
 	}
 	d.SetId(onboardedOrg.Id.GetValue())
-	return stu3Read(ctx, client, d)
+	return diags
 }
 
 func stu3Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) diag.Diagnostics {
