@@ -98,7 +98,7 @@ resource "hsdp_iam_group" "cdr_admins" {
 resource "hsdp_cdr_org" "test" {
   fhir_store  = data.hsdp_cdr_fhir_store.sandbox.endpoint
 
-  name        = "%s"
+  name        = "Practitioner Resource Test %s"
   org_id      = hsdp_iam_org.test.id
 
   version     = "%s"
