@@ -20,7 +20,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
-func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	orgID := d.Get("org_id").(string)
@@ -40,17 +40,8 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 		}
 	}
 	var onboardedOrg *r4pb.Organization
-	var resp *cdr.Response
 
-	onboardedOrg, resp, err = client.TenantR4.GetOrganizationByID(orgID)
-	if err == nil && onboardedOrg != nil && resp != nil {
-		if resp.StatusCode != http.StatusGone {
-			d.SetId(onboardedOrg.Id.Value)
-			return resourceCDROrgUpdate(ctx, d, m)
-		}
-	}
-
-	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var resp *cdr.Response
 		var err error
 		onboardedOrg, resp, err = client.TenantR4.Onboard(org)
@@ -78,7 +69,7 @@ func r4Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) dia
 
 	id := d.Id()
 
-	err := tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+	err := tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var err error
 
 		org, resp, err = client.TenantR4.GetOrganizationByID(id)

@@ -112,7 +112,7 @@ func r4Read(ctx context.Context, _ *config.Config, client *cdr.Client, d *schema
 	var contained *r4pb.ContainedResource
 	var resp *cdr.Response
 
-	err := tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+	err := tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var err error
 
 		contained, resp, err = client.OperationsR4.Get("Practitioner/" + d.Id())
