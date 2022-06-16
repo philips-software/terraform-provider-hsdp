@@ -71,7 +71,6 @@ ensuring proper lifecycle handling by Terraform
   * `text` - (Required) The text representation of the name
   * `given` - (Required, list(string)) The list of given names
   * `first` - (Required) The first name
-  * `version` - (Optional) The FHIR version to use. Options [ `stu3` | `r4` ]. Default is `stu3`
 
 !> Switching FHIR versions causes the resource to be replaced, so be careful with this.
 
@@ -79,7 +78,7 @@ ensuring proper lifecycle handling by Terraform
 
 The following attributes are exported:
 
-* `id` - The GUID of the practitioner
+* `id` - The unique GUID of the practitioner in the CDR instance
 * `version_id` - The version of the resource
 * `last_updated` - Last update time
 
