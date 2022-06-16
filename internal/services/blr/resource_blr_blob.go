@@ -267,7 +267,7 @@ func resourceBLRBlobRead(ctx context.Context, d *schema.ResourceData, m interfac
 	id := d.Id()
 	var resource *blr.Blob
 	var resp *blr.Response
-	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var err error
 		resource, resp, err = client.Blobs.GetByID(id)
 		if err != nil {

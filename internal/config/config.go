@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/go-retryablehttp"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/ai"
 	"github.com/philips-software/go-hsdp-api/ai/inference"
 	"github.com/philips-software/go-hsdp-api/ai/workspace"
@@ -134,16 +133,12 @@ func (c *Config) MDMClient() (*mdm.Client, error) {
 	return c.mdmClient, c.mdmClientErr
 }
 
-func (c *Config) BLRClient(s ...*schema.ResourceData) (*blr.Client, error) {
-	if len(s) == 0 || s[0] == nil {
-		return c.blrClient, c.blrClientErr
-	}
-	principal := SchemaToPrincipal(s[0])
-	// Use principal
-	iamClient, err := c.IAMClient(*principal)
+func (c *Config) BLRClient(principal ...Principal) (*blr.Client, error) {
+	iamClient, err := c.IAMClient(principal...)
 	if err != nil {
 		return nil, err
 	}
+	// TODO: figure out how to handle region / environment / debuglog from principal
 	return blr.NewClient(iamClient, &blr.Config{
 		Region:      c.Region,
 		Environment: c.Environment,
