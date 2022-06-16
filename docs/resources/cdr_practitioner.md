@@ -31,9 +31,13 @@ resource "hsdp_cdr_org" "hospital" {
 }
 
 resource "hsdp_cdr_practitioner" "practitioner" {
+  fhir_store = hsdp_cdr_org.hospital.fhir_store
+  version = "r4"
+
   identifier {
     system = "https://iam.hsdp.io"
     value = "xx-xx"
+    use = "actual"
   }
 
   name {
@@ -54,6 +58,7 @@ The following arguments are supported:
 This creates an explicit dependency between the practitioner and the FHIR organization,
 ensuring proper lifecycle handling by Terraform
 
+* `version` - (Optional) The FHIR version to use. Options [ `stu3` | `r4` ]. Default is `stu3`
 * `identifier` - (Required) The FHIR identifier block
   * `system` - (Required) The system of the identifier e.g. HSP IAM
   * `value` - (Required) the identifier value e.g. the IAM GUID of the practitioner
