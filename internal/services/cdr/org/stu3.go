@@ -45,7 +45,7 @@ func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sc
 
 	if err == nil && onboardedOrg != nil && resp != nil {
 		if resp.StatusCode != http.StatusGone { // Only import if not soft-deleted
-			d.SetId(onboardedOrg.Id.Value)
+			d.SetId(onboardedOrg.Id.GetValue())
 			return resourceCDROrgUpdate(ctx, d, m)
 		}
 	}
@@ -72,14 +72,14 @@ func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sc
 
 func stu3Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) diag.Diagnostics {
 	var diags diag.Diagnostics
-	var err error
-	var resp *cdr.Response
 	var org *resources_go_proto.Organization
+	var resp *cdr.Response
 
-	orgID := d.Id()
+	id := d.Id()
 
-	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
-		org, resp, err = client.TenantSTU3.GetOrganizationByID(orgID)
+	err := tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+		var err error
+		org, resp, err = client.TenantSTU3.GetOrganizationByID(id)
 		if err != nil {
 			_ = client.TokenRefresh()
 		}
@@ -100,6 +100,9 @@ func stu3Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) d
 			})
 		}
 		return diags
+	}
+	if org == nil {
+		return diag.FromErr(fmt.Errorf("org is nil, this is unexpected: %w", err))
 	}
 	if org.Name != nil {
 		_ = d.Set("name", org.Name.GetValue())
