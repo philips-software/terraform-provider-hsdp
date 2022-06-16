@@ -101,10 +101,12 @@ func stu3Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) d
 		}
 		return diags
 	}
-	_ = d.Set("name", org.Name.Value)
+	if org.Name != nil {
+		_ = d.Set("name", org.Name.GetValue())
+	}
 	if org.PartOf != nil {
 		partOfOrgID := org.PartOf.GetOrganizationId()
-		_ = d.Set("part_of", partOfOrgID.Value)
+		_ = d.Set("part_of", partOfOrgID.GetValue())
 	}
 	return diags
 }
