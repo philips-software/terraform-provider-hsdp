@@ -17,9 +17,19 @@ data "hsdp_cdr_fhir_store" "sandbox" {
   fhir_org_id = var.org_id
 }
 
-resource "hsdp_cdr_subscription" "patient_changes" {
-  fhir_store = data.hsdp_cdr_fhir_store.sandbox.endpoint
+resource "hsdp_cdr_org" "test" {
+  fhir_store  = data.hsdp_cdr_fhir_store.sandbox.endpoint
+  version     = "r4"
+  
+  name        = "Hospital"
+  org_id      = hsdp_iam_org.test.id
+}
 
+resource "hsdp_cdr_subscription" "patient_changes" {
+  # Refer to the fhir_store through the CDR Organization
+  fhir_store = hsdp_cdr_org.test.fhir_store
+  version    = "r4"
+  
   criteria        = "Patient"
   reason          = "Notification for patient changes"
   endpoint        = "https://webhook.myapp.io/patient"
@@ -47,6 +57,11 @@ CDR will send a `POST` request to the endpoint with a JSON body containing:
 The following arguments are supported:
 
 * `fhir_store` - (Required) The CDR FHIR store endpoint to use
+
+~> It is highly recommended to refer to the `fhir_store` attribute of the CDR Organization.
+   This creates an explicit dependency between the subscription and the FHIR organization,
+   ensuring proper lifecycle handling by Terraform
+
 * `version` - (Optional) The FHIR version to use. Options [ `stu3` | `r4` ]. Default is `stu3`
 * `criteria` - (Required) On which resource to notify
 * `reason` - (Required) Reason for creating the subscription
