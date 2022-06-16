@@ -42,12 +42,12 @@ jobs:
           HSDP_UAA_USERNAME: ${{ secrets.HSDP_UAA_USERNAME }}
           HSDP_UAA_PASSWORD: ${{ secrets.HSDP_UAA_PASSWORD }}
           HSDP_CDR_ACC_URL: ${{ secrets.HSDP_CDR_ACC_URL }}
-          HSDP_DEBUG_LOG: debug.log
+          HSDP_DEBUG_LOG: /tmp/debug.log
       - uses: actions/upload-artifact@v3
         if: failure()
         with:
           name: debug-log
-          path: debug.log
+          path: /tmp/debug.log
   unit:
     name: Unit Tests
     runs-on: ubuntu-latest

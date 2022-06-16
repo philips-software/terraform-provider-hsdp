@@ -73,12 +73,13 @@ func r4Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) dia
 	var diags diag.Diagnostics
 	var org *r4pb.Organization
 	var resp *cdr.Response
-	var err error
 
-	orgID := d.Id()
+	id := d.Id()
 
-	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
-		org, resp, err = client.TenantR4.GetOrganizationByID(orgID)
+	err := tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+		var err error
+
+		org, resp, err = client.TenantR4.GetOrganizationByID(id)
 		if err != nil {
 			_ = client.TokenRefresh()
 		}
@@ -93,16 +94,14 @@ func r4Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) dia
 			d.SetId("")
 			return diags
 		}
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  err.Error(),
-			})
-		}
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  err.Error(),
+		})
 		return diags
 	}
 	if org == nil {
-		return diag.FromErr(fmt.Errorf("org is nil, this is unexpected: %w", err))
+		return diag.FromErr(fmt.Errorf("org is nil, this is unexpected (id=%s): %w", id, err))
 	}
 	if org.Name != nil {
 		_ = d.Set("name", org.Name.GetValue())
