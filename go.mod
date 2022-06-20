@@ -3,7 +3,6 @@ module github.com/philips-software/terraform-provider-hsdp
 go 1.18
 
 require (
-	github.com/cenkalti/backoff v2.2.1+incompatible
 	github.com/cenkalti/backoff/v4 v4.1.3
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/google/fhir/go v0.0.0-20201203001644-a2580b6ea022
@@ -59,7 +58,6 @@ require (
 	github.com/hashicorp/terraform-registry-address v0.0.0-20210412075316-9b2996cce896 // indirect
 	github.com/hashicorp/terraform-svchost v0.0.0-20200729002733-f050f53b9734 // indirect
 	github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d // indirect
-	github.com/hasura/go-graphql-client v0.7.1 // indirect
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/klauspost/compress v1.11.7 // indirect
 	github.com/labstack/echo/v4 v4.2.2 // indirect
