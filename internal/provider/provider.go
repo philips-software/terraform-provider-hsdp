@@ -366,6 +366,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_container_host":                        ch.DataSourceContainerHost(),
 			"hsdp_iam_permission":                        iam.DataSourceIAMPermission(),
 			"hsdp_cdr_practitioner":                      practitioner.DataSourceCDRPractitioner(),
+			"hsdp_cdr_org":                               org.DataSourceCDROrg(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
