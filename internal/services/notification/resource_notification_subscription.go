@@ -3,6 +3,7 @@ package notification
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/cenkalti/backoff/v4"
@@ -18,6 +19,7 @@ func ResourceNotificationSubscription() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CreateContext: resourceNotificationSubscriptionCreate,
+		UpdateContext: resourceNotificationSubscriptionUpdate,
 		ReadContext:   resourceNotificationSubscriptionRead,
 		DeleteContext: resourceNotificationSubscriptionDelete,
 
@@ -40,11 +42,19 @@ func ResourceNotificationSubscription() *schema.Resource {
 			"soft_delete": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: true,
 				Default:  false,
 			},
 		},
 	}
+}
+
+func resourceNotificationSubscriptionUpdate(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if !d.HasChanges("soft_delete") {
+		return diag.FromErr(fmt.Errorf("only 'soft_delete' can be updated, this is provider bug"))
+	}
+	return diags
 }
 
 func resourceNotificationSubscriptionDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
