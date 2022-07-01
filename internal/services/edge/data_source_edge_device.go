@@ -59,7 +59,7 @@ func dataSourceEdgeDeviceRead(ctx context.Context, d *schema.ResourceData, m int
 
 	endpoint := d.Get("endpoint").(string)
 	if endpoint != "" {
-		client, err = c.STLClient(endpoint)
+		client, err = c.STLClient(config.Principal{Endpoint: endpoint})
 	} else {
 		client, err = c.STLClient()
 	}

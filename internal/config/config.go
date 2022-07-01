@@ -72,7 +72,44 @@ type Config struct {
 	R4UM   *jsonformat.Unmarshaller
 }
 
-func (c *Config) IAMClient() (*iam.Client, error) {
+func (c *Config) IAMClient(principal ...Principal) (*iam.Client, error) {
+	if len(principal) > 0 {
+		p := principal[0]
+		cfg := c.Config
+		if p.OAuth2ClientID != "" {
+			cfg.OAuth2ClientID = p.OAuth2ClientID
+		}
+		if p.OAuth2Password != "" {
+			cfg.OAuth2Secret = p.OAuth2Password
+		}
+		if p.Environment != "" {
+			cfg.Environment = p.Environment
+		}
+		if p.Region != "" {
+			cfg.Region = p.Region
+		}
+		iamClient, err := iam.NewClient(nil, &cfg)
+		if err != nil {
+			return nil, err
+		}
+		if p.Username != "" {
+			err := iamClient.Login(p.Username, p.Password)
+			if err != nil {
+				return nil, err
+			}
+			return iamClient, nil
+		}
+		if p.ServiceID != "" {
+			err := iamClient.ServiceLogin(iam.Service{
+				ServiceID:  p.ServiceID,
+				PrivateKey: p.ServicePrivateKey,
+			})
+			if err != nil {
+				return nil, err
+			}
+		}
+		return iamClient, nil
+	}
 	return c.iamClient, c.iamClientErr
 }
 
@@ -92,14 +129,14 @@ func (c *Config) MDMClient() (*mdm.Client, error) {
 	return c.mdmClient, c.mdmClientErr
 }
 
-func (c *Config) STLClient(_ ...string) (*stl.Client, error) {
+func (c *Config) STLClient(_ ...Principal) (*stl.Client, error) {
 	return c.stlClient, c.stlClientErr
 }
 
-func (c *Config) DockerClient(region ...string) (*docker.Client, error) {
+func (c *Config) DockerClient(principal ...Principal) (*docker.Client, error) {
 	r := c.Region
-	if len(region) > 0 {
-		r = region[0]
+	if len(principal) > 0 {
+		r = principal[0].Region
 	}
 	if c.consoleClientErr != nil {
 		return nil, c.consoleClientErr
@@ -109,10 +146,10 @@ func (c *Config) DockerClient(region ...string) (*docker.Client, error) {
 	})
 }
 
-func (c *Config) PKIClient(regionEnvironment ...string) (*pki.Client, error) {
-	if len(regionEnvironment) == 2 && c.consoleClient != nil && c.iamClient != nil {
-		region := regionEnvironment[0]
-		environment := regionEnvironment[1]
+func (c *Config) PKIClient(principal ...Principal) (*pki.Client, error) {
+	if len(principal) > 0 && c.consoleClient != nil && c.iamClient != nil {
+		region := principal[0].Region
+		environment := principal[0].Environment
 		return pki.NewClient(c.consoleClient, c.iamClient, &pki.Config{
 			Region:      region,
 			Environment: environment,

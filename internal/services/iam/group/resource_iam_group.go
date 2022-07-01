@@ -131,7 +131,7 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 	// Add users
 	users := tools.ExpandStringList(d.Get("users").(*schema.Set).List())
 	if len(users) > 0 {
-		err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
 			result, resp, err := client.Groups.AddMembers(*createdGroup, users...)
 			if resp == nil {
 				return nil, err
@@ -152,7 +152,7 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 	// Add services
 	services := tools.ExpandStringList(d.Get("services").(*schema.Set).List())
 	if len(services) > 0 {
-		err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
 			result, resp, err := client.Groups.AddServices(*createdGroup, services...)
 			if resp == nil {
 				return nil, err
@@ -309,7 +309,7 @@ func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		toRemove := tools.Difference(old, newList)
 
 		if len(toRemove) > 0 {
-			err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+			err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
 				_, resp, err := client.Groups.RemoveServices(group, toRemove...)
 				if resp == nil {
 					return nil, err
@@ -321,7 +321,7 @@ func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m inter
 			}
 		}
 		if len(toAdd) > 0 {
-			err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+			err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
 				_, resp, err := client.Groups.AddServices(group, toAdd...)
 				if resp == nil {
 					return nil, err
