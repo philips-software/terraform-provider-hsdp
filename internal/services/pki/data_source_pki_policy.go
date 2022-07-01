@@ -46,7 +46,7 @@ func dataSourcePKIPolicyRead(_ context.Context, d *schema.ResourceData, meta int
 	region := d.Get("region").(string)
 	environment := d.Get("environment").(string)
 	if region != "" || environment != "" {
-		client, err = c.PKIClient(region, environment)
+		client, err = c.PKIClient(config.Principal{Region: region, Environment: environment})
 	} else {
 		client, err = c.PKIClient()
 	}
