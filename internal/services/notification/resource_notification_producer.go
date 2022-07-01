@@ -3,6 +3,7 @@ package notification
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/cenkalti/backoff/v4"
@@ -10,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/notification"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func ResourceNotificationProducer() *schema.Resource {
@@ -22,6 +24,12 @@ func ResourceNotificationProducer() *schema.Resource {
 		DeleteContext: resourceNotificationProducerDelete,
 
 		Schema: map[string]*schema.Schema{
+			"principal": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem:     config.PrincipalSchema(),
+			},
 			"managing_organization_id": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -75,7 +83,10 @@ func ResourceNotificationProducer() *schema.Resource {
 func resourceNotificationProducerDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*config.Config)
-	client, err := c.NotificationClient()
+
+	principal := config.SchemaToPrincipal(d, m)
+
+	client, err := c.NotificationClient(principal)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -100,7 +111,10 @@ func resourceNotificationProducerDelete(_ context.Context, d *schema.ResourceDat
 func resourceNotificationProducerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*config.Config)
-	client, err := c.NotificationClient()
+
+	principal := config.SchemaToPrincipal(d, m)
+
+	client, err := c.NotificationClient(principal)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -136,7 +150,9 @@ func resourceNotificationProducerRead(_ context.Context, d *schema.ResourceData,
 
 func resourceNotificationProducerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
-	client, err := c.NotificationClient()
+	principal := config.SchemaToPrincipal(d, m)
+
+	client, err := c.NotificationClient(principal)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -155,13 +171,17 @@ func resourceNotificationProducerCreate(ctx context.Context, d *schema.ResourceD
 
 	var created *notification.Producer
 
-	operation := func() error {
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var resp *notification.Response
-		_ = client.TokenRefresh()
 		created, resp, err = client.Producer.CreateProducer(producer)
-		return checkForNotificationPermissionErrors(client, resp, err)
-	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, fmt.Errorf("Producer.CreateProducer: response is nil")
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
