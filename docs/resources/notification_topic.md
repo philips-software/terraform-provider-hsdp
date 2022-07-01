@@ -53,7 +53,6 @@ Private topics will not allow * for the organization value.
   * `environment` - (Optional) Environment to use. When not set, the provider config is used
   * `endpoint` - (Optional) The endpoint URL to use if applicable. When not set, the provider config is used
 
-
 ## Attribute reference
 
 * `id` - The topic ID
