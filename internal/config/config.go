@@ -10,7 +10,6 @@ import (
 	"github.com/philips-software/go-hsdp-api/ai"
 	"github.com/philips-software/go-hsdp-api/ai/inference"
 	"github.com/philips-software/go-hsdp-api/ai/workspace"
-	"github.com/philips-software/go-hsdp-api/blr"
 	"github.com/philips-software/go-hsdp-api/cartel"
 	"github.com/philips-software/go-hsdp-api/cdl"
 	"github.com/philips-software/go-hsdp-api/cdr"
@@ -45,7 +44,6 @@ type Config struct {
 	UAAUsername         string
 	UAAPassword         string
 	UAAURL              string
-	BLRURL              string
 	AIInferenceEndpoint string
 	AIWorkspaceEndpoint string
 
@@ -57,8 +55,6 @@ type Config struct {
 	stlClient             *stl.Client
 	notificationClient    *notification.Client
 	mdmClient             *mdm.Client
-	blrClient             *blr.Client
-	blrClientErr          error
 	DebugFile             *os.File
 	credsClientErr        error
 	cartelClientErr       error
@@ -131,19 +127,6 @@ func (c *Config) ConsoleClient() (*console.Client, error) {
 
 func (c *Config) MDMClient() (*mdm.Client, error) {
 	return c.mdmClient, c.mdmClientErr
-}
-
-func (c *Config) BLRClient(principal ...Principal) (*blr.Client, error) {
-	iamClient, err := c.IAMClient(principal...)
-	if err != nil {
-		return nil, err
-	}
-	// TODO: figure out how to handle region / environment / debuglog from principal
-	return blr.NewClient(iamClient, &blr.Config{
-		Region:      c.Region,
-		Environment: c.Environment,
-		DebugLog:    c.DebugLog,
-	})
 }
 
 func (c *Config) STLClient(_ ...Principal) (*stl.Client, error) {
@@ -326,41 +309,6 @@ func (c *Config) SetupNotificationClient() {
 		return
 	}
 	c.notificationClient = client
-}
-
-func (c *Config) SetupBLRClient() {
-	if c.iamClientErr != nil {
-		c.blrClient = nil
-		c.blrClientErr = c.iamClientErr
-		return
-	}
-	if c.BLRURL == "" {
-		env := c.Environment
-		if env == "" {
-			env = "prod"
-		}
-		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(env))
-		if err == nil {
-			url := ac.Service("blr").URL
-			if url != "" {
-				c.BLRURL = url
-			} else {
-				c.blrClient = nil
-				c.blrClientErr = fmt.Errorf("missing BLR URL (%s/%s), you can set a custom value using 'blr_url'", env, c.Region)
-				return
-			}
-		}
-	}
-	client, err := blr.NewClient(c.iamClient, &blr.Config{
-		BaseURL:  c.BLRURL,
-		DebugLog: c.DebugLog,
-	})
-	if err != nil {
-		c.blrClient = nil
-		c.blrClientErr = fmt.Errorf("configuration error (%s/%s): %w", c.Environment, c.Region, err)
-		return
-	}
-	c.blrClient = client
 }
 
 func (c *Config) SetupMDMClient() {

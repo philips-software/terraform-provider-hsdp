@@ -10,7 +10,6 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/ai/inference"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/ai/workspace"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/blr"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdl"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/fhir_store"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/org"
@@ -95,11 +94,6 @@ func Provider(build string) *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: descriptions["mdm_url"],
-			},
-			"blr_url": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: descriptions["blr_url"],
 			},
 			"service_id": {
 				Type:          schema.TypeString,
@@ -300,7 +294,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_firmware_distribution_request": mdm.ResourceConnectMDMFirmwareDistributionRequest(),
 			"hsdp_iam_group_membership":                      iam.ResourceIAMGroupMembership(),
 			"hsdp_dicom_notification":                        dicom.ResourceDICOMNotification(),
-			"hsdp_blr_blob":                                  blr.ResourceBLRBlob(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                        iam.DataSourceIAMIntrospect(),
@@ -404,7 +397,6 @@ func init() {
 		"uaa_username":        "The username of the Cloudfoundry account to use",
 		"uaa_password":        "The password of the Cloudfoundry account to use",
 		"uaa_url":             "The URL of the UAA server",
-		"blr_url":             "The URL of the Blob Repository service",
 	}
 }
 
@@ -442,7 +434,6 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.TimeZone = "UTC"
 		c.AIInferenceEndpoint = d.Get("ai_inference_endpoint").(string)
 		c.MDMURL = d.Get("mdm_url").(string)
-		c.BLRURL = d.Get("blr_url").(string)
 
 		c.SetupIAMClient()
 		c.SetupS3CredsClient()
@@ -452,7 +443,6 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.SetupSTLClient()
 		c.SetupNotificationClient()
 		c.SetupMDMClient()
-		c.SetupBLRClient()
 
 		if c.DebugLog != "" {
 			debugFile, err := os.OpenFile(c.DebugLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
