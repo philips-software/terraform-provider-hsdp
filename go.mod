@@ -19,7 +19,7 @@ require (
 	github.com/philips-software/go-hsdp-api v0.71.0
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/stretchr/testify v1.7.2
+	github.com/stretchr/testify v1.8.0
 	golang.org/x/exp v0.0.0-20220407100705-7b9b53b0aca4
 )
 
