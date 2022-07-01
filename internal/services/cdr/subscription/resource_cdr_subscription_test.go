@@ -3,6 +3,7 @@ package subscription_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -15,6 +16,7 @@ func TestAccResourceCDRSubscription_basic(t *testing.T) {
 	resourceName := "hsdp_cdr_subscription.test"
 	parentOrgID := acc.AccIAMOrgGUID()
 	cdrURL := acc.AccCDRURL()
+	now := time.Now().Format(time.RFC3339)
 
 	randomNameSTU3 := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 	randomNameR4 := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
@@ -28,7 +30,7 @@ func TestAccResourceCDRSubscription_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccResourceCDRSubscription(cdrURL, parentOrgID, randomNameSTU3, "stu3"),
+				Config:       testAccResourceCDRSubscription(cdrURL, parentOrgID, randomNameSTU3, now, "stu3"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "status", "REQUESTED"),
 				),
@@ -45,7 +47,7 @@ func TestAccResourceCDRSubscription_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccResourceCDRSubscription(cdrURL, parentOrgID, randomNameR4, "r4"),
+				Config:       testAccResourceCDRSubscription(cdrURL, parentOrgID, randomNameR4, now, "r4"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "status", "REQUESTED"),
 				),
@@ -54,7 +56,7 @@ func TestAccResourceCDRSubscription_basic(t *testing.T) {
 	})
 }
 
-func testAccResourceCDRSubscription(cdrURL, parentOrgID, name, version string) string {
+func testAccResourceCDRSubscription(cdrURL, parentOrgID, name, now, version string) string {
 	return fmt.Sprintf(`
 
 data "hsdp_cdr_fhir_store" "sandbox" {
@@ -71,7 +73,7 @@ data "hsdp_iam_service" "service" {
 
 resource "hsdp_iam_org" "test" {
   name  = "%s"
-  description = "Acceptance Test CDR %s"
+  description = "Acceptance Test CDR %s %s"
   parent_org_id = "%s"
 }
 
@@ -126,6 +128,7 @@ resource "hsdp_cdr_subscription" "test" {
 
 		// IAM ORG
 		name,
+		now,
 		name,
 		parentOrgID,
 

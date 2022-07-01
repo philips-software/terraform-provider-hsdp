@@ -3,6 +3,7 @@ package practitioner_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -15,6 +16,7 @@ func TestAccDatasourceCDRPractitioner_basic(t *testing.T) {
 	resourceName := "hsdp_cdr_practitioner.test"
 	parentOrgID := acc.AccIAMOrgGUID()
 	cdrURL := acc.AccCDRURL()
+	now := time.Now().Format(time.RFC3339)
 
 	randomNameSTU3 := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 	randomNameR4 := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
@@ -28,7 +30,7 @@ func TestAccDatasourceCDRPractitioner_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccDatasourceCDRPractitioner(cdrURL, parentOrgID, randomNameSTU3, "stu3"),
+				Config:       testAccDatasourceCDRPractitioner(cdrURL, parentOrgID, randomNameSTU3, now, "stu3"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "identifier.#", "1"),
 					resource.TestCheckResourceAttr("data.hsdp_cdr_practitioner.test", "identity_uses.#", "1"),
@@ -49,7 +51,7 @@ func TestAccDatasourceCDRPractitioner_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccDatasourceCDRPractitioner(cdrURL, parentOrgID, randomNameR4, "r4"),
+				Config:       testAccDatasourceCDRPractitioner(cdrURL, parentOrgID, randomNameR4, now, "r4"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "identifier.#", "1"),
 					resource.TestCheckResourceAttr("data.hsdp_cdr_practitioner.test", "identity_uses.#", "1"),
@@ -61,7 +63,7 @@ func TestAccDatasourceCDRPractitioner_basic(t *testing.T) {
 	})
 }
 
-func testAccDatasourceCDRPractitioner(cdrURL, parentOrgID, name, version string) string {
+func testAccDatasourceCDRPractitioner(cdrURL, parentOrgID, name, now, version string) string {
 	return fmt.Sprintf(`
 
 data "hsdp_cdr_fhir_store" "sandbox" {
@@ -78,7 +80,7 @@ data "hsdp_iam_service" "service" {
 
 resource "hsdp_iam_org" "test" {
   name  = "%s"
-  description = "Acceptance Test CDR %s"
+  description = "Practitioner Datasource Acceptance Test CDR %s %s"
   parent_org_id = "%s"
 }
 
@@ -145,6 +147,7 @@ data "hsdp_cdr_practitioner" "test" {
 
 		// IAM ORG
 		name,
+		now,
 		name,
 		parentOrgID,
 

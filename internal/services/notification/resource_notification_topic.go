@@ -44,6 +44,12 @@ func ResourceNotificationTopic() *schema.Resource {
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
+			"principal": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem:     config.PrincipalSchema(),
+			},
 			"is_auditable": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -65,7 +71,9 @@ func ResourceNotificationTopic() *schema.Resource {
 func resourceNotificationTopicDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*config.Config)
-	client, err := c.NotificationClient()
+	principal := config.SchemaToPrincipal(d, m)
+
+	client, err := c.NotificationClient(principal)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -90,7 +98,9 @@ func resourceNotificationTopicDelete(_ context.Context, d *schema.ResourceData, 
 func resourceNotificationTopicRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*config.Config)
-	client, err := c.NotificationClient()
+	principal := config.SchemaToPrincipal(d, m)
+
+	client, err := c.NotificationClient(principal)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -115,7 +125,9 @@ func resourceNotificationTopicRead(_ context.Context, d *schema.ResourceData, m 
 
 func resourceNotificationTopicCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
-	client, err := c.NotificationClient()
+	principal := config.SchemaToPrincipal(d, m)
+
+	client, err := c.NotificationClient(principal)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -151,7 +163,9 @@ func resourceNotificationTopicUpdate(_ context.Context, d *schema.ResourceData, 
 	var diags diag.Diagnostics
 
 	c := m.(*config.Config)
-	client, err := c.NotificationClient()
+	principal := config.SchemaToPrincipal(d, m)
+
+	client, err := c.NotificationClient(principal)
 	if err != nil {
 		return diag.FromErr(err)
 	}
