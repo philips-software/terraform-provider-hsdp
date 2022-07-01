@@ -72,8 +72,8 @@ type Config struct {
 	R4UM   *jsonformat.Unmarshaller
 }
 
-func (c *Config) IAMClient(principal ...Principal) (*iam.Client, error) {
-	if len(principal) > 0 {
+func (c *Config) IAMClient(principal ...*Principal) (*iam.Client, error) {
+	if len(principal) > 0 && principal[0] != nil {
 		p := principal[0]
 		cfg := c.Config
 		if p.OAuth2ClientID != "" {
@@ -129,13 +129,13 @@ func (c *Config) MDMClient() (*mdm.Client, error) {
 	return c.mdmClient, c.mdmClientErr
 }
 
-func (c *Config) STLClient(_ ...Principal) (*stl.Client, error) {
+func (c *Config) STLClient(_ ...*Principal) (*stl.Client, error) {
 	return c.stlClient, c.stlClientErr
 }
 
-func (c *Config) DockerClient(principal ...Principal) (*docker.Client, error) {
+func (c *Config) DockerClient(principal ...*Principal) (*docker.Client, error) {
 	r := c.Region
-	if len(principal) > 0 {
+	if len(principal) > 0 && principal[0] != nil {
 		r = principal[0].Region
 	}
 	if c.consoleClientErr != nil {
@@ -146,11 +146,15 @@ func (c *Config) DockerClient(principal ...Principal) (*docker.Client, error) {
 	})
 }
 
-func (c *Config) PKIClient(principal ...Principal) (*pki.Client, error) {
-	if len(principal) > 0 && c.consoleClient != nil && c.iamClient != nil {
+func (c *Config) PKIClient(principal ...*Principal) (*pki.Client, error) {
+	if len(principal) > 0 && principal[0] != nil && c.consoleClient != nil {
 		region := principal[0].Region
 		environment := principal[0].Environment
-		return pki.NewClient(c.consoleClient, c.iamClient, &pki.Config{
+		iamClient, err := c.IAMClient(principal...)
+		if err != nil {
+			return nil, err
+		}
+		return pki.NewClient(c.consoleClient, iamClient, &pki.Config{
 			Region:      region,
 			Environment: environment,
 			DebugLog:    c.DebugLog,
@@ -173,7 +177,30 @@ func (c *Config) S3CredsClientWithLogin(username, password string) (*s3creds.Cli
 	})
 }
 
-func (c *Config) NotificationClient() (*notification.Client, error) {
+func (c *Config) NotificationClient(principal ...*Principal) (*notification.Client, error) {
+	if len(principal) > 0 && principal[0] != nil {
+		region := principal[0].Region
+		environment := principal[0].Environment
+		iamClient, err := c.IAMClient(principal...)
+		if err != nil {
+			return nil, err
+		}
+		endpoint := principal[0].Endpoint
+		if endpoint == "" {
+			ac, err := config.New(config.WithRegion(region), config.WithEnv(environment))
+			if err == nil {
+				if url := ac.Service("notification").URL; url != "" {
+					endpoint = url
+				}
+			}
+		}
+		return notification.NewClient(iamClient, &notification.Config{
+			Region:          region,
+			Environment:     environment,
+			NotificationURL: endpoint,
+			DebugLog:        c.DebugLog,
+		})
+	}
 	return c.notificationClient, c.notificationClientErr
 }
 

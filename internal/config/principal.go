@@ -60,10 +60,12 @@ func PrincipalSchema() *schema.Resource {
 	}
 }
 
-func SchemaToPrincipal(d *schema.ResourceData) *Principal {
+func SchemaToPrincipal(d *schema.ResourceData, m interface{}) *Principal {
+	config := m.(*Config)
+
 	principal := Principal{}
 	found := false
-	if v, ok := d.GetOk("hsdp_principal"); ok {
+	if v, ok := d.GetOk("principal"); ok {
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
 			found = true
@@ -79,6 +81,14 @@ func SchemaToPrincipal(d *schema.ResourceData) *Principal {
 			principal.OAuth2Password = mVi["oauth2_password"].(string)
 		}
 	}
+	// Set defaults
+	if principal.Environment == "" {
+		principal.Environment = config.Environment
+	}
+	if principal.Region == "" {
+		principal.Region = config.Region
+	}
+
 	if !found {
 		return nil
 	}

@@ -2,19 +2,7 @@ package provider
 
 import (
 	"testing"
-
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
-
-var testAccProviders map[string]*schema.Provider
-var testAccProvider *schema.Provider
-
-func init() {
-	testAccProvider = Provider("v0.0.0")
-	testAccProviders = map[string]*schema.Provider{
-		"hsdp": testAccProvider,
-	}
-}
 
 func TestProvider(t *testing.T) {
 	if err := Provider("v0.0.0").InternalValidate(); err != nil {
@@ -23,5 +11,5 @@ func TestProvider(t *testing.T) {
 }
 
 func TestProvider_impl(t *testing.T) {
-	var _ *schema.Provider = Provider("v0.0.0")
+	var _ = Provider("v0.0.0")
 }

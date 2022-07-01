@@ -144,7 +144,7 @@ func resourceEdgeConfigDelete(ctx context.Context, d *schema.ResourceData, m int
 	var err error
 
 	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = c.STLClient(config.Principal{Endpoint: endpoint.(string)})
+		client, err = c.STLClient(&config.Principal{Endpoint: endpoint.(string)})
 	} else {
 		client, err = c.STLClient()
 	}
@@ -362,7 +362,7 @@ func resourceEdgeConfigRead(ctx context.Context, d *schema.ResourceData, m inter
 	var err error
 
 	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = c.STLClient(config.Principal{Endpoint: endpoint.(string)})
+		client, err = c.STLClient(&config.Principal{Endpoint: endpoint.(string)})
 	} else {
 		client, err = c.STLClient()
 	}
@@ -391,7 +391,7 @@ func resourceEdgeConfigCreate(ctx context.Context, d *schema.ResourceData, m int
 	var err error
 
 	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = c.STLClient(config.Principal{Endpoint: endpoint.(string)})
+		client, err = c.STLClient(&config.Principal{Endpoint: endpoint.(string)})
 	} else {
 		client, err = c.STLClient()
 	}
@@ -483,10 +483,10 @@ func getPortList(d *schema.ResourceData, field string) []int {
 func validateFirewallExceptions(d *schema.ResourceData) error {
 	log.Printf("Validating firewall Exceptions\n")
 	if v, ok := d.GetOk("firewall_exceptions"); ok {
-		foundTCP := []int{}
-		foundUDP := []int{}
-		foundEnsureTCP := []int{}
-		foundEnsureUDP := []int{}
+		var foundTCP []int
+		var foundUDP []int
+		var foundEnsureTCP []int
+		var foundEnsureUDP []int
 		vL := v.(*schema.Set).List()
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})

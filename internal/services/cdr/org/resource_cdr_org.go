@@ -27,7 +27,6 @@ func ResourceCDROrg() *schema.Resource {
 				Version: 0,
 			},
 		},
-
 		Schema: map[string]*schema.Schema{
 			"fhir_store": {
 				Type:     schema.TypeString,
