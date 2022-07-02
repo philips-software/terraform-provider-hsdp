@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/notification"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func ResourceNotificationSubscription() *schema.Resource {
@@ -33,6 +34,12 @@ func ResourceNotificationSubscription() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+			},
+			"principal": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem:     config.PrincipalSchema(),
 			},
 			"subscription_endpoint": {
 				Type:     schema.TypeString,
@@ -60,7 +67,9 @@ func resourceNotificationSubscriptionUpdate(_ context.Context, d *schema.Resourc
 func resourceNotificationSubscriptionDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*config.Config)
-	client, err := c.NotificationClient()
+	principal := config.SchemaToPrincipal(d, m)
+
+	client, err := c.NotificationClient(principal)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -85,7 +94,9 @@ func resourceNotificationSubscriptionDelete(_ context.Context, d *schema.Resourc
 func resourceNotificationSubscriptionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*config.Config)
-	client, err := c.NotificationClient()
+	principal := config.SchemaToPrincipal(d, m)
+
+	client, err := c.NotificationClient(principal)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -117,7 +128,9 @@ func resourceNotificationSubscriptionRead(_ context.Context, d *schema.ResourceD
 
 func resourceNotificationSubscriptionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
-	client, err := c.NotificationClient()
+	principal := config.SchemaToPrincipal(d, m)
+
+	client, err := c.NotificationClient(principal)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -131,13 +144,17 @@ func resourceNotificationSubscriptionCreate(ctx context.Context, d *schema.Resou
 
 	var created *notification.Subscription
 
-	operation := func() error {
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var resp *notification.Response
-		_ = client.TokenRefresh()
 		created, resp, err = client.Subscription.CreateSubscription(subscription)
-		return checkForNotificationPermissionErrors(client, resp, err)
-	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, fmt.Errorf("Subscription.CreateSubscription: response is nil")
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -10,10 +10,11 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/acc"
 )
 
-func TestAccResourceNotificationSubscriber_basic(t *testing.T) {
+// Disabled test as we cannot interact with AWS from the tests for now
+func DisabledTestAccResourceNotificationSubscription_basic(t *testing.T) {
 	t.Parallel()
 
-	resourceName := "hsdp_notification_subscriber.subscriber"
+	resourceName := "hsdp_notification_subscription.subscription"
 	randomName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 	iamOrgID := acc.AccIAMOrgGUID()
 
@@ -22,20 +23,20 @@ func TestAccResourceNotificationSubscriber_basic(t *testing.T) {
 		ProviderFactories: acc.ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceNotificationSubscriber(randomName, iamOrgID),
+				Config: testAccResourceNotificationSubscription(randomName, iamOrgID),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "description", fmt.Sprintf("acc subscriber %s", randomName)),
+					resource.TestCheckResourceAttr(resourceName, "subscription_endpoint", fmt.Sprintf("https://notification-receiver.cloud.pcftest.com/notification/UserEvent-%s", randomName)),
 				),
 			},
 		},
 	})
 }
 
-func testAccResourceNotificationSubscriber(random, parentId string) string {
+func testAccResourceNotificationSubscription(random, parentId string) string {
 	return fmt.Sprintf(`
 resource "hsdp_iam_org" "test" {
     name = "ACCTest-%s"
-    description = "ACCResourceNotificationProducer %s"
+    description = "ACCResourceNotificationTopic %s"
 
 	parent_org_id = "%s"
     wait_for_delete = false
@@ -60,8 +61,8 @@ resource "hsdp_iam_service" "test" {
 
   validity = 12
   token_validity = 3600
-  scopes = ["openid"]
-  default_scopes = ["openid"]
+  scopes = ["openid", "test", "auth_iam_organization", "auth_iam_introspect", "${hsdp_iam_org.test.id}.*.*.test"]
+  default_scopes = ["openid", "test", "auth_iam_organization", "auth_iam_introspect", "${hsdp_iam_org.test.id}.*.*.test"]
  
   application_id = hsdp_iam_application.test.id
 }
@@ -150,6 +151,43 @@ resource "hsdp_iam_group" "subscribers" {
   managing_organization = hsdp_iam_org.test.id
 }
 
+resource "hsdp_notification_producer" "producer" {
+  principal {
+    service_id          = hsdp_iam_service.test.service_id
+    service_private_key = hsdp_iam_service.test.private_key
+  }
+
+  managing_organization_id       = hsdp_iam_org.test.id
+  managing_organization          = hsdp_iam_org.test.name
+  producer_product_name          = "accProduct%s"
+  producer_service_name          = "accService%s"
+  producer_service_instance_name = "accServiceInstance%s"
+  producer_service_base_url      = "https://ns-producer.terrakube.com/"
+  producer_service_path_url      = "notification/create/%s"
+  description                    = "acc producer %s"
+
+  depends_on = [hsdp_iam_group.producer_admins]
+}
+
+resource "hsdp_notification_topic" "topic" {
+  principal {
+    service_id          = hsdp_iam_service.test.service_id
+    service_private_key = hsdp_iam_service.test.private_key
+  }
+
+  name          = "topic_%s"
+  producer_id   = hsdp_notification_producer.producer.id
+  
+  scope          = "private"
+  allowed_scopes = [
+    "${hsdp_iam_org.test.id}.*.*.test"
+  ]
+  is_auditable = true
+  description  = "acc topic %s"
+
+  depends_on = [hsdp_iam_group.producer_admins]
+}
+
 resource "hsdp_notification_subscriber" "subscriber" {
   principal {
     service_id          = hsdp_iam_service.test.service_id
@@ -167,6 +205,19 @@ resource "hsdp_notification_subscriber" "subscriber" {
   description                      = "acc subscriber %s"
 
   depends_on = [hsdp_iam_group.subscriber_admins]
+}
+
+resource "hsdp_notification_subscription" "subscription" {
+  principal {
+    service_id          = hsdp_iam_service.test.service_id
+    service_private_key = hsdp_iam_service.test.private_key
+  }
+
+  topic_id              = hsdp_notification_topic.topic.id
+  subscriber_id         = hsdp_notification_subscriber.subscriber.id
+  subscription_endpoint = "https://notification-receiver.cloud.pcftest.com/notification/UserEvent-%s"
+
+  depends_on = [hsdp_iam_group.subscriber_admins, hsdp_iam_group.subscribers]
 }
 `,
 		// IAM TEST ORG
@@ -199,6 +250,20 @@ resource "hsdp_notification_subscriber" "subscriber" {
 		random,
 		random,
 		random,
+		random,
+
+		// NOTIFICATION TOPIC topic
+		random,
+		random,
+
+		// NOTIFICATION subscriber
+		random,
+		random,
+		random,
+		random,
+		random,
+
+		// NOTIFICATION subscription
 		random,
 	)
 }
