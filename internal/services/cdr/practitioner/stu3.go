@@ -27,9 +27,42 @@ func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sc
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	var usualIdentifier *identifier
 	for _, i := range identifiers {
+		if i.Use == "usual" {
+			usualIdentifier = &i
+		}
 		if pr.WithIdentifier(i.System, i.Value, i.Use)(resource) != nil {
 			return diag.FromErr(err)
+		}
+	}
+	// Match existing identifier when soft_delete = true
+	if ok := d.Get("soft_delete").(bool); ok && usualIdentifier != nil {
+		var foundPractitioner *resources_go_proto.Practitioner
+		err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+			result, resp, err := client.OperationsSTU3.Post("Practitioner/_search", nil, searchIdentifier(*usualIdentifier))
+			if err != nil {
+				return nil, err
+			}
+			if resp == nil {
+				return nil, fmt.Errorf("response is nil")
+			}
+			if result == nil {
+				return nil, fmt.Errorf("result is nil")
+			}
+			bundle := result.GetBundle()
+			if len(bundle.Entry) > 0 {
+				for _, e := range bundle.Entry {
+					if r := e.GetResource(); r != nil {
+						foundPractitioner = r.GetPractitioner()
+					}
+				}
+			}
+			return resp.Response, err
+		})
+		if err == nil && foundPractitioner != nil {
+			d.SetId(foundPractitioner.Id.GetValue())
+			return diags
 		}
 	}
 	for _, n := range names {
@@ -198,8 +231,15 @@ func stu3Delete(_ context.Context, _ *config.Config, client *cdr.Client, d *sche
 
 	// TODO: Check HTTP 500 issue
 	id := d.Id()
-	ok, _, err := client.OperationsSTU3.Delete("Practitioner/" + id)
+	ok, resp, err := client.OperationsSTU3.Delete("Practitioner/" + id)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusForbidden {
+			softDelete := d.Get("soft_delete").(bool)
+			if softDelete { // No error on delete
+				d.SetId("")
+				return diags
+			}
+		}
 		return diag.FromErr(err)
 	}
 	if !ok {

@@ -37,6 +37,7 @@ resource "hsdp_notification_subscriber" "subscriber" {
     * `region` - (Optional) Region to use. When not set, the provider config is used
     * `environment` - (Optional) Environment to use. When not set, the provider config is used
     * `endpoint` - (Optional) The endpoint URL to use if applicable. When not set, the provider config is used
+* `soft_delete` - (Optional) Soft delete resource in case the subscription is still pending. Default: `false`
 
 ## Attribute reference
 

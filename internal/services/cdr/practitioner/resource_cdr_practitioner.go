@@ -51,6 +51,11 @@ func ResourceCDRPractitioner() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"soft_delete": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
 		},
 	}
 }

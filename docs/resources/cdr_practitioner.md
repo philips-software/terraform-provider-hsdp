@@ -71,6 +71,9 @@ ensuring proper lifecycle handling by Terraform
   * `text` - (Required) The text representation of the name
   * `given` - (Required, list(string)) The list of given names
   * `first` - (Required) The first name
+* `soft_delete` - (Optional) Soft deletes a Practitioner from Terraform (state) in case it still has references in CDR. Default: `false`
+  This option is useful if you are using Terraform for provisioning Practioners only. Setting `soft_delete = true ` also 
+  causes existing Practitioners to be auto-imported in case the `usual` identifier matches your declaration.
 
 !> Switching FHIR versions causes the resource to be replaced, so be careful with this.
 

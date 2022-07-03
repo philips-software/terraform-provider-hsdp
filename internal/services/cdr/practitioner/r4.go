@@ -3,10 +3,13 @@ package practitioner
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 
 	r4pb "github.com/google/fhir/go/proto/google/fhir/proto/r4/core/resources/bundle_and_contained_resource_go_proto"
+	"github.com/google/fhir/go/proto/google/fhir/proto/r4/core/resources/practitioner_go_proto"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	jsonpatch "github.com/herkyl/patchwerk"
@@ -70,11 +73,45 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	var usualIdentifier *identifier
 	for _, i := range identifiers {
+		if i.Use == "usual" {
+			usualIdentifier = &i
+		}
 		if pr.WithIdentifier(i.System, i.Value, i.Use)(resource) != nil {
 			return diag.FromErr(err)
 		}
 	}
+	// Match existing identifier when soft_delete = true
+	if ok := d.Get("soft_delete").(bool); ok && usualIdentifier != nil {
+		var foundPractitioner *practitioner_go_proto.Practitioner
+		err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+			result, resp, err := client.OperationsR4.Post("Practitioner/_search", nil, searchIdentifier(*usualIdentifier))
+			if err != nil {
+				return nil, err
+			}
+			if resp == nil {
+				return nil, fmt.Errorf("response is nil")
+			}
+			if result == nil {
+				return nil, fmt.Errorf("result is nil")
+			}
+			bundle := result.GetBundle()
+			if len(bundle.Entry) > 0 {
+				for _, e := range bundle.Entry {
+					if r := e.GetResource(); r != nil {
+						foundPractitioner = r.GetPractitioner()
+					}
+				}
+			}
+			return resp.Response, err
+		})
+		if err == nil && foundPractitioner != nil {
+			d.SetId(foundPractitioner.Id.GetValue())
+			return diags
+		}
+	}
+
 	for _, n := range names {
 		if pr.WithName(n.Text, n.Family, n.Given)(resource) != nil {
 			return diag.FromErr(err)
@@ -105,6 +142,17 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 	createdResource := contained.GetPractitioner()
 	d.SetId(createdResource.Id.GetValue())
 	return diags
+}
+
+func searchIdentifier(id identifier) cdr.OptionFunc {
+	return func(req *http.Request) error {
+		form := url.Values{}
+		form.Add("identifier", id.Value)
+		req.Body = ioutil.NopCloser(strings.NewReader(form.Encode()))
+		req.ContentLength = int64(len(form.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded; fhirVersion=4.0")
+		return nil
+	}
 }
 
 func r4Read(ctx context.Context, _ *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
@@ -242,8 +290,15 @@ func r4Delete(_ context.Context, _ *config.Config, client *cdr.Client, d *schema
 
 	// TODO: Check HTTP 500 issue
 	id := d.Id()
-	ok, _, err := client.OperationsR4.Delete("Practitioner/" + id)
+	ok, resp, err := client.OperationsR4.Delete("Practitioner/" + id)
 	if err != nil {
+		if resp != nil && resp.StatusCode == http.StatusForbidden {
+			softDelete := d.Get("soft_delete").(bool)
+			if softDelete { // No error on delete
+				d.SetId("")
+				return diags
+			}
+		}
 		return diag.FromErr(err)
 	}
 	if !ok {

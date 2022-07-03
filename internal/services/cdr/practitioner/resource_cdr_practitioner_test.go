@@ -33,7 +33,7 @@ func TestAccResourceCDRPractitioner_basic(t *testing.T) {
 				Config:       testAccResourceCDRPractitioner(cdrURL, parentOrgID, randomNameSTU3, now, "stu3"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "identifier.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "identifier.0.value", "ron.swanson@hsdp.io"),
+					resource.TestCheckResourceAttr(resourceName, "identifier.0.value", fmt.Sprintf("ron.swanson@%s.hsdp.io", randomNameSTU3)),
 				),
 			},
 		},
@@ -51,7 +51,7 @@ func TestAccResourceCDRPractitioner_basic(t *testing.T) {
 				Config:       testAccResourceCDRPractitioner(cdrURL, parentOrgID, randomNameR4, now, "r4"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "identifier.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "identifier.0.value", "ron.swanson@hsdp.io"),
+					resource.TestCheckResourceAttr(resourceName, "identifier.0.value", fmt.Sprintf("ron.swanson@%s.hsdp.io", randomNameR4)),
 				),
 			},
 		},
@@ -112,9 +112,9 @@ resource "hsdp_cdr_practitioner" "test" {
   fhir_store  = hsdp_cdr_org.test.fhir_store
 
   identifier {
-    system = "https://iam-client-test.us-east.philips-healthsuite.com/oauth2/access_token"
-    value  = "ron.swanson@hsdp.io"
-    use    = "temp"
+    system = "https://provider.terrakube.com"
+    value  = "ron.swanson@%s.hsdp.io"
+    use    = "usual"
   }
 
   name {
@@ -123,6 +123,8 @@ resource "hsdp_cdr_practitioner" "test" {
      given  = ["Ron", "%s"]
   }
  version = "%s"
+
+ soft_delete = true
 
  depends_on = [hsdp_iam_group.cdr_admins]
 }`,
@@ -142,6 +144,7 @@ resource "hsdp_cdr_practitioner" "test" {
 		version,
 
 		// CDR PRACTITIONER
+		name,
 		name,
 		version,
 	)
