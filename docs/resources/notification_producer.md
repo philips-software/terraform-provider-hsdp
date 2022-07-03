@@ -31,6 +31,12 @@ resource "hsdp_notification_producer" "producer" {
 * `producer_service_base_url` - (Required) The base URL of the producer
 * `producer_service_path_url` - (Required) The URL extension of the producer
 * `description` - (Optional) Description of the producer application
+* `principal` - (Optional) The optional principal to use for this resource
+  * `service_id` - (Optional) The IAM service ID
+  * `service_private_key` - (Optional) The IAM service private key to use
+  * `region` - (Optional) Region to use. When not set, the provider config is used
+  * `environment` - (Optional) Environment to use. When not set, the provider config is used
+  * `endpoint` - (Optional) The endpoint URL to use if applicable. When not set, the provider config is used
 
 ## Attribute reference
 

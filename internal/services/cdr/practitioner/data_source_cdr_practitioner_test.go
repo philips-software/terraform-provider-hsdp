@@ -1,4 +1,4 @@
-package subscription_test
+package practitioner_test
 
 import (
 	"fmt"
@@ -10,10 +10,10 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/acc"
 )
 
-func TestAccResourceCDRSubscription_basic(t *testing.T) {
+func TestAccDatasourceCDRPractitioner_basic(t *testing.T) {
 	t.Parallel()
 
-	resourceName := "hsdp_cdr_subscription.test"
+	resourceName := "hsdp_cdr_practitioner.test"
 	parentOrgID := acc.AccIAMOrgGUID()
 	cdrURL := acc.AccCDRURL()
 	now := time.Now().Format(time.RFC3339)
@@ -30,9 +30,13 @@ func TestAccResourceCDRSubscription_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccResourceCDRSubscription(cdrURL, parentOrgID, randomNameSTU3, now, "stu3"),
+				Config:       testAccDatasourceCDRPractitioner(cdrURL, parentOrgID, randomNameSTU3, now, "stu3"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "status", "REQUESTED"),
+					resource.TestCheckResourceAttr(resourceName, "identifier.#", "1"),
+					resource.TestCheckResourceAttr("data.hsdp_cdr_practitioner.test", "identity_uses.#", "1"),
+					resource.TestCheckResourceAttr("data.hsdp_cdr_practitioner.test", "identity_values.#", "1"),
+					resource.TestCheckResourceAttr("data.hsdp_cdr_practitioner.test", "identity_systems.#", "1"),
+					resource.TestCheckResourceAttr("data.hsdp_cdr_practitioner.test", "identity_systems.#", "1"),
 				),
 			},
 		},
@@ -47,16 +51,19 @@ func TestAccResourceCDRSubscription_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccResourceCDRSubscription(cdrURL, parentOrgID, randomNameR4, now, "r4"),
+				Config:       testAccDatasourceCDRPractitioner(cdrURL, parentOrgID, randomNameR4, now, "r4"),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "status", "REQUESTED"),
+					resource.TestCheckResourceAttr(resourceName, "identifier.#", "1"),
+					resource.TestCheckResourceAttr("data.hsdp_cdr_practitioner.test", "identity_uses.#", "1"),
+					resource.TestCheckResourceAttr("data.hsdp_cdr_practitioner.test", "identity_values.#", "1"),
+					resource.TestCheckResourceAttr("data.hsdp_cdr_practitioner.test", "identity_values.0", "amos.burton@hsdp.io"),
 				),
 			},
 		},
 	})
 }
 
-func testAccResourceCDRSubscription(cdrURL, parentOrgID, name, now, version string) string {
+func testAccDatasourceCDRPractitioner(cdrURL, parentOrgID, name, now, version string) string {
 	return fmt.Sprintf(`
 
 data "hsdp_cdr_fhir_store" "sandbox" {
@@ -73,7 +80,7 @@ data "hsdp_iam_service" "service" {
 
 resource "hsdp_iam_org" "test" {
   name  = "%s"
-  description = "Acceptance Test CDR %s %s"
+  description = "Practitioner Datasource Acceptance Test CDR %s %s"
   parent_org_id = "%s"
 }
 
@@ -98,7 +105,7 @@ resource "hsdp_iam_group" "cdr_admins" {
 resource "hsdp_cdr_org" "test" {
   fhir_store  = data.hsdp_cdr_fhir_store.sandbox.endpoint
 
-  name        = "Subscription Resource Test %s"
+  name        = "Practitioner Datasource Test %s"
   org_id      = hsdp_iam_org.test.id
 
   version     = "%s"
@@ -106,22 +113,34 @@ resource "hsdp_cdr_org" "test" {
   depends_on = [hsdp_iam_group.cdr_admins]
 }
 
-resource "hsdp_cdr_subscription" "test" {
+resource "hsdp_cdr_practitioner" "test" {
   fhir_store  = hsdp_cdr_org.test.fhir_store
 
-  criteria        = "Patient"
-  reason          = "Acceptance test %s"
-  endpoint        = "https://webhook.myapp.io/patient"
-  delete_endpoint = "https://webhook.myapp.io/patient_deleted"
-  headers = [
-    "Authorization: Basic cm9uOnN3YW5zb24="
-  ]
+  identifier {
+    system = "https://iam-client-test.us-east.philips-healthsuite.com/oauth2/access_token"
+    value  = "amos.burton@hsdp.io"
+    use    = "temp"
+  }
+
+  name {
+     text   = "Amos Burton"
+     family = "Burton"
+     given  = ["Amos", "%s"]
+  }
+ version = "%s"
+
+ depends_on = [hsdp_iam_group.cdr_admins]
+}
+
+data "hsdp_cdr_practitioner" "test" {
+  fhir_store = hsdp_cdr_org.test.fhir_store
+
+  guid = hsdp_cdr_practitioner.test.id
 
   version = "%s"
 
-  end = "2099-12-31T23:59:59Z"
+  depends_on = [hsdp_iam_group.cdr_admins]
 }
-
 `,
 		// DATA SOURCE
 		cdrURL,
@@ -138,8 +157,11 @@ resource "hsdp_cdr_subscription" "test" {
 		name,
 		version,
 
-		// CDR SUBSCRIPTION
+		// CDR PRACTITIONER
 		name,
+		version,
+
+		// DATA SOURCE
 		version,
 	)
 }

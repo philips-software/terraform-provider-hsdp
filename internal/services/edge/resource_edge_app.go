@@ -56,7 +56,7 @@ func resourceEdgeAppUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	var err error
 
 	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = c.STLClient(config.Principal{Endpoint: endpoint.(string)})
+		client, err = c.STLClient(&config.Principal{Endpoint: endpoint.(string)})
 	} else {
 		client, err = c.STLClient()
 	}
@@ -87,7 +87,7 @@ func resourceEdgeAppDelete(ctx context.Context, d *schema.ResourceData, m interf
 	var err error
 
 	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = c.STLClient(config.Principal{Endpoint: endpoint.(string)})
+		client, err = c.STLClient(&config.Principal{Endpoint: endpoint.(string)})
 	} else {
 		client, err = c.STLClient()
 	}
@@ -114,7 +114,7 @@ func resourceEdgeAppRead(ctx context.Context, d *schema.ResourceData, m interfac
 	var err error
 
 	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = c.STLClient(config.Principal{Endpoint: endpoint.(string)})
+		client, err = c.STLClient(&config.Principal{Endpoint: endpoint.(string)})
 	} else {
 		client, err = c.STLClient()
 	}
@@ -151,7 +151,7 @@ func resourceEdgeAppCreate(ctx context.Context, d *schema.ResourceData, m interf
 	var err error
 
 	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = c.STLClient(config.Principal{Endpoint: endpoint.(string)})
+		client, err = c.STLClient(&config.Principal{Endpoint: endpoint.(string)})
 	} else {
 		client, err = c.STLClient()
 	}

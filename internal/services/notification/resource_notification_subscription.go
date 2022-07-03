@@ -3,6 +3,7 @@ package notification
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/cenkalti/backoff/v4"
@@ -10,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/notification"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func ResourceNotificationSubscription() *schema.Resource {
@@ -18,6 +20,7 @@ func ResourceNotificationSubscription() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		CreateContext: resourceNotificationSubscriptionCreate,
+		UpdateContext: resourceNotificationSubscriptionUpdate,
 		ReadContext:   resourceNotificationSubscriptionRead,
 		DeleteContext: resourceNotificationSubscriptionDelete,
 
@@ -32,6 +35,12 @@ func ResourceNotificationSubscription() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"principal": {
+				Type:     schema.TypeSet,
+				Optional: true,
+				ForceNew: true,
+				Elem:     config.PrincipalSchema(),
+			},
 			"subscription_endpoint": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -40,17 +49,27 @@ func ResourceNotificationSubscription() *schema.Resource {
 			"soft_delete": {
 				Type:     schema.TypeBool,
 				Optional: true,
-				ForceNew: true,
 				Default:  false,
 			},
 		},
 	}
 }
 
+func resourceNotificationSubscriptionUpdate(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if !d.HasChanges("soft_delete") {
+		return diag.FromErr(fmt.Errorf("only 'soft_delete' can be updated, this is provider bug"))
+	}
+	return diags
+}
+
 func resourceNotificationSubscriptionDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*config.Config)
-	client, err := c.NotificationClient()
+	principal := config.SchemaToPrincipal(d, m)
+
+	client, err := c.NotificationClient(principal)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -75,7 +94,9 @@ func resourceNotificationSubscriptionDelete(_ context.Context, d *schema.Resourc
 func resourceNotificationSubscriptionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*config.Config)
-	client, err := c.NotificationClient()
+	principal := config.SchemaToPrincipal(d, m)
+
+	client, err := c.NotificationClient(principal)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -107,7 +128,9 @@ func resourceNotificationSubscriptionRead(_ context.Context, d *schema.ResourceD
 
 func resourceNotificationSubscriptionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
-	client, err := c.NotificationClient()
+	principal := config.SchemaToPrincipal(d, m)
+
+	client, err := c.NotificationClient(principal)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -121,13 +144,17 @@ func resourceNotificationSubscriptionCreate(ctx context.Context, d *schema.Resou
 
 	var created *notification.Subscription
 
-	operation := func() error {
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var resp *notification.Response
-		_ = client.TokenRefresh()
 		created, resp, err = client.Subscription.CreateSubscription(subscription)
-		return checkForNotificationPermissionErrors(client, resp, err)
-	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, fmt.Errorf("Subscription.CreateSubscription: response is nil")
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -46,6 +46,12 @@ Private topics will not allow * for the organization value.
 
 * `is_auditable` - (Optional) Indicates whether the topic has to be audited whenever messages are published to it. Default value is `false`. User has to set to `true` for audit to happen.
 * `description` - (Optional) The intended usage of this topic
+* `principal` - (Optional) The optional principal to use for this resource
+  * `service_id` - (Optional) The IAM service ID
+  * `service_private_key` - (Optional) The IAM service private key to use
+  * `region` - (Optional) Region to use. When not set, the provider config is used
+  * `environment` - (Optional) Environment to use. When not set, the provider config is used
+  * `endpoint` - (Optional) The endpoint URL to use if applicable. When not set, the provider config is used
 
 ## Attribute reference
 

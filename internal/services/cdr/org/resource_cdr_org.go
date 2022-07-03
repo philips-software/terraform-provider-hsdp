@@ -27,7 +27,6 @@ func ResourceCDROrg() *schema.Resource {
 				Version: 0,
 			},
 		},
-
 		Schema: map[string]*schema.Schema{
 			"fhir_store": {
 				Type:     schema.TypeString,
@@ -89,7 +88,6 @@ func resourceCDROrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	default:
 		return diag.FromErr(fmt.Errorf("unsupported FHIR version '%s'", version))
 	}
-
 	return resourceCDROrgRead(ctx, d, m)
 }
 

@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
 	r4dt "github.com/google/fhir/go/proto/google/fhir/proto/r4/core/datatypes_go_proto"
 	r4pb "github.com/google/fhir/go/proto/google/fhir/proto/r4/core/resources/bundle_and_contained_resource_go_proto"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -18,7 +17,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
-func r4Create(_ context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	endpoint := d.Get("endpoint").(string)
@@ -47,43 +46,54 @@ func r4Create(_ context.Context, c *config.Config, client *cdr.Client, d *schema
 		return diag.FromErr(err)
 	}
 	var contained *r4pb.ContainedResource
+	var resp *cdr.Response
 
-	operation := func() error {
-		var resp *cdr.Response
+	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+		var err error
+
 		contained, resp, err = client.OperationsR4.Post("Subscription", jsonSubscription)
-		if resp == nil {
-			if err != nil {
-				return err
-			}
-			return fmt.Errorf("OperationsR4.Post: response is nil")
+		if err != nil {
+			_ = client.TokenRefresh()
 		}
-		return tools.CheckForIAMPermissionErrors(client, resp.Response, err)
-	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
-
+		if resp == nil {
+			return nil, fmt.Errorf("OperationsR4.Post: response is nil")
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("create subscription: %w", err))
 	}
 	createdSub := contained.GetSubscription()
-	d.SetId(createdSub.Id.Value)
+	d.SetId(createdSub.Id.GetValue())
 	return diags
 }
 
-func r4Read(_ context.Context, _ *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+func r4Read(ctx context.Context, _ *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
+	var contained *r4pb.ContainedResource
+	var resp *cdr.Response
 
-	contained, resp, err := client.OperationsR4.Get("Subscription/" + d.Id())
+	err := tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+		var err error
+
+		contained, resp, err = client.OperationsR4.Get("Subscription/" + d.Id())
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, fmt.Errorf("OperationsR4.Post: response is nil")
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")
 			return diags
 		}
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  fmt.Errorf("subscription read: %w", err).Error(),
-			})
-		}
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  fmt.Errorf("subscription read: %w", err).Error(),
+		})
 		return diags
 	}
 	sub := contained.GetSubscription()

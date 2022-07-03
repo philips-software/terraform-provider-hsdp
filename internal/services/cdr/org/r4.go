@@ -20,7 +20,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
-func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	orgID := d.Get("org_id").(string)
@@ -40,17 +40,8 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 		}
 	}
 	var onboardedOrg *r4pb.Organization
-	var resp *cdr.Response
 
-	onboardedOrg, resp, err = client.TenantR4.GetOrganizationByID(orgID)
-	if err == nil && onboardedOrg != nil && resp != nil {
-		if resp.StatusCode != http.StatusGone {
-			d.SetId(onboardedOrg.Id.Value)
-			return resourceCDROrgUpdate(ctx, d, m)
-		}
-	}
-
-	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var resp *cdr.Response
 		var err error
 		onboardedOrg, resp, err = client.TenantR4.Onboard(org)
@@ -67,7 +58,7 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 		return diag.FromErr(err)
 	}
 
-	d.SetId(onboardedOrg.Id.Value)
+	d.SetId(onboardedOrg.Id.GetValue())
 	return diags
 }
 
@@ -75,12 +66,13 @@ func r4Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) dia
 	var diags diag.Diagnostics
 	var org *r4pb.Organization
 	var resp *cdr.Response
-	var err error
 
-	orgID := d.Get("org_id").(string)
+	id := d.Id()
 
-	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
-		org, resp, err = client.TenantR4.GetOrganizationByID(orgID)
+	err := tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
+		var err error
+
+		org, resp, err = client.TenantR4.GetOrganizationByID(id)
 		if err != nil {
 			_ = client.TokenRefresh()
 		}
@@ -95,18 +87,21 @@ func r4Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) dia
 			d.SetId("")
 			return diags
 		}
-		if err != nil {
-			diags = append(diags, diag.Diagnostic{
-				Severity: diag.Error,
-				Summary:  err.Error(),
-			})
-		}
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Error,
+			Summary:  err.Error(),
+		})
 		return diags
 	}
-	_ = d.Set("name", org.Name.Value)
+	if org == nil {
+		return diag.FromErr(fmt.Errorf("org is nil, this is unexpected (id=%s): %w", id, err))
+	}
+	if org.Name != nil {
+		_ = d.Set("name", org.Name.GetValue())
+	}
 	if org.PartOf != nil {
 		partOfOrgID := org.PartOf.GetOrganizationId()
-		_ = d.Set("part_of", partOfOrgID.Value)
+		_ = d.Set("part_of", partOfOrgID.GetValue())
 	}
 	return diags
 }

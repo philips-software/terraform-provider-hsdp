@@ -121,7 +121,7 @@ data "hsdp_iam_service" "service" {
 
 resource "hsdp_iam_org" "test" {
   name  = "%s"
-  description = "%s Acceptance Test CDR %s"
+  description = "CDR Org Acceptance Test %s %s"
   parent_org_id = "%s"
 }
 
@@ -156,8 +156,8 @@ resource "hsdp_cdr_org" "test" {
 
 		// IAM ORG
 		name,
-		name,
 		now,
+		name,
 		parentOrgID,
 
 		// IAM GROUP

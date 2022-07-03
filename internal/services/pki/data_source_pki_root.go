@@ -46,7 +46,7 @@ func dataSourcePKIRootRead(_ context.Context, d *schema.ResourceData, meta inter
 	region := d.Get("region").(string)
 	environment := d.Get("environment").(string)
 	if region != "" || environment != "" {
-		client, err = c.PKIClient(config.Principal{Region: region, Environment: environment})
+		client, err = c.PKIClient(&config.Principal{Region: region, Environment: environment})
 	} else {
 		client, err = c.PKIClient()
 	}

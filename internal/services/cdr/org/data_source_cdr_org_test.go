@@ -1,4 +1,4 @@
-package subscription_test
+package org_test
 
 import (
 	"fmt"
@@ -10,16 +10,16 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/acc"
 )
 
-func TestAccResourceCDRSubscription_basic(t *testing.T) {
+func TestAccDataSourceCDROrg_basic(t *testing.T) {
 	t.Parallel()
 
-	resourceName := "hsdp_cdr_subscription.test"
+	resourceName := "data.hsdp_cdr_org.test"
 	parentOrgID := acc.AccIAMOrgGUID()
 	cdrURL := acc.AccCDRURL()
-	now := time.Now().Format(time.RFC3339)
 
 	randomNameSTU3 := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 	randomNameR4 := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	now := time.Now().Format(time.RFC3339)
 
 	// STU3
 	resource.Test(t, resource.TestCase{
@@ -30,9 +30,9 @@ func TestAccResourceCDRSubscription_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccResourceCDRSubscription(cdrURL, parentOrgID, randomNameSTU3, now, "stu3"),
+				Config:       testAccDataSourceCDROrg(cdrURL, parentOrgID, randomNameSTU3, "stu3", now),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "status", "REQUESTED"),
+					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("%s %s", randomNameSTU3, now)),
 				),
 			},
 		},
@@ -47,16 +47,16 @@ func TestAccResourceCDRSubscription_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccResourceCDRSubscription(cdrURL, parentOrgID, randomNameR4, now, "r4"),
+				Config:       testAccDataSourceCDROrg(cdrURL, parentOrgID, randomNameR4, "r4", now),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "status", "REQUESTED"),
+					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("%s %s", randomNameR4, now)),
 				),
 			},
 		},
 	})
 }
 
-func testAccResourceCDRSubscription(cdrURL, parentOrgID, name, now, version string) string {
+func testAccDataSourceCDROrg(cdrURL, parentOrgID, name, version, now string) string {
 	return fmt.Sprintf(`
 
 data "hsdp_cdr_fhir_store" "sandbox" {
@@ -73,7 +73,7 @@ data "hsdp_iam_service" "service" {
 
 resource "hsdp_iam_org" "test" {
   name  = "%s"
-  description = "Acceptance Test CDR %s %s"
+  description = "Data Source ORG Acceptance Test CDR %s %s"
   parent_org_id = "%s"
 }
 
@@ -89,7 +89,7 @@ resource "hsdp_iam_role" "cdr_admin" {
 resource "hsdp_iam_group" "cdr_admins" {
   managing_organization = hsdp_iam_org.test.id
   name                  = "TF_CDR_ADMIN"
-  description           = "CDR Admins"
+  description           = "CDR Admins %s"
   roles                 = [hsdp_iam_role.cdr_admin.id]
   users                 = []
   services              = [data.hsdp_iam_service.service.id]
@@ -98,30 +98,19 @@ resource "hsdp_iam_group" "cdr_admins" {
 resource "hsdp_cdr_org" "test" {
   fhir_store  = data.hsdp_cdr_fhir_store.sandbox.endpoint
 
-  name        = "Subscription Resource Test %s"
+  name        = "%s %s"
   org_id      = hsdp_iam_org.test.id
 
   version     = "%s"
-
-  depends_on = [hsdp_iam_group.cdr_admins]
 }
 
-resource "hsdp_cdr_subscription" "test" {
-  fhir_store  = hsdp_cdr_org.test.fhir_store
+data "hsdp_cdr_org" "test" {
+  fhir_store  = data.hsdp_cdr_fhir_store.sandbox.endpoint
 
-  criteria        = "Patient"
-  reason          = "Acceptance test %s"
-  endpoint        = "https://webhook.myapp.io/patient"
-  delete_endpoint = "https://webhook.myapp.io/patient_deleted"
-  headers = [
-    "Authorization: Basic cm9uOnN3YW5zb24="
-  ]
+  org_id      = hsdp_cdr_org.test.id
 
-  version = "%s"
-
-  end = "2099-12-31T23:59:59Z"
+  version     = "%s"
 }
-
 `,
 		// DATA SOURCE
 		cdrURL,
@@ -133,13 +122,14 @@ resource "hsdp_cdr_subscription" "test" {
 		parentOrgID,
 
 		// IAM GROUP
+		now,
 
 		// CDR ORG
 		name,
+		now,
 		version,
 
-		// CDR SUBSCRIPTION
-		name,
+		// DATA CDR ORG
 		version,
 	)
 }

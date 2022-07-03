@@ -49,7 +49,7 @@ func resourceEdgeSyncCreate(ctx context.Context, d *schema.ResourceData, m inter
 	var err error
 
 	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = c.STLClient(config.Principal{Endpoint: endpoint.(string)})
+		client, err = c.STLClient(&config.Principal{Endpoint: endpoint.(string)})
 	} else {
 		client, err = c.STLClient()
 	}
