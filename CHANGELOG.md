@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.35.2
+
+- IAM Client: allow description change without recreate. Add acceptance test
+
 ## v0.35.1
 
 - IAM: relax service requirement field
