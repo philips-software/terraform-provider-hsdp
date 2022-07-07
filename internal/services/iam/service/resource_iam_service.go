@@ -93,7 +93,6 @@ func ResourceIAMService() *schema.Resource {
 				Optional:         true,
 				Computed:         true,
 				DiffSuppressFunc: tools.SuppressWhenGenerated,
-				RequiredWith:     []string{"self_managed_private_key"},
 			},
 			"scopes": {
 				Type:     schema.TypeSet,
