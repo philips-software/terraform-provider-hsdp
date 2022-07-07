@@ -25,6 +25,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/edge"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/function"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/client"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/group"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/service"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/metrics"
@@ -233,7 +234,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_proposition":                           iam.ResourceIAMProposition(),
 			"hsdp_iam_application":                           iam.ResourceIAMApplication(),
 			"hsdp_iam_user":                                  iam.ResourceIAMUser(),
-			"hsdp_iam_client":                                iam.ResourceIAMClient(),
+			"hsdp_iam_client":                                client.ResourceIAMClient(),
 			"hsdp_iam_service":                               service.ResourceIAMService(),
 			"hsdp_iam_mfa_policy":                            iam.ResourceIAMMFAPolicy(),
 			"hsdp_iam_password_policy":                       iam.ResourceIAMPasswordPolicy(),

@@ -1,4 +1,4 @@
-package iam
+package client
 
 import (
 	"context"
@@ -14,10 +14,17 @@ import (
 
 func ResourceIAMClient() *schema.Resource {
 	return &schema.Resource{
+		SchemaVersion: 1,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    ResourceIAMClientV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: patchIAMClientV0,
+				Version: 0,
+			},
+		},
 		CreateContext: resourceIAMClientCreate,
 		ReadContext:   resourceIAMClientRead,
 		UpdateContext: resourceIAMClientUpdate,
@@ -26,18 +33,18 @@ func ResourceIAMClient() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
-				ForceNew: true,
 				Required: true,
+				ForceNew: true,
 			},
 			"type": {
 				Type:     schema.TypeString,
-				ForceNew: true,
 				Required: true,
+				ForceNew: true,
 			},
 			"client_id": {
 				Type:             schema.TypeString,
-				ForceNew:         true,
 				Required:         true,
+				ForceNew:         true,
 				DiffSuppressFunc: tools.SuppressCaseDiffs,
 			},
 			"password": {
@@ -48,7 +55,6 @@ func ResourceIAMClient() *schema.Resource {
 			},
 			"description": {
 				Type:     schema.TypeString,
-				ForceNew: true,
 				Required: true,
 			},
 			"application_id": {
@@ -63,6 +69,7 @@ func ResourceIAMClient() *schema.Resource {
 			"redirection_uris": {
 				Type:     schema.TypeSet,
 				MaxItems: 100,
+				MinItems: 0,
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
@@ -254,7 +261,8 @@ func resourceIAMClientUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		d.HasChange("consent_implied") ||
 		d.HasChange("global_reference_id") ||
 		d.HasChange("response_types") ||
-		d.HasChange("redirection_uris") {
+		d.HasChange("redirection_uris") ||
+		d.HasChange("description") {
 		cl, _, err := client.Clients.GetClientByID(d.Id())
 		if err != nil {
 			return diag.FromErr(err)
@@ -266,6 +274,7 @@ func resourceIAMClientUpdate(ctx context.Context, d *schema.ResourceData, m inte
 		cl.RefreshTokenLifetime = d.Get("refresh_token_lifetime").(int)
 		cl.IDTokenLifetime = d.Get("id_token_lifetime").(int)
 		cl.GlobalReferenceID = d.Get("global_reference_id").(string)
+		cl.Description = d.Get("description").(string)
 		_, _, err = client.Clients.UpdateClient(*cl)
 		if err != nil {
 			return diag.FromErr(err)
