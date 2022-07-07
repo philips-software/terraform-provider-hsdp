@@ -194,7 +194,8 @@ func resourceIAMClientRead(_ context.Context, d *schema.ResourceData, m interfac
 	id := d.Id()
 	cl, resp, err := client.Clients.GetClientByID(id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusForbidden) {
+			// TODO: we should retrieve the managing organization of the Proposition and check for `CLIENT.READ` permissions
 			d.SetId("")
 			return diags
 		}
