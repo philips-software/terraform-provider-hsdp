@@ -22,7 +22,7 @@ func ResourceIAMService() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		SchemaVersion: 4,
+		SchemaVersion: 5,
 		CreateContext: resourceIAMServiceCreate,
 		ReadContext:   resourceIAMServiceRead,
 		UpdateContext: resourceIAMServiceUpdate,
@@ -32,6 +32,11 @@ func ResourceIAMService() *schema.Resource {
 				Type:    ResourceIAMServiceV3().CoreConfigSchema().ImpliedType(),
 				Upgrade: patchIAMServiceV3,
 				Version: 3,
+			},
+			{
+				Type:    ResourceIAMServiceV4().CoreConfigSchema().ImpliedType(),
+				Upgrade: patchIAMServiceV4,
+				Version: 4,
 			},
 		},
 
@@ -70,10 +75,9 @@ func ResourceIAMService() *schema.Resource {
 				Sensitive: true,
 				Optional:  true,
 			},
-			"self_managed_certificate": {
-				Type:       schema.TypeString,
-				Optional:   true,
-				Deprecated: "Use 'self_managed_private_key' instead. This will be removed in a future version",
+			"self_managed_expires_on": {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			"private_key": {
 				Type:      schema.TypeString,
@@ -89,10 +93,8 @@ func ResourceIAMService() *schema.Resource {
 				Computed: true,
 			},
 			"expires_on": {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Computed:         true,
-				DiffSuppressFunc: tools.SuppressWhenGenerated,
+				Type:     schema.TypeString,
+				Computed: true,
 			},
 			"scopes": {
 				Type:     schema.TypeSet,
@@ -129,10 +131,10 @@ func resourceIAMServiceCreate(ctx context.Context, d *schema.ResourceData, m int
 	s.Validity = d.Get("validity").(int)
 	scopes := tools.ExpandStringList(d.Get("scopes").(*schema.Set).List())
 	defaultScopes := tools.ExpandStringList(d.Get("default_scopes").(*schema.Set).List())
-	expiresOn := d.Get("expires_on").(string)
+	selfExpiresOn := d.Get("self_managed_expires_on").(string)
 	selfPrivateKey := d.Get("self_managed_private_key").(string)
-	if selfPrivateKey == "" && expiresOn != "" {
-		return diag.FromErr(fmt.Errorf("you cannot set an 'expires_on' value without also specifying the 'self_managed_private_key'"))
+	if selfPrivateKey == "" && selfExpiresOn != "" {
+		return diag.FromErr(fmt.Errorf("you cannot set 'self_managed_expires_on' value without also specifying the 'self_managed_private_key'"))
 	}
 
 	var createdService *iam.Service
@@ -271,7 +273,7 @@ func resourceIAMServiceUpdate(ctx context.Context, d *schema.ResourceData, m int
 			_, _, _ = client.Services.AddScopes(s, []string{}, toAdd)
 		}
 	}
-	if d.HasChange("expires_on") || d.HasChange("self_managed_private_key") {
+	if d.HasChange("self_managed_expires_on") || d.HasChange("self_managed_private_key") {
 		_, npk := d.GetChange("self_managed_private_key")
 
 		if npk.(string) == "" {
@@ -313,7 +315,7 @@ func setSelfManaged(client *iam.Client, service iam.Service, d *schema.ResourceD
 	var diags diag.Diagnostics
 
 	selfPrivateKey := d.Get("self_managed_private_key").(string)
-	selfExpiresOn := d.Get("expires_on").(string)
+	selfExpiresOn := d.Get("self_managed_expires_on").(string)
 	expiresOn := time.Now().Add(5 * 86400 * 365 * time.Second)
 	if selfExpiresOn != "" {
 		parsedExpiresOn, err := time.Parse(time.RFC3339, selfExpiresOn)
