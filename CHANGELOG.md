@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.35.4
+
+- IAM Service: add self_managed_expires_on field for better Crossplane compatibility
+
 ## v0.35.3
 
 - IAM Client: fix drift detection (#218)
