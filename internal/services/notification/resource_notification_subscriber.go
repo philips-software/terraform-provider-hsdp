@@ -5,11 +5,11 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/notification"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func ResourceNotificationSubscriber() *schema.Resource {
@@ -105,7 +105,7 @@ func resourceNotificationSubscriberDelete(_ context.Context, d *schema.ResourceD
 	return diags
 }
 
-func resourceNotificationSubscriberRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceNotificationSubscriberRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*config.Config)
 	principal := config.SchemaToPrincipal(d, m)
@@ -118,14 +118,17 @@ func resourceNotificationSubscriberRead(_ context.Context, d *schema.ResourceDat
 
 	var subscriber *notification.Subscriber
 
-	operation := func() error {
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var resp *notification.Response
-		var err error
-		_ = client.TokenRefresh()
 		subscriber, resp, err = client.Subscriber.GetSubscriber(d.Id())
-		return checkForNotificationPermissionErrors(client, resp, err)
-	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if errors.Is(err, notification.ErrEmptyResult) { // Removed
 			d.SetId("")
@@ -168,13 +171,18 @@ func resourceNotificationSubscriberCreate(ctx context.Context, d *schema.Resourc
 
 	var created *notification.Subscriber
 
-	operation := func() error {
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var resp *notification.Response
-		_ = client.TokenRefresh()
 		created, resp, err = client.Subscriber.CreateSubscriber(subscriber)
-		return checkForNotificationPermissionErrors(client, resp, err)
-	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
