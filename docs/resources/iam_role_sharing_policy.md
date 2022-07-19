@@ -35,6 +35,7 @@ resource "hsdp_iam_role" "shared" {
 
 # Share the role
 resource "hsdp_iam_role_sharing_policy" "policy" {
+  role_id        = hsdp_iam_role.shared.id
   sharing_policy = "AllowChildren"
   purpose        = "Share SOME role with another organization"
   
@@ -46,6 +47,7 @@ resource "hsdp_iam_role_sharing_policy" "policy" {
 
 The following arguments are supported:
 
+* `role_id` - (Required) The ID of the role to share
 * `sharing_policy` - (Required) The policy to use
   Sharing of a role with a tenant organization can be in one of the following modes:
   * Restricted: - The assignment role to group operation shall check and allow assignment to the groups present in the target organizations. Any assignment operation - both upward and downward organization
