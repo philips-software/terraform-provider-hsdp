@@ -370,6 +370,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_permission":                        iam.DataSourceIAMPermission(),
 			"hsdp_cdr_practitioner":                      practitioner.DataSourceCDRPractitioner(),
 			"hsdp_cdr_org":                               org.DataSourceCDROrg(),
+			"hsdp_iam_role_sharing_policies":             iam.DataSourceIAMRoleSharingPolicies(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
