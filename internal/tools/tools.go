@@ -16,9 +16,13 @@ import (
 	"github.com/philips-software/go-hsdp-api/iam"
 )
 
+var (
+	StandardRetryOnCodes = []int{http.StatusForbidden, http.StatusInternalServerError, http.StatusServiceUnavailable, http.StatusTooManyRequests}
+)
+
 func TryHTTPCall(ctx context.Context, numberOfTries uint64, operation func() (*http.Response, error), retryOnCodes ...int) error {
 	if len(retryOnCodes) == 0 {
-		retryOnCodes = []int{http.StatusForbidden, http.StatusInternalServerError, http.StatusTooManyRequests}
+		retryOnCodes = StandardRetryOnCodes
 	}
 	doOp := func() error {
 		resp, err := operation()
@@ -175,6 +179,7 @@ func CheckForIAMPermissionErrors(client iam.TokenRefresher, resp *http.Response,
 	return backoff.Permanent(err)
 }
 
+// DisableFHIRValidation disable validation for the request
 func DisableFHIRValidation(request *http.Request) error {
 	request.Header.Set("X-Validate-Resource", "false")
 	return nil
