@@ -27,6 +27,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/client"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/group"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/role_sharing_policy"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/service"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/metrics"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/notification"
@@ -297,6 +298,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_group_membership":                      iam.ResourceIAMGroupMembership(),
 			"hsdp_dicom_notification":                        dicom.ResourceDICOMNotification(),
 			"hsdp_cdr_practitioner":                          practitioner.ResourceCDRPractitioner(),
+			"hsdp_iam_role_sharing_policy":                   role_sharing_policy.ResourceRoleSharingPolicy(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                        iam.DataSourceIAMIntrospect(),
