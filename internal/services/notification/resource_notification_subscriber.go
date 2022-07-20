@@ -78,7 +78,7 @@ func ResourceNotificationSubscriber() *schema.Resource {
 	}
 }
 
-func resourceNotificationSubscriberDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceNotificationSubscriberDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*config.Config)
 	principal := config.SchemaToPrincipal(d, m)
@@ -89,7 +89,19 @@ func resourceNotificationSubscriberDelete(_ context.Context, d *schema.ResourceD
 	}
 	defer client.Close()
 
-	_, resp, err := client.Subscriber.DeleteSubscriber(notification.Subscriber{ID: d.Id()})
+	var resp *notification.Response
+
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
+		_, resp, err = client.Subscriber.DeleteSubscriber(notification.Subscriber{ID: d.Id()})
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
+
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusForbidden {
 			softDelete := d.Get("soft_delete").(bool)
