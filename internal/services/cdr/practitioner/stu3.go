@@ -75,7 +75,7 @@ func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sc
 		return diag.FromErr(err)
 	}
 
-	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var resp *cdr.Response
 		var err error
 
@@ -101,7 +101,7 @@ func stu3Read(ctx context.Context, _ *config.Config, client *cdr.Client, d *sche
 	var resp *cdr.Response
 	var contained *resources_go_proto.ContainedResource
 
-	err := tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+	err := tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var err error
 
 		contained, resp, err = client.OperationsSTU3.Get("Practitioner/" + d.Id())
@@ -112,7 +112,7 @@ func stu3Read(ctx context.Context, _ *config.Config, client *cdr.Client, d *sche
 			return nil, fmt.Errorf("OperationsSTU3.Get: response is nil")
 		}
 		return resp.Response, err
-	})
+	}, append(tools.StandardRetryOnCodes, http.StatusNotFound)...) // CDR weirdness
 	if err != nil {
 		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
 			d.SetId("")

@@ -6,6 +6,7 @@
 *.exe
 b.sh
 .swp
+.*.run
 .DS_Store
 terraform-provider-hsdp
 build/
