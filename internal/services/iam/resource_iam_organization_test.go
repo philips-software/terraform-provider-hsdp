@@ -37,7 +37,7 @@ func testAccResourceIAMOrganization(parentOrgID, name string) string {
 	return fmt.Sprintf(`
 resource "hsdp_iam_org" "test" {
     name = "ACCTest-%s"
-    description = "ACCTestORG %s"
+    description = "ACC Test Org %s"
 
 	parent_org_id = "%s"
     wait_for_delete = false
