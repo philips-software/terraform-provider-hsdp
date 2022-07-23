@@ -18,10 +18,11 @@ func ResourceContainerHostExec() *schema.Resource {
 		Description: `The ` + "`hsdp_container_host_exec`" + ` resource implements the standard resource lifecycle but takes no further action.
 The ` + "`triggers`" + ` argument allows specifying an arbitrary set of values that, when changed, will cause the resource to be replaced.`,
 
-		CreateContext: resourceContainerHostExecCreate,
-		Read:          resourceContainerHostExecRead,
-		Delete:        resourceContainerHostExecDelete,
-		SchemaVersion: 2,
+		CreateContext:      resourceContainerHostExecCreate,
+		Read:               resourceContainerHostExecRead,
+		Delete:             resourceContainerHostExecDelete,
+		DeprecationMessage: "This resource is deprecated and will be removed in version 0.40.0+. Please use the 'ssh_resource' from provider 'loafoe/ssh' instead.",
+		SchemaVersion:      2,
 
 		Schema: map[string]*schema.Schema{
 			"triggers": {
