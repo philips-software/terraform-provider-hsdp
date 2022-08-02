@@ -15,6 +15,7 @@ import (
 
 func ResourceConnectMDMStandardService() *schema.Resource {
 	return &schema.Resource{
+		SchemaVersion: 1,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -51,6 +52,7 @@ func ResourceConnectMDMStandardService() *schema.Resource {
 				MinItems: 1,
 				MaxItems: 5,
 				Elem:     serviceURLSchema(),
+				ForceNew: true, // TODO: Remove once MDM addresses this: https://github.com/philips-software/terraform-provider-hsdp/issues/225
 			},
 			"organization_identifier": {
 				Type:             schema.TypeString,
@@ -75,10 +77,12 @@ func serviceURLSchema() *schema.Resource {
 			"url": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"sort_order": {
 				Type:     schema.TypeInt,
 				Required: true,
+				ForceNew: true,
 			},
 			"authentication_method_id": {
 				Type:     schema.TypeString,
