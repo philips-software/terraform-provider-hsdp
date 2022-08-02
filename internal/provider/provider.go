@@ -420,7 +420,7 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.IAMURL = d.Get("iam_url").(string)
 		c.IDMURL = d.Get("idm_url").(string)
 		c.OAuth2ClientID = d.Get("oauth2_client_id").(string)
-		c.OAuth2Secret = d.Get("oauth2_password").(string)
+		c.OAuth2ClientSecret = d.Get("oauth2_password").(string)
 		c.ServiceID = d.Get("service_id").(string)
 		c.ServicePrivateKey = d.Get("service_private_key").(string)
 		c.OrgAdminUsername = d.Get("org_admin_username").(string)

@@ -34,6 +34,7 @@ func ResourceEdgeConfig() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"principal": config.PrincipalSchema(),
 			"sync": {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -49,13 +50,13 @@ func ResourceEdgeConfig() *schema.Resource {
 				Type:     schema.TypeSet,
 				MaxItems: 1,
 				Optional: true,
-				Elem:     loggingSchema(),
+				Elem:     loggingElem(),
 			},
 		},
 	}
 }
 
-func loggingSchema() *schema.Resource {
+func loggingElem() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"raw_config": {
@@ -143,11 +144,9 @@ func resourceEdgeConfigDelete(ctx context.Context, d *schema.ResourceData, m int
 	var client *stl.Client
 	var err error
 
-	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = c.STLClient(&config.Principal{Endpoint: endpoint.(string)})
-	} else {
-		client, err = c.STLClient()
-	}
+	principal := config.SchemaToPrincipal(d, m)
+	client, err = c.STLClient(principal)
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -298,7 +297,7 @@ func dataToResourceData(fwExceptions *stl.AppFirewallException, appLogging *stl.
 	}
 	// Logging
 	if _, ok := d.GetOk("logging"); ok {
-		s := &schema.Set{F: schema.HashResource(loggingSchema())}
+		s := &schema.Set{F: schema.HashResource(loggingElem())}
 		appLoggingDef := make(map[string]interface{})
 		appLoggingDef["raw_config"] = appLogging.RawConfig
 		appLoggingDef["hsdp_product_key"] = appLogging.HSDPProductKey
@@ -361,11 +360,9 @@ func resourceEdgeConfigRead(ctx context.Context, d *schema.ResourceData, m inter
 	var client *stl.Client
 	var err error
 
-	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = c.STLClient(&config.Principal{Endpoint: endpoint.(string)})
-	} else {
-		client, err = c.STLClient()
-	}
+	principal := config.SchemaToPrincipal(d, m)
+	client, err = c.STLClient(principal)
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -390,11 +387,9 @@ func resourceEdgeConfigCreate(ctx context.Context, d *schema.ResourceData, m int
 	var client *stl.Client
 	var err error
 
-	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = c.STLClient(&config.Principal{Endpoint: endpoint.(string)})
-	} else {
-		client, err = c.STLClient()
-	}
+	principal := config.SchemaToPrincipal(d, m)
+	client, err = c.STLClient(principal)
+
 	if err != nil {
 		return diag.FromErr(err)
 	}

@@ -23,6 +23,11 @@ resource "hsdp_edge_app" "myapp" {
 * `name` - (Required) The name of the resource
 * `content` - (Required) The content of the resource
 * `sync` - (Optional, boolean) Sync the resource after mutation. Current default behaviour at system level is to sync immediately, but this might change in future updates.
+* `principal` - (Optional) The optional principal to use for this resource
+    * `uaa_username` - (Optional) The UAA username to use
+    * `uaa_password` - (Optional) The UAA password to use
+    * `region` - (Optional) Region to use. When not set, the provider config is used
+    * `endpoint` - (Optional) The endpoint URL to use if applicable. When not set, the provider config is used
 
 ## Attribute reference
 

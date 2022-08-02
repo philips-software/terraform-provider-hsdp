@@ -14,6 +14,7 @@ import (
 
 func ResourceNotificationSubscriber() *schema.Resource {
 	return &schema.Resource{
+		SchemaVersion: 1,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -32,12 +33,7 @@ func ResourceNotificationSubscriber() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"principal": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				ForceNew: true,
-				Elem:     config.PrincipalSchema(),
-			},
+			"principal": config.PrincipalSchema(),
 			"subscriber_product_name": {
 				Type:     schema.TypeString,
 				Optional: true,

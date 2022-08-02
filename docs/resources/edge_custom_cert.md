@@ -27,6 +27,12 @@ resource "hsdp_edge_custom_cert" "cert" {
 * `private_key_pem` - (Required) the private key of the certificate in PEM format
 * `sync` (Optional, boolean) - When set to true syncs the config after mutations. Default is true.
   Set this to false if you want to batch sync to your device using `hsdp_edge_sync`  
+* `principal` - (Optional) The optional principal to use for this resource
+  * `uaa_username` - (Optional) The UAA username to use
+  * `uaa_password` - (Optional) The UAA password to use
+  * `region` - (Optional) Region to use. When not set, the provider config is used
+  * `endpoint` - (Optional) The endpoint URL to use if applicable. When not set, the provider config is used
+
 
 ## Attribute reference
 

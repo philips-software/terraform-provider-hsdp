@@ -16,6 +16,7 @@ import (
 
 func ResourceNotificationProducer() *schema.Resource {
 	return &schema.Resource{
+		SchemaVersion: 1,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -24,12 +25,7 @@ func ResourceNotificationProducer() *schema.Resource {
 		DeleteContext: resourceNotificationProducerDelete,
 
 		Schema: map[string]*schema.Schema{
-			"principal": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				ForceNew: true,
-				Elem:     config.PrincipalSchema(),
-			},
+			"principal": config.PrincipalSchema(),
 			"managing_organization_id": {
 				Type:     schema.TypeString,
 				Required: true,

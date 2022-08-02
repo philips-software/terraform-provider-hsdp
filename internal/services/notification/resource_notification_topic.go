@@ -15,6 +15,7 @@ import (
 
 func ResourceNotificationTopic() *schema.Resource {
 	return &schema.Resource{
+		SchemaVersion: 1,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -44,12 +45,7 @@ func ResourceNotificationTopic() *schema.Resource {
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
-			"principal": {
-				Type:     schema.TypeSet,
-				Optional: true,
-				ForceNew: true,
-				Elem:     config.PrincipalSchema(),
-			},
+			"principal": config.PrincipalSchema(),
 			"is_auditable": {
 				Type:     schema.TypeBool,
 				Optional: true,

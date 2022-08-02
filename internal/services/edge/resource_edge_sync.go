@@ -12,6 +12,7 @@ import (
 
 func ResourceEdgeSync() *schema.Resource {
 	return &schema.Resource{
+		SchemaVersion: 1,
 		Description:   `The ` + "`hsdp_edge_sync`" + ` resource syncs device discovery to the actual device.`,
 		CreateContext: resourceEdgeSyncCreate,
 		ReadContext:   resourceEdgeSyncRead,
@@ -24,6 +25,7 @@ func ResourceEdgeSync() *schema.Resource {
 				Required:    true,
 				ForceNew:    true,
 			},
+			"principal": config.PrincipalSchema(),
 			"serial_number": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -48,11 +50,9 @@ func resourceEdgeSyncCreate(ctx context.Context, d *schema.ResourceData, m inter
 	var client *stl.Client
 	var err error
 
-	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = c.STLClient(&config.Principal{Endpoint: endpoint.(string)})
-	} else {
-		client, err = c.STLClient()
-	}
+	principal := config.SchemaToPrincipal(d, m)
+	client, err = c.STLClient(principal)
+
 	if err != nil {
 		return diag.FromErr(err)
 	}

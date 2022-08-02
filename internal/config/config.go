@@ -27,14 +27,24 @@ import (
 
 // Config contains configuration for the client
 type Config struct {
-	iam.Config
 	BuildVersion        string
 	ServiceID           string
 	ServicePrivateKey   string
 	S3CredsURL          string
 	NotificationURL     string
+	IAMURL              string
+	IDMURL              string
+	SharedKey           string
+	SecretKey           string
 	MDMURL              string
+	Region              string
+	Environment         string
+	OAuth2ClientID      string
+	OAuth2ClientSecret  string
 	STLURL              string
+	OrgAdminUsername    string
+	OrgAdminPassword    string
+	DebugLog            string
 	CartelHost          string
 	CartelToken         string
 	CartelSecret        string
@@ -75,7 +85,17 @@ type Config struct {
 func (c *Config) IAMClient(principal ...*Principal) (*iam.Client, error) {
 	if len(principal) > 0 && principal[0] != nil {
 		p := principal[0]
-		cfg := c.Config
+		cfg := iam.Config{
+			OAuth2ClientID: c.OAuth2ClientID,
+			OAuth2Secret:   c.OAuth2ClientSecret,
+			Region:         c.Region,
+			Environment:    c.Environment,
+			DebugLog:       c.DebugLog,
+			SharedKey:      c.SharedKey,
+			SecretKey:      c.SecretKey,
+			IDMURL:         c.IDMURL,
+			IAMURL:         c.IAMURL,
+		}
 		if p.OAuth2ClientID != "" {
 			cfg.OAuth2ClientID = p.OAuth2ClientID
 		}
@@ -121,16 +141,95 @@ func (c *Config) S3CredsClient() (*s3creds.Client, error) {
 	return c.s3credsClient, c.credsClientErr
 }
 
-func (c *Config) ConsoleClient() (*console.Client, error) {
-	return c.consoleClient, c.consoleClientErr
+func (c *Config) ConsoleClient(principal ...*Principal) (*console.Client, error) {
+	region := c.Region
+	uaaUsername := c.UAAUsername
+	uaaPassword := c.UAAPassword
+
+	if region == "" {
+		region = "dev"
+	}
+
+	if len(principal) == 0 && c.consoleClient != nil {
+		return c.consoleClient, c.consoleClientErr
+	}
+
+	if len(principal) > 0 && principal[0] != nil {
+		p := principal[0]
+		if p.Region != "" {
+			region = p.Region
+		}
+		if p.UAAUsername != "" {
+			uaaUsername = p.UAAUsername
+		}
+		if p.UAAPassword != "" {
+			uaaPassword = p.UAAPassword
+		}
+	}
+	client, err := console.NewClient(nil, &console.Config{
+		Region:   region,
+		DebugLog: c.DebugLog,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	if uaaUsername == "" || uaaPassword == "" {
+		return nil, ErrMissingUAACredentials
+	}
+	err = client.Login(uaaUsername, uaaPassword)
+	if err != nil {
+		return nil, err
+	}
+	return client, err
 }
 
 func (c *Config) MDMClient() (*mdm.Client, error) {
 	return c.mdmClient, c.mdmClientErr
 }
 
-func (c *Config) STLClient(_ ...*Principal) (*stl.Client, error) {
-	return c.stlClient, c.stlClientErr
+func (c *Config) STLClient(principal ...*Principal) (*stl.Client, error) {
+	region := c.Region
+	if region == "" {
+		region = "dev"
+	}
+	consoleClient := c.consoleClient
+	consoleClientErr := c.consoleClientErr
+	stlURL := c.STLURL
+
+	if len(principal) == 0 {
+		return c.stlClient, c.stlClientErr
+	}
+
+	if principal[0] != nil {
+		p := principal[0]
+		if p.Region != "" {
+			region = p.Region
+			ac, err := config.New(config.WithRegion(region))
+			if err == nil {
+				if url := ac.Service("stl").URL; url != "" {
+					stlURL = url
+				}
+			}
+		}
+		if p.Endpoint != "" {
+			stlURL = p.Endpoint
+		}
+		consoleClient, consoleClientErr = c.ConsoleClient(principal...)
+	}
+	if consoleClientErr != nil {
+		return nil, consoleClientErr
+	}
+
+	client, err := stl.NewClient(consoleClient, &stl.Config{
+		Region:    region,
+		STLAPIURL: stlURL,
+		DebugLog:  c.DebugLog,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
 }
 
 func (c *Config) DockerClient(principal ...*Principal) (*docker.Client, error) {
@@ -213,7 +312,18 @@ func (c *Config) SetupIAMClient() {
 		standardClient = retryClient.StandardClient()
 	}
 	c.iamClient = nil
-	client, err := iam.NewClient(standardClient, &c.Config)
+	cfg := &iam.Config{
+		OAuth2ClientID: c.OAuth2ClientID,
+		OAuth2Secret:   c.OAuth2ClientSecret,
+		Region:         c.Region,
+		Environment:    c.Environment,
+		DebugLog:       c.DebugLog,
+		SharedKey:      c.SharedKey,
+		SecretKey:      c.SecretKey,
+		IDMURL:         c.IDMURL,
+		IAMURL:         c.IAMURL,
+	}
+	client, err := iam.NewClient(standardClient, cfg)
 	if err != nil {
 		c.iamClientErr = fmt.Errorf("possible invalid environment/region: %w", err)
 		return
@@ -423,6 +533,7 @@ func (c *Config) SetupConsoleClient() {
 	}
 	err = client.Login(c.UAAUsername, c.UAAPassword)
 	if err != nil {
+		c.consoleClient = nil
 		c.consoleClientErr = err
 		return
 	}

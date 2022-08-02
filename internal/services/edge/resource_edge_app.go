@@ -14,6 +14,7 @@ import (
 
 func ResourceEdgeApp() *schema.Resource {
 	return &schema.Resource{
+		SchemaVersion: 1,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -28,6 +29,7 @@ func ResourceEdgeApp() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
+			"principal": config.PrincipalSchema(),
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
@@ -55,11 +57,9 @@ func resourceEdgeAppUpdate(ctx context.Context, d *schema.ResourceData, m interf
 	var client *stl.Client
 	var err error
 
-	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = c.STLClient(&config.Principal{Endpoint: endpoint.(string)})
-	} else {
-		client, err = c.STLClient()
-	}
+	principal := config.SchemaToPrincipal(d, m)
+	client, err = c.STLClient(principal)
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -86,11 +86,9 @@ func resourceEdgeAppDelete(ctx context.Context, d *schema.ResourceData, m interf
 	var client *stl.Client
 	var err error
 
-	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = c.STLClient(&config.Principal{Endpoint: endpoint.(string)})
-	} else {
-		client, err = c.STLClient()
-	}
+	principal := config.SchemaToPrincipal(d, m)
+	client, err = c.STLClient(principal)
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -113,11 +111,9 @@ func resourceEdgeAppRead(ctx context.Context, d *schema.ResourceData, m interfac
 	var client *stl.Client
 	var err error
 
-	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = c.STLClient(&config.Principal{Endpoint: endpoint.(string)})
-	} else {
-		client, err = c.STLClient()
-	}
+	principal := config.SchemaToPrincipal(d, m)
+	client, err = c.STLClient(principal)
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -150,11 +146,9 @@ func resourceEdgeAppCreate(ctx context.Context, d *schema.ResourceData, m interf
 	var client *stl.Client
 	var err error
 
-	if endpoint, ok := d.GetOk("endpoint"); ok {
-		client, err = c.STLClient(&config.Principal{Endpoint: endpoint.(string)})
-	} else {
-		client, err = c.STLClient()
-	}
+	principal := config.SchemaToPrincipal(d, m)
+	client, err = c.STLClient(principal)
+
 	if err != nil {
 		return diag.FromErr(err)
 	}
