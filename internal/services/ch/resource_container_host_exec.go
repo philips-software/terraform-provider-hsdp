@@ -21,7 +21,7 @@ The ` + "`triggers`" + ` argument allows specifying an arbitrary set of values t
 		CreateContext:      resourceContainerHostExecCreate,
 		Read:               resourceContainerHostExecRead,
 		Delete:             resourceContainerHostExecDelete,
-		DeprecationMessage: "This resource is deprecated and will be removed in version 0.40.0+. Please use the 'ssh_resource' from provider 'loafoe/ssh' instead.",
+		DeprecationMessage: "This resource is deprecated and will be removed in version 0.40.0+. Consider using  the 'ssh_resource' from provider 'loafoe/ssh' instead.",
 		SchemaVersion:      2,
 
 		Schema: map[string]*schema.Schema{

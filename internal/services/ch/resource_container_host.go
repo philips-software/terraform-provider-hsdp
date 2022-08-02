@@ -26,9 +26,10 @@ import (
 )
 
 const (
-	fileField              = "file"
-	commandsField          = "commands"
-	execDeprecationMessage = "This field is deprecated and will be removed in 0.40.0+. Please use the 'ssh_resource' from 'loafoe/ssh' instead"
+	fileField                  = "file"
+	commandsField              = "commands"
+	commandsDepecrationMessage = "The 'commands' argument is deprecated and will be removed in v0.40.0+. Please use the 'ssh_resource' from provider 'loafoe/ssh' for bootstrapping"
+	fileDepecrationMessage     = "The 'file' block is deprecated and will be removed in v0.40.0+. Please use the 'ssh_resource' from provider 'loafoe/ssh' for bootstrapping"
 )
 
 func tagsSchema() *schema.Schema {
@@ -186,23 +187,22 @@ func ResourceContainerHost() *schema.Resource {
 				Default:  false,
 			},
 			"commands_after_file_changes": {
-				Type:       schema.TypeBool,
-				Optional:   true,
-				Default:    true,
-				Deprecated: execDeprecationMessage,
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  true,
 			},
 			commandsField: {
 				Type:       schema.TypeList,
 				MaxItems:   10,
 				Optional:   true,
 				Elem:       &schema.Schema{Type: schema.TypeString},
-				Deprecated: execDeprecationMessage,
+				Deprecated: commandsDepecrationMessage,
 			},
 			fileField: {
 				Type:       schema.TypeSet,
 				Optional:   true,
 				Elem:       fileFieldSchema(),
-				Deprecated: execDeprecationMessage,
+				Deprecated: fileDepecrationMessage,
 			},
 			"subnet_type": {
 				Type:          schema.TypeString,
