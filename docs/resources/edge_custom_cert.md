@@ -33,7 +33,6 @@ resource "hsdp_edge_custom_cert" "cert" {
   * `region` - (Optional) Region to use. When not set, the provider config is used
   * `endpoint` - (Optional) The endpoint URL to use if applicable. When not set, the provider config is used
 
-
 ## Attribute reference
 
 * `id` - The id of the custom certificate
