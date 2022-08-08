@@ -5,7 +5,6 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/notification"
@@ -140,13 +139,18 @@ func resourceNotificationTopicCreate(ctx context.Context, d *schema.ResourceData
 
 	var created *notification.Topic
 
-	operation := func() error {
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var resp *notification.Response
-		_ = client.TokenRefresh()
+
 		created, resp, err = client.Topic.CreateTopic(topic)
-		return checkForNotificationPermissionErrors(client, resp, err)
-	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -155,7 +159,7 @@ func resourceNotificationTopicCreate(ctx context.Context, d *schema.ResourceData
 	return resourceNotificationTopicRead(ctx, d, m)
 }
 
-func resourceNotificationTopicUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceNotificationTopicUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 
 	c := m.(*config.Config)
@@ -177,13 +181,17 @@ func resourceNotificationTopicUpdate(_ context.Context, d *schema.ResourceData, 
 		topic.AllowedScopes = tools.ExpandStringList(d.Get("allowed_scopes").(*schema.Set).List())
 		topic.Description = d.Get("description").(string)
 		topic.IsAuditable = d.Get("is_auditable").(bool)
-		operation := func() error {
+		err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 			var resp *notification.Response
-			_ = client.TokenRefresh()
 			_, _, err = client.Topic.UpdateTopic(*topic)
-			return checkForNotificationPermissionErrors(client, resp, err)
-		}
-		err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+			if err != nil {
+				_ = client.TokenRefresh()
+			}
+			if resp == nil {
+				return nil, err
+			}
+			return resp.Response, err
+		})
 		if err != nil {
 			return diag.FromErr(err)
 		}

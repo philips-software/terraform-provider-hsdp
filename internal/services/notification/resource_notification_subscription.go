@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/notification"
@@ -87,7 +86,7 @@ func resourceNotificationSubscriptionDelete(_ context.Context, d *schema.Resourc
 	return diags
 }
 
-func resourceNotificationSubscriptionRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceNotificationSubscriptionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*config.Config)
 	principal := config.SchemaToPrincipal(d, m)
@@ -100,14 +99,17 @@ func resourceNotificationSubscriptionRead(_ context.Context, d *schema.ResourceD
 
 	var subscription *notification.Subscription
 
-	operation := func() error {
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var resp *notification.Response
-		var err error
-		_ = client.TokenRefresh()
 		subscription, resp, err = client.Subscription.GetSubscription(d.Id())
-		return checkForNotificationPermissionErrors(client, resp, err)
-	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, fmt.Errorf("Producer.GetSubscription: response is nil, error: %w", err)
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if errors.Is(err, notification.ErrEmptyResult) { // Removed
 			d.SetId("")

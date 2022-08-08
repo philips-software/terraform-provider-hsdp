@@ -2,6 +2,7 @@ package notification_test
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -13,7 +14,7 @@ import (
 func TestAccResourceNotificationProducer_basic(t *testing.T) {
 	t.Parallel()
 
-	resourceName := "hsdp_notification_producer.producer"
+	resourceName := "hsdp_notification_producer.principal_producer"
 	randomName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 	iamOrgID := acc.AccIAMOrgGUID()
 
@@ -24,8 +25,25 @@ func TestAccResourceNotificationProducer_basic(t *testing.T) {
 			{
 				Config: testAccResourceNotificationProducer(randomName, iamOrgID),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "description", fmt.Sprintf("acc producer %s", randomName)),
+					resource.TestCheckResourceAttr(resourceName, "description", fmt.Sprintf("acc principal producer %s", randomName)),
 				),
+			},
+			{
+				Config: testAccResourceNotificationProducer(randomName, iamOrgID) +
+					fmt.Sprintf(`
+resource "hsdp_notification_producer" "producer" {
+  managing_organization_id       = hsdp_iam_org.test.id
+  managing_organization          = hsdp_iam_org.test.name
+  producer_product_name          = "accProduct%s"
+  producer_service_name          = "accService%s"
+  producer_service_instance_name = "accServiceInstance%s"
+  producer_service_base_url      = "https://ns-producer.terrakube.com/"
+  producer_service_path_url      = "notification/create/%s"
+  description                    = "acc producer %s"
+
+  depends_on = [hsdp_iam_group.producer_admins]
+}`, randomName, randomName, randomName, randomName, randomName),
+				ExpectError: regexp.MustCompile("User is not in the given organization"),
 			},
 		},
 	})
@@ -122,14 +140,14 @@ resource "hsdp_iam_group" "producer_admins" {
   name                  = "PRODUCER_ADMINS_TF"
   roles                 = [hsdp_iam_role.producer_admin.id]
   services              = [hsdp_iam_service.test.id]
-  users                 = []
+  users                 = [hsdp_iam_user.user.id]
   managing_organization = hsdp_iam_org.test.id
 }
 
 resource "hsdp_iam_group" "publishers" {
   name                  = "PUBLISHERS_TF"
   roles                 = [hsdp_iam_role.publisher.id]
-  users                 = []
+  users                 = [hsdp_iam_user.user.id]
   services              = [hsdp_iam_service.test.id]
   managing_organization = hsdp_iam_org.test.id
 }
@@ -137,7 +155,7 @@ resource "hsdp_iam_group" "publishers" {
 resource "hsdp_iam_group" "subscriber_admins" {
   name                  = "SUBSCRIBER_ADMINS_TF"
   roles                 = [hsdp_iam_role.subscriber_admin.id]
-  users                 = []
+  users                 = [hsdp_iam_user.user.id]
   services              = [hsdp_iam_service.test.id]
   managing_organization = hsdp_iam_org.test.id
 }
@@ -145,12 +163,12 @@ resource "hsdp_iam_group" "subscriber_admins" {
 resource "hsdp_iam_group" "subscribers" {
   name                  = "SUBSCRIBERS_TF"
   roles                 = [hsdp_iam_role.subscriber.id]
-  users                 = []
+  users                 = [hsdp_iam_user.user.id]
   services              = [hsdp_iam_service.test.id]
   managing_organization = hsdp_iam_org.test.id
 }
 
-resource "hsdp_notification_producer" "producer" {
+resource "hsdp_notification_producer" "principal_producer" {
   principal {
     service_id          = hsdp_iam_service.test.service_id
     service_private_key = hsdp_iam_service.test.private_key
@@ -158,14 +176,23 @@ resource "hsdp_notification_producer" "producer" {
 
   managing_organization_id       = hsdp_iam_org.test.id
   managing_organization          = hsdp_iam_org.test.name
-  producer_product_name          = "accProduct%s"
-  producer_service_name          = "accService%s"
-  producer_service_instance_name = "accServiceInstance%s"
-  producer_service_base_url      = "https://ns-producer.terrakube.com/"
+  producer_product_name          = "accPrincipalProduct%s"
+  producer_service_name          = "accPrincipalService%s"
+  producer_service_instance_name = "accPrincipalServiceInstance%s"
+  producer_service_base_url      = "https://ns-principal-producer.terrakube.com/"
   producer_service_path_url      = "notification/create/%s"
-  description                    = "acc producer %s"
+  description                    = "acc principal producer %s"
 
   depends_on = [hsdp_iam_group.producer_admins]
+}
+
+resource "hsdp_iam_user" "user" { 
+  organization_id = hsdp_iam_org.test.id
+  login           = "login-%s"
+  password        = "Temp@123!"
+  email           = "user-%s@terrakube.com"
+  first_name      = "ACCProducer"
+  last_name       = "ACCAcount"
 }
 `,
 		// IAM TEST ORG
@@ -193,10 +220,14 @@ resource "hsdp_notification_producer" "producer" {
 
 		// IAM GROUP subscribers
 
-		// NOTIFICATION PRODUCER producer
+		// NOTIFICATION PRINCIPAL PRODUCER producer
 		random,
 		random,
 		random,
+		random,
+		random,
+
+		// IAM USER
 		random,
 		random,
 	)

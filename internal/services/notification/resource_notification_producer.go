@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/notification"
@@ -104,7 +103,7 @@ func resourceNotificationProducerDelete(_ context.Context, d *schema.ResourceDat
 	return diags
 }
 
-func resourceNotificationProducerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceNotificationProducerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*config.Config)
 
@@ -118,13 +117,18 @@ func resourceNotificationProducerRead(_ context.Context, d *schema.ResourceData,
 
 	var producer *notification.Producer
 
-	operation := func() error {
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var resp *notification.Response
-		_ = client.TokenRefresh()
 		producer, resp, err = client.Producer.GetProducer(d.Id())
-		return checkForNotificationPermissionErrors(client, resp, err)
-	}
-	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, fmt.Errorf("Producer.GetProducer: response is nil, error: %w", err)
+		}
+		return resp.Response, err
+	})
+
 	if err != nil {
 		if errors.Is(err, notification.ErrEmptyResult) { // Removed
 			d.SetId("")
@@ -174,7 +178,7 @@ func resourceNotificationProducerCreate(ctx context.Context, d *schema.ResourceD
 			_ = client.TokenRefresh()
 		}
 		if resp == nil {
-			return nil, fmt.Errorf("Producer.CreateProducer: response is nil")
+			return nil, fmt.Errorf("Producer.CreateProducer: response is nil, error: %w", err)
 		}
 		return resp.Response, err
 	})
@@ -184,15 +188,4 @@ func resourceNotificationProducerCreate(ctx context.Context, d *schema.ResourceD
 
 	d.SetId(created.ID)
 	return resourceNotificationProducerRead(ctx, d, m)
-}
-
-func checkForNotificationPermissionErrors(client *notification.Client, resp *notification.Response, err error) error {
-	if resp == nil || resp.StatusCode > 500 {
-		return err
-	}
-	if resp.StatusCode == http.StatusForbidden {
-		_ = client.TokenRefresh()
-		return err
-	}
-	return backoff.Permanent(err)
 }

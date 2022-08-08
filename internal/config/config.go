@@ -83,7 +83,7 @@ type Config struct {
 }
 
 func (c *Config) IAMClient(principal ...*Principal) (*iam.Client, error) {
-	if len(principal) > 0 && principal[0] != nil {
+	if len(principal) > 0 && principal[0] != nil && principal[0].HasAuth() {
 		p := principal[0]
 		cfg := iam.Config{
 			OAuth2ClientID: c.OAuth2ClientID,
@@ -246,7 +246,7 @@ func (c *Config) DockerClient(principal ...*Principal) (*docker.Client, error) {
 }
 
 func (c *Config) PKIClient(principal ...*Principal) (*pki.Client, error) {
-	if len(principal) > 0 && principal[0] != nil && c.consoleClient != nil {
+	if len(principal) > 0 && principal[0] != nil && principal[0].HasAuth() && c.consoleClient != nil {
 		region := principal[0].Region
 		environment := principal[0].Environment
 		iamClient, err := c.IAMClient(principal...)
@@ -277,7 +277,7 @@ func (c *Config) S3CredsClientWithLogin(username, password string) (*s3creds.Cli
 }
 
 func (c *Config) NotificationClient(principal ...*Principal) (*notification.Client, error) {
-	if len(principal) > 0 && principal[0] != nil {
+	if len(principal) > 0 && principal[0] != nil && principal[0].HasAuth() {
 		region := principal[0].Region
 		environment := principal[0].Environment
 		iamClient, err := c.IAMClient(principal...)

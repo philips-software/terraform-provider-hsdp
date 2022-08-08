@@ -382,7 +382,7 @@ func purgeGroupContent(ctx context.Context, client *iam.Client, id string, d *sc
 	}
 	if len(users) > 0 {
 		for _, u := range users {
-			_ = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+			_ = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 				_, resp, err := client.Groups.RemoveMembers(group, u)
 				if resp != nil && resp.StatusCode == http.StatusUnprocessableEntity {
 					return resp.Response, nil // User is already gone
@@ -399,7 +399,7 @@ func purgeGroupContent(ctx context.Context, client *iam.Client, id string, d *sc
 	services := tools.ExpandStringList(d.Get("services").(*schema.Set).List())
 	if len(services) > 0 {
 		for _, s := range services {
-			_ = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+			_ = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 				_, resp, err := client.Groups.RemoveServices(group, s)
 				if resp != nil && resp.StatusCode == http.StatusUnprocessableEntity {
 					return resp.Response, nil // Service is already gone
@@ -421,7 +421,7 @@ func purgeGroupContent(ctx context.Context, client *iam.Client, id string, d *sc
 	}
 	if len(*roles) > 0 {
 		for _, r := range *roles {
-			_ = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+			_ = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 				var role = iam.Role{ID: r.ID}
 				_, resp, err := client.Groups.RemoveRole(group, role)
 				if resp != nil && resp.StatusCode == http.StatusUnprocessableEntity {
@@ -457,7 +457,7 @@ func resourceIAMGroupDelete(ctx context.Context, d *schema.ResourceData, m inter
 	_ = resourceIAMGroupRead(ctx, d, m)
 
 	var ok bool
-	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var resp *iam.Response
 		var err error
 		ok, resp, err = client.Groups.DeleteGroup(group)

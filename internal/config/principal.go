@@ -80,6 +80,22 @@ func PrincipalSchema() *schema.Schema {
 	}
 }
 
+func (p *Principal) HasAuth() bool {
+	// Service identity
+	if p.ServiceID != "" && p.ServicePrivateKey != "" {
+		return true
+	}
+	// IAM identity
+	if p.Username != "" && p.Password != "" && p.OAuth2ClientID != "" {
+		return true
+	}
+	if p.UAAUsername != "" && p.UAAPassword != "" {
+		return true
+	}
+	// No credentials
+	return false
+}
+
 func SchemaToPrincipal(d *schema.ResourceData, m interface{}) *Principal {
 	config := m.(*Config)
 
