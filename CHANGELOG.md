@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.37.1
+
+- Notification: fix non principal authentication (#227)
+
 ## v0.37.0
 
 - Deprecation WARNING: hsdp_container_host_exec is being deprecated. It will be removed in v0.40.0
