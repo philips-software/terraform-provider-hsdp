@@ -8,6 +8,8 @@ Copies content and executes commands on Container Host instances
 
 > This resource is only available when the `cartel_*` keys are set in the provider config
 
+~> This resource is deprecated and will be removed in v0.40.0
+
 ## Example Usage
 
 The following example uses the internal provisioning support for bootstrapping an instance
