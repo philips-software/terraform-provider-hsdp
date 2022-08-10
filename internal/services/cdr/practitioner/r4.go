@@ -3,7 +3,7 @@ package practitioner
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -148,7 +148,7 @@ func searchIdentifier(id identifier) cdr.OptionFunc {
 	return func(req *http.Request) error {
 		form := url.Values{}
 		form.Add("identifier", id.Value)
-		req.Body = ioutil.NopCloser(strings.NewReader(form.Encode()))
+		req.Body = io.NopCloser(strings.NewReader(form.Encode()))
 		req.ContentLength = int64(len(form.Encode()))
 		req.Header.Set("Content-Type", "application/x-www-form-urlencoded; fhirVersion=4.0")
 		return nil
