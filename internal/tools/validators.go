@@ -53,7 +53,7 @@ func ValidateRegion(i interface{}, k string) (warns []string, es []error) {
 
 func ValidateEnvironment(i interface{}, k string) (warns []string, es []error) {
 	env := i.(string)
-	if !ContainsString([]string{"dev", "client-test", "prod"}, env) {
+	if !ContainsString([]string{"dev", "client-test", "prod", "production"}, env) {
 		es = append(es, fmt.Errorf("environment '%s' is not a supported one", env))
 	}
 	return
