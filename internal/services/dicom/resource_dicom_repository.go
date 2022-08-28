@@ -47,6 +47,11 @@ func ResourceDICOMRepository() *schema.Resource {
 				MaxItems: 1,
 				Elem:     notificationSchema(),
 			},
+			"store_as_composite": {
+				Type:     schema.TypeBool,
+				ForceNew: true,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -135,6 +140,9 @@ func resourceDICOMRepositoryCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 	if repositoryOrgID != "" {
 		repo.OrganizationID = repositoryOrgID
+	}
+	if v, ok := d.GetOk("store_as_composite"); ok {
+		repo.StoreAsComposite = v.(bool)
 	}
 	if v, ok := d.GetOk("notification"); ok {
 		vL := v.(*schema.Set).List()
