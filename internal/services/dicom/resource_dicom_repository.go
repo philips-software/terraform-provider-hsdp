@@ -2,6 +2,7 @@ package dicom
 
 import (
 	"context"
+	"errors"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -116,6 +117,10 @@ func resourceDICOMRepositoryRead(_ context.Context, d *schema.ResourceData, m in
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
+		if errors.Is(err, dicom.ErrNotFound) {
+			d.SetId("")
+			return diags
+		}
 		return diag.FromErr(err)
 	}
 	if repo.OrganizationID != orgID {
