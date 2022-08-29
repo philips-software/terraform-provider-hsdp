@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.37.2
+
+- Core: Allow "production" as environment
+- DICOM: Add store_as_composite argument (#230)
+- IAM: Bump go-hsdp-api version to fix IAM consistency issue
+
 ## v0.37.1
 
 - Notification: fix non principal authentication (#227)
