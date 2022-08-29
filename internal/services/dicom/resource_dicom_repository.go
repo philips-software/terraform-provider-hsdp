@@ -143,7 +143,8 @@ func resourceDICOMRepositoryCreate(ctx context.Context, d *schema.ResourceData, 
 		repo.OrganizationID = repositoryOrgID
 	}
 	if v, ok := d.GetOk("store_as_composite"); ok {
-		repo.StoreAsComposite = v.(bool)
+		storeAsComposite := v.(bool)
+		repo.StoreAsComposite = &storeAsComposite
 	}
 	if v, ok := d.GetOk("notification"); ok {
 		vL := v.(*schema.Set).List()
