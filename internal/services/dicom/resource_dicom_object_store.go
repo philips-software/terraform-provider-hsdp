@@ -2,6 +2,7 @@ package dicom
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/cenkalti/backoff/v4"
@@ -210,6 +211,10 @@ func resourceDICOMObjectStoreRead(_ context.Context, d *schema.ResourceData, m i
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
+		if errors.Is(err, dicom.ErrNotFound) {
+			d.SetId("")
+			return diags
+		}
 		return diag.FromErr(err)
 	}
 	_ = d.Set("description", store.Description)

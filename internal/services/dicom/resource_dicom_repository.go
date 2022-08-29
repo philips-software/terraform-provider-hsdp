@@ -2,6 +2,7 @@ package dicom
 
 import (
 	"context"
+	"errors"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -12,6 +13,7 @@ import (
 
 func ResourceDICOMRepository() *schema.Resource {
 	return &schema.Resource{
+		SchemaVersion: 1,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -46,6 +48,11 @@ func ResourceDICOMRepository() *schema.Resource {
 				ForceNew: true,
 				MaxItems: 1,
 				Elem:     notificationSchema(),
+			},
+			"store_as_composite": {
+				Type:     schema.TypeBool,
+				ForceNew: true,
+				Optional: true,
 			},
 		},
 	}
@@ -110,6 +117,10 @@ func resourceDICOMRepositoryRead(_ context.Context, d *schema.ResourceData, m in
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
+		if errors.Is(err, dicom.ErrNotFound) {
+			d.SetId("")
+			return diags
+		}
 		return diag.FromErr(err)
 	}
 	if repo.OrganizationID != orgID {
@@ -135,6 +146,10 @@ func resourceDICOMRepositoryCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 	if repositoryOrgID != "" {
 		repo.OrganizationID = repositoryOrgID
+	}
+	if v, ok := d.GetOk("store_as_composite"); ok {
+		storeAsComposite := v.(bool)
+		repo.StoreAsComposite = &storeAsComposite
 	}
 	if v, ok := d.GetOk("notification"); ok {
 		vL := v.(*schema.Set).List()

@@ -2,6 +2,7 @@ package dicom
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/cenkalti/backoff/v4"
@@ -152,7 +153,12 @@ func resourceDICOMRemoteNodeRead(_ context.Context, d *schema.ResourceData, m in
 		return checkForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+
 	if err != nil {
+		if errors.Is(err, dicom.ErrNotFound) {
+			d.SetId("")
+			return diags
+		}
 		return diag.FromErr(err)
 	}
 	_ = d.Set("title", node.Title)
