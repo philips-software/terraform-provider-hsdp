@@ -11,7 +11,6 @@ This resource manages a DICOM notification configurations
 ```hcl
 resource "hsdp_dicom_notification" "topic" {
   config_url = hsdp_dicom_store_config.dicom.config_url
-  organization_id = hsdp_iam_org.root_org.id
   endpoint_url = var.notification_endpoint_url
   
   default_organization_id = hsdp_iam_org.tenant1.id
@@ -21,7 +20,6 @@ resource "hsdp_dicom_notification" "topic" {
 ## Argument reference
 
 * `config_url` - (Required) The base config URL of the DICOM Store instance
-* `organization_id` - (Required) The organization ID
 * `endpoint_url` - (Required) The notification endpoint URL. Example: `https://notification-dev.us-east.philips-healthsuite.com`
 * `enabled` - (Optional) Enable the notification or not. Default: `true`
 * `default_organization_id` - (Optional) The default organization ID
