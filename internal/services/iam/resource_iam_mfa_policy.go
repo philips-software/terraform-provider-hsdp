@@ -98,13 +98,13 @@ func resourceIAMMFAPolicyCreate(ctx context.Context, d *schema.ResourceData, m i
 		return diag.FromErr(err)
 	}
 	if newPolicy == nil {
-		return diag.FromErr(fmt.Errorf("failed to create MFA policy: %d", resp.StatusCode))
+		return diag.FromErr(fmt.Errorf("failed to create MFA policy: %d", resp.StatusCode()))
 	}
 	d.SetId(newPolicy.ID)
 	return resourceIAMMFAPolicyRead(ctx, d, m)
 }
 
-func resourceIAMMFAPolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMMFAPolicyRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -117,7 +117,7 @@ func resourceIAMMFAPolicyRead(ctx context.Context, d *schema.ResourceData, m int
 	id := d.Id()
 	policy, resp, err := client.MFAPolicies.GetMFAPolicyByID(id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && resp.StatusCode() == http.StatusNotFound {
 			d.SetId("")
 			return diags
 		}
@@ -138,7 +138,7 @@ func resourceIAMMFAPolicyRead(ctx context.Context, d *schema.ResourceData, m int
 	return diags
 }
 
-func resourceIAMMFAPolicyUpdate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMMFAPolicyUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -176,7 +176,7 @@ func resourceIAMMFAPolicyUpdate(ctx context.Context, d *schema.ResourceData, m i
 	return diags
 }
 
-func resourceIAMMFAPolicyDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMMFAPolicyDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics

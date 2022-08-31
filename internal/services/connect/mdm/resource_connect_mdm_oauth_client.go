@@ -371,7 +371,7 @@ func resourceConnectMDMOAuthClientCreate(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 	if created == nil {
-		return diag.FromErr(fmt.Errorf("failed to create resource: %d", resp.StatusCode))
+		return diag.FromErr(fmt.Errorf("failed to create resource: %d", resp.StatusCode()))
 	}
 	d.SetId(fmt.Sprintf("OAuthClient/%s", created.ID))
 	_ = d.Set("guid", created.ID)
@@ -425,7 +425,7 @@ func resourceConnectMDMOAuthClientRead(ctx context.Context, d *schema.ResourceDa
 		return resp.Response, err
 	})
 	if err != nil {
-		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
+		if resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusGone) {
 			d.SetId("")
 			return nil
 		}

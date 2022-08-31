@@ -32,7 +32,7 @@ func DataSourceIAMRole() *schema.Resource {
 
 }
 
-func dataSourceIAMRoleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIAMRoleRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -50,8 +50,8 @@ func dataSourceIAMRoleRead(ctx context.Context, d *schema.ResourceData, meta int
 	})
 
 	if err != nil {
-		if resp != nil && resp.StatusCode != http.StatusOK {
-			switch resp.StatusCode {
+		if resp != nil && resp.StatusCode() != http.StatusOK {
+			switch resp.StatusCode() {
 			case http.StatusNotFound:
 				err = fmt.Errorf("role '%s' not found in org '%s'", name, orgId)
 			case http.StatusForbidden:

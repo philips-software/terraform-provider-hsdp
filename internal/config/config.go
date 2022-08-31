@@ -705,6 +705,9 @@ func (c *Config) GetDICOMConfigClient(url string) (*dicom.Client, error) {
 	if c.iamClientErr != nil {
 		return nil, fmt.Errorf("DICM client error in GetDICOMConfigClient: %w", c.iamClientErr)
 	}
+	if url == "" {
+		return nil, fmt.Errorf("GetDICOMConfigClient: empty config_url")
+	}
 	client, err := dicom.NewClient(c.iamClient, &dicom.Config{
 		DICOMConfigURL: url,
 		TimeZone:       c.TimeZone,

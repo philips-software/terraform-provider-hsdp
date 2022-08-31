@@ -89,7 +89,7 @@ func dataSourceCDRPropositionRead(ctx context.Context, d *schema.ResourceData, m
 			return resp.Response, err
 		})
 		if err != nil {
-			if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
+			if resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusGone) {
 				d.SetId("")
 				return diags
 			}
@@ -135,7 +135,7 @@ func dataSourceCDRPropositionRead(ctx context.Context, d *schema.ResourceData, m
 			return resp.Response, err
 		})
 		if err != nil {
-			if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
+			if resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusGone) {
 				d.SetId("")
 				return diags
 			}

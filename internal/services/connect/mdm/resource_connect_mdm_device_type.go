@@ -151,7 +151,7 @@ func resourceConnectMDMDeviceTypeCreate(ctx context.Context, d *schema.ResourceD
 		return diag.FromErr(err)
 	}
 	if created == nil {
-		return diag.FromErr(fmt.Errorf("failed to create resource: %d", resp.StatusCode))
+		return diag.FromErr(fmt.Errorf("failed to create resource: %d", resp.StatusCode()))
 	}
 	_ = d.Set("guid", created.ID)
 	d.SetId(fmt.Sprintf("DeviceType/%s", created.ID))
@@ -181,7 +181,7 @@ func resourceConnectMDMDeviceTypeRead(ctx context.Context, d *schema.ResourceDat
 		return resp.Response, err
 	})
 	if err != nil {
-		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
+		if resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusGone) {
 			d.SetId("")
 			return nil
 		}

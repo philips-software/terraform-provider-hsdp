@@ -290,7 +290,7 @@ func resourceCDLExportRouteCreate(ctx context.Context, d *schema.ResourceData, m
 		if resp == nil {
 			return diag.FromErr(err)
 		}
-		if resp.StatusCode != http.StatusConflict {
+		if resp.StatusCode() != http.StatusConflict {
 			return diag.FromErr(err)
 		}
 		return diag.FromErr(err)

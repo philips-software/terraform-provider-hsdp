@@ -89,7 +89,7 @@ func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, m interf
 		if resp == nil {
 			return diag.FromErr(fmt.Errorf("response is nil: %v", err))
 		}
-		if resp.StatusCode != http.StatusConflict {
+		if resp.StatusCode() != http.StatusConflict {
 			return diag.FromErr(err)
 		}
 		// Already exists most likely, adopt it
@@ -114,12 +114,12 @@ func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, m interf
 			_, _, _ = client.Roles.DeleteRole(*role)
 			return diag.FromErr(fmt.Errorf("error adding permission '%s': %v", p, err))
 		}
-		if resp == nil || !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusMultiStatus) {
+		if resp == nil || !(resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusMultiStatus) {
 			// Clean up
 			_, _, _ = client.Roles.DeleteRole(*role)
 			return diag.FromErr(fmt.Errorf("error adding permission '%s': %v", p, result))
 		}
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && resp.StatusCode() == http.StatusNotFound {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
 				Summary:  "invalid permission",
@@ -146,11 +146,11 @@ func resourceIAMRoleRead(_ context.Context, d *schema.ResourceData, m interface{
 	id := d.Id()
 	role, resp, err := client.Roles.GetRoleByID(id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && resp.StatusCode() == http.StatusNotFound {
 			d.SetId("")
 			return diags
 		}
-		if resp != nil && resp.StatusCode == http.StatusForbidden { // See INC0080073
+		if resp != nil && resp.StatusCode() == http.StatusForbidden { // See INC0080073
 			orgId := d.Get("managing_organization").(string)
 			if client.HasPermissions(orgId, "ROLE.WRITE") {
 				// If we have ROLE.WRITE permission and get HTTP 403 we conclude the Role is gone
@@ -166,7 +166,7 @@ func resourceIAMRoleRead(_ context.Context, d *schema.ResourceData, m interface{
 
 	permissions, resp, err := client.Roles.GetRolePermissions(*role)
 	if err != nil {
-		if resp.StatusCode == http.StatusForbidden { // IAM limitation
+		if resp.StatusCode() == http.StatusForbidden { // IAM limitation
 			return diags // Use Terraform as source of truth
 		}
 		return diag.FromErr(err)
@@ -216,7 +216,7 @@ func addAndRemovePermissions(_ context.Context, role iam.Role, toAdd, toRemove [
 		for _, v := range toAdd {
 			_, resp, err := client.Roles.AddRolePermission(role, v)
 			if err != nil {
-				if resp != nil && resp.StatusCode == http.StatusNotFound {
+				if resp != nil && resp.StatusCode() == http.StatusNotFound {
 					diags = append(diags, diag.Diagnostic{
 						Severity: diag.Warning,
 						Summary:  "invalid permission",
@@ -232,7 +232,7 @@ func addAndRemovePermissions(_ context.Context, role iam.Role, toAdd, toRemove [
 	for _, v := range toRemove {
 		_, resp, err := client.Roles.RemoveRolePermission(role, v)
 		if err != nil {
-			if resp != nil && resp.StatusCode == http.StatusNotFound {
+			if resp != nil && resp.StatusCode() == http.StatusNotFound {
 				diags = append(diags, diag.Diagnostic{
 					Severity: diag.Warning,
 					Summary:  "invalid permission",

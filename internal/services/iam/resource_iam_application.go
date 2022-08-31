@@ -88,7 +88,7 @@ func resourceIAMApplicationCreate(ctx context.Context, d *schema.ResourceData, m
 		if resp == nil {
 			return diag.FromErr(err)
 		}
-		if resp.StatusCode != http.StatusConflict {
+		if resp.StatusCode() != http.StatusConflict {
 			return diag.FromErr(err)
 		}
 		createdApps, _, err := client.Applications.GetApplications(&iam.GetApplicationsOptions{
@@ -127,7 +127,7 @@ func resourceIAMApplicationRead(_ context.Context, d *schema.ResourceData, m int
 	id := d.Id()
 	app, resp, err := client.Applications.GetApplicationByID(id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && resp.StatusCode() == http.StatusNotFound {
 			d.SetId("")
 			return diags
 		}

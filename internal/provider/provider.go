@@ -19,6 +19,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/configuration"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/mdm"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/dicom"
+	repository2 "github.com/philips-software/terraform-provider-hsdp/internal/services/dicom/repository"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/namespace"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/repository"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/service_key"
@@ -248,7 +249,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_cdr_subscription":                          subscription.ResourceCDRSubscription(),
 			"hsdp_dicom_store_config":                        dicom.ResourceDICOMStoreConfig(),
 			"hsdp_dicom_object_store":                        dicom.ResourceDICOMObjectStore(),
-			"hsdp_dicom_repository":                          dicom.ResourceDICOMRepository(),
+			"hsdp_dicom_repository":                          repository2.ResourceDICOMRepository(),
 			"hsdp_pki_tenant":                                pki.ResourcePKITenant(),
 			"hsdp_pki_cert":                                  pki.ResourcePKICert(),
 			"hsdp_edge_app":                                  edge.ResourceEdgeApp(),

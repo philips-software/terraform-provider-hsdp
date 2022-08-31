@@ -328,7 +328,7 @@ func resourceAIInferenceJobDelete(_ context.Context, d *schema.ResourceData, m i
 		if resp == nil {
 			return diag.FromErr(err)
 		}
-		if resp.StatusCode == http.StatusNotFound { // Already deleted
+		if resp.StatusCode() == http.StatusNotFound { // Already deleted
 			d.SetId("")
 			return diags
 		}

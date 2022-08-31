@@ -229,7 +229,7 @@ func resourceConnectMDMFirmwareComponentVersionCreate(ctx context.Context, d *sc
 		return diag.FromErr(err)
 	}
 	if created == nil {
-		return diag.FromErr(fmt.Errorf("failed to create resource: %d", resp.StatusCode))
+		return diag.FromErr(fmt.Errorf("failed to create resource: %d", resp.StatusCode()))
 	}
 	_ = d.Set("guid", created.ID)
 	d.SetId(fmt.Sprintf("FirmwareComponentVersion/%s", created.ID))
@@ -262,7 +262,7 @@ func resourceConnectMDMFirmwareComponentVersionRead(ctx context.Context, d *sche
 		return resp.Response, err
 	})
 	if err != nil {
-		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
+		if resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusGone) {
 			d.SetId("")
 			return nil
 		}

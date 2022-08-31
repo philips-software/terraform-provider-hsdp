@@ -121,7 +121,7 @@ func resourceConnectMDMBlobSubscriptionCreate(ctx context.Context, d *schema.Res
 		return diag.FromErr(err)
 	}
 	if created == nil {
-		return diag.FromErr(fmt.Errorf("failed to create resource: %d", resp.StatusCode))
+		return diag.FromErr(fmt.Errorf("failed to create resource: %d", resp.StatusCode()))
 	}
 	_ = d.Set("guid", created.ID)
 	d.SetId(fmt.Sprintf("BlobSubscription/%s", created.ID))
@@ -154,7 +154,7 @@ func resourceConnectMDMBlobSubscriptionRead(ctx context.Context, d *schema.Resou
 		return resp.Response, err
 	})
 	if err != nil {
-		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
+		if resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusGone) {
 			d.SetId("")
 			return nil
 		}

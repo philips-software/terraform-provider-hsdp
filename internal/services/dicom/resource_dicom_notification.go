@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/dicom"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func ResourceDICOMNotification() *schema.Resource {
@@ -66,11 +67,11 @@ func resourceDICOMNotificationDelete(_ context.Context, d *schema.ResourceData, 
 	var resp *dicom.Response
 	operation := func() error {
 		notification, resp, err = client.Config.GetNotification(&dicom.QueryOptions{})
-		return checkForPermissionErrors(client, resp, err)
+		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && resp.StatusCode() == http.StatusNotFound {
 			d.SetId("")
 			return diags
 		}
@@ -95,7 +96,7 @@ func resourceDICOMNotificationRead(_ context.Context, d *schema.ResourceData, m 
 	operation := func() error {
 		var resp *dicom.Response
 		notification, resp, err = client.Config.GetNotification(&dicom.QueryOptions{})
-		return checkForPermissionErrors(client, resp, err)
+		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil { // For now just declare the notification not there in case of error
@@ -130,7 +131,7 @@ func resourceDICOMNotificationCreate(ctx context.Context, d *schema.ResourceData
 	operation := func() error {
 		var resp *dicom.Response
 		created, resp, err = client.Config.CreateNotification(resource, &dicom.QueryOptions{})
-		return checkForPermissionErrors(client, resp, err)
+		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {

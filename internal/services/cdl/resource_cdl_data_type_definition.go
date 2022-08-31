@@ -109,7 +109,7 @@ func resourceCDLDataTypeDefinitionCreate(ctx context.Context, d *schema.Resource
 		if resp == nil {
 			return diag.FromErr(err)
 		}
-		if resp.StatusCode != http.StatusConflict {
+		if resp.StatusCode() != http.StatusConflict {
 			return diag.FromErr(err)
 		}
 		// Search for existing DTD

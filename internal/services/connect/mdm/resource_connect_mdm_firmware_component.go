@@ -104,7 +104,7 @@ func resourceConnectMDMFirmwareComponentCreate(ctx context.Context, d *schema.Re
 		return diag.FromErr(err)
 	}
 	if created == nil {
-		return diag.FromErr(fmt.Errorf("failed to create resource: %d", resp.StatusCode))
+		return diag.FromErr(fmt.Errorf("failed to create resource: %d", resp.StatusCode()))
 	}
 	_ = d.Set("guid", created.ID)
 	d.SetId(fmt.Sprintf("FirmwareComponent/%s", created.ID))
@@ -137,7 +137,7 @@ func resourceConnectMDMFirmwareComponentRead(ctx context.Context, d *schema.Reso
 		return resp.Response, err
 	})
 	if err != nil {
-		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
+		if resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusGone) {
 			d.SetId("")
 			return nil
 		}

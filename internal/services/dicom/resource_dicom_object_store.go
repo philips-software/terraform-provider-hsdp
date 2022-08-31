@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/dicom"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func ResourceDICOMObjectStore() *schema.Resource {
@@ -180,7 +181,7 @@ func resourceDICOMObjectStoreDelete(_ context.Context, d *schema.ResourceData, m
 		_, resp, err = client.Config.DeleteObjectStore(dicom.ObjectStore{ID: d.Id()}, &dicom.QueryOptions{
 			OrganizationID: &orgID,
 		})
-		return checkForPermissionErrors(client, resp, err)
+		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
@@ -207,7 +208,7 @@ func resourceDICOMObjectStoreRead(_ context.Context, d *schema.ResourceData, m i
 		store, resp, err = client.Config.GetObjectStore(d.Id(), &dicom.QueryOptions{
 			OrganizationID: &orgID,
 		})
-		return checkForPermissionErrors(client, resp, err)
+		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
@@ -309,7 +310,7 @@ func resourceDICOMObjectStoreCreate(ctx context.Context, d *schema.ResourceData,
 		created, resp, err = client.Config.CreateObjectStore(store, &dicom.QueryOptions{
 			OrganizationID: &orgID,
 		})
-		return checkForPermissionErrors(client, resp, err)
+		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {

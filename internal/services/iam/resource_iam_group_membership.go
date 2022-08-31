@@ -61,12 +61,12 @@ func resourceIAMGroupMembershipCreate(ctx context.Context, d *schema.ResourceDat
 	group, resp, err := client.Groups.GetGroupByID(groupId)
 
 	if err != nil {
-		if resp != nil && resp.StatusCode != http.StatusOK {
-			switch resp.StatusCode {
+		if resp != nil && resp.StatusCode() != http.StatusOK {
+			switch resp.StatusCode() {
 			case http.StatusForbidden:
 				err = fmt.Errorf("no permission to read group details: %w", err)
 			default:
-				err = fmt.Errorf("error reading group '%s' (HTTP %d): %w", groupId, resp.StatusCode, err)
+				err = fmt.Errorf("error reading group '%s' (HTTP %d): %w", groupId, resp.StatusCode(), err)
 			}
 		}
 		return diag.FromErr(err)
@@ -82,7 +82,7 @@ func resourceIAMGroupMembershipCreate(ctx context.Context, d *schema.ResourceDat
 			if resp == nil {
 				return nil, err
 			}
-			if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusMultiStatus) {
+			if !(resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusMultiStatus) {
 				return resp.Response, backoff.Permanent(fmt.Errorf("failed to add members: %v %w", result, err))
 			}
 			return resp.Response, err
@@ -106,7 +106,7 @@ func resourceIAMGroupMembershipCreate(ctx context.Context, d *schema.ResourceDat
 			if err != nil {
 				return resp.Response, err
 			}
-			if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusMultiStatus) {
+			if !(resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusMultiStatus) {
 				return resp.Response, backoff.Permanent(fmt.Errorf("failed to add services: %v", result))
 			}
 			return resp.Response, err
@@ -133,12 +133,12 @@ func resourceIAMGroupMembershipDelete(ctx context.Context, d *schema.ResourceDat
 	group, resp, err := client.Groups.GetGroupByID(groupId)
 
 	if err != nil {
-		if resp != nil && resp.StatusCode != http.StatusOK {
-			switch resp.StatusCode {
+		if resp != nil && resp.StatusCode() != http.StatusOK {
+			switch resp.StatusCode() {
 			case http.StatusForbidden:
 				err = fmt.Errorf("no permission to read group details: %w", err)
 			default:
-				err = fmt.Errorf("error reading group '%s' (HTTP %d): %w", groupId, resp.StatusCode, err)
+				err = fmt.Errorf("error reading group '%s' (HTTP %d): %w", groupId, resp.StatusCode(), err)
 			}
 		}
 		return diag.FromErr(err)
@@ -151,7 +151,7 @@ func resourceIAMGroupMembershipDelete(ctx context.Context, d *schema.ResourceDat
 			if resp == nil {
 				return nil, err
 			}
-			if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusMultiStatus) {
+			if !(resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusMultiStatus) {
 				return resp.Response, backoff.Permanent(fmt.Errorf("failed to remove members: %v %w", result, err))
 			}
 			return resp.Response, err
@@ -172,7 +172,7 @@ func resourceIAMGroupMembershipDelete(ctx context.Context, d *schema.ResourceDat
 			if err != nil {
 				return resp.Response, err
 			}
-			if !(resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusMultiStatus) {
+			if !(resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusMultiStatus) {
 				return resp.Response, backoff.Permanent(fmt.Errorf("failed to remove services: %v", result))
 			}
 			return resp.Response, err
@@ -264,7 +264,7 @@ func resourceIAMGroupMembershipRead(_ context.Context, d *schema.ResourceData, m
 
 	group, resp, err := client.Groups.GetGroupByID(groupId)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && resp.StatusCode() == http.StatusNotFound {
 			d.SetId("")
 			return diags
 		}

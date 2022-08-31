@@ -320,13 +320,13 @@ func getWitRetry(client *console.Client, instanceID string, name string) (*conso
 }
 
 func checkForIntermittentErrors(resp *console.Response, err error) error {
-	if resp == nil || resp.StatusCode > 500 {
+	if resp == nil || resp.StatusCode() > 500 {
 		return err
 	}
-	if resp.StatusCode == http.StatusInternalServerError {
+	if resp.StatusCode() == http.StatusInternalServerError {
 		return backoff.Permanent(fmt.Errorf("console: %s %w", resp.Error.Message, err))
 	}
-	if resp.StatusCode == http.StatusBadRequest &&
+	if resp.StatusCode() == http.StatusBadRequest &&
 		strings.Contains(resp.Error.Message, "invalid character") {
 		return config.ErrIntermittent
 	}

@@ -105,7 +105,7 @@ func dataSourceIAMClientRead(_ context.Context, d *schema.ResourceData, m interf
 		ApplicationID: &applicationId,
 	})
 	if err != nil || clients == nil || len(*clients) == 0 {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && resp.StatusCode() == http.StatusNotFound {
 			d.SetId("")
 			return diags
 		}

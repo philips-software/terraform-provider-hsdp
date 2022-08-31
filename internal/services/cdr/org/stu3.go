@@ -81,7 +81,7 @@ func stu3Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) d
 		return resp.Response, err
 	}, append(tools.StandardRetryOnCodes, http.StatusNotFound)...) // CDR weirdness
 	if err != nil {
-		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
+		if resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusGone) {
 			d.SetId("")
 			return diags
 		}
@@ -172,7 +172,7 @@ func stu3PurgeStateRefreshFunc(client *cdr.Client, purgeStatusURL, id string) re
 		if err != nil {
 			return resp, "FAILED", err
 		}
-		if resp.StatusCode == http.StatusAccepted { // In progress
+		if resp.StatusCode() == http.StatusAccepted { // In progress
 			return resp, "PURGING", nil
 		}
 		params := contained.GetParameters()
@@ -193,7 +193,7 @@ func stu3Delete(ctx context.Context, client *cdr.Client, d *schema.ResourceData,
 
 	if !purgeDelete {
 		deleted, resp, err := client.OperationsSTU3.Delete(path.Join("Organization", id))
-		if resp != nil && resp.StatusCode == http.StatusNotFound { // Already gone
+		if resp != nil && resp.StatusCode() == http.StatusNotFound { // Already gone
 			d.SetId("")
 			return diags
 		}
@@ -202,7 +202,7 @@ func stu3Delete(ctx context.Context, client *cdr.Client, d *schema.ResourceData,
 		}
 		if !deleted {
 			if resp != nil {
-				return diag.FromErr(fmt.Errorf("delete failed with status code %d", resp.StatusCode))
+				return diag.FromErr(fmt.Errorf("delete failed with status code %d", resp.StatusCode()))
 			}
 			return diag.FromErr(fmt.Errorf("delete failed with nil response"))
 		}
@@ -214,7 +214,7 @@ func stu3Delete(ctx context.Context, client *cdr.Client, d *schema.ResourceData,
 		request.URL.Opaque = "/store/fhir/" + id + "/$purge"
 		return nil
 	})
-	if resp != nil && resp.StatusCode == http.StatusNotFound { // Already gone
+	if resp != nil && resp.StatusCode() == http.StatusNotFound { // Already gone
 		d.SetId("")
 		return diags
 	}
@@ -224,8 +224,8 @@ func stu3Delete(ctx context.Context, client *cdr.Client, d *schema.ResourceData,
 	if resp == nil {
 		return diag.FromErr(fmt.Errorf("unexpected nil response for $purge operation"))
 	}
-	if resp.StatusCode != http.StatusAccepted {
-		return diag.FromErr(fmt.Errorf("$purge operation returned unexpected statusCode %d", resp.StatusCode))
+	if resp.StatusCode() != http.StatusAccepted {
+		return diag.FromErr(fmt.Errorf("$purge operation returned unexpected statusCode %d", resp.StatusCode()))
 	}
 	stateConf := &resource.StateChangeConf{
 		Pending:    []string{"PURGING"},

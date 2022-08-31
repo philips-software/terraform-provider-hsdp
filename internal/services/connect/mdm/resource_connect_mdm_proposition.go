@@ -144,8 +144,8 @@ func resourceMDMPropositionCreate(ctx context.Context, d *schema.ResourceData, m
 		if resp == nil {
 			return diag.FromErr(err)
 		}
-		if !(resp.StatusCode == http.StatusConflict || resp.StatusCode == http.StatusUnprocessableEntity) {
-			return diag.FromErr(fmt.Errorf("error creating Proposition (%d): %w", resp.StatusCode, err))
+		if !(resp.StatusCode() == http.StatusConflict || resp.StatusCode() == http.StatusUnprocessableEntity) {
+			return diag.FromErr(fmt.Errorf("error creating Proposition (%d): %w", resp.StatusCode(), err))
 		}
 		found, _, getErr := client.Propositions.GetProposition(&mdm.GetPropositionsOptions{
 			Name:           &resource.Name,
@@ -196,7 +196,7 @@ func resourceMDMPropositionRead(ctx context.Context, d *schema.ResourceData, m i
 		return resp.Response, err
 	})
 	if err != nil {
-		if errors.Is(err, mdm.ErrEmptyResult) || (resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone)) {
+		if errors.Is(err, mdm.ErrEmptyResult) || (resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusGone)) {
 			d.SetId("")
 			return diags
 		}

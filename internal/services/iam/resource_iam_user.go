@@ -255,14 +255,14 @@ func resourceIAMUserDelete(_ context.Context, d *schema.ResourceData, m interfac
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("DeleteUser '%s' error: %w", person.ID, err))
 	}
-	if resp != nil && resp.StatusCode == http.StatusConflict {
+	if resp != nil && resp.StatusCode() == http.StatusConflict {
 		return diag.FromErr(fmt.Errorf("DeleteUser return HTTP 409 Conflict: %w", err))
 	}
-	if resp != nil && resp.StatusCode != http.StatusNoContent {
+	if resp != nil && resp.StatusCode() != http.StatusNoContent {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Warning,
 			Summary:  "DeleteUser returned unexpected result",
-			Detail:   fmt.Sprintf("DeleteUser returned status '%d', which is unexpected: %v", resp.StatusCode, err),
+			Detail:   fmt.Sprintf("DeleteUser returned status '%d', which is unexpected: %v", resp.StatusCode(), err),
 		})
 	}
 	d.SetId("")
