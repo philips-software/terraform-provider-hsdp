@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.37.3
+
+- DICOM Repository: check for pre existing repo and report
+- DICOM Notification: deprecate/remove organization_id field
+
 ## v0.37.2
 
 - Core: Allow "production" as environment
