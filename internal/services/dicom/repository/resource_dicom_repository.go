@@ -1,21 +1,23 @@
-package dicom
+package repository
 
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/dicom"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func ResourceDICOMRepository() *schema.Resource {
 	return &schema.Resource{
 		SchemaVersion: 1,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: importRepositoryContext,
 		},
 		CreateContext: resourceDICOMRepositoryCreate,
 		ReadContext:   resourceDICOMRepositoryRead,
@@ -89,7 +91,7 @@ func resourceDICOMRepositoryDelete(_ context.Context, d *schema.ResourceData, m 
 	operation := func() error {
 		var resp *dicom.Response
 		_, resp, err = client.Config.DeleteRepository(dicom.Repository{ID: d.Id()}, &dicom.QueryOptions{OrganizationID: &orgID})
-		return checkForPermissionErrors(client, resp, err)
+		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
@@ -113,7 +115,7 @@ func resourceDICOMRepositoryRead(_ context.Context, d *schema.ResourceData, m in
 	operation := func() error {
 		var resp *dicom.Response
 		repo, resp, err = client.Config.GetRepository(d.Id(), &dicom.QueryOptions{OrganizationID: &orgID})
-		return checkForPermissionErrors(client, resp, err)
+		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
@@ -136,9 +138,14 @@ func resourceDICOMRepositoryCreate(ctx context.Context, d *schema.ResourceData, 
 	orgID := d.Get("organization_id").(string)
 	repositoryOrgID := d.Get("repository_organization_id").(string)
 	client, err := c.GetDICOMConfigClient(configURL)
-	if err != nil {
-		return diag.FromErr(err)
+
+	repos, _, err := client.Config.GetRepositories(&dicom.QueryOptions{OrganizationID: &orgID})
+	if err == nil {
+		if len(*repos) > 0 {
+			return diag.FromErr(fmt.Errorf("existing dicomRepository found: %s", (*repos)[0].ID))
+		}
 	}
+
 	defer client.Close()
 	repo := dicom.Repository{
 		OrganizationID:      orgID,
@@ -166,7 +173,7 @@ func resourceDICOMRepositoryCreate(ctx context.Context, d *schema.ResourceData, 
 	operation := func() error {
 		var resp *dicom.Response
 		created, resp, err = client.Config.CreateRepository(repo, &dicom.QueryOptions{OrganizationID: &orgID})
-		return checkForPermissionErrors(client, resp, err)
+		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {

@@ -192,7 +192,7 @@ func resourceConnectMDMStandardServiceCreate(ctx context.Context, d *schema.Reso
 		return diag.FromErr(err)
 	}
 	if created == nil {
-		return diag.FromErr(fmt.Errorf("failed to create standard service: %d", resp.StatusCode))
+		return diag.FromErr(fmt.Errorf("failed to create standard service: %d", resp.StatusCode()))
 	}
 	_ = d.Set("guid", created.ID)
 	d.SetId(fmt.Sprintf("StandardService/%s", created.ID))
@@ -225,7 +225,7 @@ func resourceConnectMDMStandardServiceRead(ctx context.Context, d *schema.Resour
 		return resp.Response, err
 	})
 	if err != nil {
-		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
+		if resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusGone) {
 			d.SetId("")
 			return nil
 		}

@@ -111,7 +111,7 @@ func resourceIAMOrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(err)
 	}
 	if org == nil {
-		return diag.FromErr(fmt.Errorf("failed to create organization: %d", resp.StatusCode))
+		return diag.FromErr(fmt.Errorf("failed to create organization: %d", resp.StatusCode()))
 	}
 	d.SetId(org.ID)
 	return resourceIAMOrgRead(ctx, d, m)
@@ -130,7 +130,7 @@ func resourceIAMOrgRead(_ context.Context, d *schema.ResourceData, m interface{}
 	id := d.Id()
 	org, resp, err := client.Organizations.GetOrganizationByID(id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusNotFound {
+		if resp != nil && resp.StatusCode() == http.StatusNotFound {
 			d.SetId("")
 			return nil
 		}

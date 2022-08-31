@@ -167,7 +167,7 @@ func resourceCDLResearchStudyCreate(ctx context.Context, d *schema.ResourceData,
 		if resp == nil {
 			return diag.FromErr(err)
 		}
-		if resp.StatusCode != http.StatusConflict {
+		if resp.StatusCode() != http.StatusConflict {
 			return diag.FromErr(err)
 		}
 		// Search for existing study based on Title
@@ -318,7 +318,7 @@ func resourceCDLResearchStudyUpdate(_ context.Context, d *schema.ResourceData, m
 			// $revoke
 			for _, r := range toRemove {
 				_, resp, err := client.Study.RevokePermission(*study, r)
-				if err != nil && resp != nil && resp.StatusCode != http.StatusConflict {
+				if err != nil && resp != nil && resp.StatusCode() != http.StatusConflict {
 					diags = append(diags, diag.FromErr(err)...)
 				}
 			}
@@ -326,7 +326,7 @@ func resourceCDLResearchStudyUpdate(_ context.Context, d *schema.ResourceData, m
 			// $grant
 			for _, r := range toAdd {
 				_, resp, err := client.Study.GrantPermission(*study, r)
-				if err != nil && resp != nil && resp.StatusCode != http.StatusConflict {
+				if err != nil && resp != nil && resp.StatusCode() != http.StatusConflict {
 					diags = append(diags, diag.FromErr(err)...)
 				}
 			}

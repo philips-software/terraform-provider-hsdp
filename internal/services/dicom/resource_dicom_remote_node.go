@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/dicom"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func ResourceDICOMRemoteNode() *schema.Resource {
@@ -124,7 +125,7 @@ func resourceDICOMRemoteNodeDelete(_ context.Context, d *schema.ResourceData, m 
 		_, resp, err = client.Config.DeleteRemoteNode(dicom.RemoteNode{ID: d.Id()}, &dicom.QueryOptions{
 			OrganizationID: &organizationID,
 		})
-		return checkForPermissionErrors(client, resp, err)
+		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 10))
 	if err != nil {
@@ -150,7 +151,7 @@ func resourceDICOMRemoteNodeRead(_ context.Context, d *schema.ResourceData, m in
 		node, resp, err = client.Config.GetRemoteNode(d.Id(), &dicom.QueryOptions{
 			OrganizationID: &organizationID,
 		})
-		return checkForPermissionErrors(client, resp, err)
+		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 
@@ -205,7 +206,7 @@ func resourceDICOMRemoteNodeCreate(ctx context.Context, d *schema.ResourceData, 
 		created, resp, err = client.Config.CreateRemoteNode(node, &dicom.QueryOptions{
 			OrganizationID: &organizationID,
 		})
-		return checkForPermissionErrors(client, resp, err)
+		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {

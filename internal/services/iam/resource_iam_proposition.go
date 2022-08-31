@@ -90,7 +90,7 @@ func resourceIAMPropositionCreate(ctx context.Context, d *schema.ResourceData, m
 		if resp == nil {
 			return diag.FromErr(err)
 		}
-		if resp.StatusCode != http.StatusConflict {
+		if resp.StatusCode() != http.StatusConflict {
 			return diag.FromErr(err)
 		}
 		createdProp, _, err = client.Propositions.GetProposition(&iam.GetPropositionsOptions{
@@ -128,7 +128,7 @@ func resourceIAMPropositionRead(_ context.Context, d *schema.ResourceData, m int
 	id := d.Id()
 	prop, resp, err := client.Propositions.GetPropositionByID(id)
 	if err != nil {
-		if errors.Is(err, iam.ErrEmptyResults) || (resp != nil && resp.StatusCode == http.StatusNotFound) {
+		if errors.Is(err, iam.ErrEmptyResults) || (resp != nil && resp.StatusCode() == http.StatusNotFound) {
 			d.SetId("")
 			return diags
 		}

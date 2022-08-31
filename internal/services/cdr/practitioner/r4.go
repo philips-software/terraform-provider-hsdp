@@ -174,7 +174,7 @@ func r4Read(ctx context.Context, _ *config.Config, client *cdr.Client, d *schema
 		return resp.Response, err
 	})
 	if err != nil {
-		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
+		if resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusGone) {
 			d.SetId("")
 			return diags
 		}
@@ -292,7 +292,7 @@ func r4Delete(_ context.Context, _ *config.Config, client *cdr.Client, d *schema
 	id := d.Id()
 	ok, resp, err := client.OperationsR4.Delete("Practitioner/" + id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusForbidden {
+		if resp != nil && resp.StatusCode() == http.StatusForbidden {
 			softDelete := d.Get("soft_delete").(bool)
 			if softDelete { // No error on delete
 				d.SetId("")

@@ -163,7 +163,7 @@ func resourceAIInferenceComputeEnvironmentDelete(_ context.Context, d *schema.Re
 		if resp == nil {
 			return diag.FromErr(err)
 		}
-		if resp.StatusCode == http.StatusNotFound { // Already deleted
+		if resp.StatusCode() == http.StatusNotFound { // Already deleted
 			d.SetId("")
 			return diags
 		}

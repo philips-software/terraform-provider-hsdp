@@ -224,7 +224,7 @@ func resourceAIWorkspaceDelete(_ context.Context, d *schema.ResourceData, m inte
 		if resp == nil {
 			return diag.FromErr(err)
 		}
-		if resp.StatusCode == http.StatusNotFound { // Already deleted
+		if resp.StatusCode() == http.StatusNotFound { // Already deleted
 			d.SetId("")
 			return diags
 		}

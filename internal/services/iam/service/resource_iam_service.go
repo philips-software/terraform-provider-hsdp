@@ -199,7 +199,7 @@ func resourceIAMServiceRead(_ context.Context, d *schema.ResourceData, m interfa
 	id := d.Id()
 	s, resp, err := client.Services.GetServiceByID(id)
 	if err != nil {
-		if errors.Is(err, iam.ErrEmptyResults) || (resp != nil && resp.StatusCode == http.StatusNotFound) {
+		if errors.Is(err, iam.ErrEmptyResults) || (resp != nil && resp.StatusCode() == http.StatusNotFound) {
 			d.SetId("")
 			return diags
 		}

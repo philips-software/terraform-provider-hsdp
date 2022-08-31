@@ -87,7 +87,7 @@ func dataSourceCDLResearchStudyRead(_ context.Context, d *schema.ResourceData, m
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if resp.StatusCode == http.StatusForbidden {
+	if resp.StatusCode() == http.StatusForbidden {
 		diags = append(diags, diag.Diagnostic{
 			Severity: diag.Warning,
 			Summary:  fmt.Sprintf("permission denied ready study %s", studyID),
@@ -99,7 +99,7 @@ func dataSourceCDLResearchStudyRead(_ context.Context, d *schema.ResourceData, m
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if resp.StatusCode == http.StatusForbidden {
+	if resp.StatusCode() == http.StatusForbidden {
 		return diag.FromErr(fmt.Errorf("permission denied reading study %s", studyID))
 	}
 	var monitors []string

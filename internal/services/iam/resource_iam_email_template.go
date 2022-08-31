@@ -110,7 +110,7 @@ func resourceIAMEmailTemplateCreate(ctx context.Context, d *schema.ResourceData,
 	}, http.StatusInternalServerError, http.StatusTooManyRequests)
 
 	if err != nil {
-		if resp.StatusCode == http.StatusConflict {
+		if resp.StatusCode() == http.StatusConflict {
 			templates, _, getErr := client.EmailTemplates.GetTemplates(&iam.GetEmailTemplatesOptions{
 				Type:           &template.Type,
 				OrganizationID: &template.ManagingOrganization,

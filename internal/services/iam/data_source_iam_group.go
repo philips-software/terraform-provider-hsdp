@@ -32,7 +32,7 @@ func DataSourceIAMGroup() *schema.Resource {
 
 }
 
-func dataSourceIAMGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIAMGroupRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -50,12 +50,12 @@ func dataSourceIAMGroupRead(ctx context.Context, d *schema.ResourceData, meta in
 	})
 
 	if err != nil {
-		if resp != nil && resp.StatusCode != http.StatusOK {
-			switch resp.StatusCode {
+		if resp != nil && resp.StatusCode() != http.StatusOK {
+			switch resp.StatusCode() {
 			case http.StatusForbidden:
 				err = fmt.Errorf("no permission to read groups in org '%s'", orgId)
 			default:
-				err = fmt.Errorf("group '%s' not found in org '%s' (code: %d)", name, orgId, resp.StatusCode)
+				err = fmt.Errorf("group '%s' not found in org '%s' (code: %d)", name, orgId, resp.StatusCode())
 			}
 		}
 		return diag.FromErr(err)

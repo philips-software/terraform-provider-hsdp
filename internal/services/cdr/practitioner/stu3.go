@@ -114,7 +114,7 @@ func stu3Read(ctx context.Context, _ *config.Config, client *cdr.Client, d *sche
 		return resp.Response, err
 	}, append(tools.StandardRetryOnCodes, http.StatusNotFound)...) // CDR weirdness
 	if err != nil {
-		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
+		if resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusGone) {
 			d.SetId("")
 			return diags
 		}
@@ -233,7 +233,7 @@ func stu3Delete(_ context.Context, _ *config.Config, client *cdr.Client, d *sche
 	id := d.Id()
 	ok, resp, err := client.OperationsSTU3.Delete("Practitioner/" + id)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusForbidden {
+		if resp != nil && resp.StatusCode() == http.StatusForbidden {
 			softDelete := d.Get("soft_delete").(bool)
 			if softDelete { // No error on delete
 				d.SetId("")

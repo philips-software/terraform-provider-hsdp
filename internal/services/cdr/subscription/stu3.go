@@ -84,7 +84,7 @@ func stu3Read(ctx context.Context, _ *config.Config, client *cdr.Client, d *sche
 		return resp.Response, err
 	})
 	if err != nil {
-		if resp != nil && (resp.StatusCode == http.StatusNotFound || resp.StatusCode == http.StatusGone) {
+		if resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusGone) {
 			d.SetId("")
 			return diags
 		}

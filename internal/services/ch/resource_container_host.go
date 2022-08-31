@@ -425,7 +425,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 				diags = append(diags, diag.FromErr(fmt.Errorf("create error (resp=nil): %w", err))...)
 				return diags
 			}
-			if ch == nil || resp.StatusCode >= 500 { // Possible 504, or other timeout, try to recover!
+			if ch == nil || resp.StatusCode() >= 500 { // Possible 504, or other timeout, try to recover!
 				if details := findInstanceByName(client, tagName); details != nil {
 					instanceID = details.InstanceID
 					ipAddress = details.PrivateAddress
@@ -435,7 +435,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 					} else {
 						_, _, _ = client.Destroy(tagName)
 					}
-					diags = append(diags, diag.FromErr(fmt.Errorf("create error (status=%d): %w", resp.StatusCode, err))...)
+					diags = append(diags, diag.FromErr(fmt.Errorf("create error (status=%d): %w", resp.StatusCode(), err))...)
 					return diags
 				}
 			} else {
@@ -444,7 +444,7 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 				} else {
 					_, _, _ = client.Destroy(tagName)
 				}
-				diags = append(diags, diag.FromErr(fmt.Errorf("create error (description=[%s], code=[%d]): %w", ch.Description, resp.StatusCode, err))...)
+				diags = append(diags, diag.FromErr(fmt.Errorf("create error (description=[%s], code=[%d]): %w", ch.Description, resp.StatusCode(), err))...)
 				return diags
 			}
 		} else {
@@ -875,7 +875,7 @@ func resourceContainerHostRead(_ context.Context, d *schema.ResourceData, m inte
 
 	state, resp, err := client.GetDeploymentState(tagName)
 	if err != nil {
-		if resp != nil && resp.StatusCode == http.StatusBadRequest {
+		if resp != nil && resp.StatusCode() == http.StatusBadRequest {
 			// State not found, probably a botched provision :(
 			d.SetId("")
 			return diags

@@ -72,7 +72,7 @@ func ResourceCDLLabelDefinition() *schema.Resource {
 	}
 }
 
-func resourceCDLLabelDefinitionUpdate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceCDLLabelDefinitionUpdate(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	return diags
 }
@@ -142,7 +142,7 @@ func resourceCDLLabelDefinitionCreate(ctx context.Context, d *schema.ResourceDat
 		if resp == nil {
 			return diag.FromErr(err)
 		}
-		if resp.StatusCode != http.StatusConflict {
+		if resp.StatusCode() != http.StatusConflict {
 			return diag.FromErr(err)
 		}
 		// Search for existing Label def

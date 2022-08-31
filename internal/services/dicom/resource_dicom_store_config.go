@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/md5"
 	"fmt"
-	"net/http"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -12,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/dicom"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func ResourceDICOMStoreConfig() *schema.Resource {
@@ -133,7 +133,7 @@ func resourceDICOMStoreConfigUpdate(_ context.Context, d *schema.ResourceData, m
 				configured, resp, err = client.Config.SetCDRServiceAccount(cdrService, &dicom.QueryOptions{
 					OrganizationID: &orgID,
 				})
-				return checkForPermissionErrors(client, resp, err)
+				return tools.CheckForPermissionErrors(client, resp, err)
 			}
 			err := backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 			if err != nil {
@@ -164,7 +164,7 @@ func resourceDICOMStoreConfigUpdate(_ context.Context, d *schema.ResourceData, m
 				configured, resp, err = client.Config.SetFHIRStore(fhirStore, &dicom.QueryOptions{
 					OrganizationID: &orgID,
 				})
-				return checkForPermissionErrors(client, resp, err)
+				return tools.CheckForPermissionErrors(client, resp, err)
 			}
 			err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 			if err != nil {
@@ -199,7 +199,7 @@ func resourceDICOMStoreConfigRead(_ context.Context, d *schema.ResourceData, m i
 		configured, resp, err = client.Config.GetCDRServiceAccount(&dicom.QueryOptions{
 			OrganizationID: &orgID,
 		})
-		return checkForPermissionErrors(client, resp, err)
+		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewConstantBackOff(2*time.Second), 5))
 	if err == nil && configured != nil {
@@ -262,7 +262,7 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 			configured, resp, err = client.Config.SetCDRServiceAccount(cdrService, &dicom.QueryOptions{
 				OrganizationID: &orgID,
 			})
-			return checkForPermissionErrors(client, resp, err)
+			return tools.CheckForPermissionErrors(client, resp, err)
 		}
 		err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 		if err != nil {
@@ -294,7 +294,7 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 			configured, _, err = client.Config.SetFHIRStore(fhirStore, &dicom.QueryOptions{
 				OrganizationID: &orgID,
 			})
-			return checkForPermissionErrors(client, resp, err)
+			return tools.CheckForPermissionErrors(client, resp, err)
 		}
 		err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 		if err != nil {
@@ -316,21 +316,4 @@ func resourceDICOMStoreConfigCreate(_ context.Context, d *schema.ResourceData, m
 	generatedID := fmt.Sprintf("%x", md5.Sum([]byte(configURL)))
 	d.SetId(generatedID)
 	return diags
-}
-
-func checkForPermissionErrors(client *dicom.Client, resp *dicom.Response, err error) error {
-	if resp == nil {
-		if err == nil {
-			return backoff.Permanent(fmt.Errorf("response is 'nil'"))
-		}
-		return backoff.Permanent(err)
-	}
-	if resp.StatusCode > 500 {
-		return err
-	}
-	if resp.StatusCode == http.StatusForbidden {
-		_ = client.TokenRefresh()
-		return err
-	}
-	return backoff.Permanent(err)
 }
