@@ -138,7 +138,9 @@ func resourceDICOMRepositoryCreate(ctx context.Context, d *schema.ResourceData, 
 	orgID := d.Get("organization_id").(string)
 	repositoryOrgID := d.Get("repository_organization_id").(string)
 	client, err := c.GetDICOMConfigClient(configURL)
-
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	repos, _, err := client.Config.GetRepositories(&dicom.QueryOptions{OrganizationID: &orgID})
 	if err == nil {
 		if len(*repos) > 0 {
