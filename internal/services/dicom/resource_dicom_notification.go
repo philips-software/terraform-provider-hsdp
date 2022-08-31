@@ -66,7 +66,7 @@ func resourceDICOMNotificationDelete(_ context.Context, d *schema.ResourceData, 
 	var notification *dicom.Notification
 	var resp *dicom.Response
 	operation := func() error {
-		notification, resp, err = client.Config.GetNotification(&dicom.QueryOptions{OrganizationID: &orgID})
+		notification, resp, err = client.Config.GetNotification(&dicom.QueryOptions{})
 		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
@@ -95,7 +95,7 @@ func resourceDICOMNotificationRead(_ context.Context, d *schema.ResourceData, m 
 	var notification *dicom.Notification
 	operation := func() error {
 		var resp *dicom.Response
-		notification, resp, err = client.Config.GetNotification(&dicom.QueryOptions{OrganizationID: &orgID})
+		notification, resp, err = client.Config.GetNotification(&dicom.QueryOptions{})
 		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
@@ -130,7 +130,7 @@ func resourceDICOMNotificationCreate(ctx context.Context, d *schema.ResourceData
 	var created *dicom.Notification
 	operation := func() error {
 		var resp *dicom.Response
-		created, resp, err = client.Config.CreateNotification(resource, &dicom.QueryOptions{OrganizationID: &orgID})
+		created, resp, err = client.Config.CreateNotification(resource, &dicom.QueryOptions{})
 		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
