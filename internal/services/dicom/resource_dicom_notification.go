@@ -66,13 +66,8 @@ func resourceDICOMNotificationDelete(_ context.Context, d *schema.ResourceData, 
 	var notification *dicom.Notification
 	var resp *dicom.Response
 	operation := func() error {
-<<<<<<< HEAD
 		notification, resp, err = client.Config.GetNotification(&dicom.QueryOptions{OrganizationID: &orgID})
 		return tools.CheckForPermissionErrors(client, resp, err)
-=======
-		notification, resp, err = client.Config.GetNotification(&dicom.QueryOptions{})
-		return checkForPermissionErrors(client, resp, err)
->>>>>>> main
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
@@ -100,13 +95,8 @@ func resourceDICOMNotificationRead(_ context.Context, d *schema.ResourceData, m 
 	var notification *dicom.Notification
 	operation := func() error {
 		var resp *dicom.Response
-<<<<<<< HEAD
 		notification, resp, err = client.Config.GetNotification(&dicom.QueryOptions{OrganizationID: &orgID})
 		return tools.CheckForPermissionErrors(client, resp, err)
-=======
-		notification, resp, err = client.Config.GetNotification(&dicom.QueryOptions{})
-		return checkForPermissionErrors(client, resp, err)
->>>>>>> main
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil { // For now just declare the notification not there in case of error
@@ -140,13 +130,8 @@ func resourceDICOMNotificationCreate(ctx context.Context, d *schema.ResourceData
 	var created *dicom.Notification
 	operation := func() error {
 		var resp *dicom.Response
-<<<<<<< HEAD
 		created, resp, err = client.Config.CreateNotification(resource, &dicom.QueryOptions{OrganizationID: &orgID})
 		return tools.CheckForPermissionErrors(client, resp, err)
-=======
-		created, resp, err = client.Config.CreateNotification(resource, &dicom.QueryOptions{})
-		return checkForPermissionErrors(client, resp, err)
->>>>>>> main
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
