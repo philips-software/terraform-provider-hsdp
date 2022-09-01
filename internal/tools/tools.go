@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	StandardRetryOnCodes = []int{http.StatusForbidden, http.StatusInternalServerError, http.StatusServiceUnavailable, http.StatusTooManyRequests}
+	StandardRetryOnCodes = []int{http.StatusForbidden, http.StatusInternalServerError, http.StatusServiceUnavailable, http.StatusTooManyRequests, http.StatusGatewayTimeout}
 )
 
 func TryHTTPCall(ctx context.Context, numberOfTries uint64, operation func() (*http.Response, error), retryOnCodes ...int) error {

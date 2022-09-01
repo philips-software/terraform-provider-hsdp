@@ -4,15 +4,14 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/philips-software/go-hsdp-api/console"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func ResourceMetricsAutoscaler() *schema.Resource {
@@ -189,7 +188,7 @@ func thresholdCPUSchema() *schema.Resource {
 	}
 }
 
-func resourceMetricsAutoscalerDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceMetricsAutoscalerDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -202,12 +201,20 @@ func resourceMetricsAutoscalerDelete(_ context.Context, d *schema.ResourceData, 
 	instanceID := d.Get("metrics_instance_id").(string)
 	app.Name = d.Get("app_name").(string)
 	app.Enabled = false
-	result, err := updateWithRetry(client, instanceID, app)
+
+	var resp *console.Response
+
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
+		var err error
+		_, resp, err = client.Metrics.UpdateApplicationAutoscaler(instanceID, app)
+
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
-		return diag.FromErr(err)
-	}
-	if result == nil {
-		return diag.FromErr(fmt.Errorf("error creating/updating autoscaler"))
+		return diag.FromErr(fmt.Errorf("UpdateApplicationAutoscaler: %+v %w", resp, err))
 	}
 	d.SetId("")
 	return diags
@@ -217,7 +224,7 @@ func resourceMetricsAutoscalerUpdate(ctx context.Context, d *schema.ResourceData
 	return resourceMetricsAutoscalerCreate(ctx, d, m)
 }
 
-func resourceMetricsAutoscalerRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceMetricsAutoscalerRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -228,10 +235,20 @@ func resourceMetricsAutoscalerRead(_ context.Context, d *schema.ResourceData, m 
 	}
 	instanceID := d.Get("metrics_instance_id").(string)
 	name := d.Get("app_name").(string)
+	var app *console.Application
+	var resp *console.Response
 
-	app, err := getWitRetry(client, instanceID, name)
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
+		var err error
+
+		app, resp, err = client.Metrics.GetApplicationAutoscaler(instanceID, name)
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("GetApplicationAutoscaler: %+v %w", resp, err))
 	}
 	_ = d.Set("min_instances", app.MinInstances)
 	_ = d.Set("max_instances", app.MaxInstances)
@@ -252,7 +269,7 @@ func resourceMetricsAutoscalerRead(_ context.Context, d *schema.ResourceData, m 
 	return diags
 }
 
-func resourceMetricsAutoscalerCreate(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceMetricsAutoscalerCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -284,51 +301,24 @@ func resourceMetricsAutoscalerCreate(_ context.Context, d *schema.ResourceData, 
 			}
 		}
 	}
-	created, err := updateWithRetry(client, instanceID, app)
+	var created *console.Application
+	var resp *console.Response
+
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
+		var err error
+		created, resp, err = client.Metrics.UpdateApplicationAutoscaler(instanceID, app)
+
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("UpdateApplicationAutoscaler: %+v %w", resp, err))
 	}
 	if created == nil {
 		return diag.FromErr(fmt.Errorf("error creating/updating autoscaler"))
 	}
 	d.SetId(instanceID + created.Name)
 	return diags
-}
-
-func updateWithRetry(client *console.Client, instanceID string, app console.Application) (*console.Application, error) {
-	var created *console.Application
-	operation := func() error {
-		var err error
-		var resp *console.Response
-		created, resp, err = client.Metrics.UpdateApplicationAutoscaler(instanceID, app)
-		return checkForIntermittentErrors(resp, err)
-	}
-	err := backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 30))
-	return created, err
-}
-
-func getWitRetry(client *console.Client, instanceID string, name string) (*console.Application, error) {
-	var app *console.Application
-	operation := func() error {
-		var err error
-		var resp *console.Response
-		app, resp, err = client.Metrics.GetApplicationAutoscaler(instanceID, name)
-		return checkForIntermittentErrors(resp, err)
-	}
-	err := backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 30))
-	return app, err
-}
-
-func checkForIntermittentErrors(resp *console.Response, err error) error {
-	if resp == nil || resp.StatusCode() > 500 {
-		return err
-	}
-	if resp.StatusCode() == http.StatusInternalServerError {
-		return backoff.Permanent(fmt.Errorf("console: %s %w", resp.Error.Message, err))
-	}
-	if resp.StatusCode() == http.StatusBadRequest &&
-		strings.Contains(resp.Error.Message, "invalid character") {
-		return config.ErrIntermittent
-	}
-	return backoff.Permanent(err)
 }
