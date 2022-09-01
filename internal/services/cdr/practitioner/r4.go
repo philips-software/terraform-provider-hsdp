@@ -172,7 +172,7 @@ func r4Read(ctx context.Context, _ *config.Config, client *cdr.Client, d *schema
 			return nil, fmt.Errorf("OperationsR4.Get: response is nil")
 		}
 		return resp.Response, err
-	})
+	}, append(tools.StandardRetryOnCodes, http.StatusNotFound)...) // CDR weirdness
 	if err != nil {
 		if resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusGone) {
 			d.SetId("")
