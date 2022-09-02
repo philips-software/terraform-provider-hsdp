@@ -80,7 +80,7 @@ func r4Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) dia
 			return nil, err
 		}
 		return resp.Response, err
-	})
+	}, append(tools.StandardRetryOnCodes, http.StatusNotFound)...) // CDR weirdness
 
 	if err != nil {
 		if resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusGone) {
