@@ -20,6 +20,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/mdm"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/dicom"
 	repository2 "github.com/philips-software/terraform-provider-hsdp/internal/services/dicom/repository"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/discovery"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/namespace"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/repository"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/service_key"
@@ -30,6 +31,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/group"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/role_sharing_policy"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/service"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/user"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/metrics"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/notification"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/pki"
@@ -235,7 +237,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_role":                                  iam.ResourceIAMRole(),
 			"hsdp_iam_proposition":                           iam.ResourceIAMProposition(),
 			"hsdp_iam_application":                           iam.ResourceIAMApplication(),
-			"hsdp_iam_user":                                  iam.ResourceIAMUser(),
+			"hsdp_iam_user":                                  user.ResourceIAMUser(),
 			"hsdp_iam_client":                                client.ResourceIAMClient(),
 			"hsdp_iam_service":                               service.ResourceIAMService(),
 			"hsdp_iam_mfa_policy":                            iam.ResourceIAMMFAPolicy(),
@@ -303,7 +305,7 @@ func Provider(build string) *schema.Provider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                        iam.DataSourceIAMIntrospect(),
-			"hsdp_iam_user":                              iam.DataSourceUser(),
+			"hsdp_iam_user":                              user.DataSourceUser(),
 			"hsdp_iam_service":                           iam.DataSourceService(),
 			"hsdp_iam_permissions":                       iam.DataSourceIAMPermissions(),
 			"hsdp_iam_org":                               iam.DataSourceIAMOrg(),
@@ -341,7 +343,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_ai_workspace":                          workspace.DataSourceAIWorkspace(),
 			"hsdp_iam_group":                             iam.DataSourceIAMGroup(),
 			"hsdp_iam_role":                              iam.DataSourceIAMRole(),
-			"hsdp_iam_users":                             iam.DataSourceIAMUsers(),
+			"hsdp_iam_users":                             user.DataSourceIAMUsers(),
 			"hsdp_docker_namespace":                      namespace.DataSourceDockerNamespace(),
 			"hsdp_docker_namespaces":                     namespace.DataSourceDockerNamespaces(),
 			"hsdp_docker_repository":                     repository.DataSourceDockerRepository(),
@@ -372,6 +374,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_cdr_practitioner":                      practitioner.DataSourceCDRPractitioner(),
 			"hsdp_cdr_org":                               org.DataSourceCDROrg(),
 			"hsdp_iam_role_sharing_policies":             iam.DataSourceIAMRoleSharingPolicies(),
+			"hsdp_discovery_service":                     discovery.DataSourceDiscoveryService(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
@@ -452,6 +455,7 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.SetupSTLClient()
 		c.SetupNotificationClient()
 		c.SetupMDMClient()
+		c.SetupDiscoveryClient()
 
 		if c.DebugLog != "" {
 			debugFile, err := os.OpenFile(c.DebugLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)

@@ -86,7 +86,7 @@ func (p *Principal) HasAuth() bool {
 		return true
 	}
 	// IAM identity
-	if p.Username != "" && p.Password != "" && p.OAuth2ClientID != "" {
+	if p.Username != "" && p.Password != "" {
 		return true
 	}
 	if p.UAAUsername != "" && p.UAAPassword != "" {

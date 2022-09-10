@@ -20,6 +20,7 @@ func DataSourceIAMIntrospect() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"principal": config.PrincipalSchema(),
 			"organization_context": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -62,12 +63,13 @@ func DataSourceIAMIntrospect() *schema.Resource {
 
 }
 
-func dataSourceIAMIntrospectRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	c := meta.(*config.Config)
+func dataSourceIAMIntrospectRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
 
-	client, err := c.IAMClient()
+	principal := config.SchemaToPrincipal(d, m)
+	client, err := c.IAMClient(principal)
 	if err != nil {
 		return diag.FromErr(err)
 	}

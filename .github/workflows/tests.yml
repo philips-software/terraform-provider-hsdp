@@ -39,9 +39,14 @@ jobs:
           HSDP_IAM_SERVICE_PRIVATE_KEY: ${{ secrets.HSDP_IAM_SERVICE_PRIVATE_KEY }}
           HSDP_IAM_OAUTH2_CLIENT_ID: ${{ secrets.HSDP_IAM_OAUTH2_CLIENT_ID }}
           HSDP_IAM_OAUTH2_PASSWORD: ${{ secrets.HSDP_IAM_OAUTH2_PASSWORD }}
+          HSDP_MDM_ACC_ORG_ID: ${{ secrets.HSDP_MDM_ACC_ORG_ID }}
+          HSDP_MDM_ACC_CLIENT_ID: ${{ secrets.HSDP_MDM_ACC_CLIENT_ID }}
+          HSDP_MDM_ACC_CLIENT_SECRET: ${{ secrets.HSDP_MDM_ACC_CLIENT_SECRET }}
           HSDP_UAA_USERNAME: ${{ secrets.HSDP_UAA_USERNAME }}
           HSDP_UAA_PASSWORD: ${{ secrets.HSDP_UAA_PASSWORD }}
           HSDP_CDR_ACC_URL: ${{ secrets.HSDP_CDR_ACC_URL }}
+          HSDP_SHARED_KEY: ${{ secrets.HSDP_SHARED_KEY }}
+          HSDP_SECRET_KEY: ${{ secrets.HSDP_SECRET_KEY }}
           HSDP_DEBUG_LOG: /tmp/debug.log
       - uses: actions/upload-artifact@v3
         if: failure()

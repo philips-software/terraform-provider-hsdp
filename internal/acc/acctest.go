@@ -93,3 +93,15 @@ func AccIAMOrgGUID() string {
 func AccCDRURL() string {
 	return os.Getenv("HSDP_CDR_ACC_URL")
 }
+
+func AccMDMClientID() string {
+	return os.Getenv("HSDP_MDM_ACC_CLIENT_ID")
+}
+
+func AccMDMClientSecret() string {
+	return os.Getenv("HSDP_MDM_ACC_CLIENT_SECRET")
+}
+
+func AccMDMOrgID() string {
+	return os.Getenv("HSDP_MDM_ACC_ORG_ID")
+}

@@ -18,6 +18,7 @@ import (
 	"github.com/philips-software/go-hsdp-api/console"
 	"github.com/philips-software/go-hsdp-api/console/docker"
 	"github.com/philips-software/go-hsdp-api/dicom"
+	"github.com/philips-software/go-hsdp-api/discovery"
 	"github.com/philips-software/go-hsdp-api/iam"
 	"github.com/philips-software/go-hsdp-api/notification"
 	"github.com/philips-software/go-hsdp-api/pki"
@@ -65,6 +66,7 @@ type Config struct {
 	stlClient             *stl.Client
 	notificationClient    *notification.Client
 	mdmClient             *mdm.Client
+	discoveryClient       *discovery.Client
 	DebugFile             *os.File
 	credsClientErr        error
 	cartelClientErr       error
@@ -74,6 +76,7 @@ type Config struct {
 	stlClientErr          error
 	notificationClientErr error
 	mdmClientErr          error
+	discoveryClientErr    error
 	TimeZone              string
 
 	STU3MA *jsonformat.Marshaller
@@ -131,6 +134,23 @@ func (c *Config) IAMClient(principal ...*Principal) (*iam.Client, error) {
 		return iamClient, nil
 	}
 	return c.iamClient, c.iamClientErr
+}
+
+func (c *Config) DiscoveryClient(principal ...*Principal) (*discovery.Client, error) {
+	if len(principal) > 0 && principal[0] != nil && principal[0].HasAuth() {
+		region := principal[0].Region
+		environment := principal[0].Environment
+		iamClient, err := c.IAMClient(principal...)
+		if err != nil {
+			return nil, err
+		}
+		return discovery.NewClient(iamClient, &discovery.Config{
+			Region:      region,
+			Environment: environment,
+			DebugLog:    c.DebugLog,
+		})
+	}
+	return c.discoveryClient, c.discoveryClientErr
 }
 
 func (c *Config) CartelClient() (*cartel.Client, error) {
@@ -740,4 +760,23 @@ func (c *Config) SetupPKIClient() {
 	}
 	c.pkiClient = client
 	c.pkiClientErr = nil
+}
+
+func (c *Config) SetupDiscoveryClient() {
+	if c.iamClientErr != nil {
+		c.pkiClientErr = fmt.Errorf("IAM client error in SetupDiscoveryClient: %w", c.iamClientErr)
+		return
+	}
+	client, err := discovery.NewClient(c.iamClient, &discovery.Config{
+		Region:      c.Region,
+		Environment: c.Environment,
+		DebugLog:    c.DebugLog,
+	})
+	if err != nil {
+		c.discoveryClient = nil
+		c.discoveryClientErr = err
+		return
+	}
+	c.discoveryClient = client
+	c.discoveryClientErr = nil
 }

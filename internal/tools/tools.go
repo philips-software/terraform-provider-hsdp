@@ -20,6 +20,13 @@ var (
 	StandardRetryOnCodes = []int{http.StatusForbidden, http.StatusInternalServerError, http.StatusServiceUnavailable, http.StatusTooManyRequests, http.StatusGatewayTimeout}
 )
 
+func ReverseString(str string) (result string) {
+	for _, v := range str {
+		result = string(v) + result
+	}
+	return
+}
+
 func TryHTTPCall(ctx context.Context, numberOfTries uint64, operation func() (*http.Response, error), retryOnCodes ...int) error {
 	if len(retryOnCodes) == 0 {
 		retryOnCodes = StandardRetryOnCodes
