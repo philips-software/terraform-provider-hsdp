@@ -26,6 +26,22 @@ output "admins_org" {
 * `organization_context` - (Optional) Does a contextual introspect the IAM Organization associated
    with the GUID. The `effective_permissions` attribute will contain the list of permissions.
 
+### Principal
+
+You can optionally specify a principal (service identity, user or device) to use for performing the introspect call
+
+* `principal` - (Optional) The optional principal to use for this resource
+    * `service_id` - (Optional) The IAM service ID
+    * `service_private_key` - (Optional) The IAM service private key to use
+    * `username` - (Optional) The username of the user or device
+    * `password` - (Optional) The password of the user or device
+    * `oauth2_client_id` - (Optional) The OAuth2 client ID to use for token exchange
+    * `oauth2_password` - (Optional) The OAuth2 client password to use for token exchange
+    * `region` - (Optional) Region to use. When not set, the provider config is used
+    * `environment` - (Optional) Environment to use. When not set, the provider config is used
+    * `endpoint` - (Optional) The endpoint URL to use if applicable. When not set, the provider config is used
+
+
 ## Attributes Reference
 
 The following attributes are exported:
