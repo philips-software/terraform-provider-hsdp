@@ -1,4 +1,4 @@
-package iam
+package user
 
 import (
 	"context"
@@ -91,6 +91,7 @@ func resourceIAMUserCreate(ctx context.Context, d *schema.ResourceData, m interf
 	mobile := d.Get("mobile").(string)
 	login := d.Get("login").(string)
 	password := d.Get("password").(string)
+	reversedPassword := tools.ReverseString(password)
 	if login == "" {
 		login = email
 	}
@@ -108,6 +109,8 @@ func resourceIAMUserCreate(ctx context.Context, d *schema.ResourceData, m interf
 		d.SetId(foundUser.ID)
 		return resourceIAMUserRead(ctx, d, m)
 	}
+	initialPassword := password != "" && client.HasSigningKeys()
+
 	person := iam.Person{
 		ResourceType: "Person",
 		Name: iam.Name{
@@ -127,6 +130,9 @@ func resourceIAMUserCreate(ctx context.Context, d *schema.ResourceData, m interf
 		PreferredCommunicationChannel: preferredCommunicationChannel,
 		IsAgeValidated:                "true",
 	}
+	if initialPassword { // We first use the reverse
+		person.Password = reversedPassword
+	}
 	if mobile != "" {
 		person.Telecom = append(person.Telecom,
 			iam.TelecomEntry{
@@ -140,6 +146,14 @@ func resourceIAMUserCreate(ctx context.Context, d *schema.ResourceData, m interf
 	}
 	if user == nil {
 		return diag.FromErr(fmt.Errorf("error creating user '%s': %v %w", login, resp, err))
+	}
+	if initialPassword { // Set the final password
+		success, _, err := client.Users.ChangePassword(login, reversedPassword, password)
+		if !success {
+			person.ID = user.ID
+			_, _, _ = client.Users.DeleteUser(person)
+			return diag.FromErr(fmt.Errorf("error setting password for '%s': %w", login, err))
+		}
 	}
 	d.SetId(user.ID)
 	return resourceIAMUserRead(ctx, d, m)
