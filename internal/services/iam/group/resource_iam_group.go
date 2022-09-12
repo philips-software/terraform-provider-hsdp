@@ -118,7 +118,7 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 					return nil, err
 				}
 				return resp.Response, err
-			})
+			}, append(tools.StandardRetryOnCodes, http.StatusUnprocessableEntity)...) // Handle intermittent HTTP 422 errors
 			if err != nil {
 				// Cleanup
 				_ = purgeGroupContent(ctx, client, createdGroup.ID, d)
