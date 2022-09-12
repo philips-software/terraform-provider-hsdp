@@ -14,8 +14,16 @@ data "hsdp_discovery_service" "my_service" {
     name = "My Service"
 }
 
-// Discover by tag
+// Discover using specific principal credentials and search by tag
 data "hsdp_discovery_service" "another_service" {
+    principal {
+      username = var.device_login
+      password = var.device_password
+
+      oauth2_client_id = var.mdm_oauth2_client_id
+      oauth2_password  = var.mdm_oauth2_password
+    }
+
     tag = "another-service"
 }
 ```
