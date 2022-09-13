@@ -73,7 +73,7 @@ func resourceIAMApplicationCreate(ctx context.Context, d *schema.ResourceData, m
 	var createdApp *iam.Application
 	var resp *iam.Response
 
-	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var err error
 		createdApp, resp, err = client.Applications.CreateApplication(app)
 		if err != nil {

@@ -100,6 +100,7 @@ func s3credsAccessSchema() *schema.Resource {
 		},
 	}
 }
+
 func staticAccessSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
@@ -128,6 +129,7 @@ func staticAccessSchema() *schema.Resource {
 		},
 	}
 }
+
 func serviceAccountSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
