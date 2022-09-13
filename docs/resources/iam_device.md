@@ -71,5 +71,5 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-Existing devices can be imported, however they will be missing their password rendering them pretty much useless. 
+Existing devices can be imported, however they will be missing their password rendering them pretty much useless.
 Therefore, we recommend creating them using the provider.
