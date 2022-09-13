@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - '**.go'
+      - '**.mod'
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [main]
     paths:
       - '**.go'
+      - '**.mod'
 
 permissions:
   # Permission for checking out code
@@ -23,7 +25,7 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
-          go-version: '1.18'
+          go-version: '1.19'
       - uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: '1.1.*'
@@ -60,5 +62,5 @@ jobs:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
         with:
-          go-version: '1.18'
+          go-version: '1.19'
       - run: go test -v -cover ./...
