@@ -31,9 +31,7 @@ resource "hsdp_iam_device" "test_device" {
     value = "001"
   }
   
-  
   type = "ActivityMonitor"
-  text = "This is a test device managed by Terraform"
   
   organization_id = var.org_id
   application_id  = var.app_id
