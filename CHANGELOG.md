@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.37.5
+
+- PKI: add eu-west production
+- IAM: handle intermittent issues with Group updates
+
 ## v0.37.4
 
 - Discovery: add hsdp_discovery_service resource
