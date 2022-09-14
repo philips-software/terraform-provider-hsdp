@@ -59,7 +59,7 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 			return nil, fmt.Errorf("OperationsR4.Post: response is nil")
 		}
 		return resp.Response, err
-	})
+	}, append(tools.StandardRetryOnCodes, http.StatusNotFound)...) // CDRD weirdness
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("create subscription: %w", err))
 	}
