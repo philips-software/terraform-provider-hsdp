@@ -27,7 +27,7 @@ resource "hsdp_iam_device" "test_device" {
       code = "ID"
       text = "Device Identifier"
     }
-    system = "http://www.philips.co.id/c-m-ho/cooking/airfryer"
+    system = "https://www.philips.co.id/c-m-ho/cooking/airfryer"
     value = "001"
   }
   
