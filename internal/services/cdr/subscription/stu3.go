@@ -82,7 +82,7 @@ func stu3Read(ctx context.Context, _ *config.Config, client *cdr.Client, d *sche
 			return nil, fmt.Errorf("OperationsSTU3.Get: response is nil")
 		}
 		return resp.Response, err
-	})
+	}, append(tools.StandardRetryOnCodes, http.StatusNotFound)...) // CDR weirdness
 	if err != nil {
 		if resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusGone) {
 			d.SetId("")

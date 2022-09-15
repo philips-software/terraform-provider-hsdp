@@ -41,7 +41,7 @@ func r4Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sche
 	}
 	var onboardedOrg *r4pb.Organization
 
-	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 9, func() (*http.Response, error) {
 		var resp *cdr.Response
 		var err error
 		onboardedOrg, resp, err = client.TenantR4.Onboard(org)

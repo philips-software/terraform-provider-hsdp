@@ -129,8 +129,7 @@ cartel --help
 ## Using Terraform
 
 The HSP Terraform provider supports managing Container Host instances
-through the [hsdp_container_host](https://registry.terraform.io/providers/philips-software/hsdp/latest/docs/resources/container_host) and [hsdp_container_exec](https://registry.terraform.io/providers/philips-software/hsdp/latest/docs/resources/container_host_exec) resource types.
-
+through the [hsdp_container_host](https://registry.terraform.io/providers/philips-software/hsdp/latest/docs/resources/container_host)
 Use `hsdp_container_host` to declare an instance. Example:
 
 ```hcl
@@ -328,21 +327,40 @@ ssh -A -C -J cdrummer@gw-na1.phsdp.com cdrummer@tynan-server.dev
 
 ## Bootstrapping Container Host instances
 
-To fully automate provisioning and deployment of software on Container Host you can leverage the `hsdp_container_host_exec` resource.
-While it is possibly to specify `file` and `commands` in the `hsdp_container_host` resource directly we highly recommend splitting off
-bootstrapping steps to a `hsdp_container_host_exec` resource. This decouples your software bootstrapping from the Container Host instance provisioning, which
-can take between 7 and 10 minutes on average.
+To fully automate provisioning and deployment of software on Container Host you can leverage the [loafoe/ssh](https://registry.terraform.io/providers/loafoe/ssh/latest) providers `ssh_resource` resource.
+Ensure you pull in the provider:
+
+```hcl
+terraform {
+  required_providers {
+    // Add below block to your versions.tf
+    ssh = {
+      source  = "loafoe/ssh"
+      version = ">= 2.2.0"
+    }
+  }
+}
+```
 
 We'll break down the example below:
 
 ```hcl
-resource "hsdp_container_host_exec" "nomad_server_init" {
+// Use this to find the bastion host for the given region
+data "hsdp_config" "gw" {
+  region  = var.region
+  service = "gateway"
+}
+
+resource "ssh_resource" "nomad_server_init" {
   # Use the private_ip from a provisioned hsdp_container_host resource
   # This ensures the exec resource is only executed after the Container Host is up and running
   host  = hsdp_container_host.nomad_server.private_ip
   user  = var.ldap_user
   agent = true
 
+  // The bastion_host is crucial!
+  bastion_host = data.hsdp_config.gw.host
+  
   # Render template and copy it to the Container Host instance
   file {
     content = templatefile("${path.module}/templates/server.hcl", {
@@ -374,8 +392,13 @@ resource "hsdp_container_host_exec" "nomad_server_init" {
 
 ### host
 
-The `host` parameter should be set to the private IP address of the Container Host instance. The `hsdp_container_exec` will use
+The `host` parameter should be set to the private IP address of the Container Host instance. The `ssh_resource` will use
 an embedded SSH agent which supports tunneling (and proxy traversal!) to establish a connection to your Container Host.
+
+### bastion_host
+
+The `bastion_host` should be set to the regional SSH gateway. In the example we are using the `hsdp_cofig` data source to
+look this up automatically.
 
 ### file
 
