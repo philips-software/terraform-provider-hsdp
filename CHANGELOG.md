@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.38.0
+
+- IAM Device: add support for IAM devices (#244)
+- IAM Group: allow device assignments
+- Container Host: improve error handling (#236)
+- Documentation: update Container Host guide
+
 ## v0.37.6
 
 - PKI: update config for real

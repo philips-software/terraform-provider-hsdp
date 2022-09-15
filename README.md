@@ -16,7 +16,7 @@ terraform {
   required_providers {
     hsdp = {
       source = "philips-software/hsdp"
-      version = ">= 0.37.0"
+      version = ">= 0.38.0"
     }
   }
 }
