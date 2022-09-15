@@ -18,7 +18,7 @@ func ResourceIAMGroup() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		SchemaVersion: 1,
+		SchemaVersion: 2,
 		CreateContext: resourceIAMGroupCreate,
 		ReadContext:   resourceIAMGroupRead,
 		UpdateContext: resourceIAMGroupUpdate,
@@ -28,6 +28,11 @@ func ResourceIAMGroup() *schema.Resource {
 				Type:    ResourceIAMGroupV0().CoreConfigSchema().ImpliedType(),
 				Upgrade: patchIAMGroupV0,
 				Version: 0,
+			},
+			{
+				Type:    ResourceIAMGroupV1().CoreConfigSchema().ImpliedType(),
+				Upgrade: patchIAMGroupV1,
+				Version: 1,
 			},
 		},
 
@@ -61,6 +66,12 @@ func ResourceIAMGroup() *schema.Resource {
 				Elem:     tools.StringSchema(),
 			},
 			"services": {
+				Type:     schema.TypeSet,
+				MaxItems: 2000,
+				Optional: true,
+				Elem:     tools.StringSchema(),
+			},
+			"devices": {
 				Type:     schema.TypeSet,
 				MaxItems: 2000,
 				Optional: true,
@@ -172,6 +183,31 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 			return diag.FromErr(fmt.Errorf("error adding services: %v", err))
 		}
 	}
+
+	// Add devices
+	devices := tools.ExpandStringList(d.Get("devices").(*schema.Set).List())
+	if len(devices) > 0 {
+		err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+			result, resp, err := client.Groups.AddDevices(*createdGroup, devices...)
+			if resp == nil {
+				return nil, err
+			}
+			if err != nil {
+				return resp.Response, err
+			}
+			if !(resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusMultiStatus) {
+				return resp.Response, backoff.Permanent(fmt.Errorf("failed to add devices: %v", result))
+			}
+			return resp.Response, err
+		})
+		if err != nil {
+			// Cleanup
+			_ = purgeGroupContent(ctx, client, createdGroup.ID, d)
+			_, _, _ = client.Groups.DeleteGroup(*createdGroup)
+			return diag.FromErr(fmt.Errorf("error adding devices: %v", err))
+		}
+	}
+
 	d.SetId(createdGroup.ID)
 	return resourceIAMGroupRead(ctx, d, m)
 }
@@ -218,7 +254,15 @@ func resourceIAMGroupRead(_ context.Context, d *schema.ResourceData, m interface
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("error retrieving users from group: %v", err))
 		}
-		_ = d.Set("users", tools.SchemaSetStrings(users))
+		// Unfortunately Users must now be verified as the GetAllUsers query also returns IAM Devices
+		var verifiedUsers []string
+		for _, u := range users {
+			_, _, err := client.Users.GetUserByID(u)
+			if err == nil {
+				verifiedUsers = append(verifiedUsers, u)
+			}
+		}
+		_ = d.Set("users", tools.SchemaSetStrings(verifiedUsers))
 
 		// Services
 		// We only deal with services we know
@@ -261,6 +305,26 @@ func resourceIAMGroupRead(_ context.Context, d *schema.ResourceData, m interface
 		}
 
 		_ = d.Set("services", tools.SchemaSetStrings(verifiedServices))
+
+		// Devices
+		var verifiedDevices []string
+		devices := tools.ExpandStringList(d.Get("devices").(*schema.Set).List())
+		for _, device := range devices {
+			groups, _, err := client.Groups.GetGroups(&iam.GetGroupOptions{
+				MemberType: tools.String("DEVICE"),
+				MemberID:   &device,
+			})
+			if err != nil || groups == nil {
+				continue
+			}
+			for _, g := range *groups {
+				if g.ID == group.ID {
+					verifiedDevices = append(verifiedDevices, device)
+					continue
+				}
+			}
+		}
+		_ = d.Set("devices", tools.SchemaSetStrings(verifiedDevices))
 	}
 	return diags
 }
@@ -333,6 +397,41 @@ func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m inter
 			}
 		}
 	}
+
+	// Devices
+	if d.HasChange("devices") {
+		o, n := d.GetChange("devices")
+		old := tools.ExpandStringList(o.(*schema.Set).List())
+		newList := tools.ExpandStringList(n.(*schema.Set).List())
+		toAdd := tools.Difference(newList, old)
+		toRemove := tools.Difference(old, newList)
+
+		if len(toRemove) > 0 {
+			err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+				_, resp, err := client.Groups.RemoveDevices(group, toRemove...)
+				if resp == nil {
+					return nil, err
+				}
+				return resp.Response, err
+			})
+			if err != nil {
+				diags = append(diags, diag.FromErr(err)...)
+			}
+		}
+		if len(toAdd) > 0 {
+			err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+				_, resp, err := client.Groups.AddDevices(group, toAdd...)
+				if resp == nil {
+					return nil, err
+				}
+				return resp.Response, err
+			})
+			if err != nil {
+				diags = append(diags, diag.FromErr(err)...)
+			}
+		}
+	}
+
 	if len(diags) > 0 {
 		return diags
 	}
@@ -401,6 +500,23 @@ func purgeGroupContent(ctx context.Context, client *iam.Client, id string, d *sc
 		for _, s := range services {
 			_ = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 				_, resp, err := client.Groups.RemoveServices(group, s)
+				if resp != nil && resp.StatusCode() == http.StatusUnprocessableEntity {
+					return resp.Response, nil // Service is already gone
+				}
+				if resp == nil {
+					return nil, err
+				}
+				return resp.Response, err
+			}, http.StatusInternalServerError, http.StatusTooManyRequests)
+		}
+	}
+
+	// Remove all devices first before attempting delete
+	devices := tools.ExpandStringList(d.Get("devices").(*schema.Set).List())
+	if len(devices) > 0 {
+		for _, s := range devices {
+			_ = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
+				_, resp, err := client.Groups.RemoveDevices(group, s)
 				if resp != nil && resp.StatusCode() == http.StatusUnprocessableEntity {
 					return resp.Response, nil // Service is already gone
 				}
