@@ -397,7 +397,7 @@ an embedded SSH agent which supports tunneling (and proxy traversal!) to establi
 
 ### bastion_host
 
-The `bastion_host` should be set to the regional SSH gateway. In example we are using the `hsdp_cofig` data source to 
+The `bastion_host` should be set to the regional SSH gateway. In example we are using the `hsdp_cofig` data source to
 look this up automatically.
 
 ### file
