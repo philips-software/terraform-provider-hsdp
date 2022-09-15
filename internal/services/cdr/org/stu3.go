@@ -42,7 +42,7 @@ func stu3Create(ctx context.Context, c *config.Config, client *cdr.Client, d *sc
 	var onboardedOrg *resources_go_proto.Organization
 
 	// Do initial boarding
-	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 9, func() (*http.Response, error) {
 		var resp *cdr.Response
 		var err error
 		onboardedOrg, resp, err = client.TenantSTU3.Onboard(org)
