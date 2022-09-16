@@ -275,8 +275,9 @@ func resourceIAMServiceUpdate(ctx context.Context, d *schema.ResourceData, m int
 	}
 	if d.HasChange("self_managed_expires_on") || d.HasChange("self_managed_private_key") {
 		_, npk := d.GetChange("self_managed_private_key")
+		privateKey := d.Get("private_key").(string)
 
-		if npk.(string) == "" {
+		if npk.(string) == "" && privateKey == "" {
 			return diag.FromErr(fmt.Errorf("you cannot revert to a server side managed private key once you set a self managed private key"))
 		}
 		diags = setSelfManaged(client, s, d)

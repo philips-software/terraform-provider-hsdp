@@ -14,8 +14,10 @@ func patchIAMServiceV4(_ context.Context, rawState map[string]interface{}, _ int
 		rawState = map[string]interface{}{}
 	}
 	// Copy value to new field
-	if rawState["self_managed_private_key"] != "" && rawState["expires_on"] != "" {
+	if rawState["self_managed_private_key"] != nil && rawState["expires_on"] != nil {
 		rawState["self_managed_expires_on"] = rawState["expires_on"]
+	} else {
+		rawState["self_managed_expires_on"] = nil
 	}
 	return rawState, nil
 }
