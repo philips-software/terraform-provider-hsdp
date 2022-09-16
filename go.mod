@@ -11,7 +11,7 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.1
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.22.0
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.23.0
 	github.com/hasura/go-graphql-client v0.8.0
 	github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152
 	github.com/loafoe/easyssh-proxy/v2 v2.0.4
@@ -39,7 +39,7 @@ require (
 	github.com/go-playground/validator/v10 v10.11.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/go-cmp v0.5.8 // indirect
+	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
