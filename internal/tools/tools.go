@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	StandardRetryOnCodes = []int{http.StatusForbidden, http.StatusInternalServerError, http.StatusServiceUnavailable, http.StatusTooManyRequests, http.StatusGatewayTimeout}
+	StandardRetryOnCodes = []int{http.StatusForbidden, http.StatusInternalServerError, http.StatusServiceUnavailable, http.StatusTooManyRequests, http.StatusBadGateway, http.StatusGatewayTimeout}
 )
 
 func ReverseString(str string) (result string) {
