@@ -1,8 +1,6 @@
 package tools
 
 import (
-	"context"
-	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -16,47 +14,11 @@ import (
 	"github.com/philips-software/go-hsdp-api/iam"
 )
 
-var (
-	StandardRetryOnCodes = []int{http.StatusForbidden, http.StatusInternalServerError, http.StatusServiceUnavailable, http.StatusTooManyRequests, http.StatusBadGateway, http.StatusGatewayTimeout}
-)
-
 func ReverseString(str string) (result string) {
 	for _, v := range str {
 		result = string(v) + result
 	}
 	return
-}
-
-func TryHTTPCall(ctx context.Context, numberOfTries uint64, operation func() (*http.Response, error), retryOnCodes ...int) error {
-	if len(retryOnCodes) == 0 {
-		retryOnCodes = StandardRetryOnCodes
-	}
-	doOp := func() error {
-		resp, err := operation()
-		if err == nil {
-			return nil
-		}
-		if resp == nil {
-			return backoff.Permanent(fmt.Errorf("response was nil: %w", err))
-		}
-		select {
-		case <-ctx.Done():
-			return backoff.Permanent(fmt.Errorf("context was cancelled"))
-		default:
-		}
-		shouldRetry := false
-		for _, c := range retryOnCodes {
-			if c == resp.StatusCode {
-				shouldRetry = true
-				break
-			}
-		}
-		if shouldRetry {
-			return err
-		}
-		return backoff.Permanent(err)
-	}
-	return backoff.Retry(doOp, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), numberOfTries))
 }
 
 // Difference returns the elements in a that aren't in b
