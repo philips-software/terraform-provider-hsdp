@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.38.2
+
+- Core: better handling of 502 BAD Gateway responses
+
 ## v0.38.1
 
 - IAM Service: fix migration
