@@ -100,14 +100,14 @@ func resourceIAMEmailTemplateCreate(ctx context.Context, d *schema.ResourceData,
 
 	var createdTemplate *iam.EmailTemplate
 	var resp *iam.Response
-	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var err error
 		createdTemplate, resp, err = client.EmailTemplates.CreateTemplate(template)
 		if resp == nil {
 			return nil, err
 		}
 		return resp.Response, err
-	}, http.StatusInternalServerError, http.StatusTooManyRequests)
+	})
 
 	if err != nil {
 		if resp.StatusCode() == http.StatusConflict {
@@ -154,11 +154,10 @@ func resourceIAMEmailTemplateRead(_ context.Context, d *schema.ResourceData, m i
 	_ = d.Set("link", template.Link)
 	// Message is not returned in the read call
 
-	d.SetId(template.ID)
 	return diags
 }
 
-func resourceIAMEmailTemplateDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMEmailTemplateDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -170,12 +169,22 @@ func resourceIAMEmailTemplateDelete(_ context.Context, d *schema.ResourceData, m
 
 	var template iam.EmailTemplate
 	template.ID = d.Id()
-	ok, _, err := client.EmailTemplates.DeleteTemplate(template)
+	var ok bool
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
+		var resp *iam.Response
+		var err error
+		ok, _, err = client.EmailTemplates.DeleteTemplate(template)
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if ok {
-		d.SetId("")
+	if !ok {
+		return diag.FromErr(config.ErrDeleteEmailTemplateFailed)
 	}
+	d.SetId("")
 	return diags
 }

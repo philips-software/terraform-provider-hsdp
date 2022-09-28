@@ -71,6 +71,9 @@ resource "hsdp_iam_email_template" "password_expiry" {
     type = "PASSWORD_EXPIRY"
 
     managing_organization = "%s"
+   
+    locale = "en-US"
+	from   = "ron.swanson@pawnee.city"
 
     format   = "HTML"
     message = "Yo dawg, your password is about to expire, change it!"
