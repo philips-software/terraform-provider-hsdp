@@ -149,7 +149,7 @@ func resourceMDMApplicationCreate(ctx context.Context, d *schema.ResourceData, m
 			return nil, err
 		}
 		return resp.Response, err
-	}, http.StatusForbidden, http.StatusInternalServerError, http.StatusTooManyRequests)
+	})
 	if err != nil {
 		if resp == nil {
 			return diag.FromErr(err)

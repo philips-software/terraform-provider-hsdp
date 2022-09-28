@@ -490,7 +490,7 @@ func purgeGroupContent(ctx context.Context, client *iam.Client, id string, d *sc
 					return nil, err
 				}
 				return resp.Response, err
-			}, http.StatusInternalServerError, http.StatusTooManyRequests)
+			})
 		}
 	}
 
@@ -507,7 +507,7 @@ func purgeGroupContent(ctx context.Context, client *iam.Client, id string, d *sc
 					return nil, err
 				}
 				return resp.Response, err
-			}, http.StatusInternalServerError, http.StatusTooManyRequests)
+			})
 		}
 	}
 
@@ -524,7 +524,7 @@ func purgeGroupContent(ctx context.Context, client *iam.Client, id string, d *sc
 					return nil, err
 				}
 				return resp.Response, err
-			}, http.StatusInternalServerError, http.StatusTooManyRequests)
+			})
 		}
 	}
 
@@ -547,7 +547,7 @@ func purgeGroupContent(ctx context.Context, client *iam.Client, id string, d *sc
 					return nil, err
 				}
 				return resp.Response, err
-			}, http.StatusInternalServerError, http.StatusTooManyRequests)
+			})
 		}
 	}
 	return nil
@@ -581,7 +581,7 @@ func resourceIAMGroupDelete(ctx context.Context, d *schema.ResourceData, m inter
 			return nil, err
 		}
 		return resp.Response, err
-	}, http.StatusInternalServerError, http.StatusTooManyRequests)
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
