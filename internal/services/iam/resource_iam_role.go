@@ -246,7 +246,7 @@ func addAndRemovePermissions(_ context.Context, role iam.Role, toAdd, toRemove [
 	return diags
 }
 
-func resourceIAMRoleDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMRoleDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -259,9 +259,20 @@ func resourceIAMRoleDelete(_ context.Context, d *schema.ResourceData, m interfac
 	var role iam.Role
 	role.ID = d.Id()
 
-	_, _, err = client.Roles.DeleteRole(role)
+	var resp *iam.Response
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
+		var err error
+		_, resp, err = client.Roles.DeleteRole(role)
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
+	}
+	if resp == nil || resp.StatusCode() != http.StatusNoContent {
+		return diag.FromErr(config.ErrDeleteRoleFailed)
 	}
 	d.SetId("")
 	return diags
