@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.38.3
+
+- IAM Role: wrap delete in retry block
+- IAM Email template: wrap delete call in retry
+- Notification: fix documentation 
+
 ## v0.38.2
 
 - Core: better handling of 502 BAD Gateway responses
