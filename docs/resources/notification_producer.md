@@ -24,7 +24,7 @@ resource "hsdp_notification_producer" "producer" {
 ## Argument reference
 
 * `managing_organization_id` - (Required) The UUID of the IAM organization or tenant
-* `managing_organization_id` - (Required) The name of IAM organization or tenant
+* `managing_organization` - (Required) The name of IAM organization or tenant
 * `producer_product_name` - (Required) TThe name of the product
 * `producer_service_name` - (Required) The name of the service within the product
 * `producer_service_instance_name` - (Required) The name of a service instance in the product. Used to differentiate multiple copies of the same service used in an organization
@@ -37,6 +37,10 @@ resource "hsdp_notification_producer" "producer" {
   * `region` - (Optional) Region to use. When not set, the provider config is used
   * `environment` - (Optional) Environment to use. When not set, the provider config is used
   * `endpoint` - (Optional) The endpoint URL to use if applicable. When not set, the provider config is used
+  * `username` - (Optional) The username of the IAM user principal
+  * `password` - (Optional) The password of the IAM user principal
+  * `oauth2_client_id` - (Optional) The OAuth2 client id to authenticate the token endpoint. When not set, the provider config is used
+  * `oauth2_password` - (Optional) The Oauth2 password to authenticate the token endpoint. When not set, the provider config is used
 
 ## Attribute reference
 
