@@ -129,7 +129,7 @@ cartel --help
 ## Using Terraform
 
 The HSP Terraform provider supports managing Container Host instances
-through the [hsdp_container_host](https://registry.terraform.io/providers/philips-software/hsdp/latest/docs/resources/container_host)
+through the [hsdp_container_host](https://registry.terraform.io/providers/philips-software/hsdp/latest/docs/resources/container_host) resource.
 Use `hsdp_container_host` to declare an instance. Example:
 
 ```hcl

@@ -248,6 +248,10 @@ func resourceMetricsAutoscalerRead(ctx context.Context, d *schema.ResourceData, 
 		return resp.Response, err
 	})
 	if err != nil {
+		if resp != nil && resp.StatusCode() == http.StatusNotFound {
+			d.SetId("")
+			return diags
+		}
 		return diag.FromErr(fmt.Errorf("GetApplicationAutoscaler: %+v %w", resp, err))
 	}
 	_ = d.Set("min_instances", app.MinInstances)
