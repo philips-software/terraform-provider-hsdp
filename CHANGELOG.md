@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.38.4
+
+- Autoscaler: handle state drift
+
 ## v0.38.3
 
 - IAM Role: wrap delete in retry block
