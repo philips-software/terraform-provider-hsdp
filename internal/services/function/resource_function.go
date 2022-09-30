@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/philips-labs/ferrite/server"
+	"github.com/loafoe/ferrite/server"
 	siderite "github.com/philips-labs/siderite/models"
 	"github.com/philips-software/go-hsdp-api/iron"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
