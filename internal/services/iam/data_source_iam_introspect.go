@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -14,7 +15,8 @@ import (
 
 func DataSourceIAMIntrospect() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceIAMIntrospectRead,
+		SchemaVersion: 1,
+		ReadContext:   dataSourceIAMIntrospectRead,
 		Schema: map[string]*schema.Schema{
 			"token": {
 				Type:     schema.TypeString,
@@ -55,6 +57,11 @@ func DataSourceIAMIntrospect() *schema.Resource {
 			},
 			"effective_permissions": {
 				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"scopes": {
+				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
@@ -105,6 +112,10 @@ func dataSourceIAMIntrospectRead(_ context.Context, d *schema.ResourceData, m in
 	_ = d.Set("subject", resp.Sub)
 	_ = d.Set("issuer", resp.ISS)
 	_ = d.Set("introspect", string(introspectJSON))
+
+	scopes := strings.Split(resp.Scope, " ")
+	_ = d.Set("scopes", scopes)
+
 	if orgContext != "" {
 		for _, org := range resp.Organizations.OrganizationList {
 			if org.OrganizationID != orgContext {

@@ -30,6 +30,7 @@ func TestAccDataSourceIAMIntrospect_basic(t *testing.T) {
 						}
 						return nil
 					}),
+					resource.TestCheckResourceAttr(resourceName, "scopes.#", "4"),
 				),
 			},
 		},

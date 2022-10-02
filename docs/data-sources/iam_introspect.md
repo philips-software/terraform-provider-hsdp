@@ -55,3 +55,4 @@ The following attributes are exported:
   contains the list of effective permissions
 * `token_type` - The type of token
 * `identity_type` - The identity type, example: `Service`
+* `scopes` - The list of scopes associated with the token
