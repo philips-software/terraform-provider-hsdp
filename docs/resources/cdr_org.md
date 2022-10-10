@@ -13,18 +13,31 @@ The following example creates and onboards a CDR FHIR organization
 
 ```hcl
 data "hsdp_cdr_fhir_store" "sandbox" {
-  base_url = "https://cdr-stu3-sandbox.hsdp.io"
+  base_url = "https://cdr-stu3-sandbox.hsdp.io/store/fhir"
   fhir_org_id = var.root_org_id
 }
 
+# Onboard the root Organization onto CDR
+resource "hsdp_cdr_org" "root_org" {
+  fhir_store = data.hsdp_cdr_fhir_store.sandbox.endpoint
+  org_id     = var.root_org_id
+  
+  version = "r4"
+  
+  name = "Root ORG"
+}
+
+# Onboard the Hospital as a sub org to the root ORG
 resource "hsdp_cdr_org" "hospital" {
   fhir_store = data.hsdp_cdr_fhir_store.sandbox.endpoint
-  org_id = var.sub_org_id
+  org_id     = var.sub_org_id
 
   # Set up this org to use FHIR R4
   version = "r4"
   
   name    = "Hospital"
+  
+  # This is a sub org of the root ORG
   part_of = var.root_org_id
   
   purge_delete = false
