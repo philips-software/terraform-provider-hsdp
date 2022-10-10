@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/fhir/go/fhirversion"
 	"github.com/google/fhir/go/jsonformat"
 	stu3pb "github.com/google/fhir/go/proto/google/fhir/proto/stu3/resources_go_proto"
 	"github.com/stretchr/testify/assert"
@@ -36,7 +37,7 @@ func TestParameters(t *testing.T) {
         }
     ]
 }`
-	um, err := jsonformat.NewUnmarshaller("UTC", jsonformat.STU3)
+	um, err := jsonformat.NewUnmarshaller("UTC", fhirversion.STU3)
 	if !assert.Nil(t, err) {
 		return
 	}
@@ -80,7 +81,7 @@ func TestAccResourceCDROrg_basic(t *testing.T) {
 				ResourceName: resourceName,
 				Config:       testAccResourceCDROrg(cdrURL, parentOrgID, randomNameSTU3, "stu3", now),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("%s %s", randomNameSTU3, now)),
+					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("MAIN %s %s", randomNameSTU3, now)),
 				),
 			},
 		},
@@ -97,7 +98,7 @@ func TestAccResourceCDROrg_basic(t *testing.T) {
 				ResourceName: resourceName,
 				Config:       testAccResourceCDROrg(cdrURL, parentOrgID, randomNameR4, "r4", now),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("%s %s", randomNameR4, now)),
+					resource.TestCheckResourceAttr(resourceName, "name", fmt.Sprintf("MAIN %s %s", randomNameR4, now)),
 				),
 			},
 		},
@@ -120,9 +121,15 @@ data "hsdp_iam_service" "service" {
 }
 
 resource "hsdp_iam_org" "test" {
-  name  = "%s"
+  name  = "MAIN%s"
   description = "CDR Org Acceptance Test %s %s"
   parent_org_id = "%s"
+}
+
+resource "hsdp_iam_org" "suborg" {
+  name  = "SUB%s"
+  description = "CDR Org Acceptance Test %s %s"
+  parent_org_id = hsdp_iam_org.test.id
 }
 
 resource "hsdp_iam_role" "cdr_admin" {
@@ -146,11 +153,25 @@ resource "hsdp_iam_group" "cdr_admins" {
 resource "hsdp_cdr_org" "test" {
   fhir_store  = data.hsdp_cdr_fhir_store.sandbox.endpoint
 
-  name        = "%s %s"
+  name        = "MAIN %s %s"
   org_id      = hsdp_iam_org.test.id
 
   version     = "%s"
-}`,
+
+  depends_on = [hsdp_iam_group.cdr_admins]
+}
+
+resource "hsdp_cdr_org" "suborg" {
+  fhir_store  = data.hsdp_cdr_fhir_store.sandbox.endpoint
+
+  name        = "SUB %s %s"
+  org_id      = hsdp_iam_org.suborg.id
+
+  version     = "%s"
+  
+  part_of     = hsdp_cdr_org.test.org_id
+}
+`,
 		// DATA SOURCE
 		cdrURL,
 
@@ -159,6 +180,10 @@ resource "hsdp_cdr_org" "test" {
 		now,
 		name,
 		parentOrgID,
+		// IAM SUB-ORG
+		name,
+		now,
+		name,
 
 		// IAM GROUP
 		now,
@@ -166,5 +191,11 @@ resource "hsdp_cdr_org" "test" {
 		// CDR ORG
 		name,
 		now,
-		version)
+		version,
+
+		// CDR SUB ORG
+		name,
+		now,
+		version,
+	)
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 
+	"github.com/google/fhir/go/fhirversion"
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -468,25 +469,25 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 			}
 		}
 
-		ma, err := jsonformat.NewMarshaller(false, "", "", jsonformat.STU3)
+		ma, err := jsonformat.NewMarshaller(false, "", "", fhirversion.STU3)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
 		c.STU3MA = ma
 
-		um, err := jsonformat.NewUnmarshaller("UTC", jsonformat.STU3)
+		um, err := jsonformat.NewUnmarshaller("UTC", fhirversion.STU3)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
 		c.STU3UM = um
 
-		ma, err = jsonformat.NewMarshaller(false, "", "", jsonformat.R4)
+		ma, err = jsonformat.NewMarshaller(false, "", "", fhirversion.R4)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
 		c.R4MA = ma
 
-		um, err = jsonformat.NewUnmarshaller("UTC", jsonformat.R4)
+		um, err = jsonformat.NewUnmarshaller("UTC", fhirversion.R4)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
