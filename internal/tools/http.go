@@ -16,6 +16,7 @@ func TryHTTPCall(ctx context.Context, numberOfTries uint64, operation func() (*h
 	if len(retryOnCodes) == 0 {
 		retryOnCodes = StandardRetryOnCodes
 	}
+	count := 0
 	doOp := func() error {
 		resp, err := operation()
 		if err == nil {
@@ -26,7 +27,7 @@ func TryHTTPCall(ctx context.Context, numberOfTries uint64, operation func() (*h
 		}
 		select {
 		case <-ctx.Done():
-			return backoff.Permanent(fmt.Errorf("context was cancelled"))
+			return backoff.Permanent(fmt.Errorf("context was cancelled: %w", err))
 		default:
 		}
 		shouldRetry := false
@@ -37,9 +38,10 @@ func TryHTTPCall(ctx context.Context, numberOfTries uint64, operation func() (*h
 			}
 		}
 		if shouldRetry {
-			return err
+			count = count + 1
+			return fmt.Errorf("retry %d due to HTTP %d: %w", count, resp.StatusCode, err)
 		}
-		return backoff.Permanent(err)
+		return backoff.Permanent(fmt.Errorf("retry %d permanent: %w", count, err))
 	}
 	return backoff.Retry(doOp, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), numberOfTries))
 }
