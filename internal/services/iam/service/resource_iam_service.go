@@ -142,7 +142,7 @@ func resourceIAMServiceCreate(ctx context.Context, d *schema.ResourceData, m int
 	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		var resp *iam.Response
-		createdService, _, err = client.Services.CreateService(s)
+		createdService, resp, err = client.Services.CreateService(s)
 		if err != nil {
 			_ = client.TokenRefresh()
 		}

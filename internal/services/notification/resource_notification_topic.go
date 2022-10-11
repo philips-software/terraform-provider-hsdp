@@ -183,7 +183,7 @@ func resourceNotificationTopicUpdate(ctx context.Context, d *schema.ResourceData
 		topic.IsAuditable = d.Get("is_auditable").(bool)
 		err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 			var resp *notification.Response
-			_, _, err = client.Topic.UpdateTopic(*topic)
+			_, resp, err = client.Topic.UpdateTopic(*topic)
 			if err != nil {
 				_ = client.TokenRefresh()
 			}

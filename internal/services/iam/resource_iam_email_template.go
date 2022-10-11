@@ -173,7 +173,7 @@ func resourceIAMEmailTemplateDelete(ctx context.Context, d *schema.ResourceData,
 	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 		var resp *iam.Response
 		var err error
-		ok, _, err = client.EmailTemplates.DeleteTemplate(template)
+		ok, resp, err = client.EmailTemplates.DeleteTemplate(template)
 		if resp == nil {
 			return nil, err
 		}
