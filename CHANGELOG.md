@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.38.5
+
+- IAM Introspect: add scopes field
+- CDR: Improve the CDR Org example
+- Core: Update Google FHIR #255
+- Core: fix retry logic #257
+
 ## v0.38.4
 
 - Autoscaler: handle state drift
