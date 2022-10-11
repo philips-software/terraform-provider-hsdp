@@ -28,7 +28,7 @@ jobs:
           go-version: '1.19'
       - uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: '1.1.*'
+          terraform_version: '1.3.*'
           terraform_wrapper: false
       - run: go test -v -cover ./...
         env:
