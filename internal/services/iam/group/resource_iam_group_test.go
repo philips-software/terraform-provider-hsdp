@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/philips-software/terraform-provider-hsdp/internal/acc"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func TestAccResourceIAMGroup_basic(t *testing.T) {
@@ -16,6 +17,7 @@ func TestAccResourceIAMGroup_basic(t *testing.T) {
 	resourceName := "hsdp_iam_group.test"
 	parentOrgID := acc.AccIAMOrgGUID()
 	randomName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	randomPassword, _ := tools.RandomPassword()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -25,7 +27,7 @@ func TestAccResourceIAMGroup_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccResourceIAMGroup(parentOrgID, randomName),
+				Config:       testAccResourceIAMGroup(parentOrgID, randomName, randomPassword),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "devices.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "users.#", "1"),
@@ -37,7 +39,7 @@ func TestAccResourceIAMGroup_basic(t *testing.T) {
 	})
 }
 
-func testAccResourceIAMGroup(parentOrgID, name string) string {
+func testAccResourceIAMGroup(parentOrgID, name, password string) string {
 	upperName := strings.ToUpper(name)
 
 	return fmt.Sprintf(`
@@ -64,7 +66,7 @@ resource "hsdp_iam_application" "test" {
 
 resource "hsdp_iam_device" "test" {
   login_id = "d%s"
-  password = "Random%s@123!"
+  password = "%s"
 
   organization_id = hsdp_iam_org.test.id
   application_id  = hsdp_iam_application.test.id
@@ -74,7 +76,7 @@ resource "hsdp_iam_device" "test" {
       code = "ID"
       text = "Device Identifier"
     }
-    system = "http://www.philips.co.id/phs/healthwatch"
+    system = "https://www.philips.co.id/phs/healthwatch"
     value = "%s"
   }
 
@@ -142,7 +144,7 @@ resource "hsdp_iam_group" "test" {
 		name,
 		// DEVICE
 		name,
-		name,
+		password,
 		name,
 		// SERVICE,
 		upperName,

@@ -14,7 +14,7 @@ resource "hsdp_connect_mdm_authentication_method" "some_auth_method" {
   description = "An authentication method"
   
   login_id = var.login_id
-  password = var.password
+  password = random_password.generated.result
   
   client_id     = var.client_id
   client_secret = var.client_secret
@@ -22,6 +22,16 @@ resource "hsdp_connect_mdm_authentication_method" "some_auth_method" {
   auth_method = "Basic"
   auth_url    = "https://api.login.app.hsdp.io"
   api_version = "3"
+}
+
+resource "random_password" "generated" {
+  length           = 16
+  special          = true
+  min_upper        = 1
+  min_lower        = 1
+  min_numeric      = 1
+  min_special      = 1
+  override_special = "-!@#.:_?{$"
 }
 ```
 

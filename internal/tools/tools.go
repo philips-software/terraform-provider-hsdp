@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools/random"
 )
 
 func ReverseString(str string) (result string) {
@@ -156,4 +157,24 @@ func DisableFHIRValidation(request *http.Request) error {
 
 func String(str string) *string {
 	return &str
+}
+
+func RandomPassword() (string, error) {
+	params := random.StringParams{
+		Length:          16,
+		Upper:           true,
+		MinUpper:        1,
+		Lower:           true,
+		MinLower:        1,
+		Numeric:         true,
+		MinNumeric:      1,
+		Special:         true,
+		MinSpecial:      1,
+		OverrideSpecial: "-!@#.:_?{$",
+	}
+	result, err := random.CreateString(params)
+	if err != nil {
+		return "", err
+	}
+	return string(result), nil
 }
