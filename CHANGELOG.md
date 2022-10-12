@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.38.6
+
+- Chore: use generated password everywhere #258
+
 ## v0.38.5
 
 - IAM Introspect: add scopes field
