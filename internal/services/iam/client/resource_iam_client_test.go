@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/philips-software/terraform-provider-hsdp/internal/acc"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func TestAccResourceIAMClient_basic(t *testing.T) {
@@ -20,6 +21,7 @@ func TestAccResourceIAMClient_basic(t *testing.T) {
 	description2 := "ACCBAR"
 	name1 := fmt.Sprintf("%s-1", randomName)
 	name2 := fmt.Sprintf("%s-2", randomName)
+	randomPassword, _ := tools.RandomPassword()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -29,7 +31,7 @@ func TestAccResourceIAMClient_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccResourceIAMClient(parentOrgID, "Confidential", randomName, name1, description1),
+				Config:       testAccResourceIAMClient(parentOrgID, "Confidential", randomName, name1, description1, randomPassword),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "client_id", "acc-"+randomName),
 					resource.TestCheckResourceAttr(resourceName, "description", description1),
@@ -37,7 +39,7 @@ func TestAccResourceIAMClient_basic(t *testing.T) {
 			},
 			{
 				ResourceName: resourceName,
-				Config:       testAccResourceIAMClient(parentOrgID, "Confidential", randomName, name2, description2),
+				Config:       testAccResourceIAMClient(parentOrgID, "Confidential", randomName, name2, description2, randomPassword),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "client_id", "acc-"+randomName),
 					resource.TestCheckResourceAttr(resourceName, "description", description2),
@@ -48,7 +50,7 @@ func TestAccResourceIAMClient_basic(t *testing.T) {
 	})
 }
 
-func testAccResourceIAMClient(parentOrgID, clientType, fixedName, changingName, description string) string {
+func testAccResourceIAMClient(parentOrgID, clientType, fixedName, changingName, description, randomPassword string) string {
 	// We create a completely separate ORG as that is currently
 	// the only way we can clean up Propositions and Applications
 	// after we are done testing
@@ -56,7 +58,6 @@ func testAccResourceIAMClient(parentOrgID, clientType, fixedName, changingName, 
 	clientId := "acc-" + fixedName
 
 	return fmt.Sprintf(`
-
 resource "hsdp_iam_org" "test" {
   name = "ACC-%s"
   description = "IAM Application Test %s"
@@ -82,7 +83,7 @@ resource "hsdp_iam_client" "test" {
     type                = "%s"
     name                = "%s"
     client_id           = "%s"
-    password            = "Password@123"
+    password            = "%s"
     application_id      = hsdp_iam_application.test.id
     global_reference_id = "678477ff-35cb-4999-9100-0e74a16b820b"
     description         = "%s"
@@ -113,6 +114,7 @@ resource "hsdp_iam_client" "test" {
 		clientType,
 		changingName,
 		clientId,
+		randomPassword,
 		description,
 	)
 }

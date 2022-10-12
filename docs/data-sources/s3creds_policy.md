@@ -13,8 +13,8 @@ Gets information on defined S3 Credential policies
 ```hcl
 data "hsdp_s3creds_policy" "my_org_policies" {
    product_key = var.product_key
-   username = "my_iam_login"
-   password = "MyP@ssw0rd"
+   username = var.iam_login
+   password = var.iam_password
 
    filter {
       managing_org = var.my_org_id

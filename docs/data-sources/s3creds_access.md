@@ -11,8 +11,8 @@ Gets credentials for an S3 Credentials access
 ```hcl
 data "hsdp_s3creds_access" "my_access" {
    product_key = var.product_key
-   username = "my_iam_login"
-   password = "MyP@ssw0rd"
+   username = var.iam_login
+   password = var.iam_password
 }
 ```
 

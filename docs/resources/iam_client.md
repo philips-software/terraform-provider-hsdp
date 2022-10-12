@@ -16,7 +16,7 @@ resource "hsdp_iam_client" "testclient" {
   description         = "Test client"
   type                = "Public"
   client_id           = "testclient"
-  password            = "Password@123"
+  password            = random_password.client_password.result
   application_id      = hsdp_iam_application.testtapp.id
   global_reference_id = "some-ref-here"
   
@@ -31,6 +31,16 @@ resource "hsdp_iam_client" "testclient" {
   ]
 
   response_types = ["code", "code id_token"]
+}
+
+resource "random_password" "client_password" {
+  length           = 16
+  special          = true
+  min_upper        = 1
+  min_lower        = 1
+  min_numeric      = 1
+  min_special      = 1
+  override_special = "-!@#.:_?{$"
 }
 ```
 
