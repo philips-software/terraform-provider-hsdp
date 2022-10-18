@@ -24,6 +24,32 @@ resource "hsdp_pki_cert" "cert" {
 }
 ```
 
+The next example will refresh the certificate every quarter. You'll need to run the `apply` step occasionally
+
+```hcl
+data "hsdp_config" "pki" {
+  service = "pki" # Any service will do
+}
+
+resource "hsdp_pki_cert" "auto_refresh_cert" {
+  triggers = {
+    refresh = data.hsdp_config.pki.sliding_expires_on
+  }
+  
+  tenant_id = hsdp_pki_tenant.tenant.id
+  role      = "ec384"
+
+  common_name = "myapp.com"
+  alt_names    = "myapp.io,www.myapp.io"
+  ip_sans     = []
+  uri_sans    = []
+  other_sans  = []
+  ttl         = "720h"
+
+  exclude_cn_from_sans = false
+}
+```
+
 ## Argument reference
 
 * `tenant_id` - (Required) The tenant ID to create this certificate under
@@ -35,6 +61,7 @@ resource "hsdp_pki_cert" "cert" {
 * `other_sans` - (Optional, list(string)) A list of other SANS to include
 * `ttl` - (Optional, string regex `[0-9]+[hms]$`) The TTL, example `720h` for 1 month
 * `exclude_cn_from_sans` - (Optional) Exclude common name from SAN
+* `triggers` - (Optional, list(string)) An list of strings which when changes will trigger recreation of the resource
 
 ## Attribute reference
 
