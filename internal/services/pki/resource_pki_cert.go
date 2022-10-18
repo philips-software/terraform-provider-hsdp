@@ -15,7 +15,7 @@ import (
 
 func ResourcePKICert() *schema.Resource {
 	return &schema.Resource{
-		SchemaVersion: 1,
+		SchemaVersion: 2,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
@@ -77,6 +77,12 @@ func ResourcePKICert() *schema.Resource {
 				Type:     schema.TypeBool,
 				Optional: true,
 				ForceNew: true,
+			},
+			"triggers": {
+				Description: "A map of arbitrary strings that, when changed, will force the resource to be replaced.",
+				Type:        schema.TypeMap,
+				Optional:    true,
+				ForceNew:    true,
 			},
 			"cert_pem": {
 				Type:     schema.TypeString,

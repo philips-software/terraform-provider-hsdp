@@ -85,6 +85,7 @@ func dataSourceConfigRead(_ context.Context, d *schema.ResourceData, m interface
 	environment := d.Get("environment").(string)
 	if region == "" {
 		region = providerConfig.Region
+		_ = d.Set("region", region)
 	}
 	if environment == "" {
 		environment = providerConfig.Environment
