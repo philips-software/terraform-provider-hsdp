@@ -18,7 +18,7 @@ func ResourceIAMGroup() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		SchemaVersion: 2,
+		SchemaVersion: 3,
 		CreateContext: resourceIAMGroupCreate,
 		ReadContext:   resourceIAMGroupRead,
 		UpdateContext: resourceIAMGroupUpdate,
@@ -33,6 +33,11 @@ func ResourceIAMGroup() *schema.Resource {
 				Type:    ResourceIAMGroupV1().CoreConfigSchema().ImpliedType(),
 				Upgrade: patchIAMGroupV1,
 				Version: 1,
+			},
+			{
+				Type:    ResourceIAMGroupV2().CoreConfigSchema().ImpliedType(),
+				Upgrade: patchIAMGroupV2,
+				Version: 2,
 			},
 		},
 
@@ -78,6 +83,11 @@ func ResourceIAMGroup() *schema.Resource {
 				Elem:     tools.StringSchema(),
 			},
 			"drift_detection": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+			},
+			"iam_device_bug_workaround": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
@@ -224,6 +234,7 @@ func resourceIAMGroupRead(_ context.Context, d *schema.ResourceData, m interface
 
 	id := d.Id()
 	driftDetection := d.Get("drift_detection").(bool)
+	iamDeviceBugWorkaround := d.Get("iam_device_bug_workaround").(bool)
 
 	group, resp, err := client.Groups.GetGroupByID(id)
 	if err != nil {
@@ -254,15 +265,19 @@ func resourceIAMGroupRead(_ context.Context, d *schema.ResourceData, m interface
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("error retrieving users from group: %v", err))
 		}
-		// Unfortunately Users must now be verified as the GetAllUsers query also returns IAM Devices
-		var verifiedUsers []string
-		for _, u := range users {
-			_, _, err := client.Users.GetUserByID(u)
-			if err == nil {
-				verifiedUsers = append(verifiedUsers, u)
+		_ = d.Set("users", users)
+
+		if iamDeviceBugWorkaround {
+			// IAM Devices could be mixed in the GetUser results, this is an IAM BUG
+			var verifiedUsers []string
+			for _, u := range users {
+				_, _, err := client.Users.GetUserByID(u) // This call could FAIL if the IAM entity does not have broad access
+				if err == nil {
+					verifiedUsers = append(verifiedUsers, u)
+				}
 			}
+			_ = d.Set("users", tools.SchemaSetStrings(verifiedUsers))
 		}
-		_ = d.Set("users", tools.SchemaSetStrings(verifiedUsers))
 
 		// Services
 		// We only deal with services we know
