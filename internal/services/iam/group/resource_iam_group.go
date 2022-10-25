@@ -265,7 +265,7 @@ func resourceIAMGroupRead(_ context.Context, d *schema.ResourceData, m interface
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("error retrieving users from group: %v", err))
 		}
-		_ = d.Set("users", users)
+		_ = d.Set("users", tools.SchemaSetStrings(users))
 
 		if iamDeviceBugWorkaround {
 			// IAM Devices could be mixed in the GetUser results, this is an IAM BUG

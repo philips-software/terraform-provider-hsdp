@@ -119,6 +119,20 @@ resource "hsdp_iam_role" "test" {
   managing_organization = hsdp_iam_org.test.id
 }
 
+resource "hsdp_iam_group" "user_test" {
+  name        = "%s1"
+  description = "Acceptance Test Group %s1"
+
+  roles    = [hsdp_iam_role.test.id]
+  users    = [hsdp_iam_user.test.id]
+  services = [hsdp_iam_service.test.id]
+
+  managing_organization = hsdp_iam_org.test.id
+ 
+  drift_detection           = true
+  iam_device_bug_workaround = false
+}
+
 resource "hsdp_iam_group" "test" {
   name        = "%s"
   description = "Acceptance Test Group %s"
@@ -131,8 +145,10 @@ resource "hsdp_iam_group" "test" {
   managing_organization = hsdp_iam_org.test.id
  
   drift_detection           = true
-  iam_device_bug_workaround = false
-}`,
+  iam_device_bug_workaround = true
+}
+
+`,
 		// ORG
 		upperName,
 		name,
@@ -155,6 +171,9 @@ resource "hsdp_iam_group" "test" {
 		name,
 		// ROLE
 		upperName,
+		name,
+		// USER GROUP
+		name,
 		name,
 		// GROUP
 		name,
