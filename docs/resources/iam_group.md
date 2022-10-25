@@ -59,6 +59,8 @@ The following arguments are supported:
   opt-in for IAM Groups due to insufficient IAM API capabilities to perform this operation efficiently.
   A future version might change this to be always-on. When enabled, the provider will perform additional API calls
   to determine if any changes were made outside of Terraform to user and service assignments of this Group. Default: `false`
+* `iam_device_bug_workaround` - (Optional, bool) Work around an IAM bug that returns both user and device entities in the API.
+  Do not enable this unless you are using IAM Devices in your infrastructure. Default: `false`
 
 ## Attributes Reference
 
