@@ -2,6 +2,7 @@ package pki
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -9,6 +10,10 @@ import (
 	"github.com/philips-software/go-hsdp-api/pki"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
+)
+
+var (
+	missingUAACredentialsErr = errors.New("this resource only works when CF UAA credentials are configured")
 )
 
 func ResourcePKITenant() *schema.Resource {
@@ -155,6 +160,10 @@ func resourcePKITenantDelete(_ context.Context, d *schema.ResourceData, m interf
 	var err error
 	var client *pki.Client
 
+	if !c.HasUAAuth() {
+		return diag.FromErr(missingUAACredentialsErr)
+	}
+
 	client, err = c.PKIClient()
 	if err != nil {
 		return diag.FromErr(err)
@@ -184,6 +193,10 @@ func resourcePKITenantUpdate(_ context.Context, d *schema.ResourceData, m interf
 	c := m.(*config.Config)
 	var err error
 	var client *pki.Client
+
+	if !c.HasUAAuth() {
+		return diag.FromErr(missingUAACredentialsErr)
+	}
 
 	client, err = c.PKIClient()
 	if err != nil {
@@ -315,6 +328,10 @@ func resourcePKITenantCreate(ctx context.Context, d *schema.ResourceData, m inte
 	var err error
 	var client *pki.Client
 
+	if !c.HasUAAuth() {
+		return diag.FromErr(missingUAACredentialsErr)
+	}
+
 	client, err = c.PKIClient()
 	if err != nil {
 		return diag.FromErr(err)
@@ -339,6 +356,10 @@ func resourcePKITenantRead(_ context.Context, d *schema.ResourceData, m interfac
 	c := m.(*config.Config)
 	var err error
 	var client *pki.Client
+
+	if !c.HasUAAuth() {
+		return diag.FromErr(missingUAACredentialsErr)
+	}
 
 	client, err = c.PKIClient()
 	if err != nil {
