@@ -125,16 +125,23 @@ func resourcePKICertCreate(_ context.Context, d *schema.ResourceData, m interfac
 	}
 	defer client.Close()
 
+	roleName := d.Get("role").(string)
 	tenantID := d.Get("tenant_id").(string)
 	logicalPath, err := pki.APIEndpoint(tenantID).LogicalPath()
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("create PKI cert logicalPath: %w", err))
 	}
+
+	// Only check role if we have a working consoleClient
 	tenant, _, err := client.Tenants.Retrieve(logicalPath)
-	if err != nil {
+	if err == nil {
+		_, ok := tenant.GetRoleOk(roleName)
+		if !ok {
+			return diag.FromErr(fmt.Errorf("role '%s' not found or invalid", roleName))
+		}
 		return diag.FromErr(err)
 	}
-	roleName := d.Get("role").(string)
+
 	ttl := d.Get("ttl").(string)
 	ipSANS := tools.ExpandStringList(d.Get("ip_sans").(*schema.Set).List())
 	uriSANS := tools.ExpandStringList(d.Get("uri_sans").(*schema.Set).List())
@@ -142,10 +149,7 @@ func resourcePKICertCreate(_ context.Context, d *schema.ResourceData, m interfac
 	commonName := d.Get("common_name").(string)
 	altNames := d.Get("alt_names").(string)
 	excludeCNFromSANS := d.Get("exclude_cn_from_sans").(bool)
-	role, ok := tenant.GetRoleOk(roleName)
-	if !ok {
-		return diag.FromErr(fmt.Errorf("role '%s' not found or invalid", roleName))
-	}
+
 	certRequest := pki.CertificateRequest{
 		CommonName:        commonName,
 		AltNames:          altNames,
@@ -157,7 +161,7 @@ func resourcePKICertCreate(_ context.Context, d *schema.ResourceData, m interfac
 		PrivateKeyFormat:  "pem",
 		Format:            "pem",
 	}
-	cert, resp, err := client.Services.IssueCertificate(logicalPath, role.Name, certRequest)
+	cert, resp, err := client.Services.IssueCertificate(logicalPath, roleName, certRequest)
 	if err != nil {
 		if resp != nil && resp.StatusCode == http.StatusForbidden {
 			return diag.FromErr(fmt.Errorf("you might be missing the 'PKI_CERT.ISSUE' permission for the tenant org: %w", err))

@@ -136,6 +136,10 @@ func (c *Config) IAMClient(principal ...*Principal) (*iam.Client, error) {
 	return c.iamClient, c.iamClientErr
 }
 
+func (c *Config) HasUAAuth() bool {
+	return c.UAAUsername != "" && c.UAAPassword != ""
+}
+
 func (c *Config) DiscoveryClient(principal ...*Principal) (*discovery.Client, error) {
 	if len(principal) > 0 && principal[0] != nil && principal[0].HasAuth() {
 		region := principal[0].Region
@@ -744,10 +748,7 @@ func (c *Config) SetupPKIClient() {
 		c.pkiClientErr = fmt.Errorf("IAM client error in setupPKIClient: %w", c.iamClientErr)
 		return
 	}
-	if c.consoleClientErr != nil {
-		c.pkiClientErr = fmt.Errorf("console client error in setupPKIClient: %w", c.consoleClientErr)
-		return
-	}
+	// We ignore any consoleClient error for now
 	client, err := pki.NewClient(c.consoleClient, c.iamClient, &pki.Config{
 		Region:      c.Region,
 		Environment: c.Environment,
