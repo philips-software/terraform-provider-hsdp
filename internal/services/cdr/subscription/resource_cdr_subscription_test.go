@@ -120,6 +120,8 @@ resource "hsdp_cdr_subscription" "test" {
   version = "%s"
 
   end = "2099-12-31T23:59:59Z"
+
+  depends_on = [hsdp_cdr_org.test]
 }
 
 `,

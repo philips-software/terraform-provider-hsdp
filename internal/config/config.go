@@ -28,35 +28,35 @@ import (
 
 // Config contains configuration for the client
 type Config struct {
-	BuildVersion        string
-	ServiceID           string
-	ServicePrivateKey   string
-	S3CredsURL          string
-	NotificationURL     string
-	IAMURL              string
-	IDMURL              string
-	SharedKey           string
-	SecretKey           string
-	MDMURL              string
-	Region              string
-	Environment         string
-	OAuth2ClientID      string
-	OAuth2ClientSecret  string
-	STLURL              string
-	OrgAdminUsername    string
-	OrgAdminPassword    string
-	DebugLog            string
-	CartelHost          string
-	CartelToken         string
-	CartelSecret        string
-	CartelNoTLS         bool
-	CartelSkipVerify    bool
-	RetryMax            int
-	UAAUsername         string
-	UAAPassword         string
-	UAAURL              string
-	AIInferenceEndpoint string
-	AIWorkspaceEndpoint string
+	BuildVersion        string `json:"-"`
+	ServiceID           string `json:"service_id"`
+	ServicePrivateKey   string `json:"service_private_key"`
+	S3CredsURL          string `json:"s3_creds_url"`
+	NotificationURL     string `json:"notification_url"`
+	IAMURL              string `json:"iam_url"`
+	IDMURL              string `json:"idm_url"`
+	SharedKey           string `json:"shared_key"`
+	SecretKey           string `json:"secret_key"`
+	MDMURL              string `json:"mdm_url"`
+	Region              string `json:"region"`
+	Environment         string `json:"environment"`
+	OAuth2ClientID      string `json:"oauth2_client_id"`
+	OAuth2ClientSecret  string `json:"oauth2_client_secret"`
+	STLURL              string `json:"stl_url"`
+	OrgAdminUsername    string `json:"org_admin_username"`
+	OrgAdminPassword    string `json:"org_admin_password"`
+	DebugLog            string `json:"debug_log"`
+	CartelHost          string `json:"cartel_host"`
+	CartelToken         string `json:"cartel_token"`
+	CartelSecret        string `json:"cartel_secret"`
+	CartelNoTLS         bool   `json:"cartel_no_tls"`
+	CartelSkipVerify    bool   `json:"cartel_skip_verify"`
+	RetryMax            int    `json:"retry_max"`
+	UAAUsername         string `json:"uaa_username"`
+	UAAPassword         string `json:"uaa_password"`
+	UAAURL              string `json:"uaa_url"`
+	AIInferenceEndpoint string `json:"ai_inference_endpoint"`
+	AIWorkspaceEndpoint string `json:"ai_workspace_endpoint"`
 
 	iamClient             *iam.Client
 	cartelClient          *cartel.Client
@@ -67,7 +67,7 @@ type Config struct {
 	notificationClient    *notification.Client
 	mdmClient             *mdm.Client
 	discoveryClient       *discovery.Client
-	DebugFile             *os.File
+	DebugFile             *os.File `json:"-"`
 	credsClientErr        error
 	cartelClientErr       error
 	iamClientErr          error
@@ -77,12 +77,12 @@ type Config struct {
 	notificationClientErr error
 	mdmClientErr          error
 	discoveryClientErr    error
-	TimeZone              string
+	TimeZone              string `json:"time_zone"`
 
-	STU3MA *jsonformat.Marshaller
-	STU3UM *jsonformat.Unmarshaller
-	R4MA   *jsonformat.Marshaller
-	R4UM   *jsonformat.Unmarshaller
+	STU3MA *jsonformat.Marshaller   `json:"-"`
+	STU3UM *jsonformat.Unmarshaller `json:"-"`
+	R4MA   *jsonformat.Marshaller   `json:"-"`
+	R4UM   *jsonformat.Unmarshaller `json:"-"`
 }
 
 func (c *Config) IAMClient(principal ...*Principal) (*iam.Client, error) {
