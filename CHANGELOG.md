@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.38.10
+
+- Core: support credentials config via JSON #270
+
 ## v0.38.9
 
 - PKI: make UAA credentials fully optional #267
