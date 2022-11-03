@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: terraform-provider-hsdp
+  annotations:
+    github.com/project-slug: philips-software/terraform-provider-hsdp
+spec:
+  type: other
+  lifecycle: unknown
+  owner: hsp-foundation-core
