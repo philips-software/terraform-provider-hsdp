@@ -55,6 +55,7 @@ In addition to generic provider arguments (e.g. alias and version), the followin
 
 * `region` - (Required) The HSDP region to use [`us-east`, `eu-west`, `sa1`, `ca1`, `apac3`, ...]. Default is `us-east`
 * `environment` - (Optional) The HSDP environment to use within region [`client-test`, `prod`] . Default is `client-test`
+* `credentials` - (Optional) Can point to a JSON file containing values for all fields here
 * `iam_url` - (Optional) IAM API endpoint. Auto-discovered from region and environment.
 * `idm_url` - (Optional) IDM API endpoint Auto-discovered from region and environment.
 * `s3creds_url` - (Optional) S3 Credentials API endpoint. Auto-discovered from region and environment.

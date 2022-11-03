@@ -2,6 +2,7 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 
 	"github.com/google/fhir/go/fhirversion"
@@ -232,6 +233,10 @@ func Provider(build string) *schema.Provider {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
+			"credentials": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_org":                                   iam.ResourceIAMOrg(),
@@ -449,6 +454,12 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.TimeZone = "UTC"
 		c.AIInferenceEndpoint = d.Get("ai_inference_endpoint").(string)
 		c.MDMURL = d.Get("mdm_url").(string)
+
+		credentialsFile := d.Get("credentials").(string)
+		if credentialsFile != "" {
+			file, _ := os.ReadFile(credentialsFile)
+			_ = json.Unmarshal(file, &c)
+		}
 
 		c.SetupIAMClient()
 		c.SetupS3CredsClient()
