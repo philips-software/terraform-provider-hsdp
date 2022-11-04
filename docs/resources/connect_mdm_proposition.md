@@ -34,4 +34,5 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID reference (format: `Proposition/${GUID}`)
 * `guid` - The GUID of the underlying IAM resource
+* `proposition_id` - The ID of the IAM proposition this proposition falls under
 * `proposition_guid` - The GUID of the MDM proposition resource
