@@ -21,7 +21,7 @@ func ResourceMDMProposition() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
+		SchemaVersion: 1,
 		CreateContext: resourceMDMPropositionCreate,
 		ReadContext:   resourceMDMPropositionRead,
 		UpdateContext: resourceMDMPropositionUpdate,
@@ -64,6 +64,14 @@ func ResourceMDMProposition() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"proposition_guid": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"proposition_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
@@ -98,6 +106,14 @@ func propositionToSchema(resource mdm.Proposition, d *schema.ResourceData) {
 	_ = d.Set("name", resource.Name)
 	_ = d.Set("guid", resource.ID)
 	_ = d.Set("status", resource.Status)
+
+	if resource.PropositionGuid != nil && resource.PropositionGuid.Value != "" {
+		_ = d.Set("proposition_guid", resource.PropositionGuid.Value)
+		if resource.PropositionGuid.System != "" {
+			value := fmt.Sprintf("%s|%s", resource.PropositionGuid.System, resource.PropositionGuid.Value)
+			_ = d.Set("proposition_id", value)
+		}
+	}
 	if resource.OrganizationGuid.Value != "" {
 		value := resource.OrganizationGuid.Value
 		if resource.OrganizationGuid.System != "" {
