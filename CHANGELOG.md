@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.38.12
+
+- MDM: update MDM proposition data source as well #272
+
 ## v0.38.11
 
 - MDM: expose MDM proposition guid #272
