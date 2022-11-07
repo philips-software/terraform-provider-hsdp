@@ -121,7 +121,7 @@ resource "hsdp_cdr_subscription" "test" {
 
   end = "2099-12-31T23:59:59Z"
 
-  depends_on = [hsdp_cdr_org.test]
+  depends_on = [hsdp_cdr_org.test, hsdp_iam_org.test]
 }
 
 `,

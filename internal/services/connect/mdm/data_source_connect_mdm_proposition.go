@@ -49,6 +49,14 @@ func DataSourceConnectMDMProposition() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"proposition_guid": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"proposition_id": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 
