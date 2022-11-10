@@ -1,4 +1,4 @@
-package iam
+package organization
 
 import (
 	"context"
@@ -49,7 +49,7 @@ func DataSourceIAMOrg() *schema.Resource {
 
 }
 
-func dataSourceIAMOrgRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIAMOrgRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics

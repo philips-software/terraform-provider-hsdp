@@ -1,4 +1,4 @@
-package iam_test
+package organization_test
 
 import (
 	"fmt"

@@ -32,6 +32,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/client"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/device"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/group"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/organization"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/role_sharing_policy"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/service"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/user"
@@ -239,7 +240,7 @@ func Provider(build string) *schema.Provider {
 			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
-			"hsdp_iam_org":                                   iam.ResourceIAMOrg(),
+			"hsdp_iam_org":                                   organization.ResourceIAMOrg(),
 			"hsdp_iam_group":                                 group.ResourceIAMGroup(),
 			"hsdp_iam_role":                                  iam.ResourceIAMRole(),
 			"hsdp_iam_proposition":                           iam.ResourceIAMProposition(),
@@ -316,7 +317,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_user":                              user.DataSourceUser(),
 			"hsdp_iam_service":                           iam.DataSourceService(),
 			"hsdp_iam_permissions":                       iam.DataSourceIAMPermissions(),
-			"hsdp_iam_org":                               iam.DataSourceIAMOrg(),
+			"hsdp_iam_org":                               organization.DataSourceIAMOrg(),
 			"hsdp_iam_proposition":                       iam.DataSourceIAMProposition(),
 			"hsdp_iam_application":                       iam.DataSourceIAMApplication(),
 			"hsdp_s3creds_access":                        s3creds.DataSourceS3CredsAccess(),
