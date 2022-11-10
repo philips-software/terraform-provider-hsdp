@@ -104,8 +104,13 @@ func resourceDICOMRepositoryDelete(_ context.Context, d *schema.ResourceData, m 
 func resourceDICOMRepositoryRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	var diags diag.Diagnostics
 	c := m.(*config.Config)
+	queryOpts := &dicom.QueryOptions{}
 	configURL := d.Get("config_url").(string)
 	orgID := d.Get("organization_id").(string)
+	repositoryOrgID := d.Get("repository_organization_id").(string)
+	if repositoryOrgID != "" {
+		queryOpts.OrganizationID = &repositoryOrgID
+	}
 	client, err := c.GetDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
@@ -114,7 +119,7 @@ func resourceDICOMRepositoryRead(_ context.Context, d *schema.ResourceData, m in
 	var repo *dicom.Repository
 	operation := func() error {
 		var resp *dicom.Response
-		repo, resp, err = client.Config.GetRepository(d.Id(), &dicom.QueryOptions{OrganizationID: &orgID})
+		repo, resp, err = client.Config.GetRepository(d.Id(), queryOpts)
 		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
@@ -125,23 +130,30 @@ func resourceDICOMRepositoryRead(_ context.Context, d *schema.ResourceData, m in
 		}
 		return diag.FromErr(err)
 	}
+
+	// This is a quirk in the API
 	if repo.OrganizationID != orgID {
 		_ = d.Set("repository_organization_id", repo.OrganizationID)
 	}
+
 	_ = d.Set("object_store_id", repo.ActiveObjectStoreID)
 	return diags
 }
 
 func resourceDICOMRepositoryCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
+	queryOpts := &dicom.QueryOptions{}
 	configURL := d.Get("config_url").(string)
 	orgID := d.Get("organization_id").(string)
 	repositoryOrgID := d.Get("repository_organization_id").(string)
+	if repositoryOrgID != "" {
+		queryOpts.OrganizationID = &repositoryOrgID
+	}
 	client, err := c.GetDICOMConfigClient(configURL)
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	repos, _, err := client.Config.GetRepositories(&dicom.QueryOptions{OrganizationID: &orgID})
+	repos, _, err := client.Config.GetRepositories(queryOpts)
 	if err == nil {
 		if len(*repos) > 0 {
 			return diag.FromErr(fmt.Errorf("existing dicomRepository found: %s", (*repos)[0].ID))
@@ -153,6 +165,7 @@ func resourceDICOMRepositoryCreate(ctx context.Context, d *schema.ResourceData, 
 		OrganizationID:      orgID,
 		ActiveObjectStoreID: d.Get("object_store_id").(string),
 	}
+	// repositoryOrgID also override the body?
 	if repositoryOrgID != "" {
 		repo.OrganizationID = repositoryOrgID
 	}
@@ -174,7 +187,7 @@ func resourceDICOMRepositoryCreate(ctx context.Context, d *schema.ResourceData, 
 	var created *dicom.Repository
 	operation := func() error {
 		var resp *dicom.Response
-		created, resp, err = client.Config.CreateRepository(repo, &dicom.QueryOptions{OrganizationID: &orgID})
+		created, resp, err = client.Config.CreateRepository(repo, queryOpts)
 		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
