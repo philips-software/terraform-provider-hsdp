@@ -36,7 +36,7 @@ The following arguments are supported:
 * `description` - (Required) The description of the Org
 * `parent_org_id` - (Required if not root org) The parent Org ID (GUID)
 * `display_name` - (Optional) The name of the organization suitable for display.
-* `type` - (Optional) The type of the organization e.g. `Hospital` 
+* `type` - (Optional) The type of the organization e.g. `Hospital`
 * `external_id` - (Optional)  Identifier defined by client which identifies the organization on the client side
 * `is_root_org` - (Optional) Marks the Org as a root organization (boolean)
 * `wait_for_delete` - (Optional) Blocks until the organization delete has completed. Default: `false`.
