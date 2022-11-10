@@ -18,7 +18,22 @@ permissions:
   contents: read
 
 jobs:
+  detect-noop:
+    runs-on: ubuntu-22.04
+    outputs:
+      noop: ${{ steps.noop.outputs.should_skip }}
+    steps:
+      - name: Detect No-op Changes
+        id: noop
+        uses: fkirc/skip-duplicate-actions@v2.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          paths_ignore: '["**.md", "**.png", "**.jpg"]'
+          do_not_skip: '["workflow_dispatch", "schedule"]'
+
   acceptance:
+    needs: detect-noop
+    if: needs.detect-noop.outputs.noop != 'true'
     name: Acceptance Tests
     runs-on: ubuntu-latest
     steps:
@@ -56,6 +71,8 @@ jobs:
           name: debug-log
           path: /tmp/debug.log
   unit:
+    needs: detect-noop
+    if: needs.detect-noop.outputs.noop != 'true'
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
