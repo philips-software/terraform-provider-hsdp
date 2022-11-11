@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.38.14
+
+- Bugfix: fix get repository call #276
+
 ## v0.38.13
 
 - Bugfix: fix repository_organization_id usage #276
