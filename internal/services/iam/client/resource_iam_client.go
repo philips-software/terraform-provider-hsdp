@@ -12,6 +12,10 @@ import (
 	"github.com/philips-software/go-hsdp-api/iam"
 )
 
+var descriptions = map[string]string{
+	"client": "A client identity describes a version of a registered application, its access scopes, and its credentials. Typically, the client identity represents a foreground (or user-facing) application. A client acts on other resources.",
+}
+
 func ResourceIAMClient() *schema.Resource {
 	return &schema.Resource{
 		SchemaVersion: 1,
@@ -29,7 +33,7 @@ func ResourceIAMClient() *schema.Resource {
 		ReadContext:   resourceIAMClientRead,
 		UpdateContext: resourceIAMClientUpdate,
 		DeleteContext: resourceIAMClientDelete,
-
+		Description:   descriptions["client"],
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,

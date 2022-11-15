@@ -14,6 +14,10 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
+var descriptions = map[string]string{
+	"device": "These resources represent device accounts in IAM. Typically, devices contain information that identifies a device’s uniqueness, intended use, credentials, and other details to track the device back to its proposition",
+}
+
 func ResourceIAMDevice() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
@@ -23,6 +27,7 @@ func ResourceIAMDevice() *schema.Resource {
 		ReadContext:   resourceIAMDeviceRead,
 		UpdateContext: resourceIAMDeviceUpdate,
 		DeleteContext: resourceIAMDeviceDelete,
+		Description:   descriptions["device"],
 
 		Schema: map[string]*schema.Schema{
 			"login_id": {

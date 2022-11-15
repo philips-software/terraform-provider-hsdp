@@ -13,8 +13,13 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
+var descriptions = map[string]string{
+	"group": "Organization administrators can create groups to help organize users by teams, projects, or user function. Groups must be uniquely named within the organization in which they were created. Admins can add a single identity to one or more groups. They can also assign one or more roles to a group. All users in a group will share the permissions that are associated with the role.",
+}
+
 func ResourceIAMGroup() *schema.Resource {
 	return &schema.Resource{
+		Description: descriptions["group"],
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
