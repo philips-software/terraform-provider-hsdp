@@ -26,7 +26,7 @@ The `siderite` backend should be provisioned using the [siderite-backend](https:
 Example:
 
 ```hcl
-module "siderite-backend" {
+module "siderite_backend" {
   source  = "philips-labs/siderite-backend/cloudfoundry"
   version = "0.8.0"
 
