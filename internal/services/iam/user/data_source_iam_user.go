@@ -11,6 +11,7 @@ import (
 
 func DataSourceUser() *schema.Resource {
 	return &schema.Resource{
+		Description: descriptions["user"],
 		ReadContext: dataSourceUserRead,
 		Schema: map[string]*schema.Schema{
 			"username": {

@@ -29,10 +29,14 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/edge"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/function"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/application"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/client"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/device"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/email_template"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/group"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/organization"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/proposition"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/role"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/role_sharing_policy"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/service"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/user"
@@ -242,15 +246,15 @@ func Provider(build string) *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_org":                                   organization.ResourceIAMOrg(),
 			"hsdp_iam_group":                                 group.ResourceIAMGroup(),
-			"hsdp_iam_role":                                  iam.ResourceIAMRole(),
-			"hsdp_iam_proposition":                           iam.ResourceIAMProposition(),
-			"hsdp_iam_application":                           iam.ResourceIAMApplication(),
+			"hsdp_iam_role":                                  role.ResourceIAMRole(),
+			"hsdp_iam_proposition":                           proposition.ResourceIAMProposition(),
+			"hsdp_iam_application":                           application.ResourceIAMApplication(),
 			"hsdp_iam_user":                                  user.ResourceIAMUser(),
 			"hsdp_iam_client":                                client.ResourceIAMClient(),
 			"hsdp_iam_service":                               service.ResourceIAMService(),
 			"hsdp_iam_mfa_policy":                            iam.ResourceIAMMFAPolicy(),
 			"hsdp_iam_password_policy":                       iam.ResourceIAMPasswordPolicy(),
-			"hsdp_iam_email_template":                        iam.ResourceIAMEmailTemplate(),
+			"hsdp_iam_email_template":                        email_template.ResourceIAMEmailTemplate(),
 			"hsdp_s3creds_policy":                            s3creds.ResourceS3CredsPolicy(),
 			"hsdp_container_host":                            ch.ResourceContainerHost(),
 			"hsdp_container_host_exec":                       ch.ResourceContainerHostExec(),
@@ -315,11 +319,11 @@ func Provider(build string) *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                        iam.DataSourceIAMIntrospect(),
 			"hsdp_iam_user":                              user.DataSourceUser(),
-			"hsdp_iam_service":                           iam.DataSourceService(),
+			"hsdp_iam_service":                           service.DataSourceService(),
 			"hsdp_iam_permissions":                       iam.DataSourceIAMPermissions(),
 			"hsdp_iam_org":                               organization.DataSourceIAMOrg(),
-			"hsdp_iam_proposition":                       iam.DataSourceIAMProposition(),
-			"hsdp_iam_application":                       iam.DataSourceIAMApplication(),
+			"hsdp_iam_proposition":                       proposition.DataSourceIAMProposition(),
+			"hsdp_iam_application":                       application.DataSourceIAMApplication(),
 			"hsdp_s3creds_access":                        s3creds.DataSourceS3CredsAccess(),
 			"hsdp_s3creds_policy":                        s3creds.DataSourceS3CredsPolicy(),
 			"hsdp_config":                                configuration.DataSourceConfig(),
@@ -350,13 +354,13 @@ func Provider(build string) *schema.Provider {
 			"hsdp_ai_workspace_service_instance":         workspace.DataSourceAIWorkspaceServiceInstance(),
 			"hsdp_ai_workspace_compute_targets":          workspace.DataSourceAIWorkspaceComputeTargets(),
 			"hsdp_ai_workspace":                          workspace.DataSourceAIWorkspace(),
-			"hsdp_iam_group":                             iam.DataSourceIAMGroup(),
-			"hsdp_iam_role":                              iam.DataSourceIAMRole(),
+			"hsdp_iam_group":                             group.DataSourceIAMGroup(),
+			"hsdp_iam_role":                              role.DataSourceIAMRole(),
 			"hsdp_iam_users":                             user.DataSourceIAMUsers(),
 			"hsdp_docker_namespace":                      namespace.DataSourceDockerNamespace(),
 			"hsdp_docker_namespaces":                     namespace.DataSourceDockerNamespaces(),
 			"hsdp_docker_repository":                     repository.DataSourceDockerRepository(),
-			"hsdp_iam_client":                            iam.DataSourceIAMClient(),
+			"hsdp_iam_client":                            client.DataSourceIAMClient(),
 			"hsdp_connect_mdm_proposition":               mdm.DataSourceConnectMDMProposition(),
 			"hsdp_connect_mdm_application":               mdm.DataSourceConnectMDMApplication(),
 			"hsdp_connect_mdm_standard_services":         mdm.DataSourceConnectMDMStandardServices(),
@@ -370,7 +374,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_standard_service":          mdm.DataSourceConnectMDMStandardService(),
 			"hsdp_connect_mdm_data_subscribers":          mdm.DataSourceConnectMDMDataSubscribers(),
 			"hsdp_connect_mdm_data_adapters":             mdm.DataSourceConnectMDMDataAdapters(),
-			"hsdp_iam_email_templates":                   iam.DataSourceIAMEmailTemplates(),
+			"hsdp_iam_email_templates":                   email_template.DataSourceIAMEmailTemplates(),
 			"hsdp_connect_mdm_bucket":                    mdm.DataSourceConnectMDMBucket(),
 			"hsdp_connect_mdm_data_type":                 mdm.DataSourceConnectMDMDataType(),
 			"hsdp_container_host_security_groups":        ch.DataSourceContainerHostSecurityGroups(),
@@ -382,7 +386,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_permission":                        iam.DataSourceIAMPermission(),
 			"hsdp_cdr_practitioner":                      practitioner.DataSourceCDRPractitioner(),
 			"hsdp_cdr_org":                               org.DataSourceCDROrg(),
-			"hsdp_iam_role_sharing_policies":             iam.DataSourceIAMRoleSharingPolicies(),
+			"hsdp_iam_role_sharing_policies":             role_sharing_policy.DataSourceIAMRoleSharingPolicies(),
 			"hsdp_discovery_service":                     discovery.DataSourceDiscoveryService(),
 		},
 		ConfigureContextFunc: providerConfigure(build),

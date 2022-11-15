@@ -10,6 +10,7 @@ import (
 
 func DataSourceIAMOrg() *schema.Resource {
 	return &schema.Resource{
+		Description: descriptions["organization"],
 		ReadContext: dataSourceIAMOrgRead,
 		Schema: map[string]*schema.Schema{
 			"organization_id": {

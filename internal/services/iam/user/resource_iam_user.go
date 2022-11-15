@@ -14,8 +14,13 @@ import (
 	"github.com/philips-software/go-hsdp-api/iam"
 )
 
+var descriptions = map[string]string{
+	"user": "Users are created under an organization and are assigned to groups.",
+}
+
 func ResourceIAMUser() *schema.Resource {
 	return &schema.Resource{
+		Description: descriptions["user"],
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

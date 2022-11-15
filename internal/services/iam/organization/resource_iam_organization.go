@@ -15,8 +15,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
+var descriptions = map[string]string{
+	"organization": "An organization is a container that owns sub-organizations, groups, and users, as well as other identities like devices and services.",
+}
+
 func ResourceIAMOrg() *schema.Resource {
 	return &schema.Resource{
+		Description: descriptions["organization"],
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

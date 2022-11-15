@@ -17,8 +17,13 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
+var descriptions = map[string]string{
+	"service": "A service identity is typically used for machine to machine identification. Unlike clients, a services can act as both resource owners and resource consumers.",
+}
+
 func ResourceIAMService() *schema.Resource {
 	return &schema.Resource{
+		Description: descriptions["service"],
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
