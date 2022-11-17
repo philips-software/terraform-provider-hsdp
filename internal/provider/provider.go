@@ -41,6 +41,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/service"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/user"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/metrics"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/misc"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/notification"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/pki"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/s3creds"
@@ -315,6 +316,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_cdr_practitioner":                          practitioner.ResourceCDRPractitioner(),
 			"hsdp_iam_role_sharing_policy":                   role_sharing_policy.ResourceRoleSharingPolicy(),
 			"hsdp_iam_device":                                device.ResourceIAMDevice(),
+			"hsdp_file_upload":                               misc.ResourceFileUpload(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                        iam.DataSourceIAMIntrospect(),

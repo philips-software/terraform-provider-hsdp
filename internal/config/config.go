@@ -781,3 +781,10 @@ func (c *Config) SetupDiscoveryClient() {
 	c.discoveryClient = client
 	c.discoveryClientErr = nil
 }
+
+func (c *Config) GetIamToken() (string, error) {
+	if c.iamClientErr != nil {
+		return "", c.iamClientErr
+	}
+	return c.iamClient.Token()
+}
