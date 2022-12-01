@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.39.0
+
+- Milestone: One million downloads!
+- IAM: fix org creation #288
+
 ## v0.38.15
 
 - IAM: doc fixes #280
