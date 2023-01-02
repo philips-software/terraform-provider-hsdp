@@ -4,9 +4,11 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
@@ -18,8 +20,16 @@ func ResourceIAMApplication() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    ResourceIAMApplicationV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: patchIAMApplicationV0,
+				Version: 0,
+			},
+		},
+		SchemaVersion: 1,
 		CreateContext: resourceIAMApplicationCreate,
+		UpdateContext: resourceIAMApplicationUpdate,
 		ReadContext:   resourceIAMApplicationRead,
 		DeleteContext: resourceIAMApplicationDelete,
 
@@ -46,8 +56,21 @@ func ResourceIAMApplication() *schema.Resource {
 				ForceNew:         true,
 				DiffSuppressFunc: tools.SuppressWhenGenerated,
 			},
+			"wait_for_delete": {
+				Type:     schema.TypeBool,
+				Optional: true,
+			},
 		},
 	}
+}
+
+func resourceIAMApplicationUpdate(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+
+	if !d.HasChange("wait_for_delete") {
+		return diag.FromErr(fmt.Errorf("only 'wait_for_delete' can be updated"))
+	}
+	return diags
 }
 
 func resourceIAMApplicationCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -140,8 +163,57 @@ func resourceIAMApplicationRead(_ context.Context, d *schema.ResourceData, m int
 	return diags
 }
 
-func resourceIAMApplicationDelete(_ context.Context, d *schema.ResourceData, _ interface{}) diag.Diagnostics {
+func resourceIAMApplicationDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	c := m.(*config.Config)
+
 	var diags diag.Diagnostics
-	d.SetId("")
+
+	client, err := c.IAMClient()
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	id := d.Id()
+	app, _, err := client.Applications.GetApplicationByID(id)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	waitForDelete := d.Get("wait_for_delete").(bool)
+
+	ok, _, err := client.Applications.DeleteApplication(*app)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if !ok {
+		return diag.FromErr(config.ErrInvalidResponse)
+	}
+	if waitForDelete {
+		stateConf := &resource.StateChangeConf{
+			Pending:    []string{"IN_PROGRESS", "QUEUED", "indeterminate"},
+			Target:     []string{"SUCCESS"},
+			Refresh:    checkAppDeleteStatus(client, id),
+			Timeout:    d.Timeout(schema.TimeoutCreate),
+			Delay:      5 * time.Second,
+			MinTimeout: time.Duration(5) * time.Second,
+		}
+		_, err = stateConf.WaitForStateContext(ctx)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("waiting for delete: %w", err))
+		}
+	}
 	return diags
+}
+
+func checkAppDeleteStatus(client *iam.Client, id string) resource.StateRefreshFunc {
+	return func() (result interface{}, state string, err error) {
+		appStatus, resp, err := client.Applications.DeleteStatus(id)
+		if err != nil {
+			return resp, "FAILED", err
+		}
+		if appStatus != nil {
+			return resp, appStatus.Status, nil
+		}
+		// We may need to return an error here
+		return resp, "IN_PROGRESS", nil
+	}
 }

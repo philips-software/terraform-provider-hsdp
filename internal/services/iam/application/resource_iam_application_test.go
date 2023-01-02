@@ -63,6 +63,8 @@ resource "hsdp_iam_application" "%s" {
     name = "ACC-%s"
     description = "IAM Application Test %s"
     proposition_id = hsdp_iam_proposition.%s.id
+
+    wait_for_delete = true
 }`,
 		// ORG
 		name,
