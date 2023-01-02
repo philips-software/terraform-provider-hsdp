@@ -7,7 +7,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
-// Upgrades an IAM Group resource from v0 to v1
+// Upgrades an IAM Application resource from v0 to v1
 func patchIAMApplicationV0(_ context.Context, rawState map[string]interface{}, _ interface{}) (map[string]interface{}, error) {
 	if rawState == nil {
 		rawState = map[string]interface{}{}
