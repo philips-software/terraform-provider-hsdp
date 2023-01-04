@@ -26,6 +26,10 @@ The following arguments are supported:
 * `description` - (Required) The description of the application
 * `proposition_id` - (Required) the proposition ID (GUID) to attach this a application to
 * `global_reference_id` - (Optional, UUIDv4) Reference identifier defined by the provisioning user. Highly recommend to never set this and let Terraform generate a UUID for you.
+* `wait_for_delete` - (Optional) Blocks until the application delete has completed. Default: `false`.
+  The application delete process can take some time as all its associated resources like
+  services and clients are removed recursively. This option is useful for ephemeral environments
+  where the same application might be recreated shortly after a destroy operation.
 
 ## Attributes Reference
 
