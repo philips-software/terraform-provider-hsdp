@@ -257,7 +257,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_email_template":                        email_template.ResourceIAMEmailTemplate(),
 			"hsdp_s3creds_policy":                            s3creds.ResourceS3CredsPolicy(),
 			"hsdp_container_host":                            ch.ResourceContainerHost(),
-			"hsdp_container_host_exec":                       ch.ResourceContainerHostExec(),
 			"hsdp_metrics_autoscaler":                        metrics.ResourceMetricsAutoscaler(),
 			"hsdp_cdr_org":                                   org.ResourceCDROrg(),
 			"hsdp_cdr_subscription":                          subscription.ResourceCDRSubscription(),
