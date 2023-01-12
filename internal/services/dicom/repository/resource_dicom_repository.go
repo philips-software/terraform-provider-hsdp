@@ -117,22 +117,45 @@ func resourceDICOMRepositoryRead(_ context.Context, d *schema.ResourceData, m in
 	}
 	defer client.Close()
 	var repo *dicom.Repository
+	var resp *dicom.Response
 	operation := func() error {
-		var resp *dicom.Response
 		repo, resp, err = client.Config.GetRepository(d.Id(), queryOpts)
 		return tools.CheckForPermissionErrors(client, resp, err)
 	}
 	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
-		if errors.Is(err, dicom.ErrNotFound) {
+		if !errors.Is(err, dicom.ErrNotFound) {
+			return diag.FromErr(err)
+		}
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "DICOM quirks mode activated",
+			Detail:   fmt.Sprintf("Attempting to find the repository in organization '%s'", orgID),
+		})
+		// Not found, but for some DICOM 1.8 servers we should try with queryParam still before concluding 404 for sure
+		queryOpts.OrganizationID = &orgID
+		repo, resp, err = client.Config.GetRepository(d.Id(), queryOpts)
+		if err != nil {
+			if errors.Is(err, dicom.ErrNotFound) {
+				d.SetId("")
+				return diags
+			}
+			return diag.FromErr(err)
+		}
+		// We may have found a repo after all here
+		if repo == nil {
 			d.SetId("")
 			return diags
 		}
-		return diag.FromErr(err)
 	}
 
 	// This is a quirk in the API
 	if repo.OrganizationID != orgID {
+		diags = append(diags, diag.Diagnostic{
+			Severity: diag.Warning,
+			Summary:  "DICOM quirks mode activated",
+			Detail:   "setting 'repository_organization_id' to 'organization_id'",
+		})
 		_ = d.Set("repository_organization_id", repo.OrganizationID)
 	}
 
