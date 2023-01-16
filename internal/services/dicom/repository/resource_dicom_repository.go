@@ -134,7 +134,7 @@ func resourceDICOMRepositoryRead(_ context.Context, d *schema.ResourceData, m in
 		})
 		// Not found, but for some DICOM 1.8 servers we should try with queryParam still before concluding 404 for sure
 		queryOpts.OrganizationID = &orgID
-		repo, resp, err = client.Config.GetRepository(d.Id(), queryOpts)
+		err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 		if err != nil {
 			if errors.Is(err, dicom.ErrNotFound) {
 				d.SetId("")
