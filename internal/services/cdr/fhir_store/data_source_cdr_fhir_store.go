@@ -42,6 +42,7 @@ func dataSourceCDRFHIRStoreRead(_ context.Context, d *schema.ResourceData, meta 
 
 	baseURL := d.Get("base_url").(string)
 	fhirOrgID := d.Get("fhir_org_id").(string)
+	storeType := "EHR"
 
 	if strings.HasSuffix(baseURL, "/") {
 		return diag.FromErr(fmt.Errorf("the base_url should not end with a '/'"))
@@ -62,8 +63,8 @@ func dataSourceCDRFHIRStoreRead(_ context.Context, d *schema.ResourceData, meta 
 	}
 	defer client.Close()
 
-	d.SetId(baseURL)
+	d.SetId(fmt.Sprintf("%s:%s/%s", storeType, baseURL, fhirOrgID))
 	_ = d.Set("endpoint", client.GetEndpointURL())
-	_ = d.Set("type", "EHR")
+	_ = d.Set("type", storeType)
 	return diags
 }

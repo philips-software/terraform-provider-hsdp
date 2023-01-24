@@ -54,7 +54,6 @@ func dataSourceCDROrgRead(ctx context.Context, d *schema.ResourceData, m interfa
 	version := d.Get("version").(string)
 
 	id := d.Get("org_id").(string)
-	d.SetId(id)
 
 	switch version {
 	case "stu3":
@@ -67,6 +66,9 @@ func dataSourceCDROrgRead(ctx context.Context, d *schema.ResourceData, m interfa
 		}
 	default:
 		return diag.FromErr(fmt.Errorf("unsupported FHIR version '%s'", version))
+	}
+	if len(diags) == 0 {
+		d.SetId(id)
 	}
 	return diags
 }
