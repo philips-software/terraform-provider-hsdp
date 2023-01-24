@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.40.2
+
+- CDR: replace ForceNew behaviour and instead error with details #300
+
 ## v0.40.1
 
 - DICOM: Retry Read on 403 #297
