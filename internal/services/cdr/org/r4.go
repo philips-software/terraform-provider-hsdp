@@ -94,7 +94,7 @@ func r4Read(ctx context.Context, client *cdr.Client, d *schema.ResourceData) dia
 		return diags
 	}
 	if org == nil {
-		return diag.FromErr(fmt.Errorf("org is nil, this is unexpected (id=%s): %w", id, err))
+		return diag.FromErr(fmt.Errorf("org is nil, this is unexpected (id='%s'): %w", id, err))
 	}
 	if org.Name != nil {
 		_ = d.Set("name", org.Name.GetValue())

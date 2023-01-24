@@ -68,5 +68,6 @@ func dataSourceCDROrgRead(ctx context.Context, d *schema.ResourceData, m interfa
 	default:
 		return diag.FromErr(fmt.Errorf("unsupported FHIR version '%s'", version))
 	}
+
 	return diags
 }

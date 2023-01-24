@@ -170,7 +170,7 @@ func RandomPassword() (string, error) {
 		MinNumeric:      1,
 		Special:         true,
 		MinSpecial:      1,
-		OverrideSpecial: "-!@#.:_?{$",
+		OverrideSpecial: "-!@#.:_?",
 	}
 	result, err := random.CreateString(params)
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
@@ -19,6 +20,7 @@ func ResourceCDROrg() *schema.Resource {
 		ReadContext:   resourceCDROrgRead,
 		UpdateContext: resourceCDROrgUpdate,
 		DeleteContext: resourceCDROrgDelete,
+		CustomizeDiff: resourceCDROrgDiff(),
 		SchemaVersion: 1,
 		StateUpgraders: []schema.StateUpgrader{
 			{
@@ -31,18 +33,15 @@ func ResourceCDROrg() *schema.Resource {
 			"fhir_store": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"version": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "stu3",
-				ForceNew: true,
 			},
 			"org_id": {
 				Type:     schema.TypeString,
 				Required: true,
-				ForceNew: true,
 			},
 			"name": {
 				Type:     schema.TypeString,
@@ -59,6 +58,44 @@ func ResourceCDROrg() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceCDROrgDiff() schema.CustomizeDiffFunc {
+	return customdiff.All(
+		customdiff.ValidateChange("version", func(ctx context.Context, old, new, m interface{}) error {
+			o := old.(string)
+			n := new.(string)
+			if o == "" { // New
+				return nil
+			}
+			if o != n {
+				return fmt.Errorf("changing the FHIR version from '%s' to '%s' is not supported", o, n)
+			}
+			return nil
+		}),
+		customdiff.ValidateChange("fhir_store", func(ctx context.Context, old, new, m interface{}) error {
+			o := old.(string)
+			n := new.(string)
+			if o == "" { // New
+				return nil
+			}
+			if o != n {
+				return fmt.Errorf("changing the fhir_store endpoint from '%s' to '%s' is not supported", o, n)
+			}
+			return nil
+		}),
+		customdiff.ValidateChange("org_id", func(ctx context.Context, old, new, m interface{}) error {
+			o := old.(string)
+			n := new.(string)
+			if o == "" { // New
+				return nil
+			}
+			if o != n {
+				return fmt.Errorf("changing the organization id from '%s' to '%s' is not supported", o, n)
+			}
+			return nil
+		}),
+	)
 }
 
 func resourceCDROrgCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
@@ -133,6 +170,10 @@ func resourceCDROrgUpdate(ctx context.Context, d *schema.ResourceData, m interfa
 	defer client.Close()
 
 	version := d.Get("version").(string)
+
+	if d.HasChange("version") || d.HasChange("fhir_store") || d.HasChange("org_id") {
+		return diag.FromErr(fmt.Errorf("changes in 'version', 'fhir_stor' or 'org_id' are not supported"))
+	}
 
 	switch version {
 	case "stu3":
