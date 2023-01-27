@@ -34,3 +34,6 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The group GUID
 * `description` - The description of the group
+* `users` - list(string) The list of users in this group
+* `services` - list(string) The list of services in this group
+* `devices` - list(string) The list of devices in this group

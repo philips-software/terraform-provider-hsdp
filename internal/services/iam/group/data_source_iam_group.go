@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/go-hsdp-api/iam"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func DataSourceIAMGroup() *schema.Resource {
@@ -27,6 +28,21 @@ func DataSourceIAMGroup() *schema.Resource {
 			"description": {
 				Type:     schema.TypeString,
 				Computed: true,
+			},
+			"users": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"services": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
+			},
+			"devices": {
+				Type:     schema.TypeSet,
+				Computed: true,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}
@@ -66,9 +82,49 @@ func dataSourceIAMGroupRead(_ context.Context, d *schema.ResourceData, meta inte
 	}
 	group := (*groups)[0]
 
-	d.SetId(group.ID)
 	_ = d.Set("name", group.GroupName)
 	_ = d.Set("description", group.GroupDescription)
 
+	// Extract USER member details
+	result, err := getGroupIdsByMemberType(client, group.ID, iam.GroupMemberTypeUser)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("reading USER members: %w", err))
+	}
+	_ = d.Set("users", tools.SchemaSetStrings(result))
+
+	// Extract SERVICE member details
+	result, err = getGroupIdsByMemberType(client, group.ID, iam.GroupMemberTypeService)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("reading SERVICE members: %w", err))
+	}
+	_ = d.Set("services", tools.SchemaSetStrings(result))
+
+	// Extract DEVICE member details
+	result, err = getGroupIdsByMemberType(client, group.ID, iam.GroupMemberTypeDevice)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("reading DEVICE members: %w", err))
+	}
+	_ = d.Set("devices", tools.SchemaSetStrings(result))
+
+	d.SetId(group.ID)
 	return diags
+}
+
+func getGroupIdsByMemberType(client *iam.Client, groupID, memberType string) ([]string, error) {
+	var result []string
+	perPage := 100
+	resources, resp, err := client.Groups.SCIMGetGroupByIDAll(groupID, &iam.SCIMGetGroupOptions{
+		IncludeGroupMembersType: &memberType,
+		GroupMembersCount:       &perPage,
+	})
+	if err != nil {
+		return result, err
+	}
+	if resources == nil {
+		return result, fmt.Errorf("unexpected response: %+v", resp)
+	}
+	for _, u := range resources.ExtensionGroup.GroupMembers.Resources {
+		result = append(result, u.ID)
+	}
+	return result, nil
 }
