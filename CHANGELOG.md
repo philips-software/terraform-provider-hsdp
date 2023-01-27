@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.40.3
+
+- IAM: Add users, services and devices to group data source #302
+
 ## v0.40.2
 
 - CDR: replace ForceNew behaviour and instead error with details #300
