@@ -49,7 +49,7 @@ func DataSourceIAMGroup() *schema.Resource {
 
 }
 
-func dataSourceIAMGroupRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceIAMGroupRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -86,21 +86,21 @@ func dataSourceIAMGroupRead(_ context.Context, d *schema.ResourceData, meta inte
 	_ = d.Set("description", group.GroupDescription)
 
 	// Extract USER member details
-	result, err := getGroupIdsByMemberType(client, group.ID, iam.GroupMemberTypeUser)
+	result, err := getGroupResourcesByMemberType(ctx, client, group.ID, iam.GroupMemberTypeUser)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("reading USER members: %w", err))
 	}
 	_ = d.Set("users", tools.SchemaSetStrings(result))
 
 	// Extract SERVICE member details
-	result, err = getGroupIdsByMemberType(client, group.ID, iam.GroupMemberTypeService)
+	result, err = getGroupResourcesByMemberType(ctx, client, group.ID, iam.GroupMemberTypeService)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("reading SERVICE members: %w", err))
 	}
 	_ = d.Set("services", tools.SchemaSetStrings(result))
 
 	// Extract DEVICE member details
-	result, err = getGroupIdsByMemberType(client, group.ID, iam.GroupMemberTypeDevice)
+	result, err = getGroupResourcesByMemberType(ctx, client, group.ID, iam.GroupMemberTypeDevice)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("reading DEVICE members: %w", err))
 	}
@@ -110,12 +110,21 @@ func dataSourceIAMGroupRead(_ context.Context, d *schema.ResourceData, meta inte
 	return diags
 }
 
-func getGroupIdsByMemberType(client *iam.Client, groupID, memberType string) ([]string, error) {
+func getGroupResourcesByMemberType(ctx context.Context, client *iam.Client, groupID, memberType string) ([]string, error) {
+	var resources *iam.SCIMGroup
+	var resp *iam.Response
+	var err error
 	var result []string
 	perPage := 100
-	resources, resp, err := client.Groups.SCIMGetGroupByIDAll(groupID, &iam.SCIMGetGroupOptions{
-		IncludeGroupMembersType: &memberType,
-		GroupMembersCount:       &perPage,
+	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+		resources, resp, err = client.Groups.SCIMGetGroupByIDAll(groupID, &iam.SCIMGetGroupOptions{
+			IncludeGroupMembersType: &memberType,
+			GroupMembersCount:       &perPage,
+		})
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
 	})
 	if err != nil {
 		return result, err

@@ -130,7 +130,6 @@ resource "hsdp_iam_group" "user_test" {
   managing_organization = hsdp_iam_org.test.id
  
   drift_detection           = true
-  iam_device_bug_workaround = false
 }
 
 resource "hsdp_iam_group" "test" {
@@ -145,9 +144,7 @@ resource "hsdp_iam_group" "test" {
   managing_organization = hsdp_iam_org.test.id
  
   drift_detection           = true
-  iam_device_bug_workaround = true
 }
-
 `,
 		// ORG
 		upperName,
