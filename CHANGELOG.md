@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.40.4
+
+- IAM: Add description text to schema. #280
+- IAM Group: remove workarounds and use SCIM Group API v1 #304
+
 ## v0.40.3
 
 - IAM: Add users, services and devices to group data source #302
