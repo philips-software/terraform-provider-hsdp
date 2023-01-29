@@ -49,6 +49,7 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The GUID of the organization
+* `active` - Boolean. Weather the organization is active or not.
 
 ## Import
 
