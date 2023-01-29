@@ -93,9 +93,10 @@ func ResourceIAMGroup() *schema.Resource {
 				Default:  false,
 			},
 			"iam_device_bug_workaround": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Type:       schema.TypeBool,
+				Optional:   true,
+				Default:    false,
+				Deprecated: "This workaround is no longer required and will be removed in the near future.",
 			},
 		},
 	}
@@ -227,7 +228,7 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 	return resourceIAMGroupRead(ctx, d, m)
 }
 
-func resourceIAMGroupRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMGroupRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -239,7 +240,6 @@ func resourceIAMGroupRead(_ context.Context, d *schema.ResourceData, m interface
 
 	id := d.Id()
 	driftDetection := d.Get("drift_detection").(bool)
-	iamDeviceBugWorkaround := d.Get("iam_device_bug_workaround").(bool)
 
 	group, resp, err := client.Groups.GetGroupByID(id)
 	if err != nil {
@@ -264,87 +264,26 @@ func resourceIAMGroupRead(_ context.Context, d *schema.ResourceData, m interface
 
 	if driftDetection { // Only do drift detection when explicitly enabled
 		// Users
-		users, _, err := client.Users.GetAllUsers(&iam.GetUserOptions{
-			GroupID: &group.ID,
-		})
+		users, err := getGroupResourcesByMemberType(ctx, client, group.ID, iam.GroupMemberTypeUser)
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("error retrieving users from group: %v", err))
 		}
 		_ = d.Set("users", tools.SchemaSetStrings(users))
 
-		if iamDeviceBugWorkaround {
-			// IAM Devices could be mixed in the GetUser results, this is an IAM BUG
-			var verifiedUsers []string
-			for _, u := range users {
-				_, _, err := client.Users.GetUserByID(u) // This call could FAIL if the IAM entity does not have broad access
-				if err == nil {
-					verifiedUsers = append(verifiedUsers, u)
-				}
-			}
-			_ = d.Set("users", tools.SchemaSetStrings(verifiedUsers))
-		}
-
 		// Services
-		// We only deal with services we know
-		var verifiedServices []string
-		services := tools.ExpandStringList(d.Get("services").(*schema.Set).List())
-		for _, service := range services {
-			groups, _, err := client.Groups.GetGroups(&iam.GetGroupOptions{
-				MemberType: tools.String("SERVICE"),
-				MemberID:   &service,
-			})
-			if err != nil || groups == nil {
-				continue
-			}
-			for _, g := range *groups {
-				if g.ID == group.ID {
-					verifiedServices = append(verifiedServices, service)
-					continue
-				}
-			}
+		services, err := getGroupResourcesByMemberType(ctx, client, group.ID, iam.GroupMemberTypeService)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("error retrieving services from group: %v", err))
 		}
-		// Also check all services in this org
-		orgServices, _, err := client.Services.GetServices(&iam.GetServiceOptions{
-			OrganizationID: &group.ManagingOrganization,
-		})
-		if err == nil && orgServices != nil && len(*orgServices) > 0 {
-			for _, orgService := range *orgServices {
-				og, _, err := client.Groups.GetGroups(&iam.GetGroupOptions{
-					MemberType: tools.String("SERVICE"),
-					MemberID:   &orgService.ID,
-				})
-				if err != nil {
-					continue
-				}
-				for _, m := range *og {
-					if m.ID == group.ID && !tools.ContainsString(verifiedServices, m.ID) {
-						verifiedServices = append(verifiedServices, orgService.ID)
-					}
-				}
-			}
-		}
-
-		_ = d.Set("services", tools.SchemaSetStrings(verifiedServices))
+		_ = d.Set("services", tools.SchemaSetStrings(services))
 
 		// Devices
-		var verifiedDevices []string
-		devices := tools.ExpandStringList(d.Get("devices").(*schema.Set).List())
-		for _, device := range devices {
-			groups, _, err := client.Groups.GetGroups(&iam.GetGroupOptions{
-				MemberType: tools.String("DEVICE"),
-				MemberID:   &device,
-			})
-			if err != nil || groups == nil {
-				continue
-			}
-			for _, g := range *groups {
-				if g.ID == group.ID {
-					verifiedDevices = append(verifiedDevices, device)
-					continue
-				}
-			}
+		devices, err := getGroupResourcesByMemberType(ctx, client, group.ID, iam.GroupMemberTypeDevice)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("error retrieving devices from group: %v", err))
 		}
-		_ = d.Set("devices", tools.SchemaSetStrings(verifiedDevices))
+		_ = d.Set("devices", tools.SchemaSetStrings(devices))
+
 	}
 	return diags
 }
