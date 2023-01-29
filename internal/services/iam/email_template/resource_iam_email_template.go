@@ -23,21 +23,22 @@ func ResourceIAMEmailTemplate() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
 		CreateContext: resourceIAMEmailTemplateCreate,
 		ReadContext:   resourceIAMEmailTemplateRead,
 		DeleteContext: resourceIAMEmailTemplateDelete,
 
 		Schema: map[string]*schema.Schema{
 			"managing_organization": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The Id of the IAM Org to apply this email template to.",
 			},
 			"type": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The email template type.",
 			},
 			"from": {
 				Type:             schema.TypeString,
@@ -46,21 +47,24 @@ func ResourceIAMEmailTemplate() *schema.Resource {
 				DiffSuppressFunc: tools.SuppressDefault,
 			},
 			"format": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "HTML",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     "HTML",
+				Description: "The template format. Must be 'HTML' currently.",
 			},
 			"subject": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
-				Default:  "default",
+				Type:        schema.TypeString,
+				Optional:    true,
+				ForceNew:    true,
+				Default:     "default",
+				Description: "The Subject line of the email.",
 			},
 			"message": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "The message body.",
 			},
 			"locale": {
 				Type:     schema.TypeString,
@@ -70,12 +74,14 @@ func ResourceIAMEmailTemplate() *schema.Resource {
 					tools.SuppressDefault,
 					tools.SuppressCaseDiffs,
 				),
+				Description: "The locale of the template. When not specified the template will become the default. Only a single default template is allowed of course.",
 			},
 			"link": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ForceNew:         true,
 				DiffSuppressFunc: tools.SuppressDefault,
+				Description:      "A clickable link, depends on the template type.",
 			},
 			"message_base64": {
 				Type:     schema.TypeString,
