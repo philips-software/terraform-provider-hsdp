@@ -16,6 +16,7 @@ func ResourceCDROrg() *schema.Resource {
 			StateContext: importFHIROrgContext,
 		},
 
+		Description:   "Manage CDR Organizations.",
 		CreateContext: resourceCDROrgCreate,
 		ReadContext:   resourceCDROrgRead,
 		UpdateContext: resourceCDROrgUpdate,
@@ -31,30 +32,36 @@ func ResourceCDROrg() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			"fhir_store": {
-				Type:     schema.TypeString,
-				Required: true,
+				Description: "The CDR FHIR store tenant URL.",
+				Type:        schema.TypeString,
+				Required:    true,
 			},
 			"version": {
-				Type:     schema.TypeString,
-				Optional: true,
-				Default:  "stu3",
+				Description: "The FHIR version to use. Options: [ 'stu3' | 'r4' ].",
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "stu3",
 			},
 			"org_id": {
-				Type:     schema.TypeString,
-				Required: true,
+				Description: "The organization ID (GUID) under which to onboard. Typically the same as IAM Organization ID.",
+				Type:        schema.TypeString,
+				Required:    true,
 			},
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
+				Description: "The name of the FHIR Organization.",
+				Type:        schema.TypeString,
+				Required:    true,
 			},
 			"part_of": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Description: "The parent Organization ID (GUID) this Org is part of.",
+				Type:        schema.TypeString,
+				Optional:    true,
 			},
 			"purge_delete": {
-				Type:     schema.TypeBool,
-				Optional: true,
-				Default:  false,
+				Description: "If set to true, when the resource is destroyed the provider will purge all FHIR resources associated with the Organization. The ORGANIZATION.PURGE IAM permission is required for this to work.",
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
 			},
 		},
 	}
