@@ -49,6 +49,7 @@ The following arguments are supported:
 * `role` - (Required) A role definition. Muliple roles are supported
 * `ca` - (Required) The Certificate Authority information to use.
   * `common_name` - (Required) The common name to use
+  * `ttl` - (Optional, string regex `[0-9]+[hms]$`) The TTL, example `8760h` for 1 year
 
 Each `role` definition takes the following arguments:
 
@@ -67,6 +68,7 @@ Each `role` definition takes the following arguments:
   URI SANs. Values can contain glob patterns (e.g. `spiffe://hostname/*`)
 * `allowed_domains` - (Optional, list(string)) List of allowed domains
 * `enforce_hostnames` - (Optional, bool) Enforce hostnames. Default: `false`
+* `triggers` - (Optional, list(string)) An list of strings which when changes will trigger recreation of the resource
 
 ## Attribute reference
 

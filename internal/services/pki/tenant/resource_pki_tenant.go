@@ -1,4 +1,4 @@
-package pki
+package tenant
 
 import (
 	"context"
@@ -21,6 +21,14 @@ func ResourcePKITenant() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
+		StateUpgraders: []schema.StateUpgrader{
+			{
+				Type:    ResourcePKITenantV0().CoreConfigSchema().ImpliedType(),
+				Upgrade: patchTenantV0,
+				Version: 0,
+			},
+		},
+		SchemaVersion: 1,
 		CreateContext: resourcePKITenantCreate,
 		ReadContext:   resourcePKITenantRead,
 		UpdateContext: resourcePKITenantUpdate,
@@ -56,6 +64,12 @@ func ResourcePKITenant() *schema.Resource {
 				MaxItems: 1,
 				Elem:     pkiCASchema(),
 			},
+			"triggers": {
+				Description: "A map of arbitrary strings that, when changed, will force the resource to be replaced.",
+				Type:        schema.TypeMap,
+				Optional:    true,
+				ForceNew:    true,
+			},
 			"logical_path": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -83,6 +97,12 @@ func pkiCASchema() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+			},
+			"ttl": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+				Default:  "8760h",
 			},
 		},
 	}
@@ -268,6 +288,7 @@ func schemaToTenant(d *schema.ResourceData, _ interface{}) (*pki.Tenant, error) 
 		for _, vi := range vL {
 			mVi := vi.(map[string]interface{})
 			tenant.ServiceParameters.CA.CommonName = mVi["common_name"].(string)
+			tenant.ServiceParameters.CA.TTL = mVi["ttl"].(string)
 		}
 	}
 	return &tenant, nil
@@ -318,6 +339,7 @@ func tenantToSchema(tenant pki.Tenant, logicalPath string, d *schema.ResourceDat
 	s := &schema.Set{F: schema.HashResource(pkiCASchema())}
 	caDef := make(map[string]interface{})
 	caDef["common_name"] = tenant.ServiceParameters.CA.CommonName
+	caDef["ttl"] = tenant.ServiceParameters.CA.TTL
 	s.Add(caDef)
 	_ = d.Set("ca", s)
 	return nil
