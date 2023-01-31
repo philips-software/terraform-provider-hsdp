@@ -139,7 +139,6 @@ func resourcePKICertCreate(_ context.Context, d *schema.ResourceData, m interfac
 		if !ok {
 			return diag.FromErr(fmt.Errorf("role '%s' not found or invalid", roleName))
 		}
-		return diag.FromErr(err)
 	}
 
 	ttl := d.Get("ttl").(string)
@@ -168,12 +167,12 @@ func resourcePKICertCreate(_ context.Context, d *schema.ResourceData, m interfac
 		}
 		return diag.FromErr(fmt.Errorf("issue PKI cert: %w", err))
 	}
-	d.SetId(cert.Data.SerialNumber)
 	err = certToSchema(cert, d, m)
 	if err != nil {
 		d.SetId("")
 		return diag.FromErr(err)
 	}
+	d.SetId(cert.Data.SerialNumber)
 	return diags
 }
 
