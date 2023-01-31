@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.41.0
+
+- PKI: Add triggers ttl for tenant #306
+- IAM Group: fix read call
+
 ## v0.40.4
 
 - IAM: Add description text to schema. #280
