@@ -127,9 +127,7 @@ resource "hsdp_iam_group" "user_test" {
   users    = [hsdp_iam_user.test.id]
   services = [hsdp_iam_service.test.id]
 
-  managing_organization = hsdp_iam_org.test.id
- 
-  drift_detection           = true
+  managing_organization = hsdp_iam_org.test.id 
 }
 
 resource "hsdp_iam_group" "test" {
@@ -142,8 +140,6 @@ resource "hsdp_iam_group" "test" {
   devices  = [hsdp_iam_device.test.id]
 
   managing_organization = hsdp_iam_org.test.id
- 
-  drift_detection           = true
 }
 `,
 		// ORG

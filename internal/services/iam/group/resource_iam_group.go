@@ -97,7 +97,7 @@ func ResourceIAMGroup() *schema.Resource {
 			"drift_detection": {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Default:     false,
+				Default:     true,
 				Description: "When enabled, the provider will perform additional API calls to determine if any changes were made outside of Terraform to user and service assignments of this group.",
 			},
 			"iam_device_bug_workaround": {
@@ -292,7 +292,6 @@ func resourceIAMGroupRead(ctx context.Context, d *schema.ResourceData, m interfa
 			return diag.FromErr(fmt.Errorf("error retrieving devices from group: %v", err))
 		}
 		_ = d.Set("devices", tools.SchemaSetStrings(devices))
-
 	}
 	return diags
 }
