@@ -14,7 +14,6 @@ func TestAccResourceIAMApplication_basic(t *testing.T) {
 	t.Parallel()
 
 	randomName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
-	resourceName := fmt.Sprintf("hsdp_iam_application.%s", randomName)
 	parentOrgID := acc.AccIAMOrgGUID()
 
 	upperRandomName := strings.ToUpper(randomName)
@@ -26,10 +25,10 @@ func TestAccResourceIAMApplication_basic(t *testing.T) {
 		ProviderFactories: acc.ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				ResourceName: resourceName,
+				ResourceName: "hsdp_iam_application.test",
 				Config:       testAccResourceIAMApplication(parentOrgID, randomName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", "ACC-"+upperRandomName),
+					resource.TestCheckResourceAttr("hsdp_iam_application.test", "name", "ACC-"+upperRandomName),
 				),
 			},
 		},
@@ -44,41 +43,36 @@ func testAccResourceIAMApplication(parentOrgID, name string) string {
 
 	return fmt.Sprintf(`
 
-resource "hsdp_iam_org" "%s" {
+resource "hsdp_iam_org" "test" {
   name = "ACC-%s"
   description = "IAM Application Test %s"
 
   parent_org_id = "%s"
-  wait_for_delete = false
+  wait_for_delete = true
 }
 
-resource "hsdp_iam_proposition" "%s" {
+resource "hsdp_iam_proposition" "test" {
    name = "ACC-%s"
    description = "IAM Application Test %s"
    
-   organization_id = hsdp_iam_org.%s.id
+   organization_id = hsdp_iam_org.test.id
 }
 
-resource "hsdp_iam_application" "%s" {
+resource "hsdp_iam_application" "test" {
     name = "ACC-%s"
     description = "IAM Application Test %s"
-    proposition_id = hsdp_iam_proposition.%s.id
+    proposition_id = hsdp_iam_proposition.test.id
 
     wait_for_delete = true
 }`,
 		// ORG
-		name,
 		upperName,
 		name,
 		parentOrgID,
 		// PROP
-		name,
 		upperName,
-		name,
 		name,
 		// APP
-		name,
 		upperName,
-		name,
 		name)
 }
