@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.41.1
+
+- IAM Group: fix remove role usage #309
+- IAM Group: add lower level retry #310
+
 ## v0.41.0
 
 - PKI: Add triggers ttl for tenant #306
