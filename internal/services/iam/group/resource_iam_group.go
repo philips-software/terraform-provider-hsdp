@@ -168,7 +168,7 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 	users := tools.ExpandStringList(d.Get("users").(*schema.Set).List())
 	if len(users) > 0 {
 		err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
-			result, resp, err := client.Groups.AddMembers(*createdGroup, users...)
+			result, resp, err := client.Groups.AddMembers(ctx, *createdGroup, users...)
 			if resp == nil {
 				return nil, err
 			}
@@ -189,7 +189,7 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 	services := tools.ExpandStringList(d.Get("services").(*schema.Set).List())
 	if len(services) > 0 {
 		err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
-			result, resp, err := client.Groups.AddServices(*createdGroup, services...)
+			result, resp, err := client.Groups.AddServices(ctx, *createdGroup, services...)
 			if resp == nil {
 				return nil, err
 			}
@@ -213,7 +213,7 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 	devices := tools.ExpandStringList(d.Get("devices").(*schema.Set).List())
 	if len(devices) > 0 {
 		err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
-			result, resp, err := client.Groups.AddDevices(*createdGroup, devices...)
+			result, resp, err := client.Groups.AddDevices(ctx, *createdGroup, devices...)
 			if resp == nil {
 				return nil, err
 			}
@@ -324,10 +324,10 @@ func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		toRemove := tools.Difference(old, newList)
 
 		if len(toRemove) > 0 {
-			_, _, _ = client.Groups.RemoveMembers(group, toRemove...)
+			_, _, _ = client.Groups.RemoveMembers(ctx, group, toRemove...)
 		}
 		if len(toAdd) > 0 {
-			_, _, _ = client.Groups.AddMembers(group, toAdd...)
+			_, _, _ = client.Groups.AddMembers(ctx, group, toAdd...)
 		}
 	}
 
@@ -341,7 +341,7 @@ func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m inter
 
 		if len(toRemove) > 0 {
 			err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
-				_, resp, err := client.Groups.RemoveServices(group, toRemove...)
+				_, resp, err := client.Groups.RemoveServices(ctx, group, toRemove...)
 				if resp == nil {
 					return nil, err
 				}
@@ -353,7 +353,7 @@ func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		}
 		if len(toAdd) > 0 {
 			err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
-				_, resp, err := client.Groups.AddServices(group, toAdd...)
+				_, resp, err := client.Groups.AddServices(ctx, group, toAdd...)
 				if resp == nil {
 					return nil, err
 				}
@@ -375,7 +375,7 @@ func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m inter
 
 		if len(toRemove) > 0 {
 			err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
-				_, resp, err := client.Groups.RemoveDevices(group, toRemove...)
+				_, resp, err := client.Groups.RemoveDevices(ctx, group, toRemove...)
 				if resp == nil {
 					return nil, err
 				}
@@ -387,7 +387,7 @@ func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		}
 		if len(toAdd) > 0 {
 			err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
-				_, resp, err := client.Groups.AddDevices(group, toAdd...)
+				_, resp, err := client.Groups.AddDevices(ctx, group, toAdd...)
 				if resp == nil {
 					return nil, err
 				}
@@ -449,7 +449,7 @@ func purgeGroupContent(ctx context.Context, client *iam.Client, id string, d *sc
 	if len(users) > 0 {
 		for _, u := range users {
 			_ = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
-				_, resp, err := client.Groups.RemoveMembers(group, u)
+				_, resp, err := client.Groups.RemoveMembers(ctx, group, u)
 				if resp != nil && resp.StatusCode() == http.StatusUnprocessableEntity {
 					return resp.Response, nil // User is already gone
 				}
@@ -466,7 +466,7 @@ func purgeGroupContent(ctx context.Context, client *iam.Client, id string, d *sc
 	if len(services) > 0 {
 		for _, s := range services {
 			_ = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
-				_, resp, err := client.Groups.RemoveServices(group, s)
+				_, resp, err := client.Groups.RemoveServices(ctx, group, s)
 				if resp != nil && resp.StatusCode() == http.StatusUnprocessableEntity {
 					return resp.Response, nil // Service is already gone
 				}
@@ -483,7 +483,7 @@ func purgeGroupContent(ctx context.Context, client *iam.Client, id string, d *sc
 	if len(devices) > 0 {
 		for _, s := range devices {
 			_ = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
-				_, resp, err := client.Groups.RemoveDevices(group, s)
+				_, resp, err := client.Groups.RemoveDevices(ctx, group, s)
 				if resp != nil && resp.StatusCode() == http.StatusUnprocessableEntity {
 					return resp.Response, nil // Service is already gone
 				}
