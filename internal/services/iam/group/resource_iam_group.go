@@ -425,7 +425,10 @@ func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		// Remove every role. Simpler to remove and add newValues ones,
 		for _, v := range toRemove {
 			var role = iam.Role{ID: v}
-			_, _, err := client.Groups.RemoveRole(group, role)
+			_, resp, err := client.Groups.RemoveRole(group, role)
+			if resp != nil && resp.StatusCode() == http.StatusUnprocessableEntity {
+				return nil // Role is already gone
+			}
 			if err != nil {
 				return diag.FromErr(err)
 			}
