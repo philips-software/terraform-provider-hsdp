@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+
+## v0.41.3
+
+- Core: fix crashing bug
+
 ## v0.41.2
 
 - IAM Group: add retry for role assignment
