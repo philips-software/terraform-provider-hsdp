@@ -22,19 +22,22 @@ func TryHTTPCall(ctx context.Context, numberOfTries uint64, operation func() (*h
 		if err == nil {
 			return nil
 		}
-		if resp == nil {
-			return backoff.Permanent(fmt.Errorf("response was nil: %w", err))
-		}
 		select {
 		case <-ctx.Done():
 			return backoff.Permanent(fmt.Errorf("context was cancelled: %w", err))
 		default:
 		}
 		shouldRetry := false
-		for _, c := range retryOnCodes {
-			if c == resp.StatusCode {
-				shouldRetry = true
-				break
+		if resp == nil {
+			err = fmt.Errorf("response was nil: %w", err)
+			shouldRetry = true
+		}
+		if resp != nil {
+			for _, c := range retryOnCodes {
+				if c == resp.StatusCode {
+					shouldRetry = true
+					break
+				}
 			}
 		}
 		if shouldRetry {
