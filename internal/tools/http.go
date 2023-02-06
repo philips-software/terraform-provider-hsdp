@@ -42,7 +42,11 @@ func TryHTTPCall(ctx context.Context, numberOfTries uint64, operation func() (*h
 		}
 		if shouldRetry {
 			count = count + 1
-			return fmt.Errorf("retry %d due to HTTP %d: %w", count, resp.StatusCode, err)
+			httpCode := 0
+			if resp != nil {
+				httpCode = resp.StatusCode
+			}
+			return fmt.Errorf("retry %d due to HTTP %d: %w", count, httpCode, err)
 		}
 		return backoff.Permanent(fmt.Errorf("retry %d permanent: %w", count, err))
 	}
