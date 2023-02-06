@@ -149,7 +149,7 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 		role, _, _ := client.Roles.GetRoleByID(r)
 		if role != nil {
 			err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
-				_, resp, err := client.Groups.AssignRole(*createdGroup, *role)
+				_, resp, err := client.Groups.AssignRole(ctx, *createdGroup, *role)
 				if resp == nil {
 					return nil, err
 				}
@@ -415,7 +415,7 @@ func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		if len(toAdd) > 0 {
 			for _, v := range toAdd {
 				var role = iam.Role{ID: v}
-				_, _, err := client.Groups.AssignRole(group, role)
+				_, _, err := client.Groups.AssignRole(ctx, group, role)
 				if err != nil {
 					return diag.FromErr(err)
 				}
@@ -425,7 +425,7 @@ func resourceIAMGroupUpdate(ctx context.Context, d *schema.ResourceData, m inter
 		// Remove every role. Simpler to remove and add newValues ones,
 		for _, v := range toRemove {
 			var role = iam.Role{ID: v}
-			_, resp, err := client.Groups.RemoveRole(group, role)
+			_, resp, err := client.Groups.RemoveRole(ctx, group, role)
 			if resp != nil && resp.StatusCode() == http.StatusUnprocessableEntity {
 				return nil // Role is already gone
 			}
@@ -509,7 +509,7 @@ func purgeGroupContent(ctx context.Context, client *iam.Client, id string, d *sc
 		for _, r := range *roles {
 			_ = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
 				var role = iam.Role{ID: r.ID}
-				_, resp, err := client.Groups.RemoveRole(group, role)
+				_, resp, err := client.Groups.RemoveRole(ctx, group, role)
 				if resp != nil && resp.StatusCode() == http.StatusUnprocessableEntity {
 					return resp.Response, nil // Role is already gone
 				}
