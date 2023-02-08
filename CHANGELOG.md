@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.42.0
+
+- Core: refactor debug log writing to more container friendly (Crossplane)
+
 ## v0.41.4
 
 - Core: update go-hsdp-api
