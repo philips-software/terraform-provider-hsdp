@@ -2,8 +2,8 @@ package config
 
 import (
 	"fmt"
+	"io"
 	"net/http"
-	"os"
 
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/go-retryablehttp"
@@ -28,35 +28,36 @@ import (
 
 // Config contains configuration for the client
 type Config struct {
-	BuildVersion        string `json:"-"`
-	ServiceID           string `json:"service_id"`
-	ServicePrivateKey   string `json:"service_private_key"`
-	S3CredsURL          string `json:"s3_creds_url"`
-	NotificationURL     string `json:"notification_url"`
-	IAMURL              string `json:"iam_url"`
-	IDMURL              string `json:"idm_url"`
-	SharedKey           string `json:"shared_key"`
-	SecretKey           string `json:"secret_key"`
-	MDMURL              string `json:"mdm_url"`
-	Region              string `json:"region"`
-	Environment         string `json:"environment"`
-	OAuth2ClientID      string `json:"oauth2_client_id"`
-	OAuth2ClientSecret  string `json:"oauth2_client_secret"`
-	STLURL              string `json:"stl_url"`
-	OrgAdminUsername    string `json:"org_admin_username"`
-	OrgAdminPassword    string `json:"org_admin_password"`
-	DebugLog            string `json:"debug_log"`
-	CartelHost          string `json:"cartel_host"`
-	CartelToken         string `json:"cartel_token"`
-	CartelSecret        string `json:"cartel_secret"`
-	CartelNoTLS         bool   `json:"cartel_no_tls"`
-	CartelSkipVerify    bool   `json:"cartel_skip_verify"`
-	RetryMax            int    `json:"retry_max"`
-	UAAUsername         string `json:"uaa_username"`
-	UAAPassword         string `json:"uaa_password"`
-	UAAURL              string `json:"uaa_url"`
-	AIInferenceEndpoint string `json:"ai_inference_endpoint"`
-	AIWorkspaceEndpoint string `json:"ai_workspace_endpoint"`
+	BuildVersion        string    `json:"-"`
+	ServiceID           string    `json:"service_id"`
+	ServicePrivateKey   string    `json:"service_private_key"`
+	S3CredsURL          string    `json:"s3_creds_url"`
+	NotificationURL     string    `json:"notification_url"`
+	IAMURL              string    `json:"iam_url"`
+	IDMURL              string    `json:"idm_url"`
+	SharedKey           string    `json:"shared_key"`
+	SecretKey           string    `json:"secret_key"`
+	MDMURL              string    `json:"mdm_url"`
+	Region              string    `json:"region"`
+	Environment         string    `json:"environment"`
+	OAuth2ClientID      string    `json:"oauth2_client_id"`
+	OAuth2ClientSecret  string    `json:"oauth2_client_secret"`
+	STLURL              string    `json:"stl_url"`
+	OrgAdminUsername    string    `json:"org_admin_username"`
+	OrgAdminPassword    string    `json:"org_admin_password"`
+	DebugLog            string    `json:"debug_log"`
+	DebugWriter         io.Writer `json:"-"`
+	CartelHost          string    `json:"cartel_host"`
+	CartelToken         string    `json:"cartel_token"`
+	CartelSecret        string    `json:"cartel_secret"`
+	CartelNoTLS         bool      `json:"cartel_no_tls"`
+	CartelSkipVerify    bool      `json:"cartel_skip_verify"`
+	RetryMax            int       `json:"retry_max"`
+	UAAUsername         string    `json:"uaa_username"`
+	UAAPassword         string    `json:"uaa_password"`
+	UAAURL              string    `json:"uaa_url"`
+	AIInferenceEndpoint string    `json:"ai_inference_endpoint"`
+	AIWorkspaceEndpoint string    `json:"ai_workspace_endpoint"`
 
 	iamClient             *iam.Client
 	cartelClient          *cartel.Client
@@ -67,7 +68,7 @@ type Config struct {
 	notificationClient    *notification.Client
 	mdmClient             *mdm.Client
 	discoveryClient       *discovery.Client
-	DebugFile             *os.File `json:"-"`
+	DebugStdErr           bool `json:"debugging"`
 	credsClientErr        error
 	cartelClientErr       error
 	iamClientErr          error
@@ -93,7 +94,7 @@ func (c *Config) IAMClient(principal ...*Principal) (*iam.Client, error) {
 			OAuth2Secret:   c.OAuth2ClientSecret,
 			Region:         c.Region,
 			Environment:    c.Environment,
-			DebugLog:       c.DebugLog,
+			DebugLog:       c.DebugWriter,
 			SharedKey:      c.SharedKey,
 			SecretKey:      c.SecretKey,
 			IDMURL:         c.IDMURL,
@@ -151,7 +152,7 @@ func (c *Config) DiscoveryClient(principal ...*Principal) (*discovery.Client, er
 		return discovery.NewClient(iamClient, &discovery.Config{
 			Region:      region,
 			Environment: environment,
-			DebugLog:    c.DebugLog,
+			DebugLog:    c.DebugWriter,
 		})
 	}
 	return c.discoveryClient, c.discoveryClientErr
@@ -192,7 +193,7 @@ func (c *Config) ConsoleClient(principal ...*Principal) (*console.Client, error)
 	}
 	client, err := console.NewClient(nil, &console.Config{
 		Region:   region,
-		DebugLog: c.DebugLog,
+		DebugLog: c.DebugWriter,
 	})
 
 	if err != nil {
@@ -248,7 +249,7 @@ func (c *Config) STLClient(principal ...*Principal) (*stl.Client, error) {
 	client, err := stl.NewClient(consoleClient, &stl.Config{
 		Region:    region,
 		STLAPIURL: stlURL,
-		DebugLog:  c.DebugLog,
+		DebugLog:  c.DebugWriter,
 	})
 	if err != nil {
 		return nil, err
@@ -280,7 +281,7 @@ func (c *Config) PKIClient(principal ...*Principal) (*pki.Client, error) {
 		return pki.NewClient(c.consoleClient, iamClient, &pki.Config{
 			Region:      region,
 			Environment: environment,
-			DebugLog:    c.DebugLog,
+			DebugLog:    c.DebugWriter,
 		})
 	}
 	return c.pkiClient, c.pkiClientErr
@@ -296,7 +297,7 @@ func (c *Config) S3CredsClientWithLogin(username, password string) (*s3creds.Cli
 	}
 	return s3creds.NewClient(newIAMClient, &s3creds.Config{
 		BaseURL:  c.S3CredsURL,
-		DebugLog: c.DebugLog,
+		DebugLog: c.DebugWriter,
 	})
 }
 
@@ -321,7 +322,7 @@ func (c *Config) NotificationClient(principal ...*Principal) (*notification.Clie
 			Region:          region,
 			Environment:     environment,
 			NotificationURL: endpoint,
-			DebugLog:        c.DebugLog,
+			DebugLog:        c.DebugWriter,
 		})
 	}
 	return c.notificationClient, c.notificationClientErr
@@ -341,7 +342,7 @@ func (c *Config) SetupIAMClient() {
 		OAuth2Secret:   c.OAuth2ClientSecret,
 		Region:         c.Region,
 		Environment:    c.Environment,
-		DebugLog:       c.DebugLog,
+		DebugLog:       c.DebugWriter,
 		SharedKey:      c.SharedKey,
 		SecretKey:      c.SecretKey,
 		IDMURL:         c.IDMURL,
@@ -402,7 +403,7 @@ func (c *Config) SetupSTLClient() {
 	}
 	client, err := stl.NewClient(c.consoleClient, &stl.Config{
 		STLAPIURL: c.STLURL,
-		DebugLog:  c.DebugLog,
+		DebugLog:  c.DebugWriter,
 	})
 	if err != nil {
 		c.stlClient = nil
@@ -432,7 +433,7 @@ func (c *Config) SetupS3CredsClient() {
 	}
 	client, err := s3creds.NewClient(c.iamClient, &s3creds.Config{
 		BaseURL:  c.S3CredsURL,
-		DebugLog: c.DebugLog,
+		DebugLog: c.DebugWriter,
 	})
 	if err != nil {
 		c.s3credsClient = nil
@@ -462,7 +463,7 @@ func (c *Config) SetupNotificationClient() {
 	}
 	client, err := notification.NewClient(c.iamClient, &notification.Config{
 		NotificationURL: c.NotificationURL,
-		DebugLog:        c.DebugLog,
+		DebugLog:        c.DebugWriter,
 	})
 	if err != nil {
 		c.notificationClient = nil
@@ -497,7 +498,7 @@ func (c *Config) SetupMDMClient() {
 	}
 	client, err := mdm.NewClient(c.iamClient, &mdm.Config{
 		BaseURL:  c.MDMURL,
-		DebugLog: c.DebugLog,
+		DebugLog: c.DebugWriter,
 	})
 	if err != nil {
 		c.mdmClient = nil
@@ -529,7 +530,7 @@ func (c *Config) SetupCartelClient() {
 		Secret:     c.CartelSecret,
 		NoTLS:      c.CartelNoTLS,
 		SkipVerify: c.CartelSkipVerify,
-		DebugLog:   c.DebugLog,
+		DebugLog:   c.DebugWriter,
 	})
 	if err != nil {
 		c.cartelClient = nil
@@ -543,7 +544,7 @@ func (c *Config) SetupCartelClient() {
 func (c *Config) SetupConsoleClient() {
 	client, err := console.NewClient(nil, &console.Config{
 		Region:   c.Region,
-		DebugLog: c.DebugLog,
+		DebugLog: c.DebugWriter,
 	})
 	if err != nil {
 		c.consoleClient = nil
@@ -572,7 +573,7 @@ func (c *Config) GetFHIRClientFromEndpoint(endpointURL string) (*cdr.Client, err
 		CDRURL:    "https://localhost.domain",
 		RootOrgID: "",
 		TimeZone:  c.TimeZone,
-		DebugLog:  c.DebugLog,
+		DebugLog:  c.DebugWriter,
 	})
 	if err != nil {
 		return nil, err
@@ -589,7 +590,7 @@ func (c *Config) GetCDLClientFromEndpoint(endpointURL string) (*cdl.Client, erro
 	}
 	client, err := cdl.NewClient(c.iamClient, &cdl.Config{
 		CDLURL:   "https://localhost.domain",
-		DebugLog: c.DebugLog,
+		DebugLog: c.DebugWriter,
 	})
 	if err != nil {
 		return nil, err
@@ -611,7 +612,7 @@ func (c *Config) GetCDLClient(baseURL, tenantID string) (*cdl.Client, error) {
 	client, err := cdl.NewClient(c.iamClient, &cdl.Config{
 		CDLURL:         baseURL,
 		OrganizationID: tenantID,
-		DebugLog:       c.DebugLog,
+		DebugLog:       c.DebugWriter,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("GetCDLClient: %w", err)
@@ -629,7 +630,7 @@ func (c *Config) GetAIInferenceClient(baseURL, tenantID string) (*inference.Clie
 	client, err := inference.NewClient(c.iamClient, &ai.Config{
 		BaseURL:        baseURL,
 		OrganizationID: tenantID,
-		DebugLog:       c.DebugLog,
+		DebugLog:       c.DebugWriter,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("getAIInferenceClient: %w", err)
@@ -647,7 +648,7 @@ func (c *Config) GetAIInferenceClientFromEndpoint(endpointURL string) (*inferenc
 	client, err := inference.NewClient(c.iamClient, &ai.Config{
 		BaseURL:        "http://localhost",
 		OrganizationID: "not-set",
-		DebugLog:       c.DebugLog,
+		DebugLog:       c.DebugWriter,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("getAIInferenceClientFromEndpoint: %w", err)
@@ -668,7 +669,7 @@ func (c *Config) GetAIWorkspaceClient(baseURL, tenantID string) (*workspace.Clie
 	client, err := workspace.NewClient(c.iamClient, &ai.Config{
 		BaseURL:        baseURL,
 		OrganizationID: tenantID,
-		DebugLog:       c.DebugLog,
+		DebugLog:       c.DebugWriter,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("getAIWorkspaceClient: %w", err)
@@ -686,7 +687,7 @@ func (c *Config) GetAIWorkspaceClientFromEndpoint(endpointURL string) (*workspac
 	client, err := workspace.NewClient(c.iamClient, &ai.Config{
 		BaseURL:        "http://localhost",
 		OrganizationID: "not-set",
-		DebugLog:       c.DebugLog,
+		DebugLog:       c.DebugWriter,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("getAIWorkspaceClientFromEndpoint: %w", err)
@@ -709,7 +710,7 @@ func (c *Config) GetFHIRClient(baseURL, rootOrgID string) (*cdr.Client, error) {
 		CDRURL:    baseURL,
 		RootOrgID: rootOrgID,
 		TimeZone:  c.TimeZone,
-		DebugLog:  c.DebugLog,
+		DebugLog:  c.DebugWriter,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("GetFHIRClient: %w", err)
@@ -718,9 +719,9 @@ func (c *Config) GetFHIRClient(baseURL, rootOrgID string) (*cdr.Client, error) {
 }
 
 func (c *Config) Debug(format string, a ...interface{}) (int, error) {
-	if c.DebugFile != nil {
+	if c.DebugWriter != nil {
 		output := fmt.Sprintf(format, a...)
-		return c.DebugFile.WriteString(output)
+		return io.WriteString(c.DebugWriter, output)
 	}
 	return 0, nil
 }
@@ -735,7 +736,7 @@ func (c *Config) GetDICOMConfigClient(url string) (*dicom.Client, error) {
 	client, err := dicom.NewClient(c.iamClient, &dicom.Config{
 		DICOMConfigURL: url,
 		TimeZone:       c.TimeZone,
-		DebugLog:       c.DebugLog,
+		DebugLog:       c.DebugWriter,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("GetDICOMConfigClient: %w", err)
@@ -752,7 +753,7 @@ func (c *Config) SetupPKIClient() {
 	client, err := pki.NewClient(c.consoleClient, c.iamClient, &pki.Config{
 		Region:      c.Region,
 		Environment: c.Environment,
-		DebugLog:    c.DebugLog,
+		DebugLog:    c.DebugWriter,
 	})
 	if err != nil {
 		c.pkiClient = nil
@@ -771,7 +772,7 @@ func (c *Config) SetupDiscoveryClient() {
 	client, err := discovery.NewClient(c.iamClient, &discovery.Config{
 		Region:      c.Region,
 		Environment: c.Environment,
-		DebugLog:    c.DebugLog,
+		DebugLog:    c.DebugWriter,
 	})
 	if err != nil {
 		c.discoveryClient = nil

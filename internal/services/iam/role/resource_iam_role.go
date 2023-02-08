@@ -143,7 +143,7 @@ func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, m interf
 	return diags
 }
 
-func resourceIAMRoleRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMRoleRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -174,7 +174,15 @@ func resourceIAMRoleRead(_ context.Context, d *schema.ResourceData, m interface{
 	_ = d.Set("name", role.Name)
 	_ = d.Set("managing_organization", role.ManagingOrganization)
 
-	permissions, resp, err := client.Roles.GetRolePermissions(*role)
+	var permissions *[]string
+
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
+		permissions, resp, err = client.Roles.GetRolePermissions(*role)
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		if resp.StatusCode() == http.StatusForbidden { // IAM limitation
 			return diags // Use Terraform as source of truth
