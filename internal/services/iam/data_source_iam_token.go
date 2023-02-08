@@ -38,12 +38,11 @@ func dataSourceIAMTokenRead(_ context.Context, d *schema.ResourceData, meta inte
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
-	d.SetId("token-" + client.BaseIAMURL().Host)
 	token, err := client.Token()
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	d.SetId("token-" + client.BaseIAMURL().Host)
 	_ = d.Set("access_token", token)
 	_ = d.Set("expires_at", client.Expires())
 	_ = d.Set("id_token", client.IDToken())

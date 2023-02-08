@@ -305,7 +305,7 @@ func resourceIAMClientUpdate(ctx context.Context, d *schema.ResourceData, m inte
 	return diags
 }
 
-func resourceIAMClientDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMClientDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -324,8 +324,21 @@ func resourceIAMClientDelete(_ context.Context, d *schema.ResourceData, m interf
 
 	var cl iam.ApplicationClient
 	cl.ID = d.Id()
-	ok, _, err := client.Clients.DeleteClient(cl)
+	var ok bool
+	var resp *iam.Response
+
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
+		ok, resp, err = client.Clients.DeleteClient(cl)
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
+		if resp != nil && resp.StatusCode() == http.StatusNotFound { // Gone already
+			d.SetId("")
+			return diags
+		}
 		return diag.FromErr(err)
 	}
 	if !ok {

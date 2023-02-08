@@ -2,11 +2,14 @@ package mdm
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/philips-software/go-hsdp-api/connect/mdm"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
 func DataSourceConnectMDMRegions() *schema.Resource {
@@ -43,7 +46,7 @@ func DataSourceConnectMDMRegions() *schema.Resource {
 
 }
 
-func dataSourceConnectMDMRegionsRead(_ context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceConnectMDMRegionsRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	c := meta.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -53,7 +56,16 @@ func dataSourceConnectMDMRegionsRead(_ context.Context, d *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 
-	resources, _, err := client.Regions.GetRegions(nil)
+	var resources *[]mdm.Region
+	var resp *mdm.Response
+
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
+		resources, resp, err = client.Regions.GetRegions(nil)
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}

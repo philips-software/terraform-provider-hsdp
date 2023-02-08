@@ -40,7 +40,7 @@ arguments in its provider block. The following environment variables are recogni
 | HSDP_IAM_SERVICE_ID          | service_id          | Optional |             |
 | HSDP_IAM_SERVICE_PRIVATE_KEY | service_private_key | Optional |             |
 | HSDP_IAM_ORG_ADMIN_USERNAME  | org_admin_username  | Optional |             |
-| HSDP_IAM_ORG_ADMIN_PASSWORD  | org_admin_password  | Optional |
+| HSDP_IAM_ORG_ADMIN_PASSWORD  | org_admin_password  | Optional |             |
 | HSDP_IAM_OAUTH2_CLIENT_ID    | oauth2_client_id    | Optional |             |
 | HSDP_IAM_OAUTH2_PASSWORD     | oauth2_password     | Optional |             |
 | HSDP_SHARED_KEY              | shared_key          | Optional |             |
@@ -48,6 +48,7 @@ arguments in its provider block. The following environment variables are recogni
 | HSDP_UAA_USERNAME            | uaa_username        | Optional |             |
 | HSDP_UAA_PASSWORD            | uaa_password        | Optional |             |
 | HSDP_DEBUG_LOG               | debug_log           | Optional |             |
+| HSDP_DEBUG_STDERR            | debug_stderr        | Optional |             |
 
 ## Argument Reference
 
@@ -77,3 +78,4 @@ In addition to generic provider arguments (e.g. alias and version), the followin
 * `cartel_secret` - (Optional) The cartel secret as provided by HSDP.
 * `retry_max` - (Optional) Integer, when > 0 will use a retry-able HTTP client and retry requests when applicable.
 * `debug_log` - (Optional) If set to a path, when debug is enabled outputs details to this file
+* `debug_stderr` - (Optional) If set to true sends debug logs to `stderr`

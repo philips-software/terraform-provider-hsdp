@@ -186,8 +186,12 @@ func resourceIAMApplicationDelete(ctx context.Context, d *schema.ResourceData, m
 	}
 	waitForDelete := d.Get("wait_for_delete").(bool)
 
-	ok, _, err := client.Applications.DeleteApplication(*app)
+	ok, resp, err := client.Applications.DeleteApplication(*app)
 	if err != nil {
+		if resp.StatusCode() == http.StatusNotFound { // Gone already
+			d.SetId("")
+			return diags
+		}
 		return diag.FromErr(err)
 	}
 	if !ok {
@@ -207,6 +211,7 @@ func resourceIAMApplicationDelete(ctx context.Context, d *schema.ResourceData, m
 			return diag.FromErr(fmt.Errorf("waiting for delete: %w", err))
 		}
 	}
+	d.SetId("")
 	return diags
 }
 

@@ -65,6 +65,7 @@ const (
 	UAAUsername      = "HSDP_UAA_USERNAME"
 	UAAPassword      = "HSDP_UAA_PASSWORD"
 	DebugLog         = "HSDP_DEBUG_LOG"
+	DebugStdErr      = "HSDP_DEBUG_STDERR"
 )
 
 // Provider returns an instance of the HSDP provider
@@ -234,6 +235,12 @@ func Provider(build string) *schema.Provider {
 				Optional:    true,
 				DefaultFunc: schema.EnvDefaultFunc(DebugLog, nil),
 				Description: descriptions["debug_log"],
+			},
+			"debug_stderr": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				DefaultFunc: schema.EnvDefaultFunc(DebugStdErr, nil),
+				Description: descriptions["debug_stderr"],
 			},
 			"ai_inference_endpoint": {
 				Type:     schema.TypeString,
@@ -413,6 +420,7 @@ func init() {
 		"shared_key":          "The shared key",
 		"secret_key":          "The secret key",
 		"debug_log":           "The log file to write debugging output to",
+		"debug_stderr":        "Debug to stderr",
 		"cartel_host":         "The Cartel host",
 		"cartel_token":        "The Cartel token key",
 		"cartel_secret":       "The Cartel secret key",
@@ -450,6 +458,7 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.CartelToken = d.Get("cartel_token").(string)
 		c.CartelSecret = d.Get("cartel_secret").(string)
 		c.CartelNoTLS = d.Get("cartel_no_tls").(bool)
+		c.DebugStdErr = d.Get("debug_stderr").(bool)
 		c.CartelSkipVerify = d.Get("cartel_skip_verify").(bool)
 		c.RetryMax = d.Get("retry_max").(int)
 		c.UAAUsername = d.Get("uaa_username").(string)
@@ -465,7 +474,15 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 			file, _ := os.ReadFile(credentialsFile)
 			_ = json.Unmarshal(file, &c)
 		}
-
+		if c.DebugLog != "" {
+			debugFile, err := os.OpenFile(c.DebugLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+			if err == nil {
+				c.DebugWriter = debugFile
+			}
+		}
+		if c.DebugStdErr && c.DebugWriter == nil { // Crossplane
+			c.DebugWriter = os.Stderr
+		}
 		c.SetupIAMClient()
 		c.SetupS3CredsClient()
 		c.SetupCartelClient()
@@ -475,15 +492,6 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.SetupNotificationClient()
 		c.SetupMDMClient()
 		c.SetupDiscoveryClient()
-
-		if c.DebugLog != "" {
-			debugFile, err := os.OpenFile(c.DebugLog, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
-			if err != nil {
-				c.DebugFile = nil
-			} else {
-				c.DebugFile = debugFile
-			}
-		}
 
 		ma, err := jsonformat.NewMarshaller(false, "", "", fhirversion.STU3)
 		if err != nil {

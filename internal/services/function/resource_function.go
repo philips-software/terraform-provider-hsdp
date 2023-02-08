@@ -617,7 +617,7 @@ func newIronClient(d *schema.ResourceData, m interface{}) (*iron.Client, *iron.C
 		ProjectID: cfg["project_id"],
 		Token:     cfg["token"],
 		UserID:    cfg["user_id"],
-		DebugLog:  c.DebugLog,
+		DebugLog:  c.DebugWriter,
 		ClusterInfo: []iron.ClusterInfo{
 			{
 				ClusterID:   cfg["cluster_info_0_cluster_id"],

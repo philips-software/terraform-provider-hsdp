@@ -131,7 +131,7 @@ func resourceIAMOrgCreate(ctx context.Context, d *schema.ResourceData, m interfa
 	return resourceIAMOrgRead(ctx, d, m)
 }
 
-func resourceIAMOrgRead(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceIAMOrgRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -142,9 +142,18 @@ func resourceIAMOrgRead(_ context.Context, d *schema.ResourceData, m interface{}
 	}
 
 	id := d.Id()
-	org, resp, err := client.Organizations.GetOrganizationByID(id)
+	var resp *iam.Response
+	var org *iam.Organization
+
+	err = tools.TryHTTPCall(ctx, 8, func() (*http.Response, error) {
+		org, resp, err = client.Organizations.GetOrganizationByID(id)
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
-		if resp != nil && resp.StatusCode() == http.StatusNotFound {
+		if resp != nil && resp.StatusCode() == http.StatusNotFound { // Gone
 			d.SetId("")
 			return nil
 		}
