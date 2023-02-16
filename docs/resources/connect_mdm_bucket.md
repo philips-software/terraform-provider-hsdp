@@ -1,5 +1,8 @@
 ---
 subcategory: "Master Data Management (MDM)"
+page_title: "HSDP: hsdp_connect_mdm_bucket"
+description: |-
+  Manages HSDP Connect MDM Buckets
 ---
 
 # hsdp_connect_mdm_bucket

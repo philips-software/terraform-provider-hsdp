@@ -1,5 +1,8 @@
 ---
 subcategory: "DICOM Store"
+page_title: "HSDP: hsdp_dicom_repository"
+description: |-
+  Manages HSDP DICOM Repository resources
 ---
 
 # hsdp_dicom_repository

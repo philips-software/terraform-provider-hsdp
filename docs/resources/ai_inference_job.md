@@ -1,10 +1,13 @@
 ---
 subcategory: "AI Inference"
+page_title: "HSDP: hsdp_ai_inference_job"
+description: |-
+  Manages HSDP AI Inference Jobs
 ---
 
 # hsdp_ai_inference_job
 
-Manages HSDP IA Inference Jobs
+Manages HSDP AI Inference Jobs
 
 ## Example usage
 

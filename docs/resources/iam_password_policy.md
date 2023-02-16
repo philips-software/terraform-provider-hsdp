@@ -1,5 +1,8 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+page_title: "HSDP: hsdp_iam_password_policy"
+description: |-
+  Manages HSDP IAM Password policy resources
 ---
 
 # hsdp_iam_password_policy

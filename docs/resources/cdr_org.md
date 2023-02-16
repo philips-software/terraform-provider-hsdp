@@ -1,5 +1,8 @@
 ---
 subcategory: "Clinical Data Repository (CDR)"
+page_title: "HSDP: hsdp_cdr_org"
+description: |-
+  Manages HSDP CDR Organizations
 ---
 
 # hsdp_cdr_org

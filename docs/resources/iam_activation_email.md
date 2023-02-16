@@ -1,5 +1,8 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+page_title: "HSDP: hsdp_iam_activation_email"
+description: |-
+  Manages HSDP IAM Activation email resources
 ---
 
 # hsdp_iam_activation_email

@@ -1,5 +1,8 @@
 ---
 subcategory: "Master Data Management (MDM)"
+page_title: "HSDP: hsdp_connect_mdm_proposition"
+description: |-
+  Manages HSDP Connect MDM Propositions
 ---
 
 # hsdp_connect_mdm_proposition

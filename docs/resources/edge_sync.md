@@ -1,5 +1,8 @@
 ---
 subcategory: "HealthSuite Edge"
+page_title: "HSDP: hsdp_edge_sync"
+description: |-
+  Manages HSDP Edge synchronizations
 ---
 
 # hsdp_edge_sync

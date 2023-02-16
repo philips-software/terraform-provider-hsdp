@@ -1,5 +1,8 @@
 ---
 subcategory: "DICOM Store"
+page_title: "HSDP: hsdp_dicom_store_config"
+description: |-
+  Manages HSDP DICOM Store configurations
 ---
 
 # hsdp_dicom_store_config

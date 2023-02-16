@@ -1,5 +1,8 @@
 ---
 subcategory: "Notification"
+page_title: "HSDP: hsdp_notification_subscription"
+description: |-
+  Manages HSDP Notifation Subscription resources
 ---
 
 # hsdp_notification_subscription

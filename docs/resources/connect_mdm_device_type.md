@@ -1,5 +1,8 @@
 ---
 subcategory: "Master Data Management (MDM)"
+page_title: "HSDP: hsdp_connect_mdm_device_type"
+description: |-
+  Manages HSDP Connect MDM Device Types
 ---
 
 # hsdp_connect_mdm_device_type

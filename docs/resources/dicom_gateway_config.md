@@ -1,5 +1,8 @@
 ---
 subcategory: "DICOM Gateway"
+page_title: "HSDP: hsdp_dicom_gateway_config"
+description: |-
+  Manages HSDP DICOM Gateway configurations
 ---
 
 # hsdp_dicom_gateway_config

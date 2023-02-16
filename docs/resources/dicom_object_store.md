@@ -1,5 +1,8 @@
 ---
 subcategory: "DICOM Store"
+page_title: "HSDP: hsdp_dicom_object_store"
+description: |-
+  Manages HSDP DICOM Object Stores
 ---
 
 # hsdp_dicom_object_store

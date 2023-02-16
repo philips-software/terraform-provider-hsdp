@@ -1,5 +1,8 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+page_title: "HSDP: hsdp_iam_group_membership"
+description: |-
+  Manages HSDP IAM Group membership resources
 ---
 
 # hsdp_iam_group_membership

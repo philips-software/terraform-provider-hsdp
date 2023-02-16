@@ -1,5 +1,8 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+page_title: "HSDP: hsdp_iam_device"
+description: |-
+  Manages HSDP IAM Device resources
 ---
 
 # hsdp_iam_device

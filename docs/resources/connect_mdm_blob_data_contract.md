@@ -1,5 +1,8 @@
 ---
 subcategory: "Master Data Management (MDM)"
+page_title: "HSDP: hsdp_connect_mdm_blob_data_contract"
+description: |-
+  Manages HSDP Connect MDM Blob data contracts
 ---
 
 # hsdp_connect_mdm_blob_data_contract

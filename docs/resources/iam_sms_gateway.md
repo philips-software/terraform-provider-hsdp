@@ -1,5 +1,8 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+page_title: "HSDP: hsdp_iam_sms_gateway"
+description: |-
+  Manages HSDP IAM SMS Gateway resources
 ---
 
 # hsdp_iam_sms_gateway

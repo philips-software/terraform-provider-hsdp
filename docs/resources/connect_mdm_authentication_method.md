@@ -1,5 +1,8 @@
 ---
 subcategory: "Master Data Management (MDM)"
+page_title: "HSDP: hsdp_connect_mdm_authentication_method"
+description: |-
+  Manages HSDP Connect MDM Authentication methods
 ---
 
 # hsdp_connect_mdm_authentication_method

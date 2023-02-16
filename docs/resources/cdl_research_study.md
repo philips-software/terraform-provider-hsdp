@@ -1,5 +1,8 @@
 ---
 subcategory: "Clinical Data Lake (CDL)"
+page_title: "HSDP: hsdp_cdl_research_study"
+description: |-
+  Manages HSDP CDL Research studies
 ---
 
 # hsdp_cdl_research_study

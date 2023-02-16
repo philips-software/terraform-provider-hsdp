@@ -1,5 +1,8 @@
 ---
 subcategory: "Autoscaler"
+page_title: "HSDP: hsdp_metrics_autoscaler"
+description: |-
+  Manages HSDP Metrics autoscalers
 ---
 
 # hsdp_metrics_autoscaler

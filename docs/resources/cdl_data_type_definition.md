@@ -1,5 +1,8 @@
 ---
 subcategory: "Clinical Data Lake (CDL)"
+page_title: "HSDP: hsdp_cdl_data_type_definition"
+description: |-
+  Manages HSDP CDL Data Type Definitions
 ---
 
 # hsdp_cdl_data_type_definition

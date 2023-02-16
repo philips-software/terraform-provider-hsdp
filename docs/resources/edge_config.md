@@ -1,5 +1,8 @@
 ---
 subcategory: "HealthSuite Edge"
+page_title: "HSDP: hsdp_edge_config"
+description: |-
+  Manages HSDP Edge configurations
 ---
 
 # hsdp_edge_config

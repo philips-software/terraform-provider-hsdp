@@ -1,5 +1,8 @@
 ---
 subcategory: "Clinical Data Repository (CDR)"
+page_title: "HSDP: hsdp_cdr_practitioner"
+description: |-
+  Manages HSDP CDR Practitioner resources
 ---
 
 # hsdp_cdr_practitioner

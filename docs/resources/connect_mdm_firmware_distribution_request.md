@@ -1,5 +1,8 @@
 ---
 subcategory: "Master Data Management (MDM)"
+page_title: "HSDP: hsdp_connect_mdm_firmware_distribution_request"
+description: |-
+  Manages HSDP Connect MDM Firmware distribution requests
 ---
 
 # hsdp_connect_mdm_firmware_distribution_request

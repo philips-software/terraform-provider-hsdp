@@ -1,5 +1,8 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+page_title: "HSDP: hsdp_iam_mfa_policy"
+description: |-
+  Manages HSDP IAM MFA Policy resources
 ---
 
 # hsdp_iam_mfa_policy

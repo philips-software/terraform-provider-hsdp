@@ -1,5 +1,8 @@
 ---
 subcategory: "Functions"
+page_title: "HSDP: hsdp_function"
+description: |-
+  Manages HSDP Function definitions
 ---
 
 # hsdp_function
