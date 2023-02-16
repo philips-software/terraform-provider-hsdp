@@ -1,5 +1,8 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+page_title: "HSDP: hsdp_iam_client"
+description: |-
+  Manages HSDP IAM Client resources
 ---
 
 # hsdp_iam_client

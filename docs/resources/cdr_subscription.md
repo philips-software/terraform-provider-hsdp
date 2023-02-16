@@ -1,5 +1,8 @@
 ---
 subcategory: "Clinical Data Repository (CDR)"
+page_title: "HSDP: hsdp_cdr_subscription"
+description: |-
+  Manages HSDP CDR Subscription resources
 ---
 
 # hsdp_cdr_subscription

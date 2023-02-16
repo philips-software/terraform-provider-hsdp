@@ -1,5 +1,8 @@
 ---
 subcategory: "Master Data Management (MDM)"
+page_title: "HSDP: hsdp_connect_mdm_service_reference"
+description: |-
+  Manages HSDP Connect MDM Service references
 ---
 
 # hsdp_connect_mdm_service_reference

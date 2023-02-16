@@ -1,5 +1,8 @@
 ---
 subcategory: "HealthSuite Edge"
+page_title: "HSDP: hsdp_edge_app"
+description: |-
+  Manages HSDP Edge applications
 ---
 
 # hsdp_edge_app

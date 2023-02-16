@@ -1,5 +1,8 @@
 ---
 subcategory: "Clinical Data Lake (CDL)"
+page_title: "HSDP: hsdp_cdl_export_route"
+description: |-
+  Manages HSDP CDL Export routes
 ---
 
 # hsdp_cdl_export_route

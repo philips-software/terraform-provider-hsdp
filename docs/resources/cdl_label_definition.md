@@ -1,5 +1,8 @@
 ---
 subcategory: "Clinical Data Lake (CDL)"
+page_title: "HSDP: hsdp_cdl_label_definition"
+description: |-
+  Manages HSDP CDL Label definitions
 ---
 
 # hsdp_cdl_label_definition

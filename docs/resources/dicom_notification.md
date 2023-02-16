@@ -1,5 +1,8 @@
 ---
 subcategory: "DICOM Store"
+page_title: "HSDP: hsdp_dicom_notification"
+description: |-
+  Manages HSDP DICOM Store notifications
 ---
 
 # hsdp_dicom_notification

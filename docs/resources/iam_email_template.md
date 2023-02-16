@@ -1,5 +1,8 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+page_title: "HSDP: hsdp_iam_email_template"
+description: |-
+  Manages HSDP IAM Email template resources
 ---
 
 # hsdp_iam_email_template

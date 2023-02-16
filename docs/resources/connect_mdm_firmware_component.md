@@ -1,5 +1,8 @@
 ---
 subcategory: "Master Data Management (MDM)"
+page_title: "HSDP: hsdp_connect_mdm_firmware_component"
+description: |-
+  Manages HSDP Connect MDM Firmware components
 ---
 
 # hsdp_connect_mdm_firmware_component

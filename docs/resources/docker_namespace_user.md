@@ -1,5 +1,8 @@
 ---
 subcategory: "Docker Registry"
+page_title: "HSDP: hsdp_docker_namespace_user"
+description: |-
+  Manages HSDP Docker namespace users
 ---
 
 # hsdp_docker_namespace_user

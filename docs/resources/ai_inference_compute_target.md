@@ -1,5 +1,8 @@
 ---
 subcategory: "AI Inference"
+page_title: "HSDP: hsdp_ai_inference_compute_target"
+description: |-
+  Manages HSDP AI Inference Compute Targets
 ---
 
 # hsdp_ai_inference_compute_target

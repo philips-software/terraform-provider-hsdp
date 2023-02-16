@@ -1,5 +1,8 @@
 ---
 subcategory: "AI Workspace"
+page_title: "HSDP: hsdp_ai_workspace"
+description: |-
+  Manages HSDP AI Workspaces
 ---
 
 # hsdp_ai_workspace

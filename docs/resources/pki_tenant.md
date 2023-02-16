@@ -1,5 +1,8 @@
 ---
 subcategory: "Public Key Infrastructure"
+page_title: "HSDP: hsdp_pki_tenant"
+description: |-
+  Manages HSDP PKI tenants
 ---
 
 # hsdp_pki_tenant

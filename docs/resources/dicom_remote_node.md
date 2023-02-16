@@ -1,5 +1,8 @@
 ---
 subcategory: "DICOM Gateway"
+page_title: "HSDP: hsdp_dicom_remote_node"
+description: |-
+  Manages HSDP DICOM Remote nodes
 ---
 
 # hsdp_dicom_remote_node

@@ -1,5 +1,8 @@
 ---
 subcategory: "Container Host"
+page_title: "HSDP: hsdp_container_host"
+description: |-
+  Manages HSDP Container Host resources
 ---
 
 # hsdp_container_host

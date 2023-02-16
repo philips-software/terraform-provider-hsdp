@@ -1,5 +1,8 @@
 ---
 subcategory: "HealthSuite Edge"
+page_title: "HSDP: hsdp_edge_custom_cert"
+description: |-
+  Manages HSDP Edge custom certificates
 ---
 
 # hsdp_edge_custom_cert

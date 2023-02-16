@@ -1,5 +1,8 @@
 ---
 subcategory: "Master Data Management (MDM)"
+page_title: "HSDP: hsdp_connect_mdm_blobl_subscription"
+description: |-
+  Manages HSDP Connect MDM Blob subscriptions
 ---
 
 # hsdp_connect_mdm_blob_subscription

@@ -1,5 +1,8 @@
 ---
 subcategory: "Notification"
+page_title: "HSDP: hsdp_notification_topic"
+description: |-
+  Manages HSDP Notifation Topic resources
 ---
 
 # hsdp_notification_topic

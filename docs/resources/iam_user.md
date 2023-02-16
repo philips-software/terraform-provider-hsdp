@@ -1,5 +1,8 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+page_title: "HSDP: hsdp_iam_user"
+description: |-
+  Manages HSDP IAM Users
 ---
 
 # hsdp_iam_user

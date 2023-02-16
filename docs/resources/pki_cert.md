@@ -1,5 +1,8 @@
 ---
 subcategory: "Public Key Infrastructure"
+page_title: "HSDP: hsdp_pki_cert"
+description: |-
+  Manages HSDP PKI certificates
 ---
 
 # hsdp_pki_cert

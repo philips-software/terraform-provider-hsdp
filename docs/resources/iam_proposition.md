@@ -1,5 +1,8 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+page_title: "HSDP: hsdp_iam_proposition"
+description: |-
+  Manages HSDP IAM Proposition resources
 ---
 
 # hsdp_iam_proposition

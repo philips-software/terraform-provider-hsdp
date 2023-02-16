@@ -1,5 +1,8 @@
 ---
 subcategory: "Identity and Access Management (IAM)"
+page_title: "HSDP: hsdp_iam_sms_template"
+description: |-
+  Manages HSDP IAM SMS Template resources
 ---
 
 # hsdp_iam_sms_template

@@ -1,5 +1,8 @@
 ---
 subcategory: "AI Inference"
+page_title: "HSDP: hsdp_ai_inference_model"
+description: |-
+  Manages HSDP AI Inference Models
 ---
 
 # hsdp_ai_inference_model

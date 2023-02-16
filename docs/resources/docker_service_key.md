@@ -1,5 +1,8 @@
 ---
 subcategory: "Docker Registry"
+page_title: "HSDP: hsdp_docker_service_key"
+description: |-
+  Manages HSDP Docker service keys
 ---
 
 # hsdp_docker_service_key

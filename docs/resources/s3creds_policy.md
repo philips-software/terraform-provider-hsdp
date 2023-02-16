@@ -1,5 +1,8 @@
 ---
 subcategory: "S3 Credentials"
+page_title: "HSDP: hsdp_s3creds_policy"
+description: |-
+  Manages HSDP S3 Credentials policies
 ---
 
 # hsdp_s3creds_policy

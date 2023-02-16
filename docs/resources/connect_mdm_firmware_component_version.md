@@ -1,5 +1,9 @@
 ---
 subcategory: "Master Data Management (MDM)"
+page_title: "HSDP: hsdp_connect_mdm_component_version"
+description: |-
+  Manages HSDP Connect MDM Firmware Component versions
+
 ---
 
 # hsdp_connect_mdm_firmware_component_version
