@@ -10,8 +10,8 @@ import (
 	stu3pb "github.com/google/fhir/go/proto/google/fhir/proto/stu3/resources_go_proto"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/philips-software/terraform-provider-hsdp/internal/acc"
 )
 
