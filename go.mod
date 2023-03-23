@@ -12,7 +12,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.26.1
-	github.com/hashicorp/terraform-plugin-testing v1.1.0
+	github.com/hashicorp/terraform-plugin-testing v1.2.0
 	github.com/hasura/go-graphql-client v0.9.2
 	github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152
 	github.com/loafoe/easyssh-proxy/v2 v2.0.4
@@ -45,7 +45,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-hclog v1.4.0 // indirect
+	github.com/hashicorp/go-hclog v1.5.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-plugin v1.4.8 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
