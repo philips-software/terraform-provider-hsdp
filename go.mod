@@ -3,7 +3,7 @@ module github.com/philips-software/terraform-provider-hsdp
 go 1.19
 
 require (
-	github.com/cenkalti/backoff/v4 v4.2.0
+	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/docker/distribution v2.8.1+incompatible
 	github.com/google/fhir/go v0.7.4
 	github.com/google/uuid v1.3.0
