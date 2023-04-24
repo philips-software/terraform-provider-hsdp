@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"os"
 
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/group_membership"
+
 	"github.com/google/fhir/go/fhirversion"
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -317,7 +319,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_application":                   mdm.ResourceMDMApplication(),
 			"hsdp_connect_mdm_firmware_component_version":    mdm.ResourceConnectMDMFirmwareComponentVersion(),
 			"hsdp_connect_mdm_firmware_distribution_request": mdm.ResourceConnectMDMFirmwareDistributionRequest(),
-			"hsdp_iam_group_membership":                      iam.ResourceIAMGroupMembership(),
+			"hsdp_iam_group_membership":                      group_membership.ResourceIAMGroupMembership(),
 			"hsdp_dicom_notification":                        dicom.ResourceDICOMNotification(),
 			"hsdp_cdr_practitioner":                          practitioner.ResourceCDRPractitioner(),
 			"hsdp_iam_role_sharing_policy":                   role_sharing_policy.ResourceRoleSharingPolicy(),
