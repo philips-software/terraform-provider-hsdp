@@ -42,6 +42,20 @@ resource "hsdp_iam_user" "test" {
   last_name       = "Developer"
   password        = "DoNot@123"
   organization_id = "%s"
- 
-}`, name, name, parentOrgID)
+}
+
+resource "hsdp_iam_group" "test" {
+  name = "test-%s"
+  managing_organization = "%s"
+  description = "Acceptance Test for User"
+  users = [hsdp_iam_user.test.id]
+  roles = []
+}
+`,
+		// IAM_USER
+		name, name, parentOrgID,
+		// IAM_GROUP
+		name,
+		parentOrgID,
+	)
 }

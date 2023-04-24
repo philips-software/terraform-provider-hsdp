@@ -8,11 +8,12 @@ import (
 	"path"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+
 	"github.com/google/fhir/go/proto/google/fhir/proto/stu3/datatypes_go_proto"
 	"github.com/google/fhir/go/proto/google/fhir/proto/stu3/resources_go_proto"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	jsonpatch "github.com/herkyl/patchwerk"
 	"github.com/philips-software/go-hsdp-api/cdr"
 	"github.com/philips-software/go-hsdp-api/cdr/helper/fhir/stu3"
@@ -157,7 +158,7 @@ func stu3Update(_ context.Context, client *cdr.Client, d *schema.ResourceData, m
 	return diags
 }
 
-func stu3PurgeStateRefreshFunc(client *cdr.Client, purgeStatusURL, id string) resource.StateRefreshFunc {
+func stu3PurgeStateRefreshFunc(client *cdr.Client, purgeStatusURL, id string) retry.StateRefreshFunc {
 	statusURL, err := url.Parse(purgeStatusURL)
 	if err != nil {
 		return func() (result interface{}, state string, err error) {
@@ -227,7 +228,7 @@ func stu3Delete(ctx context.Context, client *cdr.Client, d *schema.ResourceData,
 	if resp.StatusCode() != http.StatusAccepted {
 		return diag.FromErr(fmt.Errorf("$purge operation returned unexpected statusCode %d", resp.StatusCode()))
 	}
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"PURGING"},
 		Target:     []string{"SUCCESS"},
 		Refresh:    stu3PurgeStateRefreshFunc(client, resp.Header.Get("Location"), id),

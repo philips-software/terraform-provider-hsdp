@@ -11,9 +11,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/loafoe/easyssh-proxy/v2"
 	"github.com/philips-software/go-hsdp-api/cartel"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
@@ -286,7 +286,7 @@ func fileFieldSchema() *schema.Resource {
 		},
 	}
 }
-func instanceStateRefreshFunc(client *cartel.Client, nameTag string, failStates []string) resource.StateRefreshFunc {
+func instanceStateRefreshFunc(client *cartel.Client, nameTag string, failStates []string) retry.StateRefreshFunc {
 	return func() (interface{}, string, error) {
 		state, resp, err := client.GetDeploymentState(nameTag)
 		if err != nil {
@@ -454,12 +454,9 @@ func resourceContainerHostCreate(ctx context.Context, d *schema.ResourceData, m 
 	}
 
 	// Randomize checks a bit in case of many concurrent creates
-	rand.Seed(time.Now().UnixNano())
-	min := 5
-	max := 15
-	minTimeout := rand.Intn(max-min+1) + min
+	minTimeout := rand.Intn(15-5) + 5
 
-	stateConf := &resource.StateChangeConf{
+	stateConf := &retry.StateChangeConf{
 		Pending:    []string{"provisioning", "indeterminate"},
 		Target:     []string{"succeeded"},
 		Refresh:    instanceStateRefreshFunc(client, tagName, []string{"failed", "terminated", "shutting-down"}),

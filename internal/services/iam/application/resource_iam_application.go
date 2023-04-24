@@ -6,10 +6,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/philips-software/go-hsdp-api/iam"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
@@ -198,7 +199,7 @@ func resourceIAMApplicationDelete(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(config.ErrInvalidResponse)
 	}
 	if waitForDelete {
-		stateConf := &resource.StateChangeConf{
+		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"IN_PROGRESS", "QUEUED", "indeterminate"},
 			Target:     []string{"SUCCESS"},
 			Refresh:    checkAppDeleteStatus(client, id),
@@ -215,7 +216,7 @@ func resourceIAMApplicationDelete(ctx context.Context, d *schema.ResourceData, m
 	return diags
 }
 
-func checkAppDeleteStatus(client *iam.Client, id string) resource.StateRefreshFunc {
+func checkAppDeleteStatus(client *iam.Client, id string) retry.StateRefreshFunc {
 	return func() (result interface{}, state string, err error) {
 		appStatus, resp, err := client.Applications.DeleteStatus(id)
 		if err != nil {

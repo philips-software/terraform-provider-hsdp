@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/philips-software/go-hsdp-api/iam"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
@@ -225,7 +226,7 @@ func resourceIAMOrgDelete(ctx context.Context, d *schema.ResourceData, m interfa
 		return diag.FromErr(config.ErrInvalidResponse)
 	}
 	if waitForDelete {
-		stateConf := &resource.StateChangeConf{
+		stateConf := &retry.StateChangeConf{
 			Pending:    []string{"IN_PROGRESS", "QUEUED", "indeterminate"},
 			Target:     []string{"SUCCESS"},
 			Refresh:    checkOrgDeleteStatus(client, id),
@@ -241,7 +242,7 @@ func resourceIAMOrgDelete(ctx context.Context, d *schema.ResourceData, m interfa
 	return diags
 }
 
-func checkOrgDeleteStatus(client *iam.Client, id string) resource.StateRefreshFunc {
+func checkOrgDeleteStatus(client *iam.Client, id string) retry.StateRefreshFunc {
 	return func() (result interface{}, state string, err error) {
 		orgStatus, resp, err := client.Organizations.DeleteStatus(id)
 		if err != nil {
