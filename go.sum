@@ -477,8 +477,8 @@ github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb/go.mod h1:+NfK9FKe
 github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d/go.mod h1:+NfK9FKeTrX5uv1uIXGdwYDTeHna2qgaIlx54MXqjAM=
 github.com/hashicorp/yamux v0.1.1 h1:yrQxtgseBDrq9Y652vSRDvsKCJKOUD+GzTS4Y0Y8pvE=
 github.com/hashicorp/yamux v0.1.1/go.mod h1:CtWFDAQgb7dxtzFs4tWbplKIe2jSi3+5vKbgIO0SLnQ=
-github.com/hasura/go-graphql-client v0.9.2 h1:4FyAeVOu+GcS1BaoELWNyxzaLY7s+g72LLH+qYItdEY=
-github.com/hasura/go-graphql-client v0.9.2/go.mod h1:AarJlxO1I59MPqU/TC7gQP0BMFgPEqUTt5LYPvykasw=
+github.com/hasura/go-graphql-client v0.9.3 h1:Xi3fqa2t9q4nJ2jM2AU8nB6qeAoMpbcYDiOSBnNAN1E=
+github.com/hasura/go-graphql-client v0.9.3/go.mod h1:AarJlxO1I59MPqU/TC7gQP0BMFgPEqUTt5LYPvykasw=
 github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152 h1:GITUy7r2Eijl7u/Xe5AOs3HBV3Gt/3+l0j2bTh2UO5Y=
 github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152/go.mod h1:bRtCxY0f88xmUw+Y0Xfl/uGaCWMUy04wUGSKbnQdsJs=
 github.com/hpcloud/tail v1.0.0 h1:nfCOvKYfkgYP8hkirhJocXT2+zOD8yUNjXaWfTlyFKI=
