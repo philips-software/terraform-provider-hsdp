@@ -66,7 +66,7 @@ func dataSourcePKIPolicyRead(_ context.Context, d *schema.ResourceData, meta int
 	_ = d.Set("ca_pem", caPem.String())
 
 	// Policy CRL
-	_, block, _, err = client.Services.GetPolicyCRL()
+	_, block, _, err = client.Services.GetPolicyRevocationList()
 	if err != nil {
 		return diag.FromErr(err)
 	}

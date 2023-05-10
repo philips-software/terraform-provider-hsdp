@@ -65,7 +65,7 @@ func dataSourcePKIRootRead(_ context.Context, d *schema.ResourceData, meta inter
 	}
 	_ = d.Set("ca_pem", caPem.String())
 	// Root CRL
-	_, block, _, err = client.Services.GetRootCRL()
+	_, block, _, err = client.Services.GetRootRevocationList()
 	if err != nil {
 		return diag.FromErr(err)
 	}
