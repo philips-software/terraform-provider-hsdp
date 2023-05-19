@@ -39,7 +39,7 @@ The following arguments are supported:
 
 ### filter options
 
-* `id` - (Optional) The id (uuid) of the filter
+* `id` - (Optional) The id (uuid) of the policy
 * `managing_org` - (Optional) Finds policies under `managing_org` (uuid)
 * `group_name` - (Optional) Find policies assigned to this group
 
