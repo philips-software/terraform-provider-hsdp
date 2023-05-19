@@ -79,25 +79,21 @@ func dataSourceS3CredsPolicyRead(_ context.Context, d *schema.ResourceData, meta
 			managingOrg = mVi["managing_org"].(string)
 			id, _ = strconv.Atoi(mVi["id"].(string))
 		}
-		//managingOrg := d.Get("managing_org").(string)
-		//groupName := d.Get("group_name").(string)
 	}
 
 	username := d.Get("username").(string)
 	password := d.Get("password").(string)
 
-	groupNamePtr := &groupName
-	managingOrgPtr := &managingOrg
-	idPtr := &id
+	getOpts := &creds.GetPolicyOptions{ProductKey: &productKey}
 
-	if *groupNamePtr == "" {
-		groupNamePtr = nil
+	if groupName != "" {
+		getOpts.GroupName = &groupName
 	}
-	if *managingOrgPtr == "" {
-		managingOrgPtr = nil
+	if managingOrg != "" {
+		getOpts.ManagingOrg = &managingOrg
 	}
-	if id == 0 {
-		idPtr = nil
+	if id != 0 {
+		getOpts.ID = &id
 	}
 	client, err := c.S3CredsClient()
 	if err != nil {
@@ -110,12 +106,7 @@ func dataSourceS3CredsPolicyRead(_ context.Context, d *schema.ResourceData, meta
 		}
 	}
 
-	credentials, _, err := client.Policy.GetPolicy(&creds.GetPolicyOptions{
-		ProductKey:  &productKey,
-		ManagingOrg: managingOrgPtr,
-		GroupName:   groupNamePtr,
-		ID:          idPtr,
-	})
+	credentials, _, err := client.Policy.GetPolicy(getOpts)
 	if err != nil {
 		return diag.FromErr(err)
 	}
