@@ -397,6 +397,8 @@ func Provider(build string) *schema.Provider {
 			"hsdp_cdr_org":                               org.DataSourceCDROrg(),
 			"hsdp_iam_role_sharing_policies":             role_sharing_policy.DataSourceIAMRoleSharingPolicies(),
 			"hsdp_discovery_service":                     discovery.DataSourceDiscoveryService(),
+			"hsdp_connect_mdm_service_action":            mdm.DataSourceConnectMDMServiceAction(),
+			"hsdp_connect_mdm_service_actions":           mdm.DataSourceConnectMDMServiceActions(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
