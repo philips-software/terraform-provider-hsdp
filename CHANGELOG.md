@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.43.0
+
+- MDM:  ServiceAction data sources #327
+- Core: API changes and replace deprecated code
+- Core: Migrate to terraform-plugin-testing helper
+
 ## v0.42.1
 
 - Documentation: update resource documentation metadata
