@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.43.1
+
+- Function: workaround for Iron.io race condition #375
+
 ## v0.43.0
 
 - MDM:  ServiceAction data sources #327
