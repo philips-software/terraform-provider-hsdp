@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
+
 	"github.com/docker/distribution/reference"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -264,16 +266,22 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 		return diag.FromErr(fmt.Errorf("invalid Iron.io discovery: %v", ironConfig))
 	}
 	codeName := fmt.Sprintf("%s-%s", name, signature)
-	createdCode, resp, err := ironClient.Codes.CreateOrUpdateCode(iron.Code{
-		Name:      codeName,
-		Image:     dockerImage,
-		ProjectID: ironConfig.ProjectID,
-	})
+	var createdCode *iron.Code
+	var resp *iron.Response
+	operation := func() error {
+		createdCode, resp, err = ironClient.Codes.CreateOrUpdateCode(iron.Code{
+			Name:      codeName,
+			Image:     dockerImage,
+			ProjectID: ironConfig.ProjectID,
+		})
+		return err
+	}
+	err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if resp.StatusCode == http.StatusNotFound {
-		return diag.FromErr(fmt.Errorf("code '%s' not found", dockerImage))
+	if resp != nil && resp.StatusCode == http.StatusNotFound {
+		return diag.FromErr(fmt.Errorf("resourceFunctionCreate: code '%s' not found: %w", dockerImage, err))
 	}
 	diags := createSchedules(ironClient, ironConfig, *modConfig, d, codeName, createdCode.ID, signature)
 	if len(diags) > 0 {
