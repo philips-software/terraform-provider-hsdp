@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.27.0
 	github.com/hashicorp/terraform-plugin-testing v1.4.0
-	github.com/hasura/go-graphql-client v0.9.3
+	github.com/hasura/go-graphql-client v0.10.0
 	github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152
 	github.com/loafoe/easyssh-proxy/v2 v2.0.4
 	github.com/loafoe/ferrite v0.2.0
@@ -66,7 +66,7 @@ require (
 	github.com/hashicorp/terraform-svchost v0.1.1 // indirect
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/klauspost/compress v1.16.5 // indirect
+	github.com/klauspost/compress v1.16.7 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/labstack/echo/v4 v4.9.0 // indirect
 	github.com/labstack/gommon v0.3.1 // indirect
