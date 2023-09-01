@@ -11,8 +11,8 @@ require (
 	github.com/hashicorp/go-retryablehttp v0.7.4
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/terraform-plugin-sdk v1.17.2
-	github.com/hashicorp/terraform-plugin-sdk/v2 v2.27.0
-	github.com/hashicorp/terraform-plugin-testing v1.4.0
+	github.com/hashicorp/terraform-plugin-sdk/v2 v2.28.0
+	github.com/hashicorp/terraform-plugin-testing v1.5.1
 	github.com/hasura/go-graphql-client v0.10.0
 	github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152
 	github.com/loafoe/easyssh-proxy/v2 v2.0.4
@@ -22,7 +22,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.8.4
-	golang.org/x/exp v0.0.0-20220407100705-7b9b53b0aca4
+	golang.org/x/exp v0.0.0-20230809150735-7b3493d9a819
 )
 
 require (
@@ -91,9 +91,9 @@ require (
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
-	github.com/zclconf/go-cty v1.13.2 // indirect
+	github.com/zclconf/go-cty v1.13.3 // indirect
 	golang.org/x/crypto v0.12.0 // indirect
-	golang.org/x/mod v0.10.0 // indirect
+	golang.org/x/mod v0.11.0 // indirect
 	golang.org/x/net v0.14.0 // indirect
 	golang.org/x/oauth2 v0.11.0 // indirect
 	golang.org/x/sys v0.11.0 // indirect
