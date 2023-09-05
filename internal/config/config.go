@@ -5,6 +5,8 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/philips-software/go-hsdp-api/blr"
+
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/philips-software/go-hsdp-api/ai"
@@ -65,6 +67,7 @@ type Config struct {
 	consoleClient         *console.Client
 	pkiClient             *pki.Client
 	stlClient             *stl.Client
+	blrClient             *blr.Client
 	notificationClient    *notification.Client
 	mdmClient             *mdm.Client
 	discoveryClient       *discovery.Client
@@ -78,6 +81,7 @@ type Config struct {
 	notificationClientErr error
 	mdmClientErr          error
 	discoveryClientErr    error
+	blrClientErr          error
 	TimeZone              string `json:"time_zone"`
 
 	STU3MA *jsonformat.Marshaller   `json:"-"`
@@ -156,6 +160,23 @@ func (c *Config) DiscoveryClient(principal ...*Principal) (*discovery.Client, er
 		})
 	}
 	return c.discoveryClient, c.discoveryClientErr
+}
+
+func (c *Config) BLRClient(principal ...*Principal) (*blr.Client, error) {
+	if len(principal) > 0 && principal[0] != nil && principal[0].HasAuth() {
+		region := principal[0].Region
+		environment := principal[0].Environment
+		iamClient, err := c.IAMClient(principal...)
+		if err != nil {
+			return nil, err
+		}
+		return blr.NewClient(iamClient, &blr.Config{
+			Region:      region,
+			Environment: environment,
+			DebugLog:    c.DebugWriter,
+		})
+	}
+	return c.blrClient, c.blrClientErr
 }
 
 func (c *Config) CartelClient() (*cartel.Client, error) {
@@ -781,4 +802,23 @@ func (c *Config) SetupDiscoveryClient() {
 	}
 	c.discoveryClient = client
 	c.discoveryClientErr = nil
+}
+
+func (c *Config) SetupBLRClient() {
+	if c.iamClientErr != nil {
+		c.blrClientErr = fmt.Errorf("IAM client error in SetupBLRClient: %w", c.iamClientErr)
+		return
+	}
+	client, err := blr.NewClient(c.iamClient, &blr.Config{
+		Region:      c.Region,
+		Environment: c.Environment,
+		DebugLog:    c.DebugWriter,
+	})
+	if err != nil {
+		c.blrClient = nil
+		c.blrClientErr = err
+		return
+	}
+	c.blrClient = client
+	c.blrClientErr = nil
 }

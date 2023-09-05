@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"os"
 
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/blr"
+
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/group_membership"
 
 	"github.com/google/fhir/go/fhirversion"
@@ -324,6 +326,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_cdr_practitioner":                          practitioner.ResourceCDRPractitioner(),
 			"hsdp_iam_role_sharing_policy":                   role_sharing_policy.ResourceRoleSharingPolicy(),
 			"hsdp_iam_device":                                device.ResourceIAMDevice(),
+			"hsdp_blr_bucket":                                blr.ResourceBLRBucket(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                        iam.DataSourceIAMIntrospect(),
@@ -399,6 +402,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_discovery_service":                     discovery.DataSourceDiscoveryService(),
 			"hsdp_connect_mdm_service_action":            mdm.DataSourceConnectMDMServiceAction(),
 			"hsdp_connect_mdm_service_actions":           mdm.DataSourceConnectMDMServiceActions(),
+			"hsdp_blr_store_policy":                      blr.DataSourceBLRStorePolicyDefinition(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
@@ -496,6 +500,7 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.SetupNotificationClient()
 		c.SetupMDMClient()
 		c.SetupDiscoveryClient()
+		c.SetupBLRClient()
 
 		ma, err := jsonformat.NewMarshaller(false, "", "", fhirversion.STU3)
 		if err != nil {
