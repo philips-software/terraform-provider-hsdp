@@ -27,10 +27,10 @@ resource "hsdp_blr_blob_store_policy" "policy" {
 The following arguments are available:
 
 * `statement` - (Required)
-    * `effect` - (Required, string) Effect of policy [`Allow`, `Deny`]
-    * `action` - (Required, list(string)) Allowed methods: [`GET`, `PUT`, `DELETE`]
-    * `principal` - (Required, list(string)) The principals the policy applies to
-    * `resource` - (Required, list(string)) The resources the policy applies to
+  * `effect` - (Required, string) Effect of policy [`Allow`, `Deny`]
+  * `action` - (Required, list(string)) Allowed methods: [`GET`, `PUT`, `DELETE`]
+  * `principal` - (Required, list(string)) The principals the policy applies to
+  * `resource` - (Required, list(string)) The resources the policy applies to
 
 ## Attributes reference
 

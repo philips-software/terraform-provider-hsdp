@@ -2,8 +2,6 @@ module github.com/philips-software/terraform-provider-hsdp
 
 go 1.21
 
-toolchain go1.21.0
-
 require (
 	github.com/cenkalti/backoff/v4 v4.2.1
 	github.com/docker/distribution v2.8.2+incompatible

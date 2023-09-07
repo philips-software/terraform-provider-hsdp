@@ -19,7 +19,7 @@ func importStatePassthroughSetGuidContext(_ context.Context, d *schema.ResourceD
 	if count == 0 {
 		return []*schema.ResourceData{d}, fmt.Errorf("invalid ID: %s", d.Id())
 	}
-	d.Set("guid", id)
+	_ = d.Set("guid", id)
 	return []*schema.ResourceData{d}, nil
 }
 
