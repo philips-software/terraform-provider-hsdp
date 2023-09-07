@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.44.0
+
+- BLR: Initial Blob Repository support #181
+
 ## v0.43.1
 
 - Function: workaround for Iron.io race condition #375
