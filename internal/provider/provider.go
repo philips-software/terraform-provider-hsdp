@@ -327,6 +327,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_role_sharing_policy":                   role_sharing_policy.ResourceRoleSharingPolicy(),
 			"hsdp_iam_device":                                device.ResourceIAMDevice(),
 			"hsdp_blr_bucket":                                blr.ResourceBLRBucket(),
+			"hsdp_blr_blob_store_policy":                     blr.ResourceBLRBlobStorePolicy(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                        iam.DataSourceIAMIntrospect(),
@@ -402,7 +403,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_discovery_service":                     discovery.DataSourceDiscoveryService(),
 			"hsdp_connect_mdm_service_action":            mdm.DataSourceConnectMDMServiceAction(),
 			"hsdp_connect_mdm_service_actions":           mdm.DataSourceConnectMDMServiceActions(),
-			"hsdp_blr_store_policy":                      blr.DataSourceBLRStorePolicyDefinition(),
+			"hsdp_blr_store_policy":                      blr.DataSourceBLRBlobStorePolicyDefinition(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}

@@ -9,7 +9,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
 
-func DataSourceBLRStorePolicyDefinition() *schema.Resource {
+func DataSourceBLRBlobStorePolicyDefinition() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceBLRStorePolicyRead,
 		Schema: map[string]*schema.Schema{
