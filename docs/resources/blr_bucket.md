@@ -33,7 +33,6 @@ The following arguments are available:
 
 * `name` - (Required) The name of the device group
 * `proposition_id` - (Required) The proposition ID where this bucket falls under
-* `versioning_enabled` - (Required) Set versioning
 * `enable_cdn` - (Optional) Enable CDN or not
 * `enable_create_or_delete_blob_meta` - (Optional) Enables creation or deletion of Blob meta data
 * `enable_hsdp_domain` - (Optional) Enable HSDP domain mapping
@@ -50,3 +49,11 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The ID reference of the service action (format: `Bucket/${GUID}`)
 * `guid` - The GUID of the bucket
+
+## Import
+
+An existing Bucket using `terraform import hsdp_blr_bucket`, e.g.
+
+```bash
+terraform import hsdp_blr_bucket.target Bucket/guid-of-the-bucket-to-import
+```
