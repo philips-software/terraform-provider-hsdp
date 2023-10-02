@@ -31,7 +31,7 @@ func ResourceBLRBlobStorePolicy() *schema.Resource {
 		CreateContext: resourceBLRBlobStorePolicyCreate,
 		ReadContext:   resourceBLRBlobStorePolicyRead,
 		DeleteContext: resourceBLRBlobStorePolicyDelete,
-
+		SchemaVersion: 1,
 		Schema: map[string]*schema.Schema{
 			"statement": blobStorePolicyStatementSchema(),
 			"principal": config.PrincipalSchema(),
@@ -48,12 +48,14 @@ func policyStatementResource() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			"effect": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"action": {
 				Type:     schema.TypeSet,
 				MaxItems: 4,
 				MinItems: 1,
+				ForceNew: true,
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
@@ -61,6 +63,7 @@ func policyStatementResource() *schema.Resource {
 				Type:     schema.TypeSet,
 				MinItems: 1,
 				MaxItems: 10,
+				ForceNew: true,
 				Required: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
@@ -68,6 +71,7 @@ func policyStatementResource() *schema.Resource {
 				Type:     schema.TypeSet,
 				MinItems: 1,
 				MaxItems: 10,
+				ForceNew: true,
 				Optional: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
@@ -80,6 +84,9 @@ func blobStorePolicyStatementSchema() *schema.Schema {
 		Type:     schema.TypeSet,
 		Required: true,
 		ForceNew: true,
+		DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+			return false
+		},
 		MaxItems: 1,
 		Elem:     policyStatementResource(),
 	}

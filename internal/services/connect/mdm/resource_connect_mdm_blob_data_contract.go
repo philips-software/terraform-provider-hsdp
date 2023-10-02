@@ -30,19 +30,23 @@ func ResourceConnectMDMBlobDataContract() *schema.Resource {
 			},
 			"data_type_id": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"bucket_id": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"storage_class_id": {
 				Type:     schema.TypeString,
+				ForceNew: true,
 				Required: true,
 			},
 			"root_path_in_bucket": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"logging_enabled": {
 				Type:     schema.TypeBool,

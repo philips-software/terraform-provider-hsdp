@@ -219,7 +219,7 @@ func resourceBLRBucketRead(ctx context.Context, d *schema.ResourceData, m interf
 	_, _ = fmt.Sscanf(d.Id(), "Bucket/%s", &id)
 	var resource *blr.Bucket
 	var resp *blr.Response
-	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
 		var err error
 		resource, resp, err = client.Configurations.GetBucketByID(id)
 		if err != nil {
