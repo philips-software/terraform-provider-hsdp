@@ -146,7 +146,7 @@ func schemaToBucket(d *schema.ResourceData) blr.Bucket {
 
 func bucketToSchema(resource blr.Bucket, d *schema.ResourceData) {
 	_ = d.Set("name", resource.Name)
-	_ = d.Set("proposition_id", resource.PropositionID)
+	_ = d.Set("proposition_id", resource.PropositionID.Reference)
 	_ = d.Set("enable_cdn", resource.EnableCDN)
 	_ = d.Set("price_class", resource.PriceClass)
 	_ = d.Set("enable_hsdp_domain", resource.EnableHSDPDomain)
