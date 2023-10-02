@@ -152,7 +152,7 @@ resource "hsdp_function" "cuda_test" {
   docker_image = "philipslabs/hsdp-task-cuda-test:v0.0.5"
   command      = ["/app/cudatest"]
 
-  schedule = "14 15 * * * *"
+  schedule = "14 15 * * *"
   timeout  = 120
 
   backend {
@@ -170,7 +170,7 @@ resource "hsdp_function" "cuda_test" {
   docker_image = "philipslabs/hsdp-task-cuda-test:v0.0.4"
   command      = ["/app/cudatest"]
 
-  schedule = "0 5 * * * 0"
+  schedule = "0 5 * * 0"
   timeout  = 120
 
   backend {
