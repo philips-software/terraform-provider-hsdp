@@ -10,7 +10,7 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 
-	"github.com/docker/distribution/reference"
+        "github.com/distribution/reference"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
