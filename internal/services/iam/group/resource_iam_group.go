@@ -23,7 +23,7 @@ func ResourceIAMGroup() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-		SchemaVersion: 3,
+		SchemaVersion: 4,
 		CreateContext: resourceIAMGroupCreate,
 		ReadContext:   resourceIAMGroupRead,
 		UpdateContext: resourceIAMGroupUpdate,
@@ -43,6 +43,11 @@ func ResourceIAMGroup() *schema.Resource {
 				Type:    ResourceIAMGroupV2().CoreConfigSchema().ImpliedType(),
 				Upgrade: patchIAMGroupV2,
 				Version: 2,
+			},
+			{
+				Type:    ResourceIAMGroupV3().CoreConfigSchema().ImpliedType(),
+				Upgrade: patchIAMGroupV3,
+				Version: 3,
 			},
 		},
 
@@ -69,7 +74,7 @@ func ResourceIAMGroup() *schema.Resource {
 			"roles": {
 				Type:        schema.TypeSet,
 				MaxItems:    1000,
-				Required:    true,
+				Optional:    true,
 				Elem:        tools.StringSchema(),
 				Description: "The list of role IDS to assign to this group.",
 			},
@@ -99,13 +104,6 @@ func ResourceIAMGroup() *schema.Resource {
 				Optional:    true,
 				Default:     true,
 				Description: "When enabled, the provider will perform additional API calls to determine if any changes were made outside of Terraform to user and service assignments of this group.",
-			},
-			"iam_device_bug_workaround": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Default:     false,
-				Deprecated:  "This workaround is no longer required and will be removed in the near future.",
-				Description: "Deprecated, do not use.",
 			},
 		},
 	}
@@ -138,28 +136,30 @@ func resourceIAMGroupCreate(ctx context.Context, d *schema.ResourceData, m inter
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	roles := tools.ExpandStringList(d.Get("roles").(*schema.Set).List())
 
 	_ = d.Set("name", createdGroup.Name)
 	_ = d.Set("description", createdGroup.Description)
 	_ = d.Set("managing_organization", createdGroup.ManagingOrganization)
 
+	roles := tools.ExpandStringList(d.Get("roles").(*schema.Set).List())
 	// Add roles
-	for _, r := range roles {
-		role, _, _ := client.Roles.GetRoleByID(r)
-		if role != nil {
-			err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
-				_, resp, err := client.Groups.AssignRole(ctx, *createdGroup, *role)
-				if resp == nil {
-					return nil, err
+	if len(roles) > 0 {
+		for _, r := range roles {
+			role, _, _ := client.Roles.GetRoleByID(r)
+			if role != nil {
+				err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+					_, resp, err := client.Groups.AssignRole(ctx, *createdGroup, *role)
+					if resp == nil {
+						return nil, err
+					}
+					return resp.Response, err
+				}, append(tools.StandardRetryOnCodes, http.StatusUnprocessableEntity)...) // Handle intermittent HTTP 422 errors
+				if err != nil {
+					// Cleanup
+					_ = purgeGroupContent(ctx, client, createdGroup.ID, d)
+					_, _, _ = client.Groups.DeleteGroup(*createdGroup)
+					return diag.FromErr(fmt.Errorf("error adding roles: %v", err))
 				}
-				return resp.Response, err
-			}, append(tools.StandardRetryOnCodes, http.StatusUnprocessableEntity)...) // Handle intermittent HTTP 422 errors
-			if err != nil {
-				// Cleanup
-				_ = purgeGroupContent(ctx, client, createdGroup.ID, d)
-				_, _, _ = client.Groups.DeleteGroup(*createdGroup)
-				return diag.FromErr(fmt.Errorf("error adding roles: %v", err))
 			}
 		}
 	}
