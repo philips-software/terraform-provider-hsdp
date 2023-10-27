@@ -16,7 +16,7 @@ terraform {
   required_providers {
     hsdp = {
       source = "philips-software/hsdp"
-      version = ">= 0.38.5"
+      version = ">= 0.45.0"
     }
   }
 }
@@ -24,8 +24,8 @@ terraform {
 
 ## Development requirements
 
--	[Terraform](https://www.terraform.io/downloads.html) 1.2.0 or newer
--	[Go](https://golang.org/doc/install) 1.19 or newer (to build the provider plugin)
+-	[Terraform](https://www.terraform.io/downloads.html) 1.5.5 or [OpenTofu](https://github.com/opentofu/opentofu) latest
+-	[Go](https://golang.org/doc/install) 1.21 or newer (to build the provider plugin)
 
 ## Building the provider
 
