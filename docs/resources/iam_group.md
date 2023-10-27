@@ -53,7 +53,7 @@ The following arguments are supported:
 
 * `name` - (Required) The name of the group
 * `description` - (Required) The description of the group
-* `roles` - (Required) The list of role IDS to assign to this group
+* `roles` - (Optional) The list of role IDS to assign to this group
 * `managing_organization` - (Required) The managing organization ID
 * `users` - (Optional) The list of user IDs to include in this group. The provider only manages this list of users. Existing users added by others means to the group by the provider. It is not practical to manage hundreds or thousands of users this way of course.
 * `services` - (Optional) The list of service identity IDs to include in this group. See `hsdp_iam_service`
