@@ -11,7 +11,7 @@ Search for users based on certain filters
 Get all users with unverified email addresses and in disabled state
 
 ```hcl
-data "resource_hsdp_iam_users" "unactivated" {
+data "hsdp_iam_users" "unactivated" {
   organization_id = var.org_id
   
   email_verified = false
