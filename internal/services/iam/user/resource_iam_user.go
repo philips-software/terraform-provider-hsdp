@@ -22,7 +22,7 @@ func ResourceIAMUser() *schema.Resource {
 	return &schema.Resource{
 		Description: descriptions["user"],
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: importUserContext,
 		},
 
 		CreateContext: resourceIAMUserCreate,

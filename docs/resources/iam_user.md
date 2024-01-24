@@ -64,3 +64,11 @@ An existing user can be imported using `terraform import hsdp_iam_user`, e.g.
 ```shell
 > terraform import hsdp_iam_user.developer a-guid
 ```
+
+Alternatively, users can be imported based on their existing IAM Login ID using `login/` prefix, e.g.
+
+```shell
+> terraform import hsdp_iam_user.developer login/developer
+```
+
+Where `developer` would be the IAM login ID of the user.
