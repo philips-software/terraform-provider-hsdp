@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.46.0
+
+- IAM: Support user import by login
+
 ## v0.45.0
 
 - IAM: Roles are not optional in Group declarations
