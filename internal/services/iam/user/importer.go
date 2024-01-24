@@ -20,7 +20,7 @@ func importUserContext(_ context.Context, d *schema.ResourceData, m interface{})
 		if err != nil {
 			return nil, fmt.Errorf("IAMClient error: %w", err)
 		}
-		user, _, err := client.Users.GetUserIDByLoginID(loginID)
+		user, _, err := client.Users.LegacyGetUserIDByLoginID(loginID)
 		if err != nil {
 			return nil, fmt.Errorf("GetUserIDByLoginID error: %w", err)
 		}
