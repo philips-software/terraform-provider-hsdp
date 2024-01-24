@@ -5,8 +5,9 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/philips-software/terraform-provider-hsdp/hsdp"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/philips-software/terraform-provider-hsdp/internal/provider"
 )
 
 const (
@@ -48,12 +49,12 @@ var Provider *schema.Provider
 var testAccProviderConfigure sync.Once
 
 func init() {
-	Provider = provider.Provider("test")
+	Provider = hsdp.Provider("test")
 
 	// Always allocate a new provider instance each invocation, otherwise gRPC
 	// ProviderConfigure() can overwrite configuration during concurrent testing.
 	ProviderFactories = map[string]func() (*schema.Provider, error){
-		ProviderName: func() (*schema.Provider, error) { return provider.Provider("test"), nil }, //nolint:unparam
+		ProviderName: func() (*schema.Provider, error) { return hsdp.Provider("test"), nil }, //nolint:unparam
 	}
 }
 

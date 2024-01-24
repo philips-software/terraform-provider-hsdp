@@ -3,9 +3,10 @@ package main
 import (
 	"flag"
 
+	"github.com/philips-software/terraform-provider-hsdp/hsdp"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-	"github.com/philips-software/terraform-provider-hsdp/internal/provider"
 )
 
 var commit = "deadbeef"
@@ -21,7 +22,7 @@ func main() {
 	flag.Parse()
 
 	opts := &plugin.ServeOpts{ProviderFunc: func() *schema.Provider {
-		return provider.Provider(buildVersion)
+		return hsdp.Provider(buildVersion)
 	}}
 	if debugMode {
 		opts.Debug = true
