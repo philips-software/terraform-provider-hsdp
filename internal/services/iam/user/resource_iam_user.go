@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
@@ -183,6 +185,19 @@ func resourceIAMUserRead(_ context.Context, d *schema.ResourceData, m interface{
 
 	id := d.Id()
 
+	// Crossplane Observe support
+	importId, err := url.QueryUnescape(id)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("url.QueryUnescape error: %w", err))
+	}
+	if strings.HasPrefix(importId, "login/") {
+		loginID := strings.TrimPrefix(importId, "login/")
+		user, _, err := client.Users.LegacyGetUserIDByLoginID(loginID)
+		if err == nil {
+			id = user
+			d.SetId(id)
+		}
+	}
 	user, _, err := client.Users.GetUserByID(id)
 	if err != nil {
 		if errors.Is(err, iam.ErrEmptyResults) {
