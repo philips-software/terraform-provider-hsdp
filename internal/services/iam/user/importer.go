@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
@@ -11,8 +12,10 @@ import (
 )
 
 func importUserContext(_ context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
-	importId := d.Id()
-
+	importId, err := url.QueryUnescape(d.Id()) // Can originate from Crossplane
+	if err != nil {
+		return nil, fmt.Errorf("url.QueryUnescape error: %w", err)
+	}
 	if strings.HasPrefix(importId, "login/") {
 		loginID := strings.TrimPrefix(importId, "login/")
 		c := m.(*config.Config)
