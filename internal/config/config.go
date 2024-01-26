@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/philips-software/go-hsdp-api/blr"
+	"github.com/philips-software/go-hsdp-api/connect/blr"
 
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/go-retryablehttp"
