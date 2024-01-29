@@ -130,7 +130,7 @@ func resourceDBSSQSSubscriberCreate(ctx context.Context, d *schema.ResourceData,
 
 	var created *dbs.SQSSubscriber
 	var resp *dbs.Response
-	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		created, resp, err = client.Subscribers.CreateSQS(resource)
 		if err != nil {
@@ -189,7 +189,7 @@ func resourceDBSSQSSubscriberRead(ctx context.Context, d *schema.ResourceData, m
 	return diags
 }
 
-func resourceDBSSQSSubscriberDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDBSSQSSubscriberDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -201,12 +201,35 @@ func resourceDBSSQSSubscriberDelete(_ context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
-	resource, _, err := client.Subscribers.GetSQSByID(d.Id())
+	var resource *dbs.SQSSubscriber
+	var resp *dbs.Response
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		resource, resp, err = client.Subscribers.GetSQSByID(d.Id())
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	ok, _, err := client.Subscribers.DeleteSQS(*resource)
+	var ok bool
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		ok, _, err = client.Subscribers.DeleteSQS(*resource)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}

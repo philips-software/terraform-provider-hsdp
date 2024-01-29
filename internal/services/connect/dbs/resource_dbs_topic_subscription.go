@@ -119,7 +119,7 @@ func resourceDBSTopicSubscriptionCreate(ctx context.Context, d *schema.ResourceD
 
 	var created *dbs.TopicSubscription
 	var resp *dbs.Response
-	err = tools.TryHTTPCall(ctx, 5, func() (*http.Response, error) {
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
 		created, resp, err = client.Subscriptions.CreateTopicSubscription(resource)
 		if err != nil {
@@ -129,7 +129,7 @@ func resourceDBSTopicSubscriptionCreate(ctx context.Context, d *schema.ResourceD
 			return nil, err
 		}
 		return resp.Response, err
-	})
+	}, append(tools.StandardRetryOnCodes, http.StatusUnprocessableEntity)...)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -178,7 +178,7 @@ func resourceDBSTopicSubscriptionRead(ctx context.Context, d *schema.ResourceDat
 	return diags
 }
 
-func resourceDBSTopicSubscriptionDelete(_ context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDBSTopicSubscriptionDelete(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -190,12 +190,35 @@ func resourceDBSTopicSubscriptionDelete(_ context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	resource, _, err := client.Subscriptions.GetTopicSubscriptionByID(d.Id())
+	var resource *dbs.TopicSubscription
+	var resp *dbs.Response
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		resource, resp, err = client.Subscriptions.GetTopicSubscriptionByID(d.Id())
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	ok, _, err := client.Subscriptions.DeleteTopicSubscription(*resource)
+	var ok bool
+	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+		var err error
+		ok, _, err = client.Subscriptions.DeleteTopicSubscription(*resource)
+		if err != nil {
+			_ = client.TokenRefresh()
+		}
+		if resp == nil {
+			return nil, err
+		}
+		return resp.Response, err
+	})
 	if err != nil {
 		return diag.FromErr(err)
 	}
