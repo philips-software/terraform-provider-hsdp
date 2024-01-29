@@ -5,6 +5,8 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/philips-software/go-hsdp-api/connect/dbs"
+
 	"github.com/philips-software/go-hsdp-api/connect/blr"
 
 	"github.com/google/fhir/go/jsonformat"
@@ -71,6 +73,7 @@ type Config struct {
 	notificationClient    *notification.Client
 	mdmClient             *mdm.Client
 	discoveryClient       *discovery.Client
+	dbsClient             *dbs.Client
 	DebugStdErr           bool `json:"debugging"`
 	credsClientErr        error
 	cartelClientErr       error
@@ -82,6 +85,7 @@ type Config struct {
 	mdmClientErr          error
 	discoveryClientErr    error
 	blrClientErr          error
+	dbsClientErr          error
 	TimeZone              string `json:"time_zone"`
 
 	STU3MA *jsonformat.Marshaller   `json:"-"`
@@ -347,6 +351,23 @@ func (c *Config) NotificationClient(principal ...*Principal) (*notification.Clie
 		})
 	}
 	return c.notificationClient, c.notificationClientErr
+}
+
+func (c *Config) DBSClient(principal ...*Principal) (*dbs.Client, error) {
+	if len(principal) > 0 && principal[0] != nil && principal[0].HasAuth() {
+		region := principal[0].Region
+		environment := principal[0].Environment
+		iamClient, err := c.IAMClient(principal...)
+		if err != nil {
+			return nil, err
+		}
+		return dbs.NewClient(iamClient, &dbs.Config{
+			Region:      region,
+			Environment: environment,
+			DebugLog:    c.DebugWriter,
+		})
+	}
+	return c.dbsClient, c.dbsClientErr
 }
 
 // SetupIAMClient sets up an HSDP IAM client
@@ -821,4 +842,23 @@ func (c *Config) SetupBLRClient() {
 	}
 	c.blrClient = client
 	c.blrClientErr = nil
+}
+
+func (c *Config) SetupDBSClient() {
+	if c.iamClientErr != nil {
+		c.blrClientErr = fmt.Errorf("IAM client error in SetupDBSClient: %w", c.iamClientErr)
+		return
+	}
+	client, err := dbs.NewClient(c.iamClient, &dbs.Config{
+		Region:      c.Region,
+		Environment: c.Environment,
+		DebugLog:    c.DebugWriter,
+	})
+	if err != nil {
+		c.dbsClient = nil
+		c.dbsClientErr = err
+		return
+	}
+	c.dbsClient = client
+	c.dbsClientErr = nil
 }

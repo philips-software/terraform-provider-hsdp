@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"os"
 
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/dbs"
+
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/blr"
 
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/group_membership"
@@ -404,6 +406,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_service_action":            mdm.DataSourceConnectMDMServiceAction(),
 			"hsdp_connect_mdm_service_actions":           mdm.DataSourceConnectMDMServiceActions(),
 			"hsdp_blr_store_policy":                      blr.DataSourceBLRBlobStorePolicyDefinition(),
+			"hsdp_dbs_topic_subscription":                dbs.ResourceDBSTopicSubscription(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
@@ -502,6 +505,7 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.SetupMDMClient()
 		c.SetupDiscoveryClient()
 		c.SetupBLRClient()
+		c.SetupDBSClient()
 
 		ma, err := jsonformat.NewMarshaller(false, "", "", fhirversion.STU3)
 		if err != nil {
