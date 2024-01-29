@@ -16,38 +16,98 @@ import (
 func ResourceDBSTopicSubscription() *schema.Resource {
 	return &schema.Resource{
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: func(ctx context.Context, d *schema.ResourceData, m interface{}) ([]*schema.ResourceData, error) {
+				_ = d.Set("name_infix", "imported")
+				return []*schema.ResourceData{d}, nil
+			},
 		},
 		CreateContext: resourceDBSTopicSubscriptionCreate,
-		ReadContext:   resourceDBSTopicSubscriptionyRead,
+		ReadContext:   resourceDBSTopicSubscriptionRead,
 		DeleteContext: resourceDBSTopicSubscriptionDelete,
 		SchemaVersion: 1,
 		Schema: map[string]*schema.Schema{
-			"guid": {
+			"name_infix": {
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				DiffSuppressFunc: tools.SuppressWhenImported,
+			},
+			"description": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"subscriber_id": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"data_type": {
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"deliver_data_only": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				ForceNew: true,
+			},
+			"kinesis_stream_partition_key": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			// TODO: fill in
+			"status": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+			"rule_name": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 		},
 	}
 }
 
 func schemaToDBSTopicSubscription(d *schema.ResourceData) dbs.TopicSubscriptionConfig {
-
+	nameInfix := d.Get("name_infix").(string)
+	description := d.Get("description").(string)
+	subscriberId := d.Get("subscriber_id").(string)
+	dataType := d.Get("data_type").(string)
+	deliverDataOnly := d.Get("deliver_data_only").(bool)
+	kinesisStreamPartitionKey := d.Get("kinesis_stream_partition_key").(string)
 	resource := dbs.TopicSubscriptionConfig{
-		ResourceType: "Subscription",
-		// TODO: fill in
+		ResourceType:              "Subscription",
+		NameInfix:                 nameInfix,
+		Description:               description,
+		SubscriberId:              subscriberId,
+		DeliverDataOnly:           deliverDataOnly,
+		KinesisStreamPartitionKey: kinesisStreamPartitionKey,
+		DataType:                  dataType,
 	}
 	return resource
 }
 
 func dbsTopicSubscriptionToSchema(resource dbs.TopicSubscription, d *schema.ResourceData) {
-	// TODO: fill in
+	_ = d.Set("name", resource.Name)
+	_ = d.Set("description", resource.Description)
+	_ = d.Set("subscriber_id", resource.Subscriber.ID)
+	_ = d.Set("deliver_data_only", resource.DeliverDataOnly)
+	_ = d.Set("kinesis_stream_partition_key", resource.KinesisStreamPartitionKey)
+	_ = d.Set("status", resource.Status)
+	_ = d.Set("data_type", resource.DataType)
+	_ = d.Set("rule_name", resource.RuleName)
 }
 
 func resourceDBSTopicSubscriptionCreate(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
+	var diags diag.Diagnostics
 	principal := config.SchemaToPrincipal(d, m)
 
 	client, err := c.DBSClient(principal)
@@ -76,13 +136,13 @@ func resourceDBSTopicSubscriptionCreate(ctx context.Context, d *schema.ResourceD
 	if created == nil {
 		return diag.FromErr(fmt.Errorf("failed to create resource: %d", resp.StatusCode()))
 	}
-	_ = d.Set("guid", created.ID)
-	d.SetId(fmt.Sprintf("BlobStorePolicy/%s", created.ID))
+	d.SetId(created.ID)
 
-	return resourceDBSTopicSubscriptionyRead(ctx, d, m)
+	dbsTopicSubscriptionToSchema(*created, d)
+	return diags
 }
 
-func resourceDBSTopicSubscriptionyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+func resourceDBSTopicSubscriptionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
 	c := m.(*config.Config)
 
 	var diags diag.Diagnostics
@@ -94,13 +154,11 @@ func resourceDBSTopicSubscriptionyRead(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	var id string
-	_, _ = fmt.Sscanf(d.Id(), "BlobStorePolicy/%s", &id)
 	var resource *dbs.TopicSubscription
 	var resp *dbs.Response
 	err = tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
 		var err error
-		resource, resp, err = client.Subscriptions.GetTopicSubscriptionByID(id)
+		resource, resp, err = client.Subscriptions.GetTopicSubscriptionByID(d.Id())
 		if err != nil {
 			_ = client.TokenRefresh()
 		}
@@ -132,9 +190,7 @@ func resourceDBSTopicSubscriptionDelete(_ context.Context, d *schema.ResourceDat
 		return diag.FromErr(err)
 	}
 
-	var id string
-	_, _ = fmt.Sscanf(d.Id(), "BlobStorePolicy/%s", &id)
-	resource, _, err := client.Subscriptions.GetTopicSubscriptionByID(id)
+	resource, _, err := client.Subscriptions.GetTopicSubscriptionByID(d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}

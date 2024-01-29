@@ -12,7 +12,7 @@ Manages Connect DBS SQS Subscriber configurations
 ## Example Usage
 
 ```hcl
-resource "hsdp_dbs_sqs_subscriber" {
+resource "hsdp_dbs_sqs_subscriber" "my-subscriber" {
   name_infix  = "my-subscriber"
   description = "My subscriber"
   queue_type  = "Standard"

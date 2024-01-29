@@ -3,9 +3,8 @@ package hsdp
 import (
 	"context"
 	"encoding/json"
-	"os"
-
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/dbs"
+	"os"
 
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/blr"
 
@@ -330,6 +329,8 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_device":                                device.ResourceIAMDevice(),
 			"hsdp_blr_bucket":                                blr.ResourceBLRBucket(),
 			"hsdp_blr_blob_store_policy":                     blr.ResourceBLRBlobStorePolicy(),
+			"hsdp_dbs_sqs_subscriber":                        dbs.ResourceDBSSQSSubscriber(),
+			"hsdp_dbs_topic_subscription":                    dbs.ResourceDBSTopicSubscription(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                        iam.DataSourceIAMIntrospect(),
@@ -406,7 +407,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_service_action":            mdm.DataSourceConnectMDMServiceAction(),
 			"hsdp_connect_mdm_service_actions":           mdm.DataSourceConnectMDMServiceActions(),
 			"hsdp_blr_store_policy":                      blr.DataSourceBLRBlobStorePolicyDefinition(),
-			"hsdp_dbs_topic_subscription":                dbs.ResourceDBSTopicSubscription(),
 		},
 		ConfigureContextFunc: providerConfigure(build),
 	}
