@@ -46,4 +46,8 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-DBS Topic Subscriptions cannot be imported into this resource.
+An existing Topic subscription using `terraform import hsdp_dbs_topic_subscription`, e.g.
+
+```bash
+terraform import hsdp_dbs_topic_subscription.target guid-of-the-subscription-to-import
+```

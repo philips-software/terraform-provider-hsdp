@@ -48,4 +48,8 @@ In addition to all arguments above, the following attributes are exported:
 
 ## Import
 
-DBS SQS Subscribers cannot be imported into this resource.
+An existing SQS Subscriber using `terraform import hsdp_dbs_sqs_subscriber`, e.g.
+
+```bash
+terraform import hsdp_dbs_sqs_subscriber.target guid-of-the-subscriber-to-import
+```
