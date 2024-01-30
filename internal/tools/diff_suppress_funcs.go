@@ -47,6 +47,10 @@ func SuppressWhenGenerated(k, old, new string, d *schema.ResourceData) bool {
 	return new == ""
 }
 
+func SuppressWhenImported(k, old, new string, d *schema.ResourceData) bool {
+	return old == "imported"
+}
+
 func SuppressEqualTimeOrMissing(k, old, new string, d *schema.ResourceData) bool {
 	if new == "" { // Not set by us
 		return true

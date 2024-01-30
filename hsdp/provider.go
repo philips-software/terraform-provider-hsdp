@@ -3,6 +3,7 @@ package hsdp
 import (
 	"context"
 	"encoding/json"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/dbs"
 	"os"
 
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/blr"
@@ -328,6 +329,8 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_device":                                device.ResourceIAMDevice(),
 			"hsdp_blr_bucket":                                blr.ResourceBLRBucket(),
 			"hsdp_blr_blob_store_policy":                     blr.ResourceBLRBlobStorePolicy(),
+			"hsdp_dbs_sqs_subscriber":                        dbs.ResourceDBSSQSSubscriber(),
+			"hsdp_dbs_topic_subscription":                    dbs.ResourceDBSTopicSubscription(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                        iam.DataSourceIAMIntrospect(),
@@ -502,6 +505,7 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.SetupMDMClient()
 		c.SetupDiscoveryClient()
 		c.SetupBLRClient()
+		c.SetupDBSClient()
 
 		ma, err := jsonformat.NewMarshaller(false, "", "", fhirversion.STU3)
 		if err != nil {
