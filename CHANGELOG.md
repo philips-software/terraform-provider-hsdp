@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.47.0
+
+- Initial Data Broker Service (DBS) support:
+  * hsdp_resource_dbs_sqs_subscriber
+  * resource_dbs_topic_subscription
+
 ## v0.46.0
 
 - IAM: Support user import by login
