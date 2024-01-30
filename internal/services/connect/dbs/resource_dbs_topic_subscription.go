@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/philips-software/go-hsdp-api/connect/dbs"
@@ -33,21 +35,37 @@ func ResourceDBSTopicSubscription() *schema.Resource {
 				Required:         true,
 				ForceNew:         true,
 				DiffSuppressFunc: tools.SuppressWhenImported,
+				ValidateFunc: validation.All(
+					validation.StringLenBetween(1, 12),
+					validation.StringMatch(regexp.MustCompile("^[a-zA-Z0-9]+$"), "value must be alphanumeric"),
+				),
 			},
 			"description": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: validation.All(
+					validation.StringLenBetween(1, 250),
+					validation.StringMatch(regexp.MustCompile("^[-a-zA-Z0-9_, .]+$"), ""),
+				),
 			},
 			"subscriber_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: validation.All(
+					validation.StringLenBetween(1, 36),
+					validation.StringMatch(regexp.MustCompile("^[-a-fA-F0-9]+$"), ""),
+				),
 			},
 			"data_type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: validation.All(
+					validation.StringLenBetween(1, 36),
+					validation.StringMatch(regexp.MustCompile("^[-a-zA-Z0-9_.]+$"), ""),
+				),
 			},
 			"deliver_data_only": {
 				Type:     schema.TypeBool,
@@ -56,9 +74,10 @@ func ResourceDBSTopicSubscription() *schema.Resource {
 				ForceNew: true,
 			},
 			"kinesis_stream_partition_key": {
-				Type:     schema.TypeString,
-				Optional: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ValidateFunc: validation.StringLenBetween(1, 250),
 			},
 			"name": {
 				Type:     schema.TypeString,

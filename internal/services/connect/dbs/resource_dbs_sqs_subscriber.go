@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"net/http"
+	"regexp"
 
 	"github.com/philips-software/go-hsdp-api/connect/dbs"
 
@@ -32,34 +34,48 @@ func ResourceDBSSQSSubscriber() *schema.Resource {
 				Required:         true,
 				ForceNew:         true,
 				DiffSuppressFunc: tools.SuppressWhenImported,
+				ValidateFunc: validation.All(
+					validation.StringLenBetween(1, 12),
+					validation.StringMatch(regexp.MustCompile("^[a-zA-Z0-9]+$"), "value must be alphanumeric"),
+				),
 			},
 			"description": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: validation.All(
+					validation.StringLenBetween(1, 250),
+					validation.StringMatch(regexp.MustCompile("^[-a-zA-Z0-9_, .]+$"), ""),
+				),
 			},
 			"queue_type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
+				ValidateFunc: validation.StringInSlice([]string{
+					"Standard", "FIFO",
+				}, false),
 			},
 			"delivery_delay_seconds": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  0,
-				ForceNew: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      0,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(0, 900),
 			},
 			"message_retention_period_seconds": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  345600,
-				ForceNew: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      345600,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(60, 1209600),
 			},
 			"receive_wait_time_seconds": {
-				Type:     schema.TypeInt,
-				Optional: true,
-				Default:  0,
-				ForceNew: true,
+				Type:         schema.TypeInt,
+				Optional:     true,
+				Default:      0,
+				ForceNew:     true,
+				ValidateFunc: validation.IntBetween(0, 20),
 			},
 			"server_side_encryption": {
 				Type:     schema.TypeBool,
