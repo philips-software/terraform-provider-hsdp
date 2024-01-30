@@ -3,7 +3,9 @@ package dbs
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"net/http"
+	"time"
 
 	"github.com/philips-software/go-hsdp-api/connect/dbs"
 
@@ -138,8 +140,63 @@ func resourceDBSTopicSubscriptionCreate(ctx context.Context, d *schema.ResourceD
 	}
 	d.SetId(created.ID)
 
+	created, err = waitResourceCreated[dbs.TopicSubscription](ctx, StatusTopicSubscription(ctx, client, d.Id()),
+		d.Timeout(schema.TimeoutCreate))
+
+	if err != nil {
+		if created != nil {
+			return diag.FromErr(fmt.Errorf("resource did not get correct state: %s", created.ErrorMessage))
+		}
+		return diag.FromErr(err)
+	}
+
 	dbsTopicSubscriptionToSchema(*created, d)
 	return diags
+}
+
+func waitResourceCreated[V dbs.TopicSubscription | dbs.SQSSubscriber](
+	ctx context.Context,
+	refresh retry.StateRefreshFunc,
+	timeout time.Duration) (*V, error) {
+	stateConf := &retry.StateChangeConf{
+		Pending:    []string{"Creating", "Updating"},
+		Target:     []string{"Active"},
+		Refresh:    refresh,
+		Timeout:    timeout,
+		Delay:      1 * time.Second,
+		MinTimeout: 1 * time.Second,
+	}
+	outputRaw, err := stateConf.WaitForStateContext(ctx)
+
+	if output, ok := outputRaw.(*V); ok {
+		return output, err
+	}
+
+	return nil, err
+}
+
+func StatusTopicSubscription(ctx context.Context, client *dbs.Client, id string) retry.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		var resource *dbs.TopicSubscription
+		var resp *dbs.Response
+		err := tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+			var err error
+			resource, resp, err = client.Subscriptions.GetTopicSubscriptionByID(id)
+			if err != nil {
+				_ = client.TokenRefresh()
+			}
+			if resp == nil {
+				return nil, err
+			}
+			return resp.Response, err
+		})
+
+		if err != nil {
+			return nil, "", err
+		}
+
+		return resource, resource.Status, nil
+	}
 }
 
 func resourceDBSTopicSubscriptionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {

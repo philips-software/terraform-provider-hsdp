@@ -3,6 +3,7 @@ package dbs
 import (
 	"context"
 	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"net/http"
 
 	"github.com/philips-software/go-hsdp-api/connect/dbs"
@@ -149,8 +150,42 @@ func resourceDBSSQSSubscriberCreate(ctx context.Context, d *schema.ResourceData,
 	}
 	d.SetId(created.ID)
 
+	created, err = waitResourceCreated[dbs.SQSSubscriber](ctx, StatusSQSSubscriber(ctx, client, d.Id()),
+		d.Timeout(schema.TimeoutCreate))
+
+	if err != nil {
+		if created != nil {
+			return diag.FromErr(fmt.Errorf("resource did not get correct state: %s", created.ErrorMessage))
+		}
+		return diag.FromErr(err)
+	}
+
 	dbsSQSSubscriberToSchema(*created, d)
 	return diags
+}
+
+func StatusSQSSubscriber(ctx context.Context, client *dbs.Client, id string) retry.StateRefreshFunc {
+	return func() (interface{}, string, error) {
+		var resource *dbs.SQSSubscriber
+		var resp *dbs.Response
+		err := tools.TryHTTPCall(ctx, 10, func() (*http.Response, error) {
+			var err error
+			resource, resp, err = client.Subscribers.GetSQSByID(id)
+			if err != nil {
+				_ = client.TokenRefresh()
+			}
+			if resp == nil {
+				return nil, err
+			}
+			return resp.Response, err
+		})
+
+		if err != nil {
+			return nil, "", err
+		}
+
+		return resource, resource.Status, nil
+	}
 }
 
 func resourceDBSSQSSubscriberRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
