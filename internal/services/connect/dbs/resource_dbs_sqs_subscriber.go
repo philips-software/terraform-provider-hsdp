@@ -128,7 +128,7 @@ func dbsSQSSubscriberToSchema(resource dbs.SQSSubscriber, d *schema.ResourceData
 	_ = d.Set("message_retention_period_seconds", resource.MessageRetentionPeriod)
 	_ = d.Set("receive_wait_time_seconds", resource.ReceiveMessageWaitTimeSeconds)
 	_ = d.Set("server_side_encryption", resource.ServerSideEncryption)
-	_ = d.Set("status ", resource.Status)
+	_ = d.Set("status", resource.Status)
 	_ = d.Set("queue_name", resource.QueueName)
 }
 
