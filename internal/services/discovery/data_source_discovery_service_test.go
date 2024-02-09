@@ -55,7 +55,7 @@ resource "hsdp_iam_user" "test" {
   email           = "%s@terrakube.com"
   first_name      = "ACC"
   last_name       = "TestUser"
-  password        = "Acc@1!%s"
+  password        = "%s"
 
   organization_id = "%s" # Use parentOrgID
 }

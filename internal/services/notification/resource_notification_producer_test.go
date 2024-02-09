@@ -49,7 +49,7 @@ resource "hsdp_notification_producer" "producer" {
 	})
 }
 
-func testAccResourceNotificationProducer(random, parentId string) string {
+func testAccResourceNotificationProducer(random, parentId, password string) string {
 	return fmt.Sprintf(`
 resource "hsdp_iam_org" "test" {
     name = "ACCTest-%s"
@@ -189,7 +189,7 @@ resource "hsdp_notification_producer" "principal_producer" {
 resource "hsdp_iam_user" "user" { 
   organization_id = hsdp_iam_org.test.id
   login           = "login-%s"
-  password        = "Temp@123!"
+  password        = "%s"
   email           = "user-%s@terrakube.com"
   first_name      = "ACCProducer"
   last_name       = "ACCAcount"
@@ -229,6 +229,7 @@ resource "hsdp_iam_user" "user" {
 
 		// IAM USER
 		random,
+                password,
 		random,
 	)
 }

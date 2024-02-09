@@ -33,14 +33,14 @@ func TestAccResourceIAMUser_basic(t *testing.T) {
 	})
 }
 
-func testAccResourceIAMUser(parentOrgID, name string) string {
+func testAccResourceIAMUser(parentOrgID, name, password string) string {
 	return fmt.Sprintf(`
 resource "hsdp_iam_user" "test" {
   login           = "%s"
   email           = "acceptance+%s@terrakube.com"
   first_name      = "ACC"
   last_name       = "Developer"
-  password        = "DoNot@123"
+  password        = "%s"
   organization_id = "%s"
 }
 
@@ -53,7 +53,7 @@ resource "hsdp_iam_group" "test" {
 }
 `,
 		// IAM_USER
-		name, name, parentOrgID,
+		name, name, password, parentOrgID,
 		// IAM_GROUP
 		name,
 		parentOrgID,

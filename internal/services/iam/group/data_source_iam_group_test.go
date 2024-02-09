@@ -40,14 +40,14 @@ func TestAccDataSourceIAMGroup_basic(t *testing.T) {
 	})
 }
 
-func testAccDataSourceIAMGroup(org, name, randomName string) string {
+func testAccDataSourceIAMGroup(org, name, randomName, randomPassword string) string {
 	return fmt.Sprintf(`
 resource "hsdp_iam_user" "test" {
   login           = "%s"
   email           = "acceptance+%s@terrakube.com"
   first_name      = "ACC"
   last_name       = "Developer"
-  password        = "DoNot@123"
+  password        = "%s"
   organization_id = "%s"
 }
 
@@ -69,6 +69,7 @@ data "hsdp_iam_group" "test" {
 		// USER
 		randomName,
 		randomName,
+                randomPassword,
 		org,
 
 		// RESOURCE

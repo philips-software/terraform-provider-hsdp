@@ -103,7 +103,7 @@ resource "hsdp_iam_user" "test" {
   email           = "acceptance+%s@terrakube.com"
   first_name      = "ACC"
   last_name       = "Developer"
-  password        = "DoNot@123"
+  password        = "%s"
   organization_id = hsdp_iam_org.test.id
  
 }
@@ -162,6 +162,7 @@ resource "hsdp_iam_group" "test" {
 		// USER
 		name,
 		name,
+                password,
 		// ROLE
 		upperName,
 		name,
