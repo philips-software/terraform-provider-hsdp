@@ -169,8 +169,8 @@ func RandomPassword() (string, error) {
 		Numeric:         true,
 		MinNumeric:      1,
 		Special:         true,
-		MinSpecial:      1,
-		OverrideSpecial: "-!@#.:_?",
+		MinSpecial:      2,
+		OverrideSpecial: "!@.",
 	}
 	result, err := random.CreateString(params)
 	if err != nil {
