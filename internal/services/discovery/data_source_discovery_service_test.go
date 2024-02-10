@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/philips-software/terraform-provider-hsdp/internal/acc"
@@ -17,6 +19,7 @@ func TestAccDatasourceDiscoveryService_basic(t *testing.T) {
 	parentOrgID := acc.AccMDMOrgID()
 	clientID := acc.AccMDMClientID()
 	clientSecret := acc.AccMDMClientSecret()
+	randomPassword, _ := tools.RandomPassword()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -26,7 +29,7 @@ func TestAccDatasourceDiscoveryService_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccDatasourceDiscoveryService(parentOrgID, randomName, clientID, clientSecret),
+				Config:       testAccDatasourceDiscoveryService(parentOrgID, randomName, clientID, clientSecret, randomPassword),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", "TerraformAcceptanceT"),
 				),
@@ -35,7 +38,7 @@ func TestAccDatasourceDiscoveryService_basic(t *testing.T) {
 	})
 }
 
-func testAccDatasourceDiscoveryService(parentOrgID, name, clientID, clientSecret string) string {
+func testAccDatasourceDiscoveryService(parentOrgID, name, clientID, clientSecret, randomPassword string) string {
 	// We create a completely separate ORG as that is currently
 	// the only way we can clean up Propositions and Applications
 	// after we are done testing
@@ -77,7 +80,7 @@ data "hsdp_discovery_service" "test" {
 		// IAM USER
 		name,
 		name,
-		name,
+		randomPassword,
 		parentOrgID,
 		// DISCOVERY SERVICE
 		clientID,
