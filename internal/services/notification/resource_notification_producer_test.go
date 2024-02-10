@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/philips-software/terraform-provider-hsdp/internal/acc"
@@ -17,19 +19,20 @@ func TestAccResourceNotificationProducer_basic(t *testing.T) {
 	resourceName := "hsdp_notification_producer.principal_producer"
 	randomName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 	iamOrgID := acc.AccIAMOrgGUID()
+	randomPassword, _ := tools.RandomPassword()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { acc.PreCheck(t) },
 		ProviderFactories: acc.ProviderFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccResourceNotificationProducer(randomName, iamOrgID),
+				Config: testAccResourceNotificationProducer(randomName, iamOrgID, randomPassword),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "description", fmt.Sprintf("acc principal producer %s", randomName)),
 				),
 			},
 			{
-				Config: testAccResourceNotificationProducer(randomName, iamOrgID) +
+				Config: testAccResourceNotificationProducer(randomName, iamOrgID, randomPassword) +
 					fmt.Sprintf(`
 resource "hsdp_notification_producer" "producer" {
   managing_organization_id       = hsdp_iam_org.test.id
@@ -229,7 +232,7 @@ resource "hsdp_iam_user" "user" {
 
 		// IAM USER
 		random,
-                password,
+		password,
 		random,
 	)
 }

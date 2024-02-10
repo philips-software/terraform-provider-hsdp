@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/philips-software/terraform-provider-hsdp/internal/acc"
@@ -14,6 +16,7 @@ func TestAccDataSourceIAMGroup_basic(t *testing.T) {
 	org := acc.AccIAMOrgGUID()
 	name := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 	randomName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	randomPassword, _ := tools.RandomPassword()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -30,7 +33,7 @@ func TestAccDataSourceIAMGroup_basic(t *testing.T) {
 			},
 			{
 				ResourceName: "data.hsdp_iam_group.test",
-				Config:       testAccDataSourceIAMGroup(org, name, randomName),
+				Config:       testAccDataSourceIAMGroup(org, name, randomName, randomPassword),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.hsdp_iam_group.test", "name", name),
 					resource.TestCheckResourceAttr("data.hsdp_iam_group.test", "users.#", "1"),
@@ -69,7 +72,7 @@ data "hsdp_iam_group" "test" {
 		// USER
 		randomName,
 		randomName,
-                randomPassword,
+		randomPassword,
 		org,
 
 		// RESOURCE

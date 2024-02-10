@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
+
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/philips-software/terraform-provider-hsdp/internal/acc"
@@ -15,6 +17,7 @@ func TestAccResourceIAMUser_basic(t *testing.T) {
 	resourceName := "hsdp_iam_user.test"
 	parentOrgID := acc.AccIAMOrgGUID()
 	randomName := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
+	randomPassword, _ := tools.RandomPassword()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
@@ -24,7 +27,7 @@ func TestAccResourceIAMUser_basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				ResourceName: resourceName,
-				Config:       testAccResourceIAMUser(parentOrgID, randomName),
+				Config:       testAccResourceIAMUser(parentOrgID, randomName, randomPassword),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "organization_id", parentOrgID),
 				),
