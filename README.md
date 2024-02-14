@@ -7,6 +7,10 @@
 A Terraform provider to provision and manage state of various HSDP specific resources.
 To find out more about HSDP please visit [hsdp.io](https://www.hsdp.io/)
 
+## Disclaimer
+
+This provider is not endorsed, supported or approved by HSDP. Use at your own risk.
+
 ## Using the provider
 
 **Terraform 1.0.0+**: To install this provider, copy and paste this code into your Terraform configuration. Then, run terraform init.
