@@ -56,6 +56,7 @@ The following arguments are supported:
 The following attributes are exported:
 
 * `id` - The GUID of the user
+* `access_status` - Reflects the access we have to the (existing) user. Possible values are `none`, `id_only`, `full`
 
 ## Import
 

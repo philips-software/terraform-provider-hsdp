@@ -32,7 +32,7 @@ func ResourceIAMUser() *schema.Resource {
 		UpdateContext: resourceIAMUserUpdate,
 		DeleteContext: resourceIAMUserDelete,
 
-		SchemaVersion: 2,
+		SchemaVersion: 3,
 		Schema: map[string]*schema.Schema{
 			"username": {
 				Type:       schema.TypeString,
@@ -88,6 +88,11 @@ func ResourceIAMUser() *schema.Resource {
 				Optional:         true,
 				DiffSuppressFunc: tools.SuppressDefaultCommunicationChannel,
 				Description:      "Preferred communication channel. Email and SMS are supported channels. Email is the default channel if e-mail address is provided. Values supported: [ email | sms ].",
+			},
+			"access_status": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The access status of the provider instance to the user. Depending on access level the provider might not have full access to the user. For Crossplane support we might allow just partial access to the user.",
 			},
 		},
 	}
@@ -185,6 +190,7 @@ func resourceIAMUserRead(_ context.Context, d *schema.ResourceData, m interface{
 
 	id := d.Id()
 
+	_ = d.Set("access_status", "none")
 	// Crossplane Observe support
 	importId, err := url.QueryUnescape(id)
 	if err != nil {
@@ -196,6 +202,7 @@ func resourceIAMUserRead(_ context.Context, d *schema.ResourceData, m interface{
 		if err == nil {
 			id = user
 			d.SetId(id)
+			_ = d.Set("access_status", "id_only")
 		}
 	}
 	user, _, err := client.Users.GetUserByID(id)
@@ -205,7 +212,8 @@ func resourceIAMUserRead(_ context.Context, d *schema.ResourceData, m interface{
 			d.SetId("")
 			return diags
 		}
-		return diag.FromErr(err)
+	} else {
+		_ = d.Set("access_status", "full")
 	}
 	_ = d.Set("login", user.LoginID)
 	_ = d.Set("last_name", user.Name.Family)
