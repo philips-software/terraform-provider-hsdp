@@ -215,14 +215,16 @@ func resourceIAMUserRead(_ context.Context, d *schema.ResourceData, m interface{
 	} else {
 		_ = d.Set("access_status", "full")
 	}
-	_ = d.Set("login", user.LoginID)
-	_ = d.Set("last_name", user.Name.Family)
-	_ = d.Set("first_name", user.Name.Given)
-	_ = d.Set("email", user.EmailAddress)
-	_ = d.Set("login", user.LoginID)
-	_ = d.Set("organization_id", user.ManagingOrganization)
-	_ = d.Set("preferred_communication_channel", user.PreferredCommunicationChannel)
-	_ = d.Set("preferred_language", user.PreferredLanguage)
+	if user != nil {
+		_ = d.Set("login", user.LoginID)
+		_ = d.Set("last_name", user.Name.Family)
+		_ = d.Set("first_name", user.Name.Given)
+		_ = d.Set("email", user.EmailAddress)
+		_ = d.Set("login", user.LoginID)
+		_ = d.Set("organization_id", user.ManagingOrganization)
+		_ = d.Set("preferred_communication_channel", user.PreferredCommunicationChannel)
+		_ = d.Set("preferred_language", user.PreferredLanguage)
+	}
 	return diags
 }
 
