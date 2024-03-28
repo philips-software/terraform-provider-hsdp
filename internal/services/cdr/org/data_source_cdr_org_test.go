@@ -17,6 +17,11 @@ func TestAccDataSourceCDROrg_basic(t *testing.T) {
 	parentOrgID := acc.AccIAMOrgGUID()
 	cdrURL := acc.AccCDRURL()
 
+	if cdrURL == "" {
+		t.Skipped()
+		return
+	}
+
 	randomNameSTU3 := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 	randomNameR4 := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)
 	now := time.Now().Format(time.RFC3339)

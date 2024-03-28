@@ -16,6 +16,12 @@ func TestAccDatasourceCDRPractitioner_basic(t *testing.T) {
 	resourceName := "hsdp_cdr_practitioner.test"
 	parentOrgID := acc.AccIAMOrgGUID()
 	cdrURL := acc.AccCDRURL()
+
+	if cdrURL == "" {
+		t.Skipped()
+		return
+	}
+
 	now := time.Now().Format(time.RFC3339)
 
 	randomNameSTU3 := acctest.RandStringFromCharSet(10, acctest.CharSetAlpha)

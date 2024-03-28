@@ -77,9 +77,6 @@ func PreCheck(t *testing.T) {
 		if AccIAMOrgGUID() == "" {
 			t.Fatalf("HSDP_IAM_ACC_ORG_GUID must be set")
 		}
-		if AccCDRURL() == "" {
-			t.Fatalf("HSDP_CDR_ACC_URL must be set")
-		}
 	})
 }
 
