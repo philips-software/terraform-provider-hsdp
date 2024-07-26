@@ -10,7 +10,7 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 
-        "github.com/distribution/reference"
+	"github.com/distribution/reference"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -180,7 +180,13 @@ func resourceFunctionUpdate(_ context.Context, d *schema.ResourceData, m interfa
 			return diags
 		}
 		code.Image = d.Get("docker_image").(string)
-		_, resp, err := ironClient.Codes.CreateOrUpdateCode(*code)
+		var resp *iron.Response
+		operation := func() error {
+			_, resp, err = ironClient.Codes.CreateOrUpdateCode(*code)
+			return err
+		}
+		err = backoff.Retry(operation, backoff.WithMaxRetries(backoff.NewExponentialBackOff(), 8))
+
 		if err != nil {
 			return diag.FromErr(fmt.Errorf("CreateOrUpdateCode(%v): %w", code, err))
 		}
