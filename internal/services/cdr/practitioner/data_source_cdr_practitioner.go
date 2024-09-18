@@ -107,7 +107,7 @@ func dataSourceCDRPropositionRead(ctx context.Context, d *schema.ResourceData, m
 			return diag.FromErr(fmt.Errorf("R4.MarshalResource: %w", err))
 		}
 		_ = d.Set("fhir_json", string(jsonResource))
-		if resource.Identifier != nil && len(resource.Identifier) > 0 {
+		if len(resource.Identifier) > 0 {
 			var uses []string
 			var systems []string
 			var values []string
@@ -153,7 +153,7 @@ func dataSourceCDRPropositionRead(ctx context.Context, d *schema.ResourceData, m
 			return diag.FromErr(fmt.Errorf("STU3.MarshalResource: %w", err))
 		}
 		_ = d.Set("fhir_json", string(jsonResource))
-		if resource.Identifier != nil && len(resource.Identifier) > 0 {
+		if len(resource.Identifier) > 0 {
 			var uses []string
 			var systems []string
 			var values []string
