@@ -28,7 +28,7 @@ terraform {
 ## Development requirements
 
 -	[Terraform](https://www.terraform.io/downloads.html) 1.5.5 or [OpenTofu](https://github.com/opentofu/opentofu) latest
--	[Go](https://golang.org/doc/install) 1.21 or newer (to build the provider plugin)
+-	[Go](https://golang.org/doc/install) 1.23 or newer (to build the provider plugin)
 
 ## Building the provider
 
