@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.50.0
+
+- Bump Go to 1.23
+- Added `self_managed_certificate` to IAM Service
+- Make CDR tests conditional
+- FET-128 Fix crash on partial access
+
 ## v0.48.1
 
 - IAM: Fix crash on partial user access
