@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.50.1
+
+- Fix CommonName check for IAM Service Certificate
+
 ## v0.50.0
 
 - Bump Go to 1.23
