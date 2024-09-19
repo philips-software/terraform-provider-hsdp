@@ -416,8 +416,8 @@ func setSelfManagedCertificate(client *iam.Client, service iam.Service, d *schem
 		return diag.FromErr(fmt.Errorf("parsing certificate: %w", err))
 	}
 	commonName := cert.Subject.CommonName
-	if commonName != service.ServiceID {
-		return diag.FromErr(fmt.Errorf("certificate subject CommonName should match `service_id`: %s != %s", commonName, service.ServiceID))
+	if commonName != fmt.Sprintf("%s.", service.Name) {
+		return diag.FromErr(fmt.Errorf("certificate subject CommonName should match `service_name + \".\"`: %s != %s", commonName, fmt.Sprintf("%s.", service.Name)))
 	}
 	_, _, err = client.Services.UpdateServiceCertificateDER(service, block.Bytes)
 	if err != nil {
