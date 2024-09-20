@@ -269,6 +269,7 @@ func resourceIAMServiceUpdate(ctx context.Context, d *schema.ResourceData, m int
 	var s iam.Service
 	s.ID = d.Id()
 	s.ServiceID = d.Get("service_id").(string)
+	s.Name = d.Get("name").(string)
 
 	if d.HasChange("token_validity") || d.HasChange("description") {
 		tokenValidity := d.Get("token_validity").(int)
