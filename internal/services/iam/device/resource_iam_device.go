@@ -320,7 +320,7 @@ func resourceIAMDeviceRead(ctx context.Context, d *schema.ResourceData, m interf
 		return resp.Response, err
 	})
 	if err != nil {
-		if resp != nil && resp.StatusCode() == http.StatusNotFound {
+		if resp != nil && (resp.StatusCode() == http.StatusNotFound || resp.StatusCode() == http.StatusForbidden) {
 			d.SetId("")
 			return diags
 		}

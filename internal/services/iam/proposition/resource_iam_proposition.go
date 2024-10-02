@@ -59,6 +59,7 @@ func ResourceIAMProposition() *schema.Resource {
 			"wait_for_delete": {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Default:     true,
 				Description: "Blocks until the proposition delete has completed. Default: false. The proposition delete process can take some time as all its associated resources like applications and services are removed recursively. This option is useful for ephemeral environments where the same proposition might be recreated shortly after a destroy operation.",
 			},
 		},
