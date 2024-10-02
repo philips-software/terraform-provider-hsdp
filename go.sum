@@ -218,8 +218,8 @@ github.com/go-playground/locales v0.14.1 h1:EWaQ/wswjilfKLTECiXz7Rh+3BjFhfDFKv/o
 github.com/go-playground/locales v0.14.1/go.mod h1:hxrqLVvrK65+Rwrd5Fc6F2O76J/NuW9t0sjnWqG1slY=
 github.com/go-playground/universal-translator v0.18.1 h1:Bcnm0ZwsGyWbCzImXv+pAJnYK9S473LQFuzCbDbfSFY=
 github.com/go-playground/universal-translator v0.18.1/go.mod h1:xekY+UJKNuX9WP91TpwSH2VMlDf28Uj24BCp08ZFTUY=
-github.com/go-playground/validator/v10 v10.22.0 h1:k6HsTZ0sTnROkhS//R0O+55JgM8C4Bx7ia+JlgcnOao=
-github.com/go-playground/validator/v10 v10.22.0/go.mod h1:dbuPbCMFw/DrkbEynArYaCwl3amGuJotoKCe95atGMM=
+github.com/go-playground/validator/v10 v10.22.1 h1:40JcKH+bBNGFczGuoBYgX4I6m/i27HYW8P9FDk5PbgA=
+github.com/go-playground/validator/v10 v10.22.1/go.mod h1:dbuPbCMFw/DrkbEynArYaCwl3amGuJotoKCe95atGMM=
 github.com/go-sql-driver/mysql v1.5.0/go.mod h1:DCzpHaOWr8IXmIStZouvnhqoel9Qv2LBy8hT2VhHyBg=
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/go-test/deep v1.0.3 h1:ZrJSEWsXzPOxaZnFteGEfooLba+ju3FYIbOrS+rQd68=
@@ -523,8 +523,8 @@ github.com/peterbourgon/diskv v2.0.1+incompatible/go.mod h1:uqqh8zWWbv1HBMNONnaR
 github.com/philhofer/fwd v1.0.0/go.mod h1:gk3iGcWd9+svBvR0sR+KPcfE+RNWozjowpeBVG3ZVNU=
 github.com/philips-labs/siderite v0.16.6 h1:lG+Ze7K5WOcNB3KOcUzXDxGwHZg13mKKMa+yd8wHphw=
 github.com/philips-labs/siderite v0.16.6/go.mod h1:0mVh0VJ5109l9QCJDCizGTdtEbClbeQ/lcCrsEZiu60=
-github.com/philips-software/go-hsdp-api v0.85.0 h1:+sJQcYPlknBH2X5mJwPaYhvOyBcm7MZ5/3OFKz6vMMY=
-github.com/philips-software/go-hsdp-api v0.85.0/go.mod h1:UMwbi/28tlAPjL2JDT0YzNOnY+ESj8GUzKO7HQwoKr8=
+github.com/philips-software/go-hsdp-api v0.86.0 h1:2in3PwryCmHT0/GyoYJufNhLrrYIP1LUm/DLLyGTH8U=
+github.com/philips-software/go-hsdp-api v0.86.0/go.mod h1:jaJIx/uguOyLPlAye1/aYXDheFx3GBbnQeOoZTRg5Po=
 github.com/philips-software/go-nih-signer v1.5.0 h1:qMQ2uArwgnSCbZV7GvuiN4cyHLFXqpVFojQKIiF24tE=
 github.com/philips-software/go-nih-signer v1.5.0/go.mod h1:lJQZASlfNi8XiJjEIz/xjdumb7wWU8RuSETQjlaU1f4=
 github.com/pires/go-proxyproto v0.0.0-20191211124218-517ecdf5bb2b/go.mod h1:Odh9VFOZJCf9G8cLW5o435Xf1J95Jw9Gw5rnCjcwzAY=

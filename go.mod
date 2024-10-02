@@ -17,7 +17,7 @@ require (
 	github.com/loafoe/easyssh-proxy/v2 v2.0.4
 	github.com/loafoe/ferrite v0.2.0
 	github.com/philips-labs/siderite v0.16.6
-	github.com/philips-software/go-hsdp-api v0.85.0
+	github.com/philips-software/go-hsdp-api v0.86.0
 	github.com/pkg/errors v0.9.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.9.0
@@ -38,7 +38,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator/v10 v10.22.0 // indirect
+	github.com/go-playground/validator/v10 v10.22.1 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
