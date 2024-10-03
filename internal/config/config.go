@@ -402,7 +402,7 @@ func (c *Config) SetupIAMClient() {
 			PrivateKey: c.ServicePrivateKey,
 		})
 		if err != nil {
-			c.iamClientErr = fmt.Errorf("invalid IAM Service Identity credentials: %w", err)
+			c.iamClientErr = fmt.Errorf("invalid IAM Service Identity credentials for '%s': %w", c.ServiceID, err)
 			return
 		}
 		usingServiceIdentity = true
@@ -415,7 +415,7 @@ func (c *Config) SetupIAMClient() {
 		}
 		err = client.Login(c.OrgAdminUsername, c.OrgAdminPassword)
 		if err != nil {
-			c.iamClientErr = fmt.Errorf("invalid IAM Org Admin credentials: %w", err)
+			c.iamClientErr = fmt.Errorf("invalid IAM Org Admin credentials for '%s': %w", c.OrgAdminUsername, err)
 			return
 		}
 		usingOrgAdmin = true
