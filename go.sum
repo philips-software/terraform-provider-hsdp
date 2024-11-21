@@ -523,8 +523,8 @@ github.com/peterbourgon/diskv v2.0.1+incompatible/go.mod h1:uqqh8zWWbv1HBMNONnaR
 github.com/philhofer/fwd v1.0.0/go.mod h1:gk3iGcWd9+svBvR0sR+KPcfE+RNWozjowpeBVG3ZVNU=
 github.com/philips-labs/siderite v0.16.6 h1:lG+Ze7K5WOcNB3KOcUzXDxGwHZg13mKKMa+yd8wHphw=
 github.com/philips-labs/siderite v0.16.6/go.mod h1:0mVh0VJ5109l9QCJDCizGTdtEbClbeQ/lcCrsEZiu60=
-github.com/philips-software/go-hsdp-api v0.86.0 h1:2in3PwryCmHT0/GyoYJufNhLrrYIP1LUm/DLLyGTH8U=
-github.com/philips-software/go-hsdp-api v0.86.0/go.mod h1:jaJIx/uguOyLPlAye1/aYXDheFx3GBbnQeOoZTRg5Po=
+github.com/philips-software/go-hsdp-api v0.87.0 h1:WOx0MLwoCDQI31Nyu39dBcu85uRrduDZFTgymLVcIsc=
+github.com/philips-software/go-hsdp-api v0.87.0/go.mod h1:jaJIx/uguOyLPlAye1/aYXDheFx3GBbnQeOoZTRg5Po=
 github.com/philips-software/go-nih-signer v1.5.0 h1:qMQ2uArwgnSCbZV7GvuiN4cyHLFXqpVFojQKIiF24tE=
 github.com/philips-software/go-nih-signer v1.5.0/go.mod h1:lJQZASlfNi8XiJjEIz/xjdumb7wWU8RuSETQjlaU1f4=
 github.com/pires/go-proxyproto v0.0.0-20191211124218-517ecdf5bb2b/go.mod h1:Odh9VFOZJCf9G8cLW5o435Xf1J95Jw9Gw5rnCjcwzAY=
