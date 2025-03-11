@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/cenkalti/backoff/v4"
+	"github.com/dip-software/go-dip-api/dicom"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/philips-software/go-hsdp-api/dicom"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )

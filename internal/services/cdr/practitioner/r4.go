@@ -8,13 +8,13 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/dip-software/go-dip-api/cdr"
+	pr "github.com/dip-software/go-dip-api/cdr/helper/fhir/r4/practitioner"
 	r4pb "github.com/google/fhir/go/proto/google/fhir/proto/r4/core/resources/bundle_and_contained_resource_go_proto"
 	"github.com/google/fhir/go/proto/google/fhir/proto/r4/core/resources/practitioner_go_proto"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	jsonpatch "github.com/herkyl/patchwerk"
-	"github.com/philips-software/go-hsdp-api/cdr"
-	pr "github.com/philips-software/go-hsdp-api/cdr/helper/fhir/r4/practitioner"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )

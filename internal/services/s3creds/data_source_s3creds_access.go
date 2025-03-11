@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 
+	creds "github.com/dip-software/go-dip-api/s3creds"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	creds "github.com/philips-software/go-hsdp-api/s3creds"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 )
 

@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/dip-software/go-dip-api/cdr"
+	r4idhelper "github.com/dip-software/go-dip-api/cdr/helper/fhir/r4/identifier"
+	stu3idhelper "github.com/dip-software/go-dip-api/cdr/helper/fhir/stu3/identifier"
 	r4pb "github.com/google/fhir/go/proto/google/fhir/proto/r4/core/resources/bundle_and_contained_resource_go_proto"
 	"github.com/google/fhir/go/proto/google/fhir/proto/stu3/resources_go_proto"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/philips-software/go-hsdp-api/cdr"
-	r4idhelper "github.com/philips-software/go-hsdp-api/cdr/helper/fhir/r4/identifier"
-	stu3idhelper "github.com/philips-software/go-hsdp-api/cdr/helper/fhir/stu3/identifier"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )

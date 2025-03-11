@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/cenkalti/backoff/v4"
-	"github.com/philips-software/go-hsdp-api/iam"
+	"github.com/dip-software/go-dip-api/iam"
 )
 
 func CheckForPermissionErrors(client iam.TokenRefresher, status iam.HTTPStatus, err error) error {

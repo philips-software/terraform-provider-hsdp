@@ -10,13 +10,13 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 
+	"github.com/dip-software/go-dip-api/iron"
+	siderite "github.com/dip-software/siderite/models"
 	"github.com/distribution/reference"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/loafoe/ferrite/server"
-	siderite "github.com/philips-labs/siderite/models"
-	"github.com/philips-software/go-hsdp-api/iron"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 	"github.com/robfig/cron/v3"

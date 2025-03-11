@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"time"
 
-	"github.com/philips-software/go-hsdp-api/connect/dbs"
+	"github.com/dip-software/go-dip-api/connect/dbs"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"

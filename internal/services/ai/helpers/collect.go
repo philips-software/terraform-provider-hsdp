@@ -1,9 +1,9 @@
 package helpers
 
 import (
+	"github.com/dip-software/go-dip-api/ai"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/philips-software/go-hsdp-api/ai"
 )
 
 func CollectComputeTarget(d *schema.ResourceData) (ai.ReferenceComputeTarget, diag.Diagnostics) {

@@ -6,10 +6,10 @@ import (
 	"net/http"
 
 	"github.com/cenkalti/backoff/v4"
+	"github.com/dip-software/go-dip-api/ai"
+	"github.com/dip-software/go-dip-api/ai/workspace"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/philips-software/go-hsdp-api/ai"
-	"github.com/philips-software/go-hsdp-api/ai/workspace"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/ai/helpers"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"

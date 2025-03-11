@@ -6,12 +6,12 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/dip-software/go-dip-api/cdr"
+	pr "github.com/dip-software/go-dip-api/cdr/helper/fhir/stu3/practitioner"
 	"github.com/google/fhir/go/proto/google/fhir/proto/stu3/resources_go_proto"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	jsonpatch "github.com/herkyl/patchwerk"
-	"github.com/philips-software/go-hsdp-api/cdr"
-	pr "github.com/philips-software/go-hsdp-api/cdr/helper/fhir/stu3/practitioner"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )

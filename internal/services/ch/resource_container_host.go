@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/cenkalti/backoff/v4"
+	"github.com/dip-software/go-dip-api/cartel"
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -15,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/loafoe/easyssh-proxy/v2"
-	"github.com/philips-software/go-hsdp-api/cartel"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 
