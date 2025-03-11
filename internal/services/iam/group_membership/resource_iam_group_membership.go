@@ -209,10 +209,16 @@ func resourceIAMGroupMembershipUpdate(ctx context.Context, d *schema.ResourceDat
 		toRemove := tools.Difference(old, newList)
 
 		if len(toRemove) > 0 {
-			_, _, _ = client.Groups.RemoveMembers(ctx, group, toRemove...)
+			_, _, err = client.Groups.RemoveMembers(ctx, group, toRemove...)
+			if err != nil {
+				diags = append(diags, diag.FromErr(err)...)
+			}
 		}
 		if len(toAdd) > 0 {
-			_, _, _ = client.Groups.AddMembers(ctx, group, toAdd...)
+			_, _, err = client.Groups.AddMembers(ctx, group, toAdd...)
+			if err != nil {
+				diags = append(diags, diag.FromErr(err)...)
+			}
 		}
 	}
 
