@@ -25,10 +25,11 @@ func ResourceDBSTopicSubscription() *schema.Resource {
 				return []*schema.ResourceData{d}, nil
 			},
 		},
-		CreateContext: resourceDBSTopicSubscriptionCreate,
-		ReadContext:   resourceDBSTopicSubscriptionRead,
-		DeleteContext: resourceDBSTopicSubscriptionDelete,
-		SchemaVersion: 1,
+		CreateContext:      resourceDBSTopicSubscriptionCreate,
+		ReadContext:        resourceDBSTopicSubscriptionRead,
+		DeleteContext:      resourceDBSTopicSubscriptionDelete,
+		DeprecationMessage: "This resource is deprecated. It will be removed in an upcoming release.",
+		SchemaVersion:      1,
 		Schema: map[string]*schema.Schema{
 			"name_infix": {
 				Type:             schema.TypeString,

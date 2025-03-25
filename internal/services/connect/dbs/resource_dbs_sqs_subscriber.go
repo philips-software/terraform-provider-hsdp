@@ -24,10 +24,11 @@ func ResourceDBSSQSSubscriber() *schema.Resource {
 				return []*schema.ResourceData{d}, nil
 			},
 		},
-		CreateContext: resourceDBSSQSSubscriberCreate,
-		ReadContext:   resourceDBSSQSSubscriberRead,
-		DeleteContext: resourceDBSSQSSubscriberDelete,
-		SchemaVersion: 1,
+		CreateContext:      resourceDBSSQSSubscriberCreate,
+		ReadContext:        resourceDBSSQSSubscriberRead,
+		DeleteContext:      resourceDBSSQSSubscriberDelete,
+		DeprecationMessage: "This resource is deprecated. It will be removed in an upcoming release.",
+		SchemaVersion:      1,
 		Schema: map[string]*schema.Schema{
 			"name_infix": {
 				Type:             schema.TypeString,
