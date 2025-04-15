@@ -209,6 +209,9 @@ func resourceIAMServiceCreate(ctx context.Context, d *schema.ResourceData, m int
 
 	// Set certificate if set from the get-go
 	if selfPrivateKey != "" {
+		if selfCertificate != "" {
+			return diag.FromErr(fmt.Errorf("you cannot set 'self_managed_certificate' value in combination with 'self_managed_private_key'"))
+		}
 		diags = setSelfManagedPrivateKey(client, *createdService, d)
 		if len(diags) > 0 {
 			_, _, _ = client.Services.DeleteService(*createdService) // Cleanup
@@ -222,6 +225,8 @@ func resourceIAMServiceCreate(ctx context.Context, d *schema.ResourceData, m int
 			_, _, _ = client.Services.DeleteService(*createdService) // Cleanup
 			return diags
 		}
+		// Set private_key to empty string
+		_ = d.Set("private_key", "")
 	}
 
 	// Set scopes and default_scopes
