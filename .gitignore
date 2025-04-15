@@ -12,3 +12,4 @@ terraform-provider-hsdp
 build/
 dist/
 .idea/
+__*
