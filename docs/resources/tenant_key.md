@@ -60,7 +60,7 @@ In addition to all arguments above, the following attributes are exported:
 
 * `id` - The signature of the generated API key, used to identify this resource.
 * `signature` - The signature of the generated API key (same as id, for consistency with other resources).
-* `key` - The generated API key (sensitive value).
+* `result` - The generated API key (sensitive value).
 
 ## Import
 

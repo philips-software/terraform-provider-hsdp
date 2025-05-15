@@ -81,10 +81,11 @@ func ResourceTenantKey() *schema.Resource {
 				Default:  "prod",
 				ForceNew: true,
 			},
-			"key": {
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
+			"result": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
+				Description: "The generated API key",
 			},
 			"signature": {
 				Type:        schema.TypeString,
@@ -139,7 +140,7 @@ func resourceTenantKeyCreate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	d.Set("key", apiKey)
+	d.Set("result", apiKey)
 	d.Set("signature", signature)
 	d.SetId(signature)
 
@@ -162,7 +163,7 @@ func resourceTenantKeyRead(ctx context.Context, d *schema.ResourceData, m interf
 		return diags
 	}
 
-	d.Set("key", apiKey)
+	d.Set("result", apiKey)
 	d.Set("signature", signature)
 	return diags
 }
