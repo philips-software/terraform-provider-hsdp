@@ -443,6 +443,8 @@ github.com/labstack/gommon v0.4.2 h1:F8qTUNXgG1+6WQmqoUWnz8WiEU60mXVVw0P4ht1WRA0
 github.com/labstack/gommon v0.4.2/go.mod h1:QlUFxVM+SNXhDL/Z7YhocGIBYOiwB0mXm1+1bAPHPyU=
 github.com/leodido/go-urn v1.4.0 h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=
 github.com/leodido/go-urn v1.4.0/go.mod h1:bvxc+MVxLKB4z00jd1z+Dvzr47oO32F/QSNjSBOlFxI=
+github.com/loafoe/caddy-token v0.40.0 h1:vwQBF37MRmY+VPZjjKwEPl96NAHjbC9m1rcb+fSXEr8=
+github.com/loafoe/caddy-token v0.40.0/go.mod h1:TwV/FIxUX+CjAB8gOidyneqAc7tZQUZChNpxpSRaZCg=
 github.com/loafoe/easyssh-proxy/v2 v2.0.4 h1:EzD0FWq2Ro44sDIbk95cs5oUlWFi2GKc6u/A8sxAxBM=
 github.com/loafoe/easyssh-proxy/v2 v2.0.4/go.mod h1:PzKetBuhTzg74M1AapAmDQAwBILp/MIiUkeUQ9bx42k=
 github.com/loafoe/ferrite v0.3.0 h1:MJrHMRLZjX8ZJb/hgV8KHzHRHqmEw12wFKXcD9s3m2k=

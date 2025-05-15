@@ -3,8 +3,9 @@ package hsdp
 import (
 	"context"
 	"encoding/json"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/dbs"
 	"os"
+
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/dbs"
 
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/blr"
 
@@ -48,8 +49,9 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/metrics"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/notification"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/pki"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/pki/tenant"
+	pki_tenant "github.com/philips-software/terraform-provider-hsdp/internal/services/pki/tenant"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/s3creds"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/tenant"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
 
@@ -276,7 +278,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_dicom_store_config":                        dicom.ResourceDICOMStoreConfig(),
 			"hsdp_dicom_object_store":                        dicom.ResourceDICOMObjectStore(),
 			"hsdp_dicom_repository":                          repository2.ResourceDICOMRepository(),
-			"hsdp_pki_tenant":                                tenant.ResourcePKITenant(),
+			"hsdp_pki_tenant":                                pki_tenant.ResourcePKITenant(),
 			"hsdp_pki_cert":                                  pki.ResourcePKICert(),
 			"hsdp_edge_app":                                  edge.ResourceEdgeApp(),
 			"hsdp_edge_config":                               edge.ResourceEdgeConfig(),
@@ -331,6 +333,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_blr_blob_store_policy":                     blr.ResourceBLRBlobStorePolicy(),
 			"hsdp_dbs_sqs_subscriber":                        dbs.ResourceDBSSQSSubscriber(),
 			"hsdp_dbs_topic_subscription":                    dbs.ResourceDBSTopicSubscription(),
+			"hsdp_tenant_key":                                tenant.ResourceTenantKey(),
 		},
 		DataSourcesMap: map[string]*schema.Resource{
 			"hsdp_iam_introspect":                        iam.DataSourceIAMIntrospect(),
