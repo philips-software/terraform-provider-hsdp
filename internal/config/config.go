@@ -420,7 +420,7 @@ func (c *Config) SetupIAMClient() {
 		}
 		usingOrgAdmin = true
 	}
-	if !(usingServiceIdentity || usingOrgAdmin) {
+	if !usingServiceIdentity && !usingOrgAdmin {
 		c.iamClientErr = fmt.Errorf("invalid / missing IAM Service Identity or IAM Org Admin credentials")
 		return
 	}

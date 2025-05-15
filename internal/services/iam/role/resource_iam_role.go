@@ -124,7 +124,7 @@ func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, m interf
 			_, _, _ = client.Roles.DeleteRole(*role)
 			return diag.FromErr(fmt.Errorf("error adding permission '%s': %v", p, err))
 		}
-		if resp == nil || !(resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusMultiStatus) {
+		if resp == nil || (resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusMultiStatus) {
 			// Clean up
 			_, _, _ = client.Roles.DeleteRole(*role)
 			return diag.FromErr(fmt.Errorf("error adding permission '%s': %v", p, result))

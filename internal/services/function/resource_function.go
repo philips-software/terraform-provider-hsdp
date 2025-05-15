@@ -266,7 +266,7 @@ func resourceFunctionCreate(ctx context.Context, d *schema.ResourceData, m inter
 			return diag.FromErr(fmt.Errorf("invalid or missing Docker credentials: %w", err))
 		}
 	}
-	signature := strings.Replace(uuid.New().String(), "-", "", -1)
+	signature := strings.ReplaceAll(uuid.New().String(), "-", "")
 
 	if ironConfig == nil || len(ironConfig.ClusterInfo) == 0 {
 		return diag.FromErr(fmt.Errorf("invalid Iron.io discovery: %v", ironConfig))
@@ -607,7 +607,7 @@ func newIronClient(d *schema.ResourceData, m interface{}) (*iron.Client, *iron.C
 		}
 	}
 	backendType := cfg["type"]
-	if !(backendType == "siderite" || backendType == "ferrite") {
+	if backendType != "siderite" && backendType != "ferrite" {
 		return nil, nil, nil, fmt.Errorf("expected backend type of ['siderite' | 'ferrite']")
 	}
 	// Bootstrap ferrite

@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	missingUAACredentialsErr = errors.New("this resource only works when CF UAA credentials are configured")
+	errMissingUAACredentials = errors.New("this resource only works when CF UAA credentials are configured")
 )
 
 func ResourcePKITenant() *schema.Resource {
@@ -181,7 +181,7 @@ func resourcePKITenantDelete(_ context.Context, d *schema.ResourceData, m interf
 	var client *pki.Client
 
 	if !c.HasUAAuth() {
-		return diag.FromErr(missingUAACredentialsErr)
+		return diag.FromErr(errMissingUAACredentials)
 	}
 
 	client, err = c.PKIClient()
@@ -215,7 +215,7 @@ func resourcePKITenantUpdate(_ context.Context, d *schema.ResourceData, m interf
 	var client *pki.Client
 
 	if !c.HasUAAuth() {
-		return diag.FromErr(missingUAACredentialsErr)
+		return diag.FromErr(errMissingUAACredentials)
 	}
 
 	client, err = c.PKIClient()
@@ -351,7 +351,7 @@ func resourcePKITenantCreate(ctx context.Context, d *schema.ResourceData, m inte
 	var client *pki.Client
 
 	if !c.HasUAAuth() {
-		return diag.FromErr(missingUAACredentialsErr)
+		return diag.FromErr(errMissingUAACredentials)
 	}
 
 	client, err = c.PKIClient()
@@ -380,7 +380,7 @@ func resourcePKITenantRead(_ context.Context, d *schema.ResourceData, m interfac
 	var client *pki.Client
 
 	if !c.HasUAAuth() {
-		return diag.FromErr(missingUAACredentialsErr)
+		return diag.FromErr(errMissingUAACredentials)
 	}
 
 	client, err = c.PKIClient()

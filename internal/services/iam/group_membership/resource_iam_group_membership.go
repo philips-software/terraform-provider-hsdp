@@ -83,7 +83,7 @@ func resourceIAMGroupMembershipCreate(ctx context.Context, d *schema.ResourceDat
 			if resp == nil {
 				return nil, err
 			}
-			if !(resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusMultiStatus) {
+			if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusMultiStatus {
 				return resp.Response, backoff.Permanent(fmt.Errorf("failed to add members: %v %w", result, err))
 			}
 			return resp.Response, err
@@ -107,7 +107,7 @@ func resourceIAMGroupMembershipCreate(ctx context.Context, d *schema.ResourceDat
 			if err != nil {
 				return resp.Response, err
 			}
-			if !(resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusMultiStatus) {
+			if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusMultiStatus {
 				return resp.Response, backoff.Permanent(fmt.Errorf("failed to add services: %v", result))
 			}
 			return resp.Response, err
@@ -152,7 +152,7 @@ func resourceIAMGroupMembershipDelete(ctx context.Context, d *schema.ResourceDat
 			if resp == nil {
 				return nil, err
 			}
-			if !(resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusMultiStatus) {
+			if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusMultiStatus {
 				return resp.Response, backoff.Permanent(fmt.Errorf("failed to remove members: %v %w", result, err))
 			}
 			return resp.Response, err
@@ -173,7 +173,7 @@ func resourceIAMGroupMembershipDelete(ctx context.Context, d *schema.ResourceDat
 			if err != nil {
 				return resp.Response, err
 			}
-			if !(resp.StatusCode() == http.StatusOK || resp.StatusCode() == http.StatusMultiStatus) {
+			if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusMultiStatus {
 				return resp.Response, backoff.Permanent(fmt.Errorf("failed to remove services: %v", result))
 			}
 			return resp.Response, err

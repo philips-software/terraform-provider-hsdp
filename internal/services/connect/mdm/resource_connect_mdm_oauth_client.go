@@ -449,9 +449,9 @@ func resourceConnectMDMOAuthClientUpdate(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if !(d.HasChange("scopes") || d.HasChange("default_scopes") || d.HasChange("iam_scopes") || d.HasChange("iam_default_scopes") ||
-		d.HasChange("bootstrap_client_scopes") || d.HasChange("bootstrap_client_default_scopes") ||
-		d.HasChange("bootstrap_client_iam_scopes") || d.HasChange("bootstrap_client_iam_default_scopes")) {
+	if !d.HasChange("scopes") && !d.HasChange("default_scopes") && !d.HasChange("iam_scopes") && !d.HasChange("iam_default_scopes") &&
+		!d.HasChange("bootstrap_client_scopes") && !d.HasChange("bootstrap_client_default_scopes") &&
+		!d.HasChange("bootstrap_client_iam_scopes") && !d.HasChange("bootstrap_client_iam_default_scopes") {
 		return diag.FromErr(fmt.Errorf("only 'scopes', 'default_scopes', 'iam_scopes', 'iam_default_scopes', " +
 			"'bootstrap_client_scopes', 'bootstrap_client_default_scopes', 'bootstrap_client_iam_scopes' " +
 			"or 'bootstrap_client_iam_default_scopes' can be updated. this is a bug"))

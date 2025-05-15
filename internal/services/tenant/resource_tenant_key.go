@@ -140,8 +140,8 @@ func resourceTenantKeyCreate(ctx context.Context, d *schema.ResourceData, m inte
 		return diag.FromErr(err)
 	}
 
-	d.Set("result", apiKey)
-	d.Set("signature", signature)
+	_ = d.Set("result", apiKey)
+	_ = d.Set("signature", signature)
 	d.SetId(signature)
 
 	return diags
@@ -157,14 +157,17 @@ func resourceTenantKeyRead(ctx context.Context, d *schema.ResourceData, m interf
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
 	if signature != id {
 		d.SetId("")
 		return diags
 	}
 
-	d.Set("result", apiKey)
-	d.Set("signature", signature)
+	if err := d.Set("result", apiKey); err != nil {
+		return diag.FromErr(fmt.Errorf("error setting result: %w", err))
+	}
+	if err := d.Set("signature", signature); err != nil {
+		return diag.FromErr(fmt.Errorf("error setting signature: %w", err))
+	}
 	return diags
 }
 

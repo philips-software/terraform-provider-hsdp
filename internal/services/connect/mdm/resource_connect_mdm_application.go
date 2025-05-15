@@ -154,7 +154,7 @@ func resourceMDMApplicationCreate(ctx context.Context, d *schema.ResourceData, m
 		if resp == nil {
 			return diag.FromErr(err)
 		}
-		if !(resp.StatusCode() == http.StatusConflict || resp.StatusCode() == http.StatusUnprocessableEntity) {
+		if resp.StatusCode() != http.StatusConflict && resp.StatusCode() != http.StatusUnprocessableEntity {
 			return diag.FromErr(fmt.Errorf("error creating Application (%d): %w", resp.StatusCode(), err))
 		}
 		found, _, foundErr := client.Applications.GetApplications(&mdm.GetApplicationsOptions{
