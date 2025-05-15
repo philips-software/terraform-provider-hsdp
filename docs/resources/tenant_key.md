@@ -76,4 +76,4 @@ terraform import hsdp_tenant_key.example [signature]
 * The API key is generated deterministically when a `salt` value is provided. Using the same inputs (project, organization, salt, etc.) will always generate the same key.
 * The API key generation is no longer time-dependent as it uses a specific expiration time rather than a relative duration.
 * Both the API key and signature are computed values based on your configuration.
-* The `signature` attribute is provided both as the resource ID and as a separate output field, making it easier to reference in other resources or outputs.
+* The `signature` attribute is provided both as the resource ID and as a separate output field, making it easier to reference in other resources or outputs

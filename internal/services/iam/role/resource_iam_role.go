@@ -129,7 +129,7 @@ func resourceIAMRoleCreate(ctx context.Context, d *schema.ResourceData, m interf
 			_, _, _ = client.Roles.DeleteRole(*role)
 			return diag.FromErr(fmt.Errorf("error adding permission '%s': %v", p, result))
 		}
-		if resp != nil && resp.StatusCode() == http.StatusNotFound {
+		if resp.StatusCode() == http.StatusNotFound {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Warning,
 				Summary:  "invalid permission",
