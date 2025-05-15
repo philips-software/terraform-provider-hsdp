@@ -49,21 +49,25 @@ func ResourceTenantKey() *schema.Resource {
 			"expiration": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Default:     "8760h", // 365 days
+				Default:     time.Now().UTC().AddDate(1, 0, 0).Format(time.RFC3339), // 1 year from now
 				ForceNew:    true,
-				Description: "The duration before the token expires. Uses Go duration format (e.g., '24h', '7d', '1y')",
+				Description: "Expiration time in RFC3339 format (e.g., '2025-12-31T23:59:59Z')",
 				ValidateFunc: func(val interface{}, key string) (warns []string, errs []error) {
 					v := val.(string)
-					duration, err := time.ParseDuration(v)
+					_, err := time.Parse(time.RFC3339, v)
 					if err != nil {
-						errs = append(errs, fmt.Errorf("%q must be a valid duration, got: %s", key, err))
+						errs = append(errs, fmt.Errorf("%q must be a valid RFC3339 time string (e.g., '2025-12-31T23:59:59Z'), got: %s", key, err))
 						return
-					}
-					if duration <= 0 {
-						errs = append(errs, fmt.Errorf("%q must be a positive duration", key))
 					}
 					return
 				},
+			},
+			"salt": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				ForceNew:    true,
+				Description: "Salt value to use for generating a deterministic API key",
 			},
 			"region": {
 				Type:     schema.TypeString,
@@ -82,6 +86,11 @@ func ResourceTenantKey() *schema.Resource {
 				Computed:  true,
 				Sensitive: true,
 			},
+			"signature": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "The signature of the generated API key",
+			},
 		},
 	}
 }
@@ -95,14 +104,16 @@ func generateAPIKeyAndSignature(d *schema.ResourceData) (string, string, error) 
 	region := d.Get("region").(string)
 	environment := d.Get("environment").(string)
 	expirationStr := d.Get("expiration").(string)
+	salt := d.Get("salt").(string)
 
-	// Parse the duration string
-	duration, err := time.ParseDuration(expirationStr)
+	// Parse the expiration time string
+	expirationTime, err := time.Parse(time.RFC3339, expirationStr)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to parse expiration duration '%s': %w", expirationStr, err)
+		return "", "", fmt.Errorf("failed to parse expiration time '%s': %w", expirationStr, err)
 	}
 
-	apiKey, signature, err := keys.GenerateAPIKey(
+	// Use GenerateDeterministicAPIKey for a deterministic, non-time-dependent key
+	apiKey, signature, err := keys.GenerateDeterministicAPIKey(
 		"2",
 		signingKey,
 		organization,
@@ -110,7 +121,8 @@ func generateAPIKeyAndSignature(d *schema.ResourceData) (string, string, error) 
 		region,
 		project,
 		scopes,
-		time.Now().Add(duration),
+		expirationTime,
+		salt,
 	)
 	if err != nil {
 		return "", "", err
@@ -128,6 +140,7 @@ func resourceTenantKeyCreate(ctx context.Context, d *schema.ResourceData, m inte
 	}
 
 	d.Set("key", apiKey)
+	d.Set("signature", signature)
 	d.SetId(signature)
 
 	return diags
@@ -139,7 +152,7 @@ func resourceTenantKeyRead(ctx context.Context, d *schema.ResourceData, m interf
 
 	id := d.Id()
 
-	_, signature, err := generateAPIKeyAndSignature(d)
+	apiKey, signature, err := generateAPIKeyAndSignature(d)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -148,6 +161,9 @@ func resourceTenantKeyRead(ctx context.Context, d *schema.ResourceData, m interf
 		d.SetId("")
 		return diags
 	}
+
+	d.Set("key", apiKey)
+	d.Set("signature", signature)
 	return diags
 }
 
