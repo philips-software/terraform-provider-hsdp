@@ -10,7 +10,8 @@ import (
 
 func DataSourceAIWorkspaceComputeTargets() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceAIWorkspaceComputeTargetsRead,
+		DeprecationMessage: "This data source is deprecated and will be removed in an upcoming release of the provider",
+		ReadContext:        dataSourceAIWorkspaceComputeTargetsRead,
 		Schema: map[string]*schema.Schema{
 			"endpoint": {
 				Type:     schema.TypeString,

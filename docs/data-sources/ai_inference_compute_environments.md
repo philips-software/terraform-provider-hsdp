@@ -4,6 +4,8 @@ subcategory: "AI Inference"
 
 # hsdp_ai_inference_compute_environments
 
+-> **Deprecation Notice** This data source is deprecated and will be removed in an upcoming release of the provider
+
 Retrieves AI Inference Compute Environments
 
 ## Example usage

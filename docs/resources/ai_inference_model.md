@@ -7,6 +7,8 @@ description: |-
 
 # hsdp_ai_inference_model
 
+-> **Deprecation Notice** This resource is deprecated and will be removed in an upcoming release of the provider
+
 Manages HSDP AI Inference models.
 
 ## Example usage

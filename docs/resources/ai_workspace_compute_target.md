@@ -7,6 +7,8 @@ description: |-
 
 # hsdp_ai_compute_target
 
+-> **Deprecation Notice** This resource is deprecated and will be removed in an upcoming release of the provider
+
 Manages HSDP AI Workspace compute targets
 
 ## Example usage

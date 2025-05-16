@@ -10,7 +10,8 @@ import (
 
 func DataSourceAIWorkspaceServiceInstance() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceAIWorkspaceServiceInstanceRead,
+		DeprecationMessage: "This data source is deprecated and will be removed in an upcoming release of the provider",
+		ReadContext:        dataSourceAIWorkspaceServiceInstanceRead,
 		Schema: map[string]*schema.Schema{
 			"base_url": {
 				Type:     schema.TypeString,

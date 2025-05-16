@@ -7,6 +7,8 @@ description: |-
 
 # hsdp_ai_workspace
 
+-> **Deprecation Notice** This resource is deprecated and will be removed in an upcoming release of the provider
+
 Manages HSDP AI Workspace instances
 
 ## Example usage

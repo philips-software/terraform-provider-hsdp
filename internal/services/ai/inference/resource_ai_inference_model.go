@@ -17,6 +17,7 @@ import (
 
 func ResourceAIInferenceModel() *schema.Resource {
 	return &schema.Resource{
+		DeprecationMessage: "This resource is deprecated and will be removed in an upcoming release of the provider",
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},

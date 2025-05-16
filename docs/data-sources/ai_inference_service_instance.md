@@ -4,6 +4,8 @@ subcategory: "AI Inference"
 
 # hsdp_ai_inference_service_instance
 
+-> **Deprecation Notice** This data source is deprecated and will be removed in an upcoming release of the provider
+
 Retrieve details of an existing HSDP AI Inference instance.
 
 ## Example Usage

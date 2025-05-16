@@ -13,7 +13,8 @@ import (
 
 func DataSourceAIInferenceComputeEnvironments() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceAIInferenceComputeEnvironmentsRead,
+		DeprecationMessage: "This data source is deprecated and will be removed in an upcoming release of the provider",
+		ReadContext:        dataSourceAIInferenceComputeEnvironmentsRead,
 		Schema: map[string]*schema.Schema{
 			"endpoint": {
 				Type:     schema.TypeString,

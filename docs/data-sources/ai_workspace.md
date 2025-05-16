@@ -4,6 +4,8 @@ subcategory: "AI Workspace"
 
 # hsdp_ai_workspace
 
+-> **Deprecation Notice** This data source is deprecated and will be removed in an upcoming release of the provider
+
 Retrieve details of an existing HSDP AI Workspace instance.
 
 ## Example Usage

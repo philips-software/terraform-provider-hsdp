@@ -4,6 +4,8 @@ subcategory: "AI Workspace"
 
 # hsdp_ai_workspace_compute_targets
 
+-> **Deprecation Notice** This data source is deprecated and will be removed in an upcoming release of the provider
+
 Retrieves AI Workspace Compute Targets
 
 ## Example usage
