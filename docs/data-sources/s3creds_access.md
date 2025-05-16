@@ -4,6 +4,8 @@ subcategory: "S3 Credentials"
 
 # hsdp_s3creds_access
 
+-> **Deprecation Notice** This data source is deprecated and will be removed in an upcoming release of the provider
+
 Gets credentials for an S3 Credentials access
 
 ## Example Usage

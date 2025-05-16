@@ -14,9 +14,10 @@ import (
 
 func ResourceS3CredsPolicy() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceS3CredsPolicyCreate,
-		ReadContext:   resourceS3CredsPolicyRead,
-		DeleteContext: resourceS3CredsPolicyDelete,
+		DeprecationMessage: "This resource is deprecated and will be removed in an upcoming release of the provider",
+		CreateContext:      resourceS3CredsPolicyCreate,
+		ReadContext:        resourceS3CredsPolicyRead,
+		DeleteContext:      resourceS3CredsPolicyDelete,
 
 		Schema: map[string]*schema.Schema{
 			"policy": {

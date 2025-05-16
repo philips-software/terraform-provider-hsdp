@@ -4,6 +4,8 @@ subcategory: "S3 Credentials"
 
 # hsdp_s3creds_policy
 
+-> **Deprecation Notice** This data source is deprecated and will be removed in an upcoming release of the provider
+
 Gets information on defined S3 Credential policies
 
 > This resource is only available when `s3creds_url` is set in the provider config

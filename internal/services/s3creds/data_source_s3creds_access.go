@@ -12,7 +12,8 @@ import (
 
 func DataSourceS3CredsAccess() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceS3CredsAccessRead,
+		DeprecationMessage: "This data source is deprecated and will be removed in an upcoming release of the provider",
+		ReadContext:        dataSourceS3CredsAccessRead,
 		Schema: map[string]*schema.Schema{
 			"access": {
 				Type:     schema.TypeString,

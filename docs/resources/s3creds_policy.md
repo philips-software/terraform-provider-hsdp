@@ -7,6 +7,8 @@ description: |-
 
 # hsdp_s3creds_policy
 
+-> **Deprecation Notice** This resource is deprecated and will be removed in an upcoming release of the provider
+
 Provides a resource for managing HSDP S3 Credentials policies
 
 > This resource is only available when `credentials_url` is set in the provider config

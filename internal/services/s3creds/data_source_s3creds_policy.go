@@ -14,7 +14,8 @@ import (
 
 func DataSourceS3CredsPolicy() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceS3CredsPolicyRead,
+		DeprecationMessage: "This data source is deprecated and will be removed in an upcoming release of the provider",
+		ReadContext:        dataSourceS3CredsPolicyRead,
 		Schema: map[string]*schema.Schema{
 			"username": {
 				Type:     schema.TypeString,
