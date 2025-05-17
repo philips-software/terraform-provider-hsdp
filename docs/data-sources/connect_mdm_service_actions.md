@@ -10,6 +10,9 @@ Retrieve details of ServiceActions
 
 ```hcl
 data "hsdp_connect_mdm_service_actions" "all" {
+    filter {
+        standard_service_id = 1234
+    }
 }
 ```
 
