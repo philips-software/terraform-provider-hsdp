@@ -386,8 +386,8 @@ github.com/hashicorp/terraform-svchost v0.1.1 h1:EZZimZ1GxdqFRinZ1tpJwVxxt49xc/S
 github.com/hashicorp/terraform-svchost v0.1.1/go.mod h1:mNsjQfZyf/Jhz35v6/0LWcv26+X7JPS+buii2c9/ctc=
 github.com/hashicorp/yamux v0.1.1 h1:yrQxtgseBDrq9Y652vSRDvsKCJKOUD+GzTS4Y0Y8pvE=
 github.com/hashicorp/yamux v0.1.1/go.mod h1:CtWFDAQgb7dxtzFs4tWbplKIe2jSi3+5vKbgIO0SLnQ=
-github.com/hasura/go-graphql-client v0.14.0 h1:YJqhFt6KmCaiakqJF6FvgvHvc34SdUi5zQ1imvp7fTI=
-github.com/hasura/go-graphql-client v0.14.0/go.mod h1:jfSZtBER3or+88Q9vFhWHiFMPppfYILRyl+0zsgPIIw=
+github.com/hasura/go-graphql-client v0.14.4 h1:bYU7/+V50T2YBGdNQXt6l4f2cMZPECPUd8cyCR+ixtw=
+github.com/hasura/go-graphql-client v0.14.4/go.mod h1:jfSZtBER3or+88Q9vFhWHiFMPppfYILRyl+0zsgPIIw=
 github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152 h1:GITUy7r2Eijl7u/Xe5AOs3HBV3Gt/3+l0j2bTh2UO5Y=
 github.com/herkyl/patchwerk v0.0.0-20190629103337-f0ea77068152/go.mod h1:bRtCxY0f88xmUw+Y0Xfl/uGaCWMUy04wUGSKbnQdsJs=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
