@@ -114,16 +114,15 @@ func generateAPIKeyAndSignature(d *schema.ResourceData) (string, string, error) 
 	}
 
 	// Use GenerateDeterministicAPIKey for a deterministic, non-time-dependent key
-	apiKey, signature, err := keys.GenerateDeterministicAPIKey(
-		"2",
+	apiKey, signature, err := keys.GenerateDeterministicAPIKey("2",
 		signingKey,
-		organization,
-		environment,
-		region,
-		project,
-		scopes,
-		expirationTime,
-		salt,
+		keys.WithOrganization(organization),
+		keys.WithEnvironment(environment),
+		keys.WithRegion(region),
+		keys.WithProject(project),
+		keys.WithScopes(scopes),
+		keys.WithToken(salt), // Use salt as the token for deterministic generation
+		keys.WithExpires(expirationTime.Unix()),
 	)
 	if err != nil {
 		return "", "", err
