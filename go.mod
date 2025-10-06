@@ -1,6 +1,6 @@
 module github.com/philips-software/terraform-provider-hsdp
 
-go 1.25
+go 1.25.1
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
