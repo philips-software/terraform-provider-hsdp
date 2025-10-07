@@ -16,7 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdl"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/fhir_store"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/org"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/practitioner"
@@ -284,11 +283,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_notification_topic":                        notification.ResourceNotificationTopic(),
 			"hsdp_notification_subscription":                 notification.ResourceNotificationSubscription(),
 			"hsdp_dicom_gateway_config":                      dicom.ResourceDICOMGatewayConfig(),
-			"hsdp_cdl_research_study":                        cdl.ResourceCDLResearchStudy(),
 			"hsdp_dicom_remote_node":                         dicom.ResourceDICOMRemoteNode(),
-			"hsdp_cdl_data_type_definition":                  cdl.ResourceCDLDataTypeDefinition(),
-			"hsdp_cdl_label_definition":                      cdl.ResourceCDLLabelDefinition(),
-			"hsdp_cdl_export_route":                          cdl.ResourceCDLExportRoute(),
 			"hsdp_iam_sms_gateway":                           iam.ResourceIAMSMSGatewayConfig(),
 			"hsdp_iam_sms_template":                          iam.ResourceIAMSMSTemplate(),
 			"hsdp_iam_activation_email":                      iam.ResourceIAMActivationEmail(),
@@ -345,14 +340,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_notification_topic":                    notification.DataSourceNotificationTopic(),
 			"hsdp_notification_subscription":             notification.DataSourceNotificationSubscription(),
 			"hsdp_notification_subscriber":               notification.DataSourceNotificationSubscriber(),
-			"hsdp_cdl_instance":                          cdl.DataSourceCDLInstance(),
-			"hsdp_cdl_research_study":                    cdl.DataSourceCDLResearchStudy(),
-			"hsdp_cdl_research_studies":                  cdl.DataSourceCDLResearchStudies(),
 			"hsdp_container_host_instances":              ch.DataSourceContainerHostInstances(),
-			"hsdp_cdl_data_type_definitions":             cdl.DataSourceCDLDataTypeDefinitions(),
-			"hsdp_cdl_data_type_definition":              cdl.DataSourceCDLDataTypeDefinition(),
-			"hsdp_cdl_label_definition":                  cdl.DataSourceCDLLabelDefinition(),
-			"hsdp_cdl_export_route":                      cdl.DataSourceCDLExportRoute(),
 			"hsdp_iam_group":                             group.DataSourceIAMGroup(),
 			"hsdp_iam_role":                              role.DataSourceIAMRole(),
 			"hsdp_iam_users":                             user.DataSourceIAMUsers(),

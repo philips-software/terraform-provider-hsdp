@@ -10,7 +10,6 @@ import (
 	"github.com/dip-software/go-dip-api/connect/blr"
 
 	"github.com/dip-software/go-dip-api/cartel"
-	"github.com/dip-software/go-dip-api/cdl"
 	"github.com/dip-software/go-dip-api/cdr"
 	"github.com/dip-software/go-dip-api/config"
 	"github.com/dip-software/go-dip-api/connect/mdm"
@@ -617,42 +616,6 @@ func (c *Config) GetFHIRClientFromEndpoint(endpointURL string) (*cdr.Client, err
 	}
 	if err = client.SetEndpointURL(endpointURL); err != nil {
 		return nil, err
-	}
-	return client, nil
-}
-
-func (c *Config) GetCDLClientFromEndpoint(endpointURL string) (*cdl.Client, error) {
-	if c.iamClientErr != nil {
-		return nil, c.iamClientErr
-	}
-	client, err := cdl.NewClient(c.iamClient, &cdl.Config{
-		CDLURL:   "https://localhost.domain",
-		DebugLog: c.DebugWriter,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if err = client.SetEndpointURL(endpointURL); err != nil {
-		return nil, err
-	}
-	return client, nil
-}
-
-// GetCDLClient creates a HSDP CDL client
-func (c *Config) GetCDLClient(baseURL, tenantID string) (*cdl.Client, error) {
-	if c.iamClientErr != nil {
-		return nil, fmt.Errorf("IAM client error in GetCDLClient: %w", c.iamClientErr)
-	}
-	if tenantID == "" {
-		return nil, fmt.Errorf("GetCDLClient: %w", ErrMissingOrganizationID)
-	}
-	client, err := cdl.NewClient(c.iamClient, &cdl.Config{
-		CDLURL:         baseURL,
-		OrganizationID: tenantID,
-		DebugLog:       c.DebugWriter,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("GetCDLClient: %w", err)
 	}
 	return client, nil
 }
