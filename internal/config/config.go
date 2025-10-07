@@ -9,9 +9,6 @@ import (
 
 	"github.com/dip-software/go-dip-api/connect/blr"
 
-	"github.com/dip-software/go-dip-api/ai"
-	"github.com/dip-software/go-dip-api/ai/inference"
-	"github.com/dip-software/go-dip-api/ai/workspace"
 	"github.com/dip-software/go-dip-api/cartel"
 	"github.com/dip-software/go-dip-api/cdl"
 	"github.com/dip-software/go-dip-api/cdr"
@@ -60,8 +57,6 @@ type Config struct {
 	UAAUsername         string    `json:"uaa_username"`
 	UAAPassword         string    `json:"uaa_password"`
 	UAAURL              string    `json:"uaa_url"`
-	AIInferenceEndpoint string    `json:"ai_inference_endpoint"`
-	AIWorkspaceEndpoint string    `json:"ai_workspace_endpoint"`
 
 	iamClient             *iam.Client
 	cartelClient          *cartel.Client
@@ -658,84 +653,6 @@ func (c *Config) GetCDLClient(baseURL, tenantID string) (*cdl.Client, error) {
 	})
 	if err != nil {
 		return nil, fmt.Errorf("GetCDLClient: %w", err)
-	}
-	return client, nil
-}
-
-func (c *Config) GetAIInferenceClient(baseURL, tenantID string) (*inference.Client, error) {
-	if c.iamClientErr != nil {
-		return nil, fmt.Errorf("IAM client error in getAIInferenceClient: %w", c.iamClientErr)
-	}
-	if tenantID == "" {
-		return nil, fmt.Errorf("getAIInferenceClient: %w", ErrMissingOrganizationID)
-	}
-	client, err := inference.NewClient(c.iamClient, &ai.Config{
-		BaseURL:        baseURL,
-		OrganizationID: tenantID,
-		DebugLog:       c.DebugWriter,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("getAIInferenceClient: %w", err)
-	}
-	return client, nil
-}
-
-func (c *Config) GetAIInferenceClientFromEndpoint(endpointURL string) (*inference.Client, error) {
-	if c.iamClientErr != nil {
-		return nil, c.iamClientErr
-	}
-	if endpointURL == "" {
-		endpointURL = c.AIInferenceEndpoint
-	}
-	client, err := inference.NewClient(c.iamClient, &ai.Config{
-		BaseURL:        "http://localhost",
-		OrganizationID: "not-set",
-		DebugLog:       c.DebugWriter,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("getAIInferenceClientFromEndpoint: %w", err)
-	}
-	if err = client.SetEndpointURL(endpointURL); err != nil {
-		return nil, err
-	}
-	return client, nil
-}
-
-func (c *Config) GetAIWorkspaceClient(baseURL, tenantID string) (*workspace.Client, error) {
-	if c.iamClientErr != nil {
-		return nil, fmt.Errorf("IAM client error in getAIWorkspaceClient: %w", c.iamClientErr)
-	}
-	if tenantID == "" {
-		return nil, fmt.Errorf("getAIWorkspaceClient: %w", ErrMissingOrganizationID)
-	}
-	client, err := workspace.NewClient(c.iamClient, &ai.Config{
-		BaseURL:        baseURL,
-		OrganizationID: tenantID,
-		DebugLog:       c.DebugWriter,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("getAIWorkspaceClient: %w", err)
-	}
-	return client, nil
-}
-
-func (c *Config) GetAIWorkspaceClientFromEndpoint(endpointURL string) (*workspace.Client, error) {
-	if c.iamClientErr != nil {
-		return nil, c.iamClientErr
-	}
-	if endpointURL == "" {
-		endpointURL = c.AIWorkspaceEndpoint
-	}
-	client, err := workspace.NewClient(c.iamClient, &ai.Config{
-		BaseURL:        "http://localhost",
-		OrganizationID: "not-set",
-		DebugLog:       c.DebugWriter,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("getAIWorkspaceClientFromEndpoint: %w", err)
-	}
-	if err = client.SetEndpointURL(endpointURL); err != nil {
-		return nil, err
 	}
 	return client, nil
 }

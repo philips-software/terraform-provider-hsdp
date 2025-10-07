@@ -16,8 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/ai/inference"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/ai/workspace"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdl"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/fhir_store"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/org"
@@ -249,10 +247,6 @@ func Provider(build string) *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc(DebugStdErr, nil),
 				Description: descriptions["debug_stderr"],
 			},
-			"ai_inference_endpoint": {
-				Type:     schema.TypeString,
-				Optional: true,
-			},
 			"credentials": {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -289,18 +283,12 @@ func Provider(build string) *schema.Provider {
 			"hsdp_notification_subscriber":                   notification.ResourceNotificationSubscriber(),
 			"hsdp_notification_topic":                        notification.ResourceNotificationTopic(),
 			"hsdp_notification_subscription":                 notification.ResourceNotificationSubscription(),
-			"hsdp_ai_inference_compute_environment":          inference.ResourceAIInferenceComputeEnvironment(),
-			"hsdp_ai_inference_compute_target":               inference.ResourceAIInferenceComputeTarget(),
-			"hsdp_ai_inference_model":                        inference.ResourceAIInferenceModel(),
-			"hsdp_ai_inference_job":                          inference.ResourceAIInferenceJob(),
 			"hsdp_dicom_gateway_config":                      dicom.ResourceDICOMGatewayConfig(),
 			"hsdp_cdl_research_study":                        cdl.ResourceCDLResearchStudy(),
 			"hsdp_dicom_remote_node":                         dicom.ResourceDICOMRemoteNode(),
 			"hsdp_cdl_data_type_definition":                  cdl.ResourceCDLDataTypeDefinition(),
 			"hsdp_cdl_label_definition":                      cdl.ResourceCDLLabelDefinition(),
 			"hsdp_cdl_export_route":                          cdl.ResourceCDLExportRoute(),
-			"hsdp_ai_workspace_compute_target":               workspace.ResourceAIWorkspaceComputeTarget(),
-			"hsdp_ai_workspace":                              workspace.ResourceAIWorkspace(),
 			"hsdp_iam_sms_gateway":                           iam.ResourceIAMSMSGatewayConfig(),
 			"hsdp_iam_sms_template":                          iam.ResourceIAMSMSTemplate(),
 			"hsdp_iam_activation_email":                      iam.ResourceIAMActivationEmail(),
@@ -357,11 +345,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_notification_topic":                    notification.DataSourceNotificationTopic(),
 			"hsdp_notification_subscription":             notification.DataSourceNotificationSubscription(),
 			"hsdp_notification_subscriber":               notification.DataSourceNotificationSubscriber(),
-			"hsdp_ai_inference_service_instance":         inference.DataSourceAIInferenceServiceInstance(),
-			"hsdp_ai_inference_compute_environments":     inference.DataSourceAIInferenceComputeEnvironments(),
-			"hsdp_ai_inference_compute_targets":          inference.DataSourceAIInferenceComputeTargets(),
-			"hsdp_ai_inference_jobs":                     inference.DataSourceAIInferenceJobs(),
-			"hsdp_ai_inference_models":                   inference.DataSourceAIInferenceModels(),
 			"hsdp_cdl_instance":                          cdl.DataSourceCDLInstance(),
 			"hsdp_cdl_research_study":                    cdl.DataSourceCDLResearchStudy(),
 			"hsdp_cdl_research_studies":                  cdl.DataSourceCDLResearchStudies(),
@@ -370,9 +353,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_cdl_data_type_definition":              cdl.DataSourceCDLDataTypeDefinition(),
 			"hsdp_cdl_label_definition":                  cdl.DataSourceCDLLabelDefinition(),
 			"hsdp_cdl_export_route":                      cdl.DataSourceCDLExportRoute(),
-			"hsdp_ai_workspace_service_instance":         workspace.DataSourceAIWorkspaceServiceInstance(),
-			"hsdp_ai_workspace_compute_targets":          workspace.DataSourceAIWorkspaceComputeTargets(),
-			"hsdp_ai_workspace":                          workspace.DataSourceAIWorkspace(),
 			"hsdp_iam_group":                             group.DataSourceIAMGroup(),
 			"hsdp_iam_role":                              role.DataSourceIAMRole(),
 			"hsdp_iam_users":                             user.DataSourceIAMUsers(),
@@ -481,7 +461,6 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.UAAURL = d.Get("uaa_url").(string)
 		c.NotificationURL = d.Get("notification_url").(string)
 		c.TimeZone = "UTC"
-		c.AIInferenceEndpoint = d.Get("ai_inference_endpoint").(string)
 		c.MDMURL = d.Get("mdm_url").(string)
 
 		credentialsFile := d.Get("credentials").(string)
