@@ -14,7 +14,6 @@ import (
 	"github.com/dip-software/go-dip-api/connect/mdm"
 	"github.com/dip-software/go-dip-api/console"
 	"github.com/dip-software/go-dip-api/console/docker"
-	"github.com/dip-software/go-dip-api/dicom"
 	"github.com/dip-software/go-dip-api/discovery"
 	"github.com/dip-software/go-dip-api/iam"
 	"github.com/dip-software/go-dip-api/notification"
@@ -606,24 +605,6 @@ func (c *Config) Debug(format string, a ...interface{}) (int, error) {
 		return io.WriteString(c.DebugWriter, output)
 	}
 	return 0, nil
-}
-
-func (c *Config) GetDICOMConfigClient(url string) (*dicom.Client, error) {
-	if c.iamClientErr != nil {
-		return nil, fmt.Errorf("DICM client error in GetDICOMConfigClient: %w", c.iamClientErr)
-	}
-	if url == "" {
-		return nil, fmt.Errorf("GetDICOMConfigClient: empty config_url")
-	}
-	client, err := dicom.NewClient(c.iamClient, &dicom.Config{
-		DICOMConfigURL: url,
-		TimeZone:       c.TimeZone,
-		DebugLog:       c.DebugWriter,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("GetDICOMConfigClient: %w", err)
-	}
-	return client, nil
 }
 
 func (c *Config) SetupPKIClient() {

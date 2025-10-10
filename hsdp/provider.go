@@ -19,8 +19,6 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/ch"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/configuration"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/mdm"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/dicom"
-	repository2 "github.com/philips-software/terraform-provider-hsdp/internal/services/dicom/repository"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/discovery"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/namespace"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/repository"
@@ -262,9 +260,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_s3creds_policy":                            s3creds.ResourceS3CredsPolicy(),
 			"hsdp_container_host":                            ch.ResourceContainerHost(),
 			"hsdp_metrics_autoscaler":                        metrics.ResourceMetricsAutoscaler(),
-			"hsdp_dicom_store_config":                        dicom.ResourceDICOMStoreConfig(),
-			"hsdp_dicom_object_store":                        dicom.ResourceDICOMObjectStore(),
-			"hsdp_dicom_repository":                          repository2.ResourceDICOMRepository(),
 			"hsdp_pki_tenant":                                pki_tenant.ResourcePKITenant(),
 			"hsdp_pki_cert":                                  pki.ResourcePKICert(),
 			"hsdp_edge_app":                                  edge.ResourceEdgeApp(),
@@ -276,8 +271,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_notification_subscriber":                   notification.ResourceNotificationSubscriber(),
 			"hsdp_notification_topic":                        notification.ResourceNotificationTopic(),
 			"hsdp_notification_subscription":                 notification.ResourceNotificationSubscription(),
-			"hsdp_dicom_gateway_config":                      dicom.ResourceDICOMGatewayConfig(),
-			"hsdp_dicom_remote_node":                         dicom.ResourceDICOMRemoteNode(),
 			"hsdp_iam_sms_gateway":                           iam.ResourceIAMSMSGatewayConfig(),
 			"hsdp_iam_sms_template":                          iam.ResourceIAMSMSTemplate(),
 			"hsdp_iam_activation_email":                      iam.ResourceIAMActivationEmail(),
@@ -302,7 +295,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_firmware_component_version":    mdm.ResourceConnectMDMFirmwareComponentVersion(),
 			"hsdp_connect_mdm_firmware_distribution_request": mdm.ResourceConnectMDMFirmwareDistributionRequest(),
 			"hsdp_iam_group_membership":                      group_membership.ResourceIAMGroupMembership(),
-			"hsdp_dicom_notification":                        dicom.ResourceDICOMNotification(),
 			"hsdp_iam_role_sharing_policy":                   role_sharing_policy.ResourceRoleSharingPolicy(),
 			"hsdp_iam_device":                                device.ResourceIAMDevice(),
 			"hsdp_blr_bucket":                                blr.ResourceBLRBucket(),
