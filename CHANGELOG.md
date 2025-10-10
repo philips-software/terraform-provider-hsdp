@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## v0.70.0
+
+- Remove CDR support
+- Remove DICOM support
+
+## v0.69.0
+
+- Remove AI Inference support
+- Remove Clinical DataLake support
+
 ## v0.60.0
 
 - Proposition DELETE
