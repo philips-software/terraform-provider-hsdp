@@ -18,5 +18,5 @@ and the `#terraform` channel on HSDP Slack.
 To effectively use the HSDP Terraform provider please take into consideration the following:
 
 - Have a HSDP LDAP account and registered SSH public key
-- For services which are not self-provisioned (examples IAM, CDR): request provisioning via SNOW ticket. Your Technical Account Manager can assist you with this.
+- For services which are not self-provisioned (examples IAM, MDM): request provisioning via SNOW ticket. Your Technical Account Manager can assist you with this.
 - Consider where to store your [Terraform state](https://registry.terraform.io/providers/philips-software/hsdp/latest/docs/guides/state)

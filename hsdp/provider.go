@@ -16,10 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/fhir_store"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/org"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/practitioner"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/cdr/subscription"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/ch"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/configuration"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/mdm"
@@ -266,8 +262,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_s3creds_policy":                            s3creds.ResourceS3CredsPolicy(),
 			"hsdp_container_host":                            ch.ResourceContainerHost(),
 			"hsdp_metrics_autoscaler":                        metrics.ResourceMetricsAutoscaler(),
-			"hsdp_cdr_org":                                   org.ResourceCDROrg(),
-			"hsdp_cdr_subscription":                          subscription.ResourceCDRSubscription(),
 			"hsdp_dicom_store_config":                        dicom.ResourceDICOMStoreConfig(),
 			"hsdp_dicom_object_store":                        dicom.ResourceDICOMObjectStore(),
 			"hsdp_dicom_repository":                          repository2.ResourceDICOMRepository(),
@@ -309,7 +303,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_firmware_distribution_request": mdm.ResourceConnectMDMFirmwareDistributionRequest(),
 			"hsdp_iam_group_membership":                      group_membership.ResourceIAMGroupMembership(),
 			"hsdp_dicom_notification":                        dicom.ResourceDICOMNotification(),
-			"hsdp_cdr_practitioner":                          practitioner.ResourceCDRPractitioner(),
 			"hsdp_iam_role_sharing_policy":                   role_sharing_policy.ResourceRoleSharingPolicy(),
 			"hsdp_iam_device":                                device.ResourceIAMDevice(),
 			"hsdp_blr_bucket":                                blr.ResourceBLRBucket(),
@@ -330,7 +323,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_s3creds_policy":                        s3creds.DataSourceS3CredsPolicy(),
 			"hsdp_config":                                configuration.DataSourceConfig(),
 			"hsdp_container_host_subnet_types":           ch.DataSourceContainerHostSubnetTypes(),
-			"hsdp_cdr_fhir_store":                        fhir_store.DataSourceCDRFHIRStore(),
 			"hsdp_pki_root":                              pki.DataSourcePKIRoot(),
 			"hsdp_pki_policy":                            pki.DataSourcePKIPolicy(),
 			"hsdp_edge_device":                           edge.DataSourceEdgeDevice(),
@@ -371,8 +363,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_service_agents":            mdm.DataSourceConnectMDMServiceAgents(),
 			"hsdp_container_host":                        ch.DataSourceContainerHost(),
 			"hsdp_iam_permission":                        iam.DataSourceIAMPermission(),
-			"hsdp_cdr_practitioner":                      practitioner.DataSourceCDRPractitioner(),
-			"hsdp_cdr_org":                               org.DataSourceCDROrg(),
 			"hsdp_iam_role_sharing_policies":             role_sharing_policy.DataSourceIAMRoleSharingPolicies(),
 			"hsdp_discovery_service":                     discovery.DataSourceDiscoveryService(),
 			"hsdp_connect_mdm_service_action":            mdm.DataSourceConnectMDMServiceAction(),

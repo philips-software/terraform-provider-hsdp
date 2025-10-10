@@ -1,6 +1,6 @@
 # HSDP Provider
 
-Use the HSDP provider to interact with the many resources supported by [HSDP](https://www.hsdp.io). This includes amongst others IAM entities, Container Host instances, Edge devices and even some Clinical Data Repository (CDR) resources
+Use the HSDP provider to interact with the many resources supported by [HSDP](https://www.hsdp.io). This includes amongst others IAM entities, Container Host instances and Edge devices
 
 Use the navigation to the left to read about the available resources.
 
