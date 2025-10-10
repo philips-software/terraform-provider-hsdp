@@ -10,12 +10,10 @@ import (
 	"github.com/dip-software/go-dip-api/connect/blr"
 
 	"github.com/dip-software/go-dip-api/cartel"
-	"github.com/dip-software/go-dip-api/cdr"
 	"github.com/dip-software/go-dip-api/config"
 	"github.com/dip-software/go-dip-api/connect/mdm"
 	"github.com/dip-software/go-dip-api/console"
 	"github.com/dip-software/go-dip-api/console/docker"
-	"github.com/dip-software/go-dip-api/dicom"
 	"github.com/dip-software/go-dip-api/discovery"
 	"github.com/dip-software/go-dip-api/iam"
 	"github.com/dip-software/go-dip-api/notification"
@@ -28,34 +26,34 @@ import (
 
 // Config contains configuration for the client
 type Config struct {
-	BuildVersion        string    `json:"-"`
-	ServiceID           string    `json:"service_id"`
-	ServicePrivateKey   string    `json:"service_private_key"`
-	S3CredsURL          string    `json:"s3_creds_url"`
-	NotificationURL     string    `json:"notification_url"`
-	IAMURL              string    `json:"iam_url"`
-	IDMURL              string    `json:"idm_url"`
-	SharedKey           string    `json:"shared_key"`
-	SecretKey           string    `json:"secret_key"`
-	MDMURL              string    `json:"mdm_url"`
-	Region              string    `json:"region"`
-	Environment         string    `json:"environment"`
-	OAuth2ClientID      string    `json:"oauth2_client_id"`
-	OAuth2ClientSecret  string    `json:"oauth2_client_secret"`
-	STLURL              string    `json:"stl_url"`
-	OrgAdminUsername    string    `json:"org_admin_username"`
-	OrgAdminPassword    string    `json:"org_admin_password"`
-	DebugLog            string    `json:"debug_log"`
-	DebugWriter         io.Writer `json:"-"`
-	CartelHost          string    `json:"cartel_host"`
-	CartelToken         string    `json:"cartel_token"`
-	CartelSecret        string    `json:"cartel_secret"`
-	CartelNoTLS         bool      `json:"cartel_no_tls"`
-	CartelSkipVerify    bool      `json:"cartel_skip_verify"`
-	RetryMax            int       `json:"retry_max"`
-	UAAUsername         string    `json:"uaa_username"`
-	UAAPassword         string    `json:"uaa_password"`
-	UAAURL              string    `json:"uaa_url"`
+	BuildVersion       string    `json:"-"`
+	ServiceID          string    `json:"service_id"`
+	ServicePrivateKey  string    `json:"service_private_key"`
+	S3CredsURL         string    `json:"s3_creds_url"`
+	NotificationURL    string    `json:"notification_url"`
+	IAMURL             string    `json:"iam_url"`
+	IDMURL             string    `json:"idm_url"`
+	SharedKey          string    `json:"shared_key"`
+	SecretKey          string    `json:"secret_key"`
+	MDMURL             string    `json:"mdm_url"`
+	Region             string    `json:"region"`
+	Environment        string    `json:"environment"`
+	OAuth2ClientID     string    `json:"oauth2_client_id"`
+	OAuth2ClientSecret string    `json:"oauth2_client_secret"`
+	STLURL             string    `json:"stl_url"`
+	OrgAdminUsername   string    `json:"org_admin_username"`
+	OrgAdminPassword   string    `json:"org_admin_password"`
+	DebugLog           string    `json:"debug_log"`
+	DebugWriter        io.Writer `json:"-"`
+	CartelHost         string    `json:"cartel_host"`
+	CartelToken        string    `json:"cartel_token"`
+	CartelSecret       string    `json:"cartel_secret"`
+	CartelNoTLS        bool      `json:"cartel_no_tls"`
+	CartelSkipVerify   bool      `json:"cartel_skip_verify"`
+	RetryMax           int       `json:"retry_max"`
+	UAAUsername        string    `json:"uaa_username"`
+	UAAPassword        string    `json:"uaa_password"`
+	UAAURL             string    `json:"uaa_url"`
 
 	iamClient             *iam.Client
 	cartelClient          *cartel.Client
@@ -601,69 +599,12 @@ func (c *Config) SetupConsoleClient() {
 	c.consoleClient = client
 }
 
-func (c *Config) GetFHIRClientFromEndpoint(endpointURL string) (*cdr.Client, error) {
-	if c.iamClientErr != nil {
-		return nil, c.iamClientErr
-	}
-	client, err := cdr.NewClient(c.iamClient, &cdr.Config{
-		CDRURL:    "https://localhost.domain",
-		RootOrgID: "",
-		TimeZone:  c.TimeZone,
-		DebugLog:  c.DebugWriter,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if err = client.SetEndpointURL(endpointURL); err != nil {
-		return nil, err
-	}
-	return client, nil
-}
-
-// GetFHIRClient creates a HSDP CDR client
-func (c *Config) GetFHIRClient(baseURL, rootOrgID string) (*cdr.Client, error) {
-	if c.iamClientErr != nil {
-		return nil, fmt.Errorf("IAM client error in GetFHIRClient: %w", c.iamClientErr)
-	}
-	if rootOrgID == "" {
-		return nil, fmt.Errorf("GetFHIRClient: %w", ErrMissingOrganizationID)
-	}
-	client, err := cdr.NewClient(c.iamClient, &cdr.Config{
-		CDRURL:    baseURL,
-		RootOrgID: rootOrgID,
-		TimeZone:  c.TimeZone,
-		DebugLog:  c.DebugWriter,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("GetFHIRClient: %w", err)
-	}
-	return client, nil
-}
-
 func (c *Config) Debug(format string, a ...interface{}) (int, error) {
 	if c.DebugWriter != nil {
 		output := fmt.Sprintf(format, a...)
 		return io.WriteString(c.DebugWriter, output)
 	}
 	return 0, nil
-}
-
-func (c *Config) GetDICOMConfigClient(url string) (*dicom.Client, error) {
-	if c.iamClientErr != nil {
-		return nil, fmt.Errorf("DICM client error in GetDICOMConfigClient: %w", c.iamClientErr)
-	}
-	if url == "" {
-		return nil, fmt.Errorf("GetDICOMConfigClient: empty config_url")
-	}
-	client, err := dicom.NewClient(c.iamClient, &dicom.Config{
-		DICOMConfigURL: url,
-		TimeZone:       c.TimeZone,
-		DebugLog:       c.DebugWriter,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("GetDICOMConfigClient: %w", err)
-	}
-	return client, nil
 }
 
 func (c *Config) SetupPKIClient() {
