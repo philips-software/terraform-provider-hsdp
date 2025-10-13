@@ -4,7 +4,7 @@ go 1.25.1
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/dip-software/go-dip-api v0.92.0
+	github.com/dip-software/go-dip-api v0.93.0
 	github.com/dip-software/siderite v0.17.1
 	github.com/distribution/reference v0.6.0
 	github.com/google/fhir/go v0.7.4
@@ -94,7 +94,7 @@ require (
 	golang.org/x/crypto v0.42.0 // indirect
 	golang.org/x/mod v0.28.0 // indirect
 	golang.org/x/net v0.44.0 // indirect
-	golang.org/x/oauth2 v0.31.0 // indirect
+	golang.org/x/oauth2 v0.32.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/text v0.29.0 // indirect
