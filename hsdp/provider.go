@@ -18,6 +18,7 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/ch"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/configuration"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/iot"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/mdm"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/discovery"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/namespace"
@@ -294,6 +295,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_application":                   mdm.ResourceMDMApplication(),
 			"hsdp_connect_mdm_firmware_component_version":    mdm.ResourceConnectMDMFirmwareComponentVersion(),
 			"hsdp_connect_mdm_firmware_distribution_request": mdm.ResourceConnectMDMFirmwareDistributionRequest(),
+			"hsdp_connect_iot_provisioning_orgconfiguration": iot.ResourceConnectIoTProvisioningOrgConfiguration(),
 			"hsdp_iam_group_membership":                      group_membership.ResourceIAMGroupMembership(),
 			"hsdp_iam_role_sharing_policy":                   role_sharing_policy.ResourceRoleSharingPolicy(),
 			"hsdp_iam_device":                                device.ResourceIAMDevice(),
@@ -458,6 +460,7 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.SetupDiscoveryClient()
 		c.SetupBLRClient()
 		c.SetupDBSClient()
+		c.SetupProvisioningClient()
 
 		ma, err := jsonformat.NewMarshaller(false, "", "", fhirversion.STU3)
 		if err != nil {
