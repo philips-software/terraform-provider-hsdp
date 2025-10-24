@@ -1,4 +1,4 @@
-package iot
+package provisioning
 
 import (
 	"context"
