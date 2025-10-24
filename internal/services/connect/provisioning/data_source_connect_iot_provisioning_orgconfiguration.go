@@ -1,4 +1,4 @@
-package iot
+package provisioning
 
 import (
 	"context"
@@ -125,7 +125,8 @@ func dataSourceConnectIoTProvisioningOrgConfigurationRead(ctx context.Context, d
 	}
 
 	if resources == nil || len(*resources) == 0 {
-		return diag.FromErr(fmt.Errorf("no Organization Configuration found for organization_guid: %s", organizationGuid))
+		d.SetId("")
+		return diags
 	}
 
 	// Use the first result

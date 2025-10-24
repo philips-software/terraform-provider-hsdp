@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/dbs"
+	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/provisioning"
 
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/blr"
 
@@ -18,7 +19,6 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/ch"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/configuration"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/iot"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/connect/mdm"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/discovery"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/namespace"
@@ -295,7 +295,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_application":                   mdm.ResourceMDMApplication(),
 			"hsdp_connect_mdm_firmware_component_version":    mdm.ResourceConnectMDMFirmwareComponentVersion(),
 			"hsdp_connect_mdm_firmware_distribution_request": mdm.ResourceConnectMDMFirmwareDistributionRequest(),
-			"hsdp_connect_iot_provisioning_orgconfiguration": iot.ResourceConnectIoTProvisioningOrgConfiguration(),
+			"hsdp_connect_iot_provisioning_orgconfiguration": provisioning.ResourceConnectIoTProvisioningOrgConfiguration(),
 			"hsdp_iam_group_membership":                      group_membership.ResourceIAMGroupMembership(),
 			"hsdp_iam_role_sharing_policy":                   role_sharing_policy.ResourceRoleSharingPolicy(),
 			"hsdp_iam_device":                                device.ResourceIAMDevice(),
@@ -347,7 +347,7 @@ func Provider(build string) *schema.Provider {
 			"hsdp_connect_mdm_standard_service":              mdm.DataSourceConnectMDMStandardService(),
 			"hsdp_connect_mdm_data_subscribers":              mdm.DataSourceConnectMDMDataSubscribers(),
 			"hsdp_connect_mdm_data_adapters":                 mdm.DataSourceConnectMDMDataAdapters(),
-			"hsdp_connect_iot_provisioning_orgconfiguration": iot.DataSourceConnectIoTProvisioningOrgConfiguration(),
+			"hsdp_connect_iot_provisioning_orgconfiguration": provisioning.DataSourceConnectIoTProvisioningOrgConfiguration(),
 			"hsdp_iam_email_templates":                       email_template.DataSourceIAMEmailTemplates(),
 			"hsdp_connect_mdm_bucket":                        mdm.DataSourceConnectMDMBucket(),
 			"hsdp_connect_mdm_data_type":                     mdm.DataSourceConnectMDMDataType(),
