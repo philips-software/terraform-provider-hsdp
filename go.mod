@@ -4,7 +4,7 @@ go 1.25.1
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/dip-software/go-dip-api v0.93.0
+	github.com/dip-software/go-dip-api v0.93.1
 	github.com/dip-software/siderite v0.17.1
 	github.com/distribution/reference v0.6.0
 	github.com/google/fhir/go v0.7.4
