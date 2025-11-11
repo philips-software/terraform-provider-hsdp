@@ -44,6 +44,7 @@ resource "hsdp_connect_iot_provisioning_orgconfiguration" "test" {
   
   service_account {
     service_account_id  = "demo_test_tf_%s.app@demo.iot__connect__sandbox.apmplatform.philips-healthsuite.com"
+    # This private key is for testing only! It's not used anywhere else!
     service_account_key = "-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEAwJ6bR9Wj3wSxHGIBxmO8VVLhLUGzXGJFVdgzjJwMIIEowIBAAKCAQEAwJ6bR9Wj3wSxHGIBxmO8VVLhLUGzXGJFVdgzjJwMKExUm\n-----END RSA PRIVATE KEY-----"
   }
 
