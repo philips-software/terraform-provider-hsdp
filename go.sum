@@ -127,8 +127,6 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8Yc
 github.com/dchest/bcrypt_pbkdf v0.0.0-20150205184540-83f37f9c154a h1:saTgr5tMLFnmy/yg3qDTft4rE5DY2uJ/cCxCe3q0XTU=
 github.com/dchest/bcrypt_pbkdf v0.0.0-20150205184540-83f37f9c154a/go.mod h1:Bw9BbhOJVNR+t0jCqx2GC6zv0TGBsShs56Y3gfSCvl0=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
-github.com/dip-software/go-dip-api v0.93.0 h1:8OUbb4v0VhVsjmthE9oMePj7WPC6WfJlw77XZNawi9Y=
-github.com/dip-software/go-dip-api v0.93.0/go.mod h1:XduaN7oR6aUIqUzsEPSQuowLAcElnYSC527mXJK9ts0=
 github.com/dip-software/go-dip-api v0.93.1 h1:1U3k9Oy5YjEtw38qFQcpx3Phpf/m5/5ZH1ioi+4zHKE=
 github.com/dip-software/go-dip-api v0.93.1/go.mod h1:XduaN7oR6aUIqUzsEPSQuowLAcElnYSC527mXJK9ts0=
 github.com/dip-software/go-dip-signer v1.6.0 h1:Yqp1rBfnvbJcQWFZ2weKY0wGTo0QcBHJVGDXu/p8fjQ=
