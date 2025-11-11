@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/dip-software/go-dip-api/connect/dbs"
+	"github.com/dip-software/go-dip-api/connect/provisioning"
 
 	"github.com/dip-software/go-dip-api/connect/blr"
 
@@ -66,6 +67,7 @@ type Config struct {
 	mdmClient             *mdm.Client
 	discoveryClient       *discovery.Client
 	dbsClient             *dbs.Client
+	provisioningClient    *provisioning.Client
 	DebugStdErr           bool `json:"debugging"`
 	credsClientErr        error
 	cartelClientErr       error
@@ -78,6 +80,7 @@ type Config struct {
 	discoveryClientErr    error
 	blrClientErr          error
 	dbsClientErr          error
+	provisioningClientErr error
 	TimeZone              string `json:"time_zone"`
 
 	STU3MA *jsonformat.Marshaller   `json:"-"`
@@ -360,6 +363,23 @@ func (c *Config) DBSClient(principal ...*Principal) (*dbs.Client, error) {
 		})
 	}
 	return c.dbsClient, c.dbsClientErr
+}
+
+func (c *Config) ProvisioningClient(principal ...*Principal) (*provisioning.Client, error) {
+	if len(principal) > 0 && principal[0] != nil && principal[0].HasAuth() {
+		region := principal[0].Region
+		environment := principal[0].Environment
+		iamClient, err := c.IAMClient(principal...)
+		if err != nil {
+			return nil, err
+		}
+		return provisioning.NewClient(iamClient, &provisioning.Config{
+			Region:      region,
+			Environment: environment,
+			DebugLog:    c.DebugWriter,
+		})
+	}
+	return c.provisioningClient, c.provisioningClientErr
 }
 
 // SetupIAMClient sets up an HSDP IAM client
@@ -682,4 +702,23 @@ func (c *Config) SetupDBSClient() {
 	}
 	c.dbsClient = client
 	c.dbsClientErr = nil
+}
+
+func (c *Config) SetupProvisioningClient() {
+	if c.iamClientErr != nil {
+		c.provisioningClientErr = fmt.Errorf("IAM client error in SetupProvisioningClient: %w", c.iamClientErr)
+		return
+	}
+	client, err := provisioning.NewClient(c.iamClient, &provisioning.Config{
+		Region:      c.Region,
+		Environment: c.Environment,
+		DebugLog:    c.DebugWriter,
+	})
+	if err != nil {
+		c.provisioningClient = nil
+		c.provisioningClientErr = err
+		return
+	}
+	c.provisioningClient = client
+	c.provisioningClientErr = nil
 }
