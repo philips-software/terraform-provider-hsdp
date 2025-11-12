@@ -1,3 +1,9 @@
+---
+subcategory: "Provisioning"
+page_title: "HSDP: hsdp_connect_iot_provisioning_orgconfiguration"
+description: |-
+  Manages HSDP DIP Connect IoT Provisioning Org Configuration
+---
 # hsdp_connect_iot_provisioning_orgconfiguration (Resource)
 
 Provides a resource for managing HSDP Connect IoT provisioning organization configurations. This resource allows you to configure the service account and bootstrap signature settings for an organization in the Connect IoT provisioning service.

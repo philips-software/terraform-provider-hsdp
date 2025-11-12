@@ -1,5 +1,5 @@
 ---
-subcategory: "Connect IoT"
+subcategory: "Provisioning"
 ---
 
 # Data Source: hsdp_connect_iot_provisioning_orgconfiguration
