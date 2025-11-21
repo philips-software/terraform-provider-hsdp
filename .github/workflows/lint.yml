@@ -13,7 +13,7 @@ jobs:
     name: golint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: actions/setup-go@v6
         with:
           go-version: '^1.25.1'
@@ -27,7 +27,7 @@ jobs:
     name: markdownlint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: DavidAnson/markdownlint-cli2-action@v21
         with:
           globs: |
