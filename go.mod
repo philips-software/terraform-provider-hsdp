@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/terraform-plugin-testing v1.14.0
 	github.com/hasura/go-graphql-client v0.15.1
 	github.com/loafoe/easyssh-proxy/v2 v2.0.4
-	github.com/philips-software/go-dip-api v0.96.0
+	github.com/philips-software/go-dip-api v0.97.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
 )

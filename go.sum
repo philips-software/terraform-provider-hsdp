@@ -525,8 +525,8 @@ github.com/pborman/uuid v1.2.0/go.mod h1:X/NO0urCmaxf9VXbdlT7C2Yzkj2IKimNn4k+gtP
 github.com/pelletier/go-toml v1.2.0/go.mod h1:5z9KED0ma1S8pY6P1sdut58dfprrGBbd/94hg7ilaic=
 github.com/peterbourgon/diskv v2.0.1+incompatible/go.mod h1:uqqh8zWWbv1HBMNONnaR/tNboyR3/BZd58JJSHlUSCU=
 github.com/philhofer/fwd v1.0.0/go.mod h1:gk3iGcWd9+svBvR0sR+KPcfE+RNWozjowpeBVG3ZVNU=
-github.com/philips-software/go-dip-api v0.96.0 h1:c2nNDJiPFHFNCPJMfwtTBzSvqbopMeDHRtz+lQ+TexM=
-github.com/philips-software/go-dip-api v0.96.0/go.mod h1:Q1MLoXoLmF34ycDfqsZrzysiZ724NaL3A/kUtcDZQBY=
+github.com/philips-software/go-dip-api v0.97.0 h1:ai9LAuSrmeyKnchtr/8MZQvo5YUtrI5rNY38oadVc0U=
+github.com/philips-software/go-dip-api v0.97.0/go.mod h1:iBhVUpv31eT7G0UAPasj9Ywe/9r5Si0tiuGAGD9B9Js=
 github.com/philips-software/go-nih-signer v1.5.0 h1:qMQ2uArwgnSCbZV7GvuiN4cyHLFXqpVFojQKIiF24tE=
 github.com/philips-software/go-nih-signer v1.5.0/go.mod h1:lJQZASlfNi8XiJjEIz/xjdumb7wWU8RuSETQjlaU1f4=
 github.com/pires/go-proxyproto v0.0.0-20191211124218-517ecdf5bb2b/go.mod h1:Odh9VFOZJCf9G8cLW5o435Xf1J95Jw9Gw5rnCjcwzAY=
