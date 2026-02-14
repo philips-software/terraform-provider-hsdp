@@ -16,9 +16,9 @@ different locales as well.
 The various template types supported by IAM are:
 
 | Type | Description |
-|------|--------------|
+| --- | --- |
 | PHONE_VERIFICATION | Send when the users' phone needs to be verified |
-| PASSWORD_RECOVERY  | If a user triggers forgot password flow, OTP to reset password will be sent to user. The following placeholders are supported in this template |
+| PASSWORD_RECOVERY | If a user triggers forgot password flow, OTP to reset password will be sent to user. The following placeholders are supported in this template |
 | PASSWORD_FAILED_ATTEMPTS | If there are multiple attempts to change user account password with invalid current password, then the user will get this SMS notification warning user about malicious login attempts. This notification will be sent after 5 invalid attempts. The following placeholders are supported in this template |
 | MFA_OTP | This SMS template is used for login using OTP for multi-fator authentication. |
 

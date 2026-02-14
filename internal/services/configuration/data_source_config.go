@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	discovery "github.com/philips-software/go-dip-api/config"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	discovery "github.com/philips-software/go-dip-api/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )

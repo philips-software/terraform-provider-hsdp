@@ -12,8 +12,8 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 
-	"github.com/philips-software/go-dip-api/iam"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/philips-software/go-dip-api/iam"
 )
 
 var descriptions = map[string]string{

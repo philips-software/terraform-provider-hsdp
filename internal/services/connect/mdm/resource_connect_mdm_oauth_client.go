@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/philips-software/go-dip-api/connect/mdm"
-	"github.com/philips-software/go-dip-api/iam"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/philips-software/go-dip-api/connect/mdm"
+	"github.com/philips-software/go-dip-api/iam"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )

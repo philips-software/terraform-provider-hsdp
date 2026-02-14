@@ -17,7 +17,7 @@ This resource allows you to manage template for your HSDP IAM organization. [Fur
 The various template types supported by IAM are:
 
 | Type | Description |
-|------|--------------|
+| --- | --- |
 | ACCOUNT_ALREADY_VERIFIED | If a user’s account is already verified and activated and the resend verification is triggered, the user gets this email with a message that the account is already verified. |
 | ACCOUNT_UNLOCKED | If a user’s account is unlocked by an administrator, the user gets this email notification. |
 | ACCOUNT_VERIFICATION | When a user gets registered within an organization, an account verification email will be sent to the user. The email message will contain an account verification link that will redirect users to the set password page through which the user can set a password and complete the registration process. |

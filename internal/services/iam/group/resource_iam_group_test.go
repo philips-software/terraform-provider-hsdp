@@ -162,7 +162,7 @@ resource "hsdp_iam_group" "test" {
 		// USER
 		name,
 		name,
-                password,
+		password,
 		// ROLE
 		upperName,
 		name,

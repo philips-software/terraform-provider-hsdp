@@ -10,6 +10,8 @@ import (
 
 	"github.com/philips-software/go-dip-api/connect/blr"
 
+	"github.com/google/fhir/go/jsonformat"
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/philips-software/go-dip-api/cartel"
 	"github.com/philips-software/go-dip-api/config"
 	"github.com/philips-software/go-dip-api/connect/mdm"
@@ -20,8 +22,6 @@ import (
 	"github.com/philips-software/go-dip-api/notification"
 	"github.com/philips-software/go-dip-api/pki"
 	"github.com/philips-software/go-dip-api/stl"
-	"github.com/google/fhir/go/jsonformat"
-	"github.com/hashicorp/go-retryablehttp"
 )
 
 // Config contains configuration for the client

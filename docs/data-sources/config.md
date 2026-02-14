@@ -64,7 +64,7 @@ The following regions are recognized:
 | eu-west | [European Union](https://en.wikipedia.org/wiki/European_Union) (Ireland) |
 | sa1     | [South America](https://en.wikipedia.org/wiki/South_America) (Sao Paulo) |
 | us-east | [United States](https://en.wikipedia.org/wiki/United_States) (Virginia)  |
- | pl      | HealthSuite Extended Platform with PrivateLink (pl) endpoints            |  
+| pl      | HealthSuite Extended Platform with PrivateLink (pl) endpoints            |
 
 ~> The `pl` region only has a limited subset of mapped services (logging)
 

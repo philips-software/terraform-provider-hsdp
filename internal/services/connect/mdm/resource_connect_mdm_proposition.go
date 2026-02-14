@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/philips-software/go-dip-api/connect/mdm"
 	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/philips-software/go-dip-api/connect/mdm"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 
