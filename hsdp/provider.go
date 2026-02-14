@@ -25,7 +25,6 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/repository"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/docker/service_key"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/edge"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/function"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/application"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/client"
@@ -260,7 +259,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_edge_config":                               edge.ResourceEdgeConfig(),
 			"hsdp_edge_custom_cert":                          edge.ResourceEdgeCustomCert(),
 			"hsdp_edge_sync":                                 edge.ResourceEdgeSync(),
-			"hsdp_function":                                  function.ResourceFunction(),
 			"hsdp_notification_producer":                     notification.ResourceNotificationProducer(),
 			"hsdp_notification_subscriber":                   notification.ResourceNotificationSubscriber(),
 			"hsdp_notification_topic":                        notification.ResourceNotificationTopic(),

@@ -4,8 +4,6 @@ go 1.25.1
 
 require (
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/dip-software/siderite v0.17.1
-	github.com/distribution/reference v0.6.0
 	github.com/google/fhir/go v0.7.4
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-cty v1.5.0
@@ -15,15 +13,12 @@ require (
 	github.com/hashicorp/terraform-plugin-testing v1.14.0
 	github.com/hasura/go-graphql-client v0.15.1
 	github.com/loafoe/easyssh-proxy/v2 v2.0.4
-	github.com/loafoe/ferrite v0.3.0
 	github.com/philips-software/go-dip-api v0.96.0
 	github.com/pkg/errors v0.9.1
-	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.11.1
 )
 
 require (
-	github.com/dip-software/go-dip-api v0.91.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/philips-software/go-nih-signer v1.5.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.38.0 // indirect
@@ -66,8 +61,6 @@ require (
 	github.com/hashicorp/terraform-svchost v0.1.1 // indirect
 	github.com/hashicorp/yamux v0.1.2 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
-	github.com/labstack/echo/v4 v4.13.3 // indirect
-	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/loafoe/caddy-token v0.77.0
 	github.com/mattn/go-colorable v0.1.14 // indirect
@@ -83,11 +76,8 @@ require (
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/onsi/ginkgo v1.16.5 // indirect
 	github.com/onsi/gomega v1.36.1 // indirect
-	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/serenize/snaker v0.0.0-20201027110005-a7ad2135616e // indirect
-	github.com/valyala/bytebufferpool v1.0.0 // indirect
-	github.com/valyala/fasttemplate v1.2.2 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
