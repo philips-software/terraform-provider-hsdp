@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/cenkalti/backoff/v4"
-	"github.com/dip-software/go-dip-api/cartel"
+	"github.com/philips-software/go-dip-api/cartel"
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"

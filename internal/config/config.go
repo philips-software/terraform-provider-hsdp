@@ -5,22 +5,21 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/dip-software/go-dip-api/connect/dbs"
-	"github.com/dip-software/go-dip-api/connect/provisioning"
+	"github.com/philips-software/go-dip-api/connect/dbs"
+	"github.com/philips-software/go-dip-api/connect/provisioning"
 
-	"github.com/dip-software/go-dip-api/connect/blr"
+	"github.com/philips-software/go-dip-api/connect/blr"
 
-	"github.com/dip-software/go-dip-api/cartel"
-	"github.com/dip-software/go-dip-api/config"
-	"github.com/dip-software/go-dip-api/connect/mdm"
-	"github.com/dip-software/go-dip-api/console"
-	"github.com/dip-software/go-dip-api/console/docker"
-	"github.com/dip-software/go-dip-api/discovery"
-	"github.com/dip-software/go-dip-api/iam"
-	"github.com/dip-software/go-dip-api/notification"
-	"github.com/dip-software/go-dip-api/pki"
-	"github.com/dip-software/go-dip-api/s3creds"
-	"github.com/dip-software/go-dip-api/stl"
+	"github.com/philips-software/go-dip-api/cartel"
+	"github.com/philips-software/go-dip-api/config"
+	"github.com/philips-software/go-dip-api/connect/mdm"
+	"github.com/philips-software/go-dip-api/console"
+	"github.com/philips-software/go-dip-api/console/docker"
+	"github.com/philips-software/go-dip-api/discovery"
+	"github.com/philips-software/go-dip-api/iam"
+	"github.com/philips-software/go-dip-api/notification"
+	"github.com/philips-software/go-dip-api/pki"
+	"github.com/philips-software/go-dip-api/stl"
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/go-retryablehttp"
 )
@@ -30,7 +29,6 @@ type Config struct {
 	BuildVersion       string    `json:"-"`
 	ServiceID          string    `json:"service_id"`
 	ServicePrivateKey  string    `json:"service_private_key"`
-	S3CredsURL         string    `json:"s3_creds_url"`
 	NotificationURL    string    `json:"notification_url"`
 	IAMURL             string    `json:"iam_url"`
 	IDMURL             string    `json:"idm_url"`
@@ -58,7 +56,6 @@ type Config struct {
 
 	iamClient             *iam.Client
 	cartelClient          *cartel.Client
-	s3credsClient         *s3creds.Client
 	consoleClient         *console.Client
 	pkiClient             *pki.Client
 	stlClient             *stl.Client
@@ -69,7 +66,6 @@ type Config struct {
 	dbsClient             *dbs.Client
 	provisioningClient    *provisioning.Client
 	DebugStdErr           bool `json:"debugging"`
-	credsClientErr        error
 	cartelClientErr       error
 	iamClientErr          error
 	consoleClientErr      error
@@ -180,10 +176,6 @@ func (c *Config) BLRClient(principal ...*Principal) (*blr.Client, error) {
 
 func (c *Config) CartelClient() (*cartel.Client, error) {
 	return c.cartelClient, c.cartelClientErr
-}
-
-func (c *Config) S3CredsClient() (*s3creds.Client, error) {
-	return c.s3credsClient, c.credsClientErr
 }
 
 func (c *Config) ConsoleClient(principal ...*Principal) (*console.Client, error) {
@@ -305,20 +297,6 @@ func (c *Config) PKIClient(principal ...*Principal) (*pki.Client, error) {
 		})
 	}
 	return c.pkiClient, c.pkiClientErr
-}
-
-func (c *Config) S3CredsClientWithLogin(username, password string) (*s3creds.Client, error) {
-	if c.iamClientErr != nil {
-		return nil, c.iamClientErr
-	}
-	newIAMClient, err := c.iamClient.WithLogin(username, password)
-	if err != nil {
-		return nil, err
-	}
-	return s3creds.NewClient(newIAMClient, &s3creds.Config{
-		BaseURL:  c.S3CredsURL,
-		DebugLog: c.DebugWriter,
-	})
 }
 
 func (c *Config) NotificationClient(principal ...*Principal) (*notification.Client, error) {
@@ -465,36 +443,6 @@ func (c *Config) SetupSTLClient() {
 		return
 	}
 	c.stlClient = client
-}
-
-func (c *Config) SetupS3CredsClient() {
-	if c.iamClientErr != nil {
-		c.s3credsClient = nil
-		c.credsClientErr = c.iamClientErr
-		return
-	}
-	if c.Region != "" {
-		env := c.Environment
-		if env == "" {
-			env = "prod"
-		}
-		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(env))
-		if err == nil {
-			if url := ac.Service("s3creds").URL; c.S3CredsURL == "" {
-				c.S3CredsURL = url
-			}
-		}
-	}
-	client, err := s3creds.NewClient(c.iamClient, &s3creds.Config{
-		BaseURL:  c.S3CredsURL,
-		DebugLog: c.DebugWriter,
-	})
-	if err != nil {
-		c.s3credsClient = nil
-		c.credsClientErr = err
-		return
-	}
-	c.s3credsClient = client
 }
 
 func (c *Config) SetupNotificationClient() {

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/dip-software/go-dip-api/stl"
+	"github.com/philips-software/go-dip-api/stl"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/terraform-provider-hsdp/internal/config"

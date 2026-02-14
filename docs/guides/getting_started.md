@@ -5,7 +5,7 @@ page_title: "Getting started with HSDP Terraform"
 # Getting started with HSDP Terraform
 
 The HSDP Terraform provider provides Lifecycle management of many HSDP resources,
-including IAM, PKI, S3Creds, Edge and more. The provider is a Philips Open Source project maintained
+including IAM, PKI, Edge and more. The provider is a Philips Open Source project maintained
 on [Github](https://github.com/philips-software/terraform-provider-hsdp).
 
 Support is provided through the [Github issue tracker](https://github.com/philips-software/terraform-provider-hsdp/issues)

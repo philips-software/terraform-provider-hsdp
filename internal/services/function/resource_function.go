@@ -10,7 +10,7 @@ import (
 
 	"github.com/cenkalti/backoff/v4"
 
-	"github.com/dip-software/go-dip-api/iron"
+	"github.com/philips-software/go-dip-api/iron"
 	siderite "github.com/dip-software/siderite/models"
 	"github.com/distribution/reference"
 	"github.com/google/uuid"

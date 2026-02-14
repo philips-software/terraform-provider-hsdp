@@ -42,7 +42,6 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/notification"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/pki"
 	pki_tenant "github.com/philips-software/terraform-provider-hsdp/internal/services/pki/tenant"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/s3creds"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/tenant"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
@@ -94,11 +93,6 @@ func Provider(build string) *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: descriptions["idm_url"],
-			},
-			"s3creds_url": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: descriptions["s3creds_url"],
 			},
 			"notification_url": {
 				Type:        schema.TypeString,
@@ -258,7 +252,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_mfa_policy":                            iam.ResourceIAMMFAPolicy(),
 			"hsdp_iam_password_policy":                       iam.ResourceIAMPasswordPolicy(),
 			"hsdp_iam_email_template":                        email_template.ResourceIAMEmailTemplate(),
-			"hsdp_s3creds_policy":                            s3creds.ResourceS3CredsPolicy(),
 			"hsdp_container_host":                            ch.ResourceContainerHost(),
 			"hsdp_metrics_autoscaler":                        metrics.ResourceMetricsAutoscaler(),
 			"hsdp_pki_tenant":                                pki_tenant.ResourcePKITenant(),
@@ -313,8 +306,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_org":                                   organization.DataSourceIAMOrg(),
 			"hsdp_iam_proposition":                           proposition.DataSourceIAMProposition(),
 			"hsdp_iam_application":                           application.DataSourceIAMApplication(),
-			"hsdp_s3creds_access":                            s3creds.DataSourceS3CredsAccess(),
-			"hsdp_s3creds_policy":                            s3creds.DataSourceS3CredsPolicy(),
 			"hsdp_config":                                    configuration.DataSourceConfig(),
 			"hsdp_container_host_subnet_types":               ch.DataSourceContainerHostSubnetTypes(),
 			"hsdp_pki_root":                                  pki.DataSourcePKIRoot(),
@@ -376,7 +367,6 @@ func init() {
 		"environment":         "The HSDP environment to configure for",
 		"iam_url":             "The HSDP IAM instance URL",
 		"idm_url":             "The HSDP IDM instance URL",
-		"s3creds_url":         "The HSDP S3 Credentials instance URL",
 		"notification_url":    "The HSDP Notification service base URL to use",
 		"mdm_url":             "The Connect MDM URL to use",
 		"oauth2_client_id":    "The OAuth2 client id",
@@ -421,7 +411,6 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.SharedKey = d.Get("shared_key").(string)
 		c.SecretKey = d.Get("secret_key").(string)
 		c.DebugLog = d.Get("debug_log").(string)
-		c.S3CredsURL = d.Get("s3creds_url").(string)
 		c.CartelHost = d.Get("cartel_host").(string)
 		c.CartelToken = d.Get("cartel_token").(string)
 		c.CartelSecret = d.Get("cartel_secret").(string)
@@ -451,7 +440,6 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 			c.DebugWriter = os.Stderr
 		}
 		c.SetupIAMClient()
-		c.SetupS3CredsClient()
 		c.SetupCartelClient()
 		c.SetupConsoleClient()
 		c.SetupPKIClient()

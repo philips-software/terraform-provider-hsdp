@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	cfg "github.com/dip-software/go-dip-api/config"
+	cfg "github.com/philips-software/go-dip-api/config"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/robfig/cron/v3"

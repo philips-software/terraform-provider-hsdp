@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	"github.com/dip-software/go-dip-api/iam"
+	"github.com/philips-software/go-dip-api/iam"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools/random"

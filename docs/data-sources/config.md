@@ -46,7 +46,6 @@ Availability of services varies across regions. The following services are disco
 | mdm             | Master Data Management [MDM](https://www.hsdp.io/documentation/master-data-management)                                                                      |
 | notification    | HSDP [Notification service](https://www.hsdp.io/documentation/notification)                                                                                 |
 | pki             | Public Key Infrastructure [PKI](https://www.hsdp.io/documentation/public-key-infrastructure/getting-started) services                                       |
-| s3creds         | [S3 Credentials](https://www.hsdp.io/documentation/s3-credentials) API details                                                                              |
 | edge            | Edge / STL API details                                                                                                                                      |
 | uaa             | User Account and Authentication [UAA](https://docs.cloudfoundry.org/concepts/architecture/uaa.html). Part of Cloud foundry                                  |
 | vault-proxy     | Vault proxy details. Part of [Vault Service Broker](https://www.hsdp.io/documentation/vault-service-broker/service-details)                                 |
