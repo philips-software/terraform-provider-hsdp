@@ -14,13 +14,17 @@ func DataSourceIAMProposition() *schema.Resource {
 		Description: descriptions["proposition"],
 		ReadContext: dataSourceIAMPropositionRead,
 		Schema: map[string]*schema.Schema{
+			"proposition_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"name": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"organization_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -44,18 +48,33 @@ func dataSourceIAMPropositionRead(_ context.Context, d *schema.ResourceData, met
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	orgId := d.Get("organization_id").(string)
-	name := d.Get("name").(string)
 
-	prop, _, err := client.Propositions.GetProposition(&iam.GetPropositionsOptions{
-		OrganizationID: &orgId,
-		Name:           &name,
-	})
-	if err != nil {
-		return diag.FromErr(err)
+	propositionID := d.Get("proposition_id").(string)
+	name := d.Get("name").(string)
+	orgID := d.Get("organization_id").(string)
+
+	var prop *iam.Proposition
+
+	if propositionID != "" {
+		prop, _, err = client.Propositions.GetPropositionByID(propositionID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	} else {
+		if name == "" || orgID == "" {
+			return diag.Errorf("when proposition_id is not provided, both name and organization_id are required")
+		}
+		prop, _, err = client.Propositions.GetProposition(&iam.GetPropositionsOptions{
+			OrganizationID: &orgID,
+			Name:           &name,
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	d.SetId(prop.ID)
+	_ = d.Set("name", prop.Name)
 	_ = d.Set("description", prop.Description)
 	_ = d.Set("global_reference_id", prop.GlobalReferenceID)
 	return diags

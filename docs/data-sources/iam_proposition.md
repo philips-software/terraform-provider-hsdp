@@ -8,6 +8,16 @@ Retrieve details of an existing proposition
 
 ## Example Usage
 
+The following example looks up a proposition by ID:
+
+```hcl
+data "hsdp_iam_proposition" "my_prop" {
+   proposition_id = var.my_prop_id
+}
+```
+
+The following example looks up a proposition by name and organization:
+
 ```hcl
 data "hsdp_iam_proposition" "my_prop" {
    name = "MYPROPOSITION"
@@ -25,8 +35,11 @@ output "my_prop_display_name" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the proposition to look up
-* `organization_id` - (Required) the UUID of the organization the proposition belongs to
+* `proposition_id` - (Optional) The UUID of the proposition to look up
+* `name` - (Optional) The name of the proposition to look up
+* `organization_id` - (Optional) the UUID of the organization the proposition belongs to
+
+~> When `proposition_id` is not provided, both `name` and `organization_id` are required.
 
 ## Attributes Reference
 

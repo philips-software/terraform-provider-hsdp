@@ -13,13 +13,17 @@ func DataSourceIAMApplication() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceIAMApplicationRead,
 		Schema: map[string]*schema.Schema{
+			"application_id": {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			"name": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"proposition_id": {
 				Type:     schema.TypeString,
-				Required: true,
+				Optional: true,
 			},
 			"description": {
 				Type:     schema.TypeString,
@@ -43,22 +47,38 @@ func dataSourceIAMApplicationRead(_ context.Context, d *schema.ResourceData, met
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	propID := d.Get("proposition_id").(string)
+
+	applicationID := d.Get("application_id").(string)
 	name := d.Get("name").(string)
+	propID := d.Get("proposition_id").(string)
 
-	apps, _, err := client.Applications.GetApplications(&iam.GetApplicationsOptions{
-		PropositionID: &propID,
-		Name:          &name,
-	})
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	if len(apps) == 0 {
-		return diag.FromErr(config.ErrResourceNotFound)
+	var app *iam.Application
+
+	if applicationID != "" {
+		app, _, err = client.Applications.GetApplicationByID(applicationID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+	} else {
+		if name == "" || propID == "" {
+			return diag.Errorf("when application_id is not provided, both name and proposition_id are required")
+		}
+		apps, _, err := client.Applications.GetApplications(&iam.GetApplicationsOptions{
+			PropositionID: &propID,
+			Name:          &name,
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if len(apps) == 0 {
+			return diag.FromErr(config.ErrResourceNotFound)
+		}
+		app = apps[0]
 	}
 
-	d.SetId(apps[0].ID)
-	_ = d.Set("description", apps[0].Description)
-	_ = d.Set("global_reference_id", apps[0].GlobalReferenceID)
+	d.SetId(app.ID)
+	_ = d.Set("name", app.Name)
+	_ = d.Set("description", app.Description)
+	_ = d.Set("global_reference_id", app.GlobalReferenceID)
 	return diags
 }

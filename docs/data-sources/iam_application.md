@@ -8,6 +8,16 @@ Retrieve details of an existing application
 
 ## Example Usage
 
+The following example looks up an application by ID:
+
+```hcl
+data "hsdp_iam_application" "my_app" {
+   application_id = var.my_app_id
+}
+```
+
+The following example looks up an application by name and proposition:
+
 ```hcl
 data "hsdp_iam_application" "my_app" {
    name = "MYAPP"
@@ -25,8 +35,11 @@ output "my_app_id" {
 
 The following arguments are supported:
 
-* `name` - (Required) The name of the application to look up
-* `proposition_id` - (Required) the UUID of the proposition the application belongs to
+* `application_id` - (Optional) The UUID of the application to look up
+* `name` - (Optional) The name of the application to look up
+* `proposition_id` - (Optional) the UUID of the proposition the application belongs to
+
+~> When `application_id` is not provided, both `name` and `proposition_id` are required.
 
 ## Attributes Reference
 
