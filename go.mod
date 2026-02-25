@@ -30,7 +30,7 @@ require (
 	github.com/ScaleFT/sshkeys v0.0.0-20200327173127-6142f742bca5 // indirect
 	github.com/agext/levenshtein v1.2.2 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-	github.com/cloudflare/circl v1.6.1 // indirect
+	github.com/cloudflare/circl v1.6.3 // indirect
 	github.com/coder/websocket v1.8.13 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dchest/bcrypt_pbkdf v0.0.0-20150205184540-83f37f9c154a // indirect
