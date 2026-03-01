@@ -64,7 +64,7 @@ jobs:
           HSDP_SHARED_KEY: ${{ secrets.HSDP_SHARED_KEY }}
           HSDP_SECRET_KEY: ${{ secrets.HSDP_SECRET_KEY }}
           HSDP_DEBUG_LOG: /tmp/debug.log
-      - uses: actions/upload-artifact@v6
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: debug-log
