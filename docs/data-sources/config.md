@@ -42,7 +42,6 @@ Availability of services varies across regions. The following services are disco
 | logging         | [HSDP Logging](https://www.hsdp.io/documentation/logging) API details                                                                                       |
 | logquery        | Log query endpoint details. Part of [HSDP Logging](https://www.hsdp.io/documentation/logging)                                                               |
 | mdm             | Master Data Management [MDM](https://www.hsdp.io/documentation/master-data-management)                                                                      |
-| notification    | HSDP [Notification service](https://www.hsdp.io/documentation/notification)                                                                                 |
 | edge            | Edge / STL API details                                                                                                                                      |
 | vault-proxy     | Vault proxy details. Part of [Vault Service Broker](https://www.hsdp.io/documentation/vault-service-broker/service-details)                                 |
 

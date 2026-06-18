@@ -56,7 +56,6 @@ In addition to generic provider arguments (e.g. alias and version), the followin
 * `credentials` - (Optional) Can point to a JSON file containing values for all fields here
 * `iam_url` - (Optional) IAM API endpoint. Auto-discovered from region and environment.
 * `idm_url` - (Optional) IDM API endpoint Auto-discovered from region and environment.
-* `notification_url` - (Optional) Notification service URL. Auto-discovered from region and environment.
 * `oauth2_client_id` - (Optional) The OAuth2 client ID as provided by HSDP
 * `oauth2_password` - (Optional) The OAuth2 password as provided by HSDP
 * `service_id` - (Optional) The service ID to use for IAM org admin operations (conflicts with: `org_admin_username`)

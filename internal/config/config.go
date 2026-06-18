@@ -17,7 +17,6 @@ import (
 	"github.com/philips-software/go-dip-api/console"
 	"github.com/philips-software/go-dip-api/discovery"
 	"github.com/philips-software/go-dip-api/iam"
-	"github.com/philips-software/go-dip-api/notification"
 	"github.com/philips-software/go-dip-api/stl"
 )
 
@@ -26,7 +25,6 @@ type Config struct {
 	BuildVersion       string    `json:"-"`
 	ServiceID          string    `json:"service_id"`
 	ServicePrivateKey  string    `json:"service_private_key"`
-	NotificationURL    string    `json:"notification_url"`
 	IAMURL             string    `json:"iam_url"`
 	IDMURL             string    `json:"idm_url"`
 	SharedKey          string    `json:"shared_key"`
@@ -50,7 +48,6 @@ type Config struct {
 	consoleClient         *console.Client
 	stlClient             *stl.Client
 	blrClient             *blr.Client
-	notificationClient    *notification.Client
 	mdmClient             *mdm.Client
 	discoveryClient       *discovery.Client
 	dbsClient             *dbs.Client
@@ -59,7 +56,6 @@ type Config struct {
 	iamClientErr          error
 	consoleClientErr      error
 	stlClientErr          error
-	notificationClientErr error
 	mdmClientErr          error
 	discoveryClientErr    error
 	blrClientErr          error
@@ -253,33 +249,6 @@ func (c *Config) STLClient(principal ...*Principal) (*stl.Client, error) {
 	return client, nil
 }
 
-func (c *Config) NotificationClient(principal ...*Principal) (*notification.Client, error) {
-	if len(principal) > 0 && principal[0] != nil && principal[0].HasAuth() {
-		region := principal[0].Region
-		environment := principal[0].Environment
-		iamClient, err := c.IAMClient(principal...)
-		if err != nil {
-			return nil, err
-		}
-		endpoint := principal[0].Endpoint
-		if endpoint == "" {
-			ac, err := config.New(config.WithRegion(region), config.WithEnv(environment))
-			if err == nil {
-				if url := ac.Service("notification").URL; url != "" {
-					endpoint = url
-				}
-			}
-		}
-		return notification.NewClient(iamClient, &notification.Config{
-			Region:          region,
-			Environment:     environment,
-			NotificationURL: endpoint,
-			DebugLog:        c.DebugWriter,
-		})
-	}
-	return c.notificationClient, c.notificationClientErr
-}
-
 func (c *Config) DBSClient(principal ...*Principal) (*dbs.Client, error) {
 	if len(principal) > 0 && principal[0] != nil && principal[0].HasAuth() {
 		region := principal[0].Region
@@ -397,36 +366,6 @@ func (c *Config) SetupSTLClient() {
 		return
 	}
 	c.stlClient = client
-}
-
-func (c *Config) SetupNotificationClient() {
-	if c.iamClientErr != nil {
-		c.notificationClient = nil
-		c.notificationClientErr = c.iamClientErr
-		return
-	}
-	if c.NotificationURL == "" {
-		env := c.Environment
-		if env == "" {
-			env = "prod"
-		}
-		ac, err := config.New(config.WithRegion(c.Region), config.WithEnv(env))
-		if err == nil {
-			if url := ac.Service("notification").URL; url != "" {
-				c.NotificationURL = url
-			}
-		}
-	}
-	client, err := notification.NewClient(c.iamClient, &notification.Config{
-		NotificationURL: c.NotificationURL,
-		DebugLog:        c.DebugWriter,
-	})
-	if err != nil {
-		c.notificationClient = nil
-		c.notificationClientErr = err
-		return
-	}
-	c.notificationClient = client
 }
 
 func (c *Config) SetupMDMClient() {

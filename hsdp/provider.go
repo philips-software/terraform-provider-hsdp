@@ -33,7 +33,6 @@ import (
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/role_sharing_policy"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/service"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/iam/user"
-	"github.com/philips-software/terraform-provider-hsdp/internal/services/notification"
 	"github.com/philips-software/terraform-provider-hsdp/internal/services/tenant"
 	"github.com/philips-software/terraform-provider-hsdp/internal/tools"
 )
@@ -82,11 +81,6 @@ func Provider(build string) *schema.Provider {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: descriptions["idm_url"],
-			},
-			"notification_url": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: descriptions["notification_url"],
 			},
 			"mdm_url": {
 				Type:        schema.TypeString,
@@ -213,10 +207,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_edge_config":                               edge.ResourceEdgeConfig(),
 			"hsdp_edge_custom_cert":                          edge.ResourceEdgeCustomCert(),
 			"hsdp_edge_sync":                                 edge.ResourceEdgeSync(),
-			"hsdp_notification_producer":                     notification.ResourceNotificationProducer(),
-			"hsdp_notification_subscriber":                   notification.ResourceNotificationSubscriber(),
-			"hsdp_notification_topic":                        notification.ResourceNotificationTopic(),
-			"hsdp_notification_subscription":                 notification.ResourceNotificationSubscription(),
 			"hsdp_iam_sms_gateway":                           iam.ResourceIAMSMSGatewayConfig(),
 			"hsdp_iam_sms_template":                          iam.ResourceIAMSMSTemplate(),
 			"hsdp_iam_activation_email":                      iam.ResourceIAMActivationEmail(),
@@ -256,12 +246,6 @@ func Provider(build string) *schema.Provider {
 			"hsdp_iam_application":                           application.DataSourceIAMApplication(),
 			"hsdp_config":                                    configuration.DataSourceConfig(),
 			"hsdp_edge_device":                               edge.DataSourceEdgeDevice(),
-			"hsdp_notification_producers":                    notification.DataSourceNotificationProducers(),
-			"hsdp_notification_producer":                     notification.DataSourceNotificationProducer(),
-			"hsdp_notification_topics":                       notification.DataSourceNotificationTopics(),
-			"hsdp_notification_topic":                        notification.DataSourceNotificationTopic(),
-			"hsdp_notification_subscription":                 notification.DataSourceNotificationSubscription(),
-			"hsdp_notification_subscriber":                   notification.DataSourceNotificationSubscriber(),
 			"hsdp_iam_group":                                 group.DataSourceIAMGroup(),
 			"hsdp_iam_role":                                  role.DataSourceIAMRole(),
 			"hsdp_iam_users":                                 user.DataSourceIAMUsers(),
@@ -305,7 +289,6 @@ func init() {
 		"environment":         "The HSDP environment to configure for",
 		"iam_url":             "The HSDP IAM instance URL",
 		"idm_url":             "The HSDP IDM instance URL",
-		"notification_url":    "The HSDP Notification service base URL to use",
 		"mdm_url":             "The Connect MDM URL to use",
 		"oauth2_client_id":    "The OAuth2 client id",
 		"oauth2_password":     "The OAuth2 password",
@@ -350,7 +333,6 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.UAAUsername = d.Get("uaa_username").(string)
 		c.UAAPassword = d.Get("uaa_password").(string)
 		c.UAAURL = d.Get("uaa_url").(string)
-		c.NotificationURL = d.Get("notification_url").(string)
 		c.TimeZone = "UTC"
 		c.MDMURL = d.Get("mdm_url").(string)
 
@@ -371,7 +353,6 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 		c.SetupIAMClient()
 		c.SetupConsoleClient()
 		c.SetupSTLClient()
-		c.SetupNotificationClient()
 		c.SetupMDMClient()
 		c.SetupDiscoveryClient()
 		c.SetupBLRClient()
