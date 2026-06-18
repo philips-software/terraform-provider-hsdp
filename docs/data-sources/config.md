@@ -32,8 +32,6 @@ Availability of services varies across regions. The following services are disco
 
 | Service         | Description                                                                                                                                                 |
 |-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| cartel          | The Cartel API service. Manages [Container Host](https://www.hsdp.io/documentation/container-host) instances                                                |
-| cf              | HSDP [Cloud foundry](https://www.hsdp.io/develop/architecture/cloud-foundry) regional PaaS configuration                                                    |
 | console         | HSDP [Console](https://www.hsdp.io/documentation/metrics-service-broker/service-details) API endpoints                                                      |
 | docker-registry | Regional [Docker Registry](https://www.hsdp.io/documentation/docker-registry) details                                                                       |
 | gateway         | Regional [SSH gateway](https://www.hsdp.io/develop/get-started-healthsuite/set-up-ssh-access/access-services-behind-ssh-gateway/connect-to-gateway) details |
@@ -45,9 +43,7 @@ Availability of services varies across regions. The following services are disco
 | logquery        | Log query endpoint details. Part of [HSDP Logging](https://www.hsdp.io/documentation/logging)                                                               |
 | mdm             | Master Data Management [MDM](https://www.hsdp.io/documentation/master-data-management)                                                                      |
 | notification    | HSDP [Notification service](https://www.hsdp.io/documentation/notification)                                                                                 |
-| pki             | Public Key Infrastructure [PKI](https://www.hsdp.io/documentation/public-key-infrastructure/getting-started) services                                       |
 | edge            | Edge / STL API details                                                                                                                                      |
-| uaa             | User Account and Authentication [UAA](https://docs.cloudfoundry.org/concepts/architecture/uaa.html). Part of Cloud foundry                                  |
 | vault-proxy     | Vault proxy details. Part of [Vault Service Broker](https://www.hsdp.io/documentation/vault-service-broker/service-details)                                 |
 
 * `region` - (Optional) The HSDP region. If not set, defaults to provider level config

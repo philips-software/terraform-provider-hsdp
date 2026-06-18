@@ -25,9 +25,6 @@ func ValidateRegion(i interface{}, k string) (warns []string, es []error) {
 	if err != nil {
 		es = append(es, err)
 	}
-	if d.Service("cf").URL == "" {
-		warns = append(warns, fmt.Sprintf("no Cloud foundry presence in region '%s'", r))
-	}
 	if d.Env("prod").Service("iam").URL == "" {
 		warns = append(warns, fmt.Sprintf("no production IAM presence in region '%s'", r))
 	}

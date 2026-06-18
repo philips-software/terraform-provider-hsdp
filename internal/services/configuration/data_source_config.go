@@ -81,6 +81,9 @@ func dataSourceConfigRead(_ context.Context, d *schema.ResourceData, m interface
 	var diags diag.Diagnostics
 
 	service := d.Get("service").(string)
+	if service == "cf" || service == "uaa" {
+		return diag.Errorf("service %s is no longer supported", service)
+	}
 	region := d.Get("region").(string)
 	environment := d.Get("environment").(string)
 	if region == "" {
@@ -105,7 +108,13 @@ func dataSourceConfigRead(_ context.Context, d *schema.ResourceData, m interface
 	if domain := c.Service(service).Domain; domain != "" {
 		_ = d.Set("domain", domain)
 	}
-	_ = d.Set("services", c.Services())
+	services := []string{}
+	for _, s := range c.Services() {
+		if s != "cf" && s != "uaa" {
+			services = append(services, s)
+		}
+	}
+	_ = d.Set("services", services)
 	_ = d.Set("service_id", providerConfig.ServiceID)
 	_ = d.Set("org_admin_username", providerConfig.OrgAdminUsername)
 	_ = d.Set("regions", c.Regions())

@@ -34,9 +34,6 @@ arguments in its provider block. The following environment variables are recogni
 |------------------------------|---------------------|----------|-------------|
 | HSDP_REGION                  | region              | Optional | us-east     |
 | HSDP_ENVIRONMENT             | environment         | Optional | client-test |
-| HSDP_CARTEL_HOST             | cartel_host         | Optional |             |
-| HSDP_CARTEL_SECRET           | cartel_secret       | Optional |             |
-| HSDP_CARTEL_TOKEN            | cartel_token        | Optional |             |
 | HSDP_IAM_SERVICE_ID          | service_id          | Optional |             |
 | HSDP_IAM_SERVICE_PRIVATE_KEY | service_private_key | Optional |             |
 | HSDP_IAM_ORG_ADMIN_USERNAME  | org_admin_username  | Optional |             |
@@ -72,9 +69,6 @@ In addition to generic provider arguments (e.g. alias and version), the followin
 * `mdm_url` - (Optional) The base URL of the MDM service. Auto-discovered from region and environment.
 * `shared_key` - (Optional) The shared key as provided by HSDP. Actions which require API signing will not work if this value is missing.
 * `secret_key` - (Optional) The secret key as provided by HSDP. Actions which require API signing will not work if this value is missing.
-* `cartel_host` - (Optional) The cartel host as provided by HSDP. Auto-discovered from region.
-* `cartel_token` - (Optional) The cartel token as provided by HSDP.
-* `cartel_secret` - (Optional) The cartel secret as provided by HSDP.
 * `retry_max` - (Optional) Integer, when > 0 will use a retry-able HTTP client and retry requests when applicable.
 * `debug_log` - (Optional) If set to a path, when debug is enabled outputs details to this file
 * `debug_stderr` - (Optional) If set to true sends debug logs to `stderr`

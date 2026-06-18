@@ -12,15 +12,12 @@ import (
 
 	"github.com/google/fhir/go/jsonformat"
 	"github.com/hashicorp/go-retryablehttp"
-	"github.com/philips-software/go-dip-api/cartel"
 	"github.com/philips-software/go-dip-api/config"
 	"github.com/philips-software/go-dip-api/connect/mdm"
 	"github.com/philips-software/go-dip-api/console"
-	"github.com/philips-software/go-dip-api/console/docker"
 	"github.com/philips-software/go-dip-api/discovery"
 	"github.com/philips-software/go-dip-api/iam"
 	"github.com/philips-software/go-dip-api/notification"
-	"github.com/philips-software/go-dip-api/pki"
 	"github.com/philips-software/go-dip-api/stl"
 )
 
@@ -44,20 +41,13 @@ type Config struct {
 	OrgAdminPassword   string    `json:"org_admin_password"`
 	DebugLog           string    `json:"debug_log"`
 	DebugWriter        io.Writer `json:"-"`
-	CartelHost         string    `json:"cartel_host"`
-	CartelToken        string    `json:"cartel_token"`
-	CartelSecret       string    `json:"cartel_secret"`
-	CartelNoTLS        bool      `json:"cartel_no_tls"`
-	CartelSkipVerify   bool      `json:"cartel_skip_verify"`
 	RetryMax           int       `json:"retry_max"`
 	UAAUsername        string    `json:"uaa_username"`
 	UAAPassword        string    `json:"uaa_password"`
 	UAAURL             string    `json:"uaa_url"`
 
 	iamClient             *iam.Client
-	cartelClient          *cartel.Client
 	consoleClient         *console.Client
-	pkiClient             *pki.Client
 	stlClient             *stl.Client
 	blrClient             *blr.Client
 	notificationClient    *notification.Client
@@ -66,10 +56,8 @@ type Config struct {
 	dbsClient             *dbs.Client
 	provisioningClient    *provisioning.Client
 	DebugStdErr           bool `json:"debugging"`
-	cartelClientErr       error
 	iamClientErr          error
 	consoleClientErr      error
-	pkiClientErr          error
 	stlClientErr          error
 	notificationClientErr error
 	mdmClientErr          error
@@ -174,10 +162,6 @@ func (c *Config) BLRClient(principal ...*Principal) (*blr.Client, error) {
 	return c.blrClient, c.blrClientErr
 }
 
-func (c *Config) CartelClient() (*cartel.Client, error) {
-	return c.cartelClient, c.cartelClientErr
-}
-
 func (c *Config) ConsoleClient(principal ...*Principal) (*console.Client, error) {
 	region := c.Region
 	uaaUsername := c.UAAUsername
@@ -267,36 +251,6 @@ func (c *Config) STLClient(principal ...*Principal) (*stl.Client, error) {
 		return nil, err
 	}
 	return client, nil
-}
-
-func (c *Config) DockerClient(principal ...*Principal) (*docker.Client, error) {
-	r := c.Region
-	if len(principal) > 0 && principal[0] != nil {
-		r = principal[0].Region
-	}
-	if c.consoleClientErr != nil {
-		return nil, c.consoleClientErr
-	}
-	return docker.NewClient(c.consoleClient, &docker.Config{
-		Region: r,
-	})
-}
-
-func (c *Config) PKIClient(principal ...*Principal) (*pki.Client, error) {
-	if len(principal) > 0 && principal[0] != nil && principal[0].HasAuth() && c.consoleClient != nil {
-		region := principal[0].Region
-		environment := principal[0].Environment
-		iamClient, err := c.IAMClient(principal...)
-		if err != nil {
-			return nil, err
-		}
-		return pki.NewClient(c.consoleClient, iamClient, &pki.Config{
-			Region:      region,
-			Environment: environment,
-			DebugLog:    c.DebugWriter,
-		})
-	}
-	return c.pkiClient, c.pkiClientErr
 }
 
 func (c *Config) NotificationClient(principal ...*Principal) (*notification.Client, error) {
@@ -510,38 +464,6 @@ func (c *Config) SetupMDMClient() {
 	c.mdmClient = client
 }
 
-// SetupCartelClient sets up an Cartel client
-func (c *Config) SetupCartelClient() {
-	if c.CartelHost == "" {
-		ac, err := config.New(config.WithRegion(c.Region))
-		if err == nil {
-			if host := ac.Service("cartel").Host; host != "" {
-				c.CartelHost = host
-			}
-		}
-	}
-	if c.CartelToken == "" || c.CartelSecret == "" {
-		c.cartelClient = nil
-		c.cartelClientErr = fmt.Errorf("missing Cartel token or secret, set 'cartel_token' and 'cartel_secret'")
-		return
-	}
-	client, err := cartel.NewClient(nil, &cartel.Config{
-		Region:     c.Region,
-		Host:       c.CartelHost,
-		Token:      c.CartelToken,
-		Secret:     c.CartelSecret,
-		NoTLS:      c.CartelNoTLS,
-		SkipVerify: c.CartelSkipVerify,
-		DebugLog:   c.DebugWriter,
-	})
-	if err != nil {
-		c.cartelClient = nil
-		c.cartelClientErr = err
-		return
-	}
-	c.cartelClient = client
-}
-
 // SetupConsoleClient sets up an Console client
 func (c *Config) SetupConsoleClient() {
 	client, err := console.NewClient(nil, &console.Config{
@@ -575,29 +497,9 @@ func (c *Config) Debug(format string, a ...interface{}) (int, error) {
 	return 0, nil
 }
 
-func (c *Config) SetupPKIClient() {
-	if c.iamClientErr != nil {
-		c.pkiClientErr = fmt.Errorf("IAM client error in setupPKIClient: %w", c.iamClientErr)
-		return
-	}
-	// We ignore any consoleClient error for now
-	client, err := pki.NewClient(c.consoleClient, c.iamClient, &pki.Config{
-		Region:      c.Region,
-		Environment: c.Environment,
-		DebugLog:    c.DebugWriter,
-	})
-	if err != nil {
-		c.pkiClient = nil
-		c.pkiClientErr = err
-		return
-	}
-	c.pkiClient = client
-	c.pkiClientErr = nil
-}
-
 func (c *Config) SetupDiscoveryClient() {
 	if c.iamClientErr != nil {
-		c.pkiClientErr = fmt.Errorf("IAM client error in SetupDiscoveryClient: %w", c.iamClientErr)
+		c.discoveryClientErr = fmt.Errorf("IAM client error in SetupDiscoveryClient: %w", c.iamClientErr)
 		return
 	}
 	client, err := discovery.NewClient(c.iamClient, &discovery.Config{
