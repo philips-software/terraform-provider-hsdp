@@ -14,11 +14,7 @@ func TestConfig(t *testing.T) {
 	c.OrgAdminUsername = "foo"
 	c.OrgAdminPassword = "bar"
 	c.OAuth2ClientID = "public"
-	c.UAAPassword = "foo"
-	c.UAAUsername = "bar"
-
 	c.SetupIAMClient()
-	c.SetupConsoleClient()
 
 	assert.NotNil(t, c.iamClientErr)
 }

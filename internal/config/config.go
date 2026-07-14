@@ -14,10 +14,10 @@ import (
 	"github.com/hashicorp/go-retryablehttp"
 	"github.com/philips-software/go-dip-api/config"
 	"github.com/philips-software/go-dip-api/connect/mdm"
-	"github.com/philips-software/go-dip-api/console"
 	"github.com/philips-software/go-dip-api/discovery"
 	"github.com/philips-software/go-dip-api/iam"
 	"github.com/philips-software/go-dip-api/stl"
+	"golang.org/x/oauth2"
 )
 
 // Config contains configuration for the client
@@ -45,7 +45,6 @@ type Config struct {
 	UAAURL             string    `json:"uaa_url"`
 
 	iamClient             *iam.Client
-	consoleClient         *console.Client
 	stlClient             *stl.Client
 	blrClient             *blr.Client
 	mdmClient             *mdm.Client
@@ -54,7 +53,6 @@ type Config struct {
 	provisioningClient    *provisioning.Client
 	DebugStdErr           bool `json:"debugging"`
 	iamClientErr          error
-	consoleClientErr      error
 	stlClientErr          error
 	mdmClientErr          error
 	discoveryClientErr    error
@@ -158,47 +156,18 @@ func (c *Config) BLRClient(principal ...*Principal) (*blr.Client, error) {
 	return c.blrClient, c.blrClientErr
 }
 
-func (c *Config) ConsoleClient(principal ...*Principal) (*console.Client, error) {
-	region := c.Region
-	uaaUsername := c.UAAUsername
-	uaaPassword := c.UAAPassword
+type iamTokenSource struct {
+	client *iam.Client
+}
 
-	if region == "" {
-		region = "dev"
-	}
-
-	if len(principal) == 0 && c.consoleClient != nil {
-		return c.consoleClient, c.consoleClientErr
-	}
-
-	if len(principal) > 0 && principal[0] != nil {
-		p := principal[0]
-		if p.Region != "" {
-			region = p.Region
-		}
-		if p.UAAUsername != "" {
-			uaaUsername = p.UAAUsername
-		}
-		if p.UAAPassword != "" {
-			uaaPassword = p.UAAPassword
-		}
-	}
-	client, err := console.NewClient(nil, &console.Config{
-		Region:   region,
-		DebugLog: c.DebugWriter,
-	})
-
+func (t *iamTokenSource) Token() (*oauth2.Token, error) {
+	tokenStr, err := t.client.Token()
 	if err != nil {
 		return nil, err
 	}
-	if uaaUsername == "" || uaaPassword == "" {
-		return nil, ErrMissingUAACredentials
-	}
-	err = client.Login(uaaUsername, uaaPassword)
-	if err != nil {
-		return nil, err
-	}
-	return client, err
+	return &oauth2.Token{
+		AccessToken: tokenStr,
+	}, nil
 }
 
 func (c *Config) MDMClient() (*mdm.Client, error) {
@@ -210,13 +179,14 @@ func (c *Config) STLClient(principal ...*Principal) (*stl.Client, error) {
 	if region == "" {
 		region = "dev"
 	}
-	consoleClient := c.consoleClient
-	consoleClientErr := c.consoleClientErr
 	stlURL := c.STLURL
 
 	if len(principal) == 0 {
 		return c.stlClient, c.stlClientErr
 	}
+
+	var iamClient *iam.Client
+	var iamClientErr error
 
 	if principal[0] != nil {
 		p := principal[0]
@@ -232,13 +202,18 @@ func (c *Config) STLClient(principal ...*Principal) (*stl.Client, error) {
 		if p.Endpoint != "" {
 			stlURL = p.Endpoint
 		}
-		consoleClient, consoleClientErr = c.ConsoleClient(principal...)
+		iamClient, iamClientErr = c.IAMClient(principal...)
+	} else {
+		iamClient, iamClientErr = c.IAMClient()
 	}
-	if consoleClientErr != nil {
-		return nil, consoleClientErr
+	if iamClientErr != nil {
+		return nil, iamClientErr
+	}
+	if iamClient == nil {
+		return nil, fmt.Errorf("IAM client not initialized")
 	}
 
-	client, err := stl.NewClient(consoleClient, &stl.Config{
+	client, err := stl.NewClient(&iamTokenSource{client: iamClient}, &stl.Config{
 		Region:    region,
 		STLAPIURL: stlURL,
 		DebugLog:  c.DebugWriter,
@@ -341,9 +316,14 @@ func (c *Config) SetupIAMClient() {
 }
 
 func (c *Config) SetupSTLClient() {
-	if c.consoleClientErr != nil {
+	if c.iamClientErr != nil {
 		c.stlClient = nil
-		c.stlClientErr = c.consoleClientErr
+		c.stlClientErr = c.iamClientErr
+		return
+	}
+	if c.iamClient == nil {
+		c.stlClient = nil
+		c.stlClientErr = fmt.Errorf("IAM client not initialized")
 		return
 	}
 	region := c.Region
@@ -356,7 +336,7 @@ func (c *Config) SetupSTLClient() {
 			c.STLURL = url
 		}
 	}
-	client, err := stl.NewClient(c.consoleClient, &stl.Config{
+	client, err := stl.NewClient(&iamTokenSource{client: c.iamClient}, &stl.Config{
 		STLAPIURL: c.STLURL,
 		DebugLog:  c.DebugWriter,
 	})
@@ -401,31 +381,6 @@ func (c *Config) SetupMDMClient() {
 		return
 	}
 	c.mdmClient = client
-}
-
-// SetupConsoleClient sets up an Console client
-func (c *Config) SetupConsoleClient() {
-	client, err := console.NewClient(nil, &console.Config{
-		Region:   c.Region,
-		DebugLog: c.DebugWriter,
-	})
-	if err != nil {
-		c.consoleClient = nil
-		c.consoleClientErr = err
-		return
-	}
-	if c.UAAUsername == "" || c.UAAPassword == "" {
-		c.consoleClientErr = ErrMissingUAACredentials
-		c.consoleClient = nil
-		return
-	}
-	err = client.Login(c.UAAUsername, c.UAAPassword)
-	if err != nil {
-		c.consoleClient = nil
-		c.consoleClientErr = err
-		return
-	}
-	c.consoleClient = client
 }
 
 func (c *Config) Debug(format string, a ...interface{}) (int, error) {

@@ -351,7 +351,6 @@ func providerConfigure(build string) schema.ConfigureContextFunc {
 			c.DebugWriter = os.Stderr
 		}
 		c.SetupIAMClient()
-		c.SetupConsoleClient()
 		c.SetupSTLClient()
 		c.SetupMDMClient()
 		c.SetupDiscoveryClient()
