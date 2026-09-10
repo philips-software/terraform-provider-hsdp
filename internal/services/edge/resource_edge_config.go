@@ -73,12 +73,14 @@ func loggingElem() *schema.Resource {
 				Optional: true,
 			},
 			"hsdp_shared_key": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
 			},
 			"hsdp_secret_key": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
 			},
 			"hsdp_ingestor_host": {
 				Type:     schema.TypeString,

@@ -114,8 +114,9 @@ func encryptionInfoSchema() *schema.Resource {
 				Optional: true,
 			},
 			"decryption_key": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
 			},
 		},
 	}

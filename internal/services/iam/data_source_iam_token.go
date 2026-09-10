@@ -13,16 +13,18 @@ func DataSourceIAMToken() *schema.Resource {
 		ReadContext: dataSourceIAMTokenRead,
 		Schema: map[string]*schema.Schema{
 			"access_token": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 			"expires_at": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
 			"id_token": {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 		},
 	}

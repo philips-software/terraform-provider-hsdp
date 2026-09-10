@@ -19,8 +19,9 @@ func DataSourceIAMIntrospect() *schema.Resource {
 		ReadContext:   dataSourceIAMIntrospectRead,
 		Schema: map[string]*schema.Schema{
 			"token": {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:      schema.TypeString,
+				Optional:  true,
+				Sensitive: true,
 			},
 			"principal": config.PrincipalSchema(),
 			"organization_context": {
