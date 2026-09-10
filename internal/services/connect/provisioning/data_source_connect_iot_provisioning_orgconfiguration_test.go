@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccDataSourceConnectIoTProvisioningOrgConfiguration_basic(t *testing.T) {
+	t.Skip("CI service account lacks permission for connect/provisioning/OrgConfiguration (HTTP 403); unhealthy indefinitely")
 	t.Parallel()
 	resourceName := "data.hsdp_connect_iot_provisioning_orgconfiguration.test"
 	orgGuid := acc.AccIAMOrgGUID()
