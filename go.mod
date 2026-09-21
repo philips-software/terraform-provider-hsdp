@@ -10,7 +10,7 @@ require (
 	github.com/hashicorp/go-uuid v1.0.3
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.40.1
 	github.com/hashicorp/terraform-plugin-testing v1.15.0
-	github.com/loafoe/caddy-token v1.1.3
+	github.com/loafoe/caddy-token v1.2.0
 	github.com/philips-software/go-dip-api v0.99.4
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
